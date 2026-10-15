@@ -1,0 +1,14 @@
+{
+  "name": "@newchiwan/mturtle-skills",
+  "version": "0.1.0",
+  "description": "newchiwan 团队跨端 agent skill pack：monorepo-setup + speckit-flow",
+  "bin": {
+    "mturtle-skills": "skills/monorepo-setup/scripts/sync.mjs"
+  },
+  "files": [
+    "skills"
+  ],
+  "engines": {
+    "node": ">=22"
+  }
+}
