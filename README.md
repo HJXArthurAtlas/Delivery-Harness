@@ -38,4 +38,4 @@ omp 实测同时读项目级与全局级；DSH / OpenCode 官方支持同两个�
 npm test   # 校验 skills/ 结构：frontmatter、引用文件、泄漏扫描、PACK_SKILLS 与目录一致
 ```
 
-新增技能 = 在 `skills/` 下建 kebab-case 目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）+ 在 `sync.mjs` 的 `PACK_SKILLS` 登记一行；`npm test` 会把关，缺登记即失败。
+新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）+ 在 `sync.mjs` 的 `PACK_SKILLS` 登记一行；`npm test` 会把关，缺登记即失败。命名格式 `ncw-{submodule}-action`（如 `ncw-monorepo-init`），全名 ≤32 字符。

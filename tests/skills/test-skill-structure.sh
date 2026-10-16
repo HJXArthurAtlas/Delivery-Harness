@@ -31,10 +31,11 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     ok
   fi
 
-  # 2. name 与目录名一致，目录名 kebab-case
+  # 2. name 与目录名一致；命名格式 ncw-{submodule}-action（至少三段 kebab），且简洁（≤32 字符）
   name="$(awk -F': *' '/^name:/{print $2; exit}' "$skill_md")"
   [ "$name" = "$skill" ] && ok || bad "$skill: name '$name' 与目录名不一致"
-  [[ "$skill" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] && ok || bad "$skill: 目录名不是 kebab-case"
+  [[ "$skill" =~ ^ncw-[a-z0-9]+-[a-z0-9]+(-[a-z0-9]+)*$ ]] && ok || bad "$skill: 命名不符 ncw-{submodule}-action 格式"
+  [ "${#skill}" -le 32 ] && ok || bad "$skill: 命名过长（${#skill} chars，简洁上限 32）"
 
   # 3. description 非空、≤1024 字符
   desc_len="$(awk '/^---$/{c++; next} c==1 && /^description:/{sub(/^description: */,""); print length($0); exit}' "$skill_md")"
