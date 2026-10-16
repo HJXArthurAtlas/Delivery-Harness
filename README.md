@@ -7,6 +7,7 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | skill | 用途 | 触发语示例 |
 |---|---|---|
 | `ncw-monorepo-init` | 项目初始化（init）/ 结构环境诊断（diagnose），migrate 待标注 | 「按团队 monorepo 规范初始化/诊断这个项目」 |
+| `ncw-speckit-constitution` | 创建/更新项目章程（上游 spec-kit /speckit.constitution 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「立章程」「修订治理原则」 |
 | `ncw-speckit-flow` | speckit + PingCode AI native 开发流程的衔接与门禁（出规格建卡 → 接规格规划实现 → 卡片收尾） | 「这个需求转开发了，开始 plan」「出 spec 并建卡」 |
 
 ## 安装
