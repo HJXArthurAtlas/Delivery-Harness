@@ -11,7 +11,7 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 
 ## 安装
 
-各端全靠文件落位，无需包管理器或插件；项目级同名覆盖全局级（DSH rank 100/200 > 400/500）。
+需要 Node ≥ 22。各端全靠文件落位，无需包管理器或插件；项目级同名覆盖全局级（DSH rank 100/200 > 400/500）。
 
 ```bash
 # 方式一：npx 直装（免克隆；私有仓需 git 凭证）
@@ -35,7 +35,7 @@ omp 实测同时读项目级与全局级；DSH / OpenCode 官方支持同两个�
 ## 开发
 
 ```bash
-npm test   # 校验 skills/ 结构：frontmatter、引用文件、泄漏扫描、PACK_SKILLS 与目录一致
+npm test   # 校验 skills/ 结构：SKILL.md 存在与 frontmatter 格式（name/description）、引用文件存在、绝对路径泄漏扫描、PACK_SKILLS 与目录一一对应
 ```
 
 新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）+ 在 `sync.mjs` 的 `PACK_SKILLS` 登记一行；`npm test` 会把关，缺登记即失败。命名格式 `ncw-{submodule}-action`（如 `ncw-monorepo-init`），全名 ≤32 字符。
