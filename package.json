@@ -1,9 +1,9 @@
 {
-  "name": "ncw-specify",
+  "name": "ncw-delivery-harness",
   "version": "0.1.0",
   "description": "newchiwan 团队跨端 agent skill pack：monorepo-setup + speckit-flow",
   "bin": {
-    "ncw-specify": "skills/monorepo-setup/scripts/sync.mjs"
+    "ncw-delivery-harness": "skills/monorepo-setup/scripts/sync.mjs"
   },
   "files": [
     "skills"

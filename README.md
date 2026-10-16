@@ -1,4 +1,4 @@
-# ncw-specify
+# ncw-delivery-harness
 
 newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始化 / 诊断流程与 speckit + PingCode 规格驱动开发流程做成可安装的 agent skill，DSH / OpenCode / omp 等等。初始化步骤与工具链版本钉子的单一载体是 `skills/monorepo-setup/references/init.md`（与模板仓 `monorepo-template` 的 `AGENTS-TEMPLATE.md` 巡检表版本同步）。
 
@@ -16,10 +16,10 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 ```bash
 # 方式一：npx 直装（免克隆；私有仓需 git 凭证）
 # 装（用户级）全局 skill 加 --global；装当前项目则去掉该参数
-npx git+https://git.newchiwan.com/council/ncw-specify.git --global
+npx git+https://git.newchiwan.com/council/ncw-delivery-harness.git --global
 
 # 方式二：克隆后执行
-git clone https://git.newchiwan.com/council/ncw-specify.git && cd ncw-specify
+git clone https://git.newchiwan.com/council/ncw-delivery-harness.git && cd ncw-delivery-harness
 node skills/monorepo-setup/scripts/sync.mjs             # 项目级：<cwd>/.agents/skills/
 node skills/monorepo-setup/scripts/sync.mjs --global    # 用户级：~/.agents/skills/
 ```
