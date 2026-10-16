@@ -39,3 +39,5 @@ npm test   # 校验 skills/ 结构：frontmatter、引用文件、泄漏扫描�
 ```
 
 新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）+ 在 `sync.mjs` 的 `PACK_SKILLS` 登记一行；`npm test` 会把关，缺登记即失败。命名格式 `ncw-{submodule}-action`（如 `ncw-monorepo-init`），全名 ≤32 字符。
+
+提交信息格式：`<type>(<scope>): #<工作项ID> <主题>`，如 `refactor(skills): #TECH-1234 技能更名`；无对应工作项时 ID 用默认 `#TECH-000`。type 取值：`feat` / `fix` / `refactor` / `docs` / `test` / `chore`。提交时由 `.githooks/commit-msg` 强制校验；首次克隆后执行一次 `git config core.hooksPath .githooks` 激活。
