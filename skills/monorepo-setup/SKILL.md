@@ -41,20 +41,19 @@ https://git.newchiwan.com/council/monorepo-template.git
 
 ## 分发与安装
 
-本 skill 正本在团队 pack 仓 `ncw-specify`（与模板仓分离：模板仓 `.agents/skills/` 是随 init 复制的模板载荷，本 pack 是消费模板的元工具，独立发版）。四端都靠**文件落位**，不需要任何包管理器或插件：
+本 skill 正本在团队 pack 仓 `ncw-specify`（与模板仓分离：模板仓 `.agents/skills/` 是随 init 复制的模板载荷，本 pack 是消费模板的元工具，独立发版）。各端都靠**文件落位**，不需要任何包管理器或插件：
 
 | 端 | 项目级 | 全局级 |
 |---|---|---|
 | DSH / OpenCode / omp | 拷入 `<项目>/.agents/skills/`（init 流程的 pack 安装步完成） | 拷入 `~/.agents/skills/` |
-| Claude Code | 拷入 `<项目>/.claude/skills/` | 拷入 `~/.claude/skills/` |
 
 - omp 实测同时读项目级与全局级；DSH 无需 plugin——skill 是「被扫描的文件」，拷贝即安装，免重启热加载。
 - pack 安装器 `scripts/sync.mjs`（一次装整个 pack，`PACK_SKILLS` 列表 = `monorepo-setup` + `speckit-flow`）：
   ```bash
   npx git+https://git.newchiwan.com/council/ncw-specify.git --global   # 免克隆直装用户级
   # 或克隆后：
-  node skills/monorepo-setup/scripts/sync.mjs             # 项目级：.agents/skills/ + .claude/skills/
-  node skills/monorepo-setup/scripts/sync.mjs --global    # 用户级：~/.agents/skills/ + ~/.claude/skills/
+  node skills/monorepo-setup/scripts/sync.mjs             # 项目级：.agents/skills/
+  node skills/monorepo-setup/scripts/sync.mjs --global    # 用户级：~/.agents/skills/
   ```
   支持 `--dry-run` / `--force`；默认同名不覆盖，只列出冲突。
 - 项目级同名 skill 覆盖全局级（DSH rank 100/200 > 400/500）——团队全局发、项目内可定制覆盖。
