@@ -41,7 +41,7 @@ https://git.newchiwan.com/council/monorepo-template.git
 
 ## 分发与安装
 
-本 skill 正本在团队 pack 仓 `mturtle-skills`（与模板仓分离：模板仓 `.agents/skills/` 是随 init 复制的模板载荷，本 pack 是消费模板的元工具，独立发版）。四端都靠**文件落位**，不需要任何包管理器或插件：
+本 skill 正本在团队 pack 仓 `ncw-specify`（与模板仓分离：模板仓 `.agents/skills/` 是随 init 复制的模板载荷，本 pack 是消费模板的元工具，独立发版）。四端都靠**文件落位**，不需要任何包管理器或插件：
 
 | 端 | 项目级 | 全局级 |
 |---|---|---|
@@ -51,7 +51,7 @@ https://git.newchiwan.com/council/monorepo-template.git
 - omp 实测同时读项目级与全局级；DSH 无需 plugin——skill 是「被扫描的文件」，拷贝即安装，免重启热加载。
 - pack 安装器 `scripts/sync.mjs`（一次装整个 pack，`PACK_SKILLS` 列表 = `monorepo-setup` + `speckit-flow`）：
   ```bash
-  npx git+https://git.newchiwan.com/council/mturtle-skills.git --global   # 免克隆直装用户级
+  npx git+https://git.newchiwan.com/council/ncw-specify.git --global   # 免克隆直装用户级
   # 或克隆后：
   node skills/monorepo-setup/scripts/sync.mjs             # 项目级：.agents/skills/ + .claude/skills/
   node skills/monorepo-setup/scripts/sync.mjs --global    # 用户级：~/.agents/skills/ + ~/.claude/skills/

@@ -1,4 +1,4 @@
-# mturtle-skills
+# ncw-specify
 
 newchiwan 团队跨端 agent skill pack。与 [monorepo-template](https://git.newchiwan.com/council/monorepo-template.git)（项目模板载荷）分离：本仓只装「消费模板的元工具」，独立发版，不随模板 init 复制。
 
@@ -15,10 +15,10 @@ newchiwan 团队跨端 agent skill pack。与 [monorepo-template](https://git.ne
 
 ```bash
 # 方式一：npx 直装（免克隆；私有仓需 git 凭证）
-npx git+https://git.newchiwan.com/council/mturtle-skills.git --global
+npx git+https://git.newchiwan.com/council/ncw-specify.git --global
 
 # 方式二：克隆后执行
-git clone https://git.newchiwan.com/council/mturtle-skills.git && cd mturtle-skills
+git clone https://git.newchiwan.com/council/ncw-specify.git && cd ncw-specify
 node skills/monorepo-setup/scripts/sync.mjs             # 项目级：<cwd>/.agents/skills/ + <cwd>/.claude/skills/
 node skills/monorepo-setup/scripts/sync.mjs --global    # 用户级：~/.agents/skills/ + ~/.claude/skills/
 ```

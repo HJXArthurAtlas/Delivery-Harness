@@ -1,9 +1,9 @@
 {
-  "name": "@newchiwan/mturtle-skills",
+  "name": "ncw-specify",
   "version": "0.1.0",
   "description": "newchiwan 团队跨端 agent skill pack：monorepo-setup + speckit-flow",
   "bin": {
-    "mturtle-skills": "skills/monorepo-setup/scripts/sync.mjs"
+    "ncw-specify": "skills/monorepo-setup/scripts/sync.mjs"
   },
   "files": [
     "skills"
