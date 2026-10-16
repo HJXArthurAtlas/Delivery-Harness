@@ -5,6 +5,9 @@
   "bin": {
     "ncw-delivery-harness": "skills/monorepo-setup/scripts/sync.mjs"
   },
+  "scripts": {
+    "test": "bash tests/skills/test-skill-structure.sh"
+  },
   "files": [
     "skills"
   ],

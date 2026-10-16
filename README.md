@@ -31,3 +31,11 @@ node skills/monorepo-setup/scripts/sync.mjs --global    # 用户级：~/.agents/
 | `.agents/skills/`（项目）或 `~/.agents/skills/`（全局） | DSH / OpenCode / omp |
 
 omp 实测同时读项目级与全局级；DSH / OpenCode 官方支持同两个路径；DSH 无需 plugin——skill 是「被扫描的文件」，拷贝即安装，免重启热加载。
+
+## 开发
+
+```bash
+npm test   # 校验 skills/ 结构：frontmatter、引用文件、泄漏扫描、PACK_SKILLS 与目录一致
+```
+
+新增技能 = 在 `skills/` 下建 kebab-case 目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）+ 在 `sync.mjs` 的 `PACK_SKILLS` 登记一行；`npm test` 会把关，缺登记即失败。
