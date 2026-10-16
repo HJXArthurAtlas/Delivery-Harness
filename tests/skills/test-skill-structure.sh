@@ -63,5 +63,18 @@ listed="$(grep -oE '^const PACK_SKILLS = \[.*\];' "$SYNC_SCRIPT" | grep -oE '"[^
 actual="$(ls "$SKILLS_DIR" | sort)"
 [ "$listed" = "$actual" ] && ok || bad "sync.mjs PACK_SKILLS（$(echo "$listed" | tr '\n' ' ')）与 skills/ 目录（$(echo "$actual" | tr '\n' ' ')）不一致"
 
+# 7. 斜杠命令走通用发现路径 .agents/commands/（omp/DSH/OpenCode 均读 .agents/ 族），禁止回退工具专属 .omp/commands/
+if [ -d "$REPO_ROOT/.omp/commands" ]; then
+  bad "命令目录必须使用通用 .agents/commands/，发现工具专属 .omp/commands/"
+else
+  ok
+fi
+for cmd_md in "$REPO_ROOT"/.agents/commands/*.md; do
+  [ -e "$cmd_md" ] || continue
+  cmd="$(basename "$cmd_md" .md)"
+  [ "$(head -n 1 "$cmd_md")" = "---" ] && ok || bad "命令 $cmd: 首行必须是 ---"
+  grep -q '^description: .\+' "$cmd_md" && ok || bad "命令 $cmd: frontmatter 缺少非空 description"
+done
+
 printf 'skill-structure: %d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]
