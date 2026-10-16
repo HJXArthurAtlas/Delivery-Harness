@@ -35,6 +35,7 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 | `skills/ncw-speckit-analyze/` | 单文件 SKILL.md：上游 spec-kit /speckit.analyze 命令（spec/plan/tasks 一致性只读分析），正文英文原文；extension hook 机制未迁移 |
 | `skills/ncw-speckit-clarify/` | 单文件 SKILL.md：上游 spec-kit /speckit.clarify 命令（≤5 问澄清并回写 spec），正文英文原文；extension hook 机制未迁移 |
 | `skills/ncw-speckit-constitution/` | 单文件 SKILL.md：上游 spec-kit /speckit.constitution 命令（建/改 .specify/memory/constitution.md），正文英文原文；extension hook 机制未迁移 |
+| `skills/ncw-speckit-converge/` | 单文件 SKILL.md：上游 spec-kit /speckit.converge 命令（代码现状 vs 工件差距→追加收敛任务），正文英文原文；extension hook 机制未迁移 |
 | `skills/ncw-speckit-flow/` | 单文件 `SKILL.md`：8 阶段流程表 + 交接门禁 + 对账纪律 |
 | `tests/skills/` | 结构校验脚本（见 Testing & QA） |
 | `.githooks/` | `commit-msg` 提交信息格式校验 |

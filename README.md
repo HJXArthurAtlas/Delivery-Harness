@@ -10,6 +10,7 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | `ncw-speckit-analyze` | 跨工件一致性只读分析（上游 spec-kit /speckit.analyze 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「分析 spec/plan/tasks 一致性」 |
 | `ncw-speckit-clarify` | 规格澄清问答（上游 spec-kit /speckit.clarify 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「澄清规格歧义」「补全需求细节」 |
 | `ncw-speckit-constitution` | 创建/更新项目章程（上游 spec-kit /speckit.constitution 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「立章程」「修订治理原则」 |
+| `ncw-speckit-converge` | 差距收敛（上游 spec-kit /speckit.converge 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「收敛剩余工作」「补齐未实现需求」 |
 | `ncw-speckit-flow` | speckit + PingCode AI native 开发流程的衔接与门禁（出规格建卡 → 接规格规划实现 → 卡片收尾） | 「这个需求转开发了，开始 plan」「出 spec 并建卡」 |
 
 ## 安装
