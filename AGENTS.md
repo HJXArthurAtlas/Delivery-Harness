@@ -20,6 +20,8 @@ skills/<name>/SKILL.md (+ references/ scripts/)
    agent 运行时加载 skill
 ```
 
+omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 是 catalog（插件 `ncw-delivery`，`source: "./"` 即仓根），用户 `omp plugin marketplace add <仓 URL>` + `omp plugin install ncw-delivery@ncw-delivery-harness` 后由 omp 从插件树 `skills/<name>/SKILL.md` 发现。**插件只含 skills**——绝不加 `.omp-plugin/plugin.json` manifest（remap 会把 `.agents/` 带进安装面）；斜杠命令仍只走 `.agents/commands/` + sync.mjs。catalog `version` 与 `package.json` 版本同步维护。
+
 职责分层与外部委托：
 
 - `ncw-monorepo-init` 承载流程与**版本钉子**（`references/init.md` 是唯一载体）；模板仓承载骨架（`AGENTS-TEMPLATE.md`、`.specify/`、`docs/adr/` 等），**版本双落点同改**：init.md 的钉子 = 初始化基线，模板仓巡检表 = 巡检基线。
@@ -34,6 +36,7 @@ skills/<name>/SKILL.md (+ references/ scripts/)
 | `tests/skills/` | 结构校验脚本（见 Testing & QA） |
 | `.githooks/` | `commit-msg` 提交信息格式校验 |
 | `.agents/commands/` | 斜杠命令（通用 agent 发现路径，omp 实测可读；`*.md` + frontmatter `description`，文件名即命令名，如 `/readme-refresh`）。**禁止**用工具专属的 `.omp/commands/` |
+| `.omp-plugin/` | omp marketplace catalog（`marketplace.json` 单文件；插件 `ncw-delivery`，`source: "./"`）。**禁止**加 `plugin.json`——插件面只含 skills，命令不经插件分发 |
 
 ## Development Commands
 
@@ -65,25 +68,29 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 | `skills/ncw-monorepo-init/references/init.md` | init 流程 + 工具链版本钉子唯一载体（spec-kit v1.1.3、adrkit 0.20.0 等） |
 | `skills/ncw-monorepo-init/references/checklist.md` | diagnose 基线；版本事实源是项目 `AGENTS.md` 或模板仓，本文件不复写版本号 |
 | `.githooks/commit-msg` | 提交格式校验（`core.hooksPath` 已在本仓激活） |
+| `.omp-plugin/marketplace.json` | omp marketplace catalog（omp 插件分发唯一入口；`version` 必须与 `package.json` 一致，`npm test` 强制） |
 | `README.md` | 面向用户的安装/开发文档；改动分发模型时同步 |
 
 ## Runtime/Tooling Preferences
 
 - **Node ≥ 22**，ESM（`.mjs`）；bash + POSIX coreutils（`awk/grep/sort`…）。
-- **零依赖、无 lockfile**（刻意）：`sync.mjs` 只用 `node:fs/os/path/url`，测试只用 bash——不要引入 npm 依赖或 lockfile。
+- **零依赖、无 lockfile**（刻意）：`sync.mjs` 只用 `node:fs/os/path/url`；测试只用 bash + node 内联脚本（JSON 校验，node ≥22 是运行前提）——不要引入 npm 依赖或 lockfile。
 - 无 CI、无构建、无格式化工具链；不要新增这类配置，除非明确要建立。
 
 ## Testing & QA
 
 `npm test` = `bash tests/skills/test-skill-structure.sh`，零依赖、可从任意 CWD 运行（路径自定位），退出码 0/1。
 
-强制 6 条（改技能内容后必须跑）：
+强制规则（改技能内容后必须跑）：
 
 1. `SKILL.md` 存在，frontmatter 由 `---` 定界且闭合；
 2. `name:` = 目录名，匹配 `^ncw-[a-z0-9]+-[a-z0-9]+(-[a-z0-9]+)*$`，≤32 字符；
 3. `description:` 非空、≤1024 字符；
 4. `SKILL.md` 中字面引用的 `references/`、`scripts/` 文件必须存在（引用即契约，改名要同步建文件）；
-5. 泄漏扫描：`skills/` 内禁止 `/Users/`、`/home/` 绝对路径；
-6. `sync.mjs` `PACK_SKILLS` 与 `skills/` 目录一一对应（防新增技能忘登记）。
+5. 泄漏扫描：`skills/` 与 `.omp-plugin/` 内禁止 `/Users/`、`/home/` 绝对路径；
+6. `sync.mjs` `PACK_SKILLS` 与 `skills/` 目录一一对应（防新增技能忘登记）；
+7. `.agents/commands/*.md` frontmatter 合规（`---` 定界 + 非空 `description`），且不存在工具专属 `.omp/commands/`；
+8. `.omp-plugin/marketplace.json` 为合法 JSON，marketplace/plugin 名合规（小写开头结尾、可含 `-`/`.`、≤64），plugin `source` 恰为 `"./"`，`version` 与 `package.json` 一致且符合 omp 缓存路径字符集。JSON 校验用 node 内联脚本完成（node 是运行前提，非新增依赖）；
+9. `.omp-plugin/plugin.json` 绝不许存在（manifest remap 会把 `.agents/` 带进 omp 插件安装面，插件只分发 skills）。
 
 新增检查：在 `for skill_dir in …` 循环内加 per-skill 规则（用 `ok` / `bad "<msg>"` 助手计数），循环后加全局规则；保持 `set -u` 与结尾的 `printf` + `[ "$fail" -eq 0 ]` 不变。

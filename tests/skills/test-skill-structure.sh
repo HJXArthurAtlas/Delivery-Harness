@@ -4,6 +4,9 @@
 #   - 保留：frontmatter 校验、引用文件存在性、泄漏扫描、[PASS]/[FAIL] 计数
 #   - 裁剪：superpowers 专属规则（"Use when" 前缀、## Hard rules 标题、词数预算、第二人称策略）
 #   - 新增：sync.mjs PACK_SKILLS 必须与 skills/ 目录一致（新增技能忘登记安装器的防呆）
+#   - 新增：.agents/commands/ 斜杠命令 frontmatter 校验，禁止工具专属 .omp/commands/
+#   - 新增：.omp-plugin/marketplace.json 目录校验（JSON 合法、命名合规、source 恰为 "./"、
+#     version 与 package.json 同步），并禁止 .omp-plugin/plugin.json（防 remap 把 .agents/ 带进 omp 插件安装面）
 set -u
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -51,9 +54,9 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   done < <(grep -oE '(references|scripts)/[A-Za-z0-9._-]+' "$skill_md" | sort -u)
 done
 
-# 5. 泄漏扫描：技能文件不得含本机绝对路径
-if grep -rn '/Users/\|/home/' "$SKILLS_DIR" >/dev/null 2>&1; then
-  bad "泄漏扫描：skills/ 内出现 /Users/ 或 /home/ 路径"
+# 5. 泄漏扫描：技能与 omp 目录文件不得含本机绝对路径
+if grep -rn '/Users/\|/home/' "$SKILLS_DIR" "$REPO_ROOT/.omp-plugin" >/dev/null 2>&1; then
+  bad "泄漏扫描：skills/ 或 .omp-plugin/ 内出现 /Users/ 或 /home/ 路径"
 else
   ok
 fi
@@ -75,6 +78,84 @@ for cmd_md in "$REPO_ROOT"/.agents/commands/*.md; do
   [ "$(head -n 1 "$cmd_md")" = "---" ] && ok || bad "命令 $cmd: 首行必须是 ---"
   grep -q '^description: .\+' "$cmd_md" && ok || bad "命令 $cmd: frontmatter 缺少非空 description"
 done
+
+# 8. omp marketplace 目录：.omp-plugin/marketplace.json 合法、命名合规、source 锁定 "./"、版本与 package.json 同步
+CATALOG="$REPO_ROOT/.omp-plugin/marketplace.json"
+if [ ! -f "$CATALOG" ]; then
+  bad "omp 目录缺失：.omp-plugin/marketplace.json"
+elif command -v node >/dev/null 2>&1; then
+  while IFS= read -r line; do
+    case "$line" in
+      ok) ok ;;
+      "bad "*) bad "${line#bad }" ;;
+    esac
+  done < <(node -e '
+const fs = require("node:fs");
+const [catalogPath, pkgPath] = process.argv.slice(1);
+const out = [];
+const ok = () => out.push("ok");
+const bad = (m) => out.push(`bad omp 目录：${m}`);
+const nameRe = /^[a-z0-9]([-a-z0-9.]{0,62}[a-z0-9])?$/;
+
+let catalog;
+try {
+  catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
+  ok();
+} catch (e) {
+  bad(`marketplace.json 非法 JSON：${e.message}`);
+  console.log(out.join("\n"));
+  process.exit(0);
+}
+
+nameRe.test(catalog.name || "")
+  ? ok()
+  : bad(`marketplace name "${catalog.name}" 不合规（小写字母/数字开头结尾，可含 - 和 .，≤64）`);
+
+typeof catalog.owner?.name === "string" && catalog.owner.name !== ""
+  ? ok()
+  : bad("owner.name 缺失或为空");
+
+Array.isArray(catalog.plugins) && catalog.plugins.length > 0
+  ? ok()
+  : bad("plugins 必须是非空数组");
+
+const plugins = catalog.plugins || [];
+const names = plugins.map((p) => (p && typeof p.name === "string" ? p.name : ""));
+names.every((n) => nameRe.test(n))
+  ? ok()
+  : bad(`plugin 名不合规：${names.join(", ") || "(无)"}`);
+
+new Set(names.map((n) => n.toLowerCase())).size === names.length
+  ? ok()
+  : bad("plugin 名大小写冲突重复");
+
+plugins.every((p) => p && p.source === "./")
+  ? ok()
+  : bad("plugin source 必须恰为 ./（仓根即插件根，否则 skills/<name> 发现静默失效）");
+
+const declared = plugins.map((p) => (p && typeof p.version === "string" ? p.version : null));
+declared.every((v) => v !== null && v.length >= 1 && v.length <= 128 && /^[A-Za-z0-9._+-]+$/.test(v) && !v.includes(".."))
+  ? ok()
+  : bad(`plugin version 缺失或不合规（缓存路径字符集）：${declared.join(", ") || "(无)"}`);
+
+let pkgVersion = null;
+try { pkgVersion = JSON.parse(fs.readFileSync(pkgPath, "utf8")).version ?? null; } catch {}
+declared.length > 0 && declared.every((v) => v === pkgVersion)
+  ? ok()
+  : bad(`catalog version（${declared.join(", ")}）与 package.json version（${pkgVersion}）不一致`);
+
+console.log(out.join("\n"));
+' "$CATALOG" "$REPO_ROOT/package.json")
+else
+  bad "omp 目录校验需要 node（engines 要求 >=22）"
+fi
+
+# 9. omp 插件仅分发 skills/：禁止 manifest remap 把 .agents/ 等仓内目录带进安装面
+if [ -e "$REPO_ROOT/.omp-plugin/plugin.json" ]; then
+  bad ".omp-plugin/plugin.json 不允许存在（remap 会把 .agents/ 带进 omp 插件；斜杠命令仍走 .agents/commands/ + sync.mjs）"
+else
+  ok
+fi
 
 printf 'skill-structure: %d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

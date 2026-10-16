@@ -32,10 +32,24 @@ node skills/ncw-monorepo-init/scripts/sync.mjs --global    # 用户级：~/.agen
 
 omp 实测同时读项目级与全局级；DSH / OpenCode 官方支持同两个路径；DSH 无需 plugin——skill 是「被扫描的文件」，拷贝即安装，免重启热加载。
 
+### omp marketplace 插件（可选）
+
+omp 侧还可以走原生插件分发（catalog：`.omp-plugin/marketplace.json`，插件名 `ncw-delivery`）：
+
+```bash
+omp plugin marketplace add https://git.newchiwan.com/council/ncw-delivery-harness.git
+omp plugin install ncw-delivery@ncw-delivery-harness
+```
+
+- 插件**只含 skills**，不含斜杠命令（`.agents/commands/` 不经插件分发）；要 `/readme-refresh` 等命令仍走上面的 sync 安装。
+- 更新：`omp plugin upgrade ncw-delivery@ncw-delivery-harness`；装完 `/reload-plugins` 或开新会话生效。
+- 注意 `marketplace.autoUpdate` 默认 `notify` 只写 debug log 不提示；要自动更新执行 `omp config set marketplace.autoUpdate auto`。
+- catalog `version` 与 `package.json` 版本同步维护，`npm test` 校验二者一致。
+
 ## 开发
 
 ```bash
-npm test   # 校验 skills/ 结构：SKILL.md 存在与 frontmatter 格式（name/description）、引用文件存在、绝对路径泄漏扫描、PACK_SKILLS 与目录一一对应
+npm test   # 校验 skills/ 结构：SKILL.md 存在与 frontmatter 格式（name/description）、引用文件存在、绝对路径泄漏扫描、PACK_SKILLS 与目录一一对应；另校验 .agents/commands/ frontmatter 与 .omp-plugin/marketplace.json（命名合规、source 恰为 ./、version 与 package.json 同步）
 ```
 
 新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）+ 在 `sync.mjs` 的 `PACK_SKILLS` 登记一行；`npm test` 会把关，缺登记即失败。命名格式 `ncw-{submodule}-action`（如 `ncw-monorepo-init`），全名 ≤32 字符。
