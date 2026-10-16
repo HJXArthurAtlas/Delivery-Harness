@@ -34,5 +34,5 @@ omp 实测同时读项目级与全局级；DSH / OpenCode 官方支持同两个�
 
 ## 与模板仓的分工
 
-- **monorepo-template**：项目骨架与模板载荷（`AGENTS-TEMPLATE.md`、`.agents/skills/mturtle-*`、`.specify/` 等），init 时整体复制进用户项目。
-- **本仓**：装到「人 + 项目」上的团队技能。项目内的 `speckit-flow` 由 init 流程的 pack 安装步拷入；全局安装覆盖个人所有项目。
+- **monorepo-template**：项目骨架与模板载荷（`AGENTS-TEMPLATE.md`、`.agents/skills/mturtle-*`、`.specify/` 等），init 时整体复制进用户项目；其 README 不再承载初始化提示词。
+- **本仓**：承载团队**流程**——初始化步骤与版本钉子（`monorepo-setup/references/init.md`，与模板仓巡检表两处同步）、诊断基线、speckit 流程规范。项目内的 pack 技能由 init 第 7 步的同步动作拷入；全局安装覆盖个人所有项目。

@@ -1,11 +1,11 @@
 ---
 name: monorepo-setup
-description: 把团队标准 monorepo 框架（monorepo-template）初始化进用户项目，或对既有项目做结构/环境诊断。当用户说"初始化项目""按团队规范搭 monorepo""接入模板仓""结构诊断""环境检查""我的项目为什么不符规范"，或任务涉及 monorepo-template 一键开始、骨架复制、spec-kit / adrkit / pingcode / grill / codegraph / AOCI 接入时使用本 skill——即使用户没提"monorepo"三个字，只要意图是把项目对齐团队 monorepo 规范也要使用。三种模式：init（空项目/缺骨架 → 全新初始化）、diagnose（已有骨架 → 结构与环境基线核对）、migrate（非空项目结构迁移，能力待标注）。
+description: 把团队标准 monorepo 框架（monorepo-template）初始化进用户项目，或对既有项目做结构/环境诊断。当用户说"初始化项目""按团队规范搭 monorepo""接入模板仓""结构诊断""环境检查""我的项目为什么不符规范"，或任务涉及 monorepo-template 初始化、骨架复制、spec-kit / adrkit / pingcode / grill / codegraph / AOCI 接入时使用本 skill——即使用户没提"monorepo"三个字，只要意图是把项目对齐团队 monorepo 规范也要使用。三种模式：init（空项目/缺骨架 → 全新初始化）、diagnose（已有骨架 → 结构与环境基线核对）、migrate（非空项目结构迁移，能力待标注）。
 ---
 
 # monorepo-setup
 
-把团队标准 monorepo 框架装进用户项目。设计原则：**本 skill 是"程序"，模板仓是"payload"**——所有精确命令、版本钉子、骨架内容都以模板仓为单一事实源，skill 只钉地址和流程，不复制内容。模板内容演进时只改模板仓，本 skill 不动。
+把团队标准 monorepo 框架装进用户项目。分工原则：**本 skill 承载流程**——init 步骤、诊断动作、版本钉子（初始化基线）都在本 skill；**模板仓承载载荷**——骨架文件与环境巡检表。版本钉子与模板仓 `AGENTS-TEMPLATE.md` 巡检表是同一基线的两处落点，改版本两处同改；骨架内容演进只改模板仓，本 skill 不动。
 
 模板仓 canonical 地址（下文称"模板仓"）：
 
