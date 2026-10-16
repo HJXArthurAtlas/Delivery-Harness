@@ -16,6 +16,10 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 ```bash
 # 方式一：npx 直装（免克隆；私有仓需 git 凭证）
 npx git+https://git.newchiwan.com/council/ncw-specify.git --global
+#        ^^^^^^^^ --global 是 sync.mjs 的参数（非 npm 的）：装到用户级 ~/.agents/skills/ + ~/.claude/skills/。
+#                 npx 场景下必须加——npx 把仓库克隆进自己的缓存后在你当前目录执行脚本，
+#                 不加则默认项目级、写进 <cwd>/.agents/skills/，等于把 skill 装进你碰巧所在的目录。
+#                 项目级安装由 monorepo-setup 的 init 流程负责，无需手动 sync。
 
 # 方式二：克隆后执行
 git clone https://git.newchiwan.com/council/ncw-specify.git && cd ncw-specify
