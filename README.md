@@ -1,6 +1,6 @@
 # ncw-specify
 
-newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始化 / 诊断流程与 speckit + PingCode 规格驱动开发流程做成可安装的 agent skill，DSH / OpenCode / omp / Claude Code 四端通用。初始化步骤与工具链版本钉子的单一载体是 `skills/monorepo-setup/references/init.md`（与模板仓 `monorepo-template` 的 `AGENTS-TEMPLATE.md` 巡检表版本同步）。
+newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始化 / 诊断流程与 speckit + PingCode 规格驱动开发流程做成可安装的 agent skill，DSH / OpenCode / omp / Claude Code 等等。初始化步骤与工具链版本钉子的单一载体是 `skills/monorepo-setup/references/init.md`（与模板仓 `monorepo-template` 的 `AGENTS-TEMPLATE.md` 巡检表版本同步）。
 
 ## Pack 内容
 
@@ -31,4 +31,3 @@ node skills/monorepo-setup/scripts/sync.mjs --global    # 用户级：~/.agents/
 | `.claude/skills/`（项目）或 `~/.claude/skills/`（全局） | Claude Code |
 
 omp 实测同时读项目级与全局级；DSH / OpenCode 官方支持同两个路径；DSH 无需 plugin——skill 是「被扫描的文件」，拷贝即安装，免重启热加载。
-
