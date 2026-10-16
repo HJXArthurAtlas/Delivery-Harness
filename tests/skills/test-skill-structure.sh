@@ -8,7 +8,7 @@ set -u
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SKILLS_DIR="$REPO_ROOT/skills"
-SYNC_SCRIPT="$SKILLS_DIR/monorepo-setup/scripts/sync.mjs"
+SYNC_SCRIPT="$SKILLS_DIR/ncw-monorepo-init/scripts/sync.mjs"
 
 pass=0
 fail=0

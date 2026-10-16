@@ -26,7 +26,7 @@
    - grill：`printf 'y\n' | specify extension add grill --from https://github.com/yoshi1220/speckit-grill-me/releases/download/v1.0.1/speckit-grill-me-extension-v1.0.1.zip`
    - bug（内置）：`specify extension add bug`
    - assess（内置）：`specify extension add assess`
-7. **同步 pack 技能进项目**：`node <本 skill 目录>/scripts/sync.mjs`——把 `monorepo-setup`、`speckit-flow` 装入项目 `.agents/skills/`（源与目标重合时脚本自动跳过，同名不覆盖）。
+7. **同步 pack 技能进项目**：`node <本 skill 目录>/scripts/sync.mjs`——把 `ncw-monorepo-init`、`ncw-speckit-flow` 装入项目 `.agents/skills/`（源与目标重合时脚本自动跳过，同名不覆盖）。
 8. **接入 codegraph**：`npm i -g @colbymchenry/codegraph@1.6.2`；只为当前宿主写项目级 MCP 配置，不要为其他检测到的 agent 写宿主私有目录：宿主在其支持列表内用 `codegraph install -l local -t <宿主id> -y`，不在就手写 `.mcp.json`：`{"mcpServers":{"codegraph":{"type":"stdio","command":"codegraph","args":["serve","--mcp"]}}}`；再 `codegraph init` 建索引（`.codegraph/` 不提交，新 MCP 工具重启后才生效）。
 9. **接入 AOCI-CODE**：从 releases 下载对应系统/架构的最新包，校验解压后把 `aoci`（Windows 为 `aoci.exe`）放进 PATH 下的稳定路径，确保 `aoci` 命令直接可用；用 aoci 跑 `init --agent <当前宿主>`（claude / codex / cursor / opencode / qoder；不支持就手写 MCP 条目 `{"mcpServers":{"aoci":{"type":"stdio","command":"aoci","args":["mcp"]}}}`，写不了就把配置内容报告给用户）；MCP 范围同第 8 条；再跑 `scan`；`aoci.txt` / `aoci.meta.txt` / `aoci.code.txt` / `AGENTS.md` 是认知资产，别加进 `.gitignore`。
 10. **收尾**：删除 init 产生的 `*.backup.*`，按项目 `AGENTS.md` 的提交规范提交本次变更（含认知资产），然后停下提示用户重启 Agent。

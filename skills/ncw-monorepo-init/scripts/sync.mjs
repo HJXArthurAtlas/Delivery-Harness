@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // 技能 pack 安装器：把本 pack 的技能目录拷入各端 skill 发现目录。
-// 本脚本随 monorepo-setup 技能分发，是整个 pack（PACK_SKILLS 列表）的统一安装入口；
+// 本脚本随 ncw-monorepo-init 技能分发，是整个 pack（PACK_SKILLS 列表）的统一安装入口；
 // 新增 pack 技能时在 PACK_SKILLS 里加一行，不要复制本脚本。
 //
 // 覆盖矩阵（项目级同名覆盖全局级）：
@@ -20,7 +20,7 @@ import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const PACK_SKILLS = ["monorepo-setup", "speckit-flow"];
+const PACK_SKILLS = ["ncw-monorepo-init", "ncw-speckit-flow"];
 
 const args = process.argv.slice(2);
 if (args.includes("--help") || args.includes("-h")) {

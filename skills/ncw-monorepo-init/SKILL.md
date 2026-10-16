@@ -1,9 +1,9 @@
 ---
-name: monorepo-setup
+name: ncw-monorepo-init
 description: 把团队标准 monorepo 框架（monorepo-template）初始化进用户项目，或对既有项目做结构/环境诊断。当用户说"初始化项目""按团队规范搭 monorepo""接入模板仓""结构诊断""环境检查""我的项目为什么不符规范"，或任务涉及 monorepo-template 初始化、骨架复制、spec-kit / adrkit / pingcode / grill / codegraph / AOCI 接入时使用本 skill——即使用户没提"monorepo"三个字，只要意图是把项目对齐团队 monorepo 规范也要使用。三种模式：init（空项目/缺骨架 → 全新初始化）、diagnose（已有骨架 → 结构与环境基线核对）、migrate（非空项目结构迁移，能力待标注）。
 ---
 
-# monorepo-setup
+# ncw-monorepo-init
 
 把团队标准 monorepo 框架装进用户项目。分工原则：**本 skill 承载流程**——init 步骤、诊断动作、版本钉子（初始化基线）都在本 skill；**模板仓承载载荷**——骨架文件与环境巡检表。版本钉子与模板仓 `AGENTS-TEMPLATE.md` 巡检表是同一基线的两处落点，改版本两处同改；骨架内容演进只改模板仓，本 skill 不动。
 
@@ -48,12 +48,12 @@ https://git.newchiwan.com/council/monorepo-template.git
 | DSH / OpenCode / omp | 拷入 `<项目>/.agents/skills/`（init 流程的 pack 安装步完成） | 拷入 `~/.agents/skills/` |
 
 - omp 实测同时读项目级与全局级；DSH 无需 plugin——skill 是「被扫描的文件」，拷贝即安装，免重启热加载。
-- pack 安装器 `scripts/sync.mjs`（一次装整个 pack，`PACK_SKILLS` 列表 = `monorepo-setup` + `speckit-flow`）：
+- pack 安装器 `scripts/sync.mjs`（一次装整个 pack，`PACK_SKILLS` 列表 = `ncw-monorepo-init` + `ncw-speckit-flow`）：
   ```bash
   npx git+https://git.newchiwan.com/council/ncw-delivery-harness.git --global   # 免克隆直装用户级
   # 或克隆后：
-  node skills/monorepo-setup/scripts/sync.mjs             # 项目级：.agents/skills/
-  node skills/monorepo-setup/scripts/sync.mjs --global    # 用户级：~/.agents/skills/
+  node skills/ncw-monorepo-init/scripts/sync.mjs             # 项目级：.agents/skills/
+  node skills/ncw-monorepo-init/scripts/sync.mjs --global    # 用户级：~/.agents/skills/
   ```
   支持 `--dry-run` / `--force`；默认同名不覆盖，只列出冲突。
 - 项目级同名 skill 覆盖全局级（DSH rank 100/200 > 400/500）——团队全局发、项目内可定制覆盖。
