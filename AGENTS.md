@@ -39,6 +39,7 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 | `skills/ncw-speckit-flow/` | 单文件 `SKILL.md`：8 阶段流程表 + 交接门禁 + 对账纪律 |
 | `skills/ncw-speckit-implement/` | 单文件 SKILL.md：上游 spec-kit /speckit.implement 命令（按 tasks.md 执行实现），正文英文原文；extension hook 机制未迁移 |
 | `skills/ncw-speckit-plan/` | 单文件 SKILL.md：上游 spec-kit /speckit.plan 命令（实现规划 + research/data-model/contracts/quickstart 工件），正文英文原文；extension hook 机制未迁移 |
+| `skills/ncw-speckit-specify/` | 单文件 SKILL.md：上游 spec-kit /speckit-specify 命令（特性规格创建/更新 + 质量清单），正文英文原文；extension hook 机制未迁移 |
 | `tests/skills/` | 结构校验脚本（见 Testing & QA） |
 | `.githooks/` | `commit-msg` 提交信息格式校验 |
 | `.agents/commands/` | 斜杠命令（通用 agent 发现路径，omp 实测可读；`*.md` + frontmatter `description`，文件名即命令名，如 `/readme-refresh`）。**禁止**用工具专属的 `.omp/commands/` |

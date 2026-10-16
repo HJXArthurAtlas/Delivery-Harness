@@ -14,6 +14,7 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | `ncw-speckit-flow` | speckit + PingCode AI native 开发流程的衔接与门禁（出规格建卡 → 接规格规划实现 → 卡片收尾） | 「这个需求转开发了，开始 plan」「出 spec 并建卡」 |
 | `ncw-speckit-implement` | 按 tasks.md 执行任务实现（上游 spec-kit /speckit.implement 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「开始实现」「按任务清单编码」 |
 | `ncw-speckit-plan` | 实现规划与设计工件生成（上游 spec-kit /speckit.plan 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「做这个需求的实现计划」「出 plan」 |
+| `ncw-speckit-specify` | 特性规格创建/更新（上游 spec-kit /speckit-specify 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「出 spec」「写特性需求」 |
 
 ## 安装
 
