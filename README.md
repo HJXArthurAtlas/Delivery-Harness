@@ -1,6 +1,6 @@
 # ncw-specify
 
-newchiwan 团队跨端 agent skill pack。与 [monorepo-template](https://git.newchiwan.com/council/monorepo-template.git)（项目模板载荷）分离：本仓只装「消费模板的元工具」，独立发版，不随模板 init 复制。
+newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始化 / 诊断流程与 speckit + PingCode 规格驱动开发流程做成可安装的 agent skill，DSH / OpenCode / omp / Claude Code 四端通用。初始化步骤与工具链版本钉子的单一载体是 `skills/monorepo-setup/references/init.md`（与模板仓 `monorepo-template` 的 `AGENTS-TEMPLATE.md` 巡检表版本同步）。
 
 ## Pack 内容
 
@@ -32,7 +32,3 @@ node skills/monorepo-setup/scripts/sync.mjs --global    # 用户级：~/.agents/
 
 omp 实测同时读项目级与全局级；DSH / OpenCode 官方支持同两个路径；DSH 无需 plugin——skill 是「被扫描的文件」，拷贝即安装，免重启热加载。
 
-## 与模板仓的分工
-
-- **monorepo-template**：项目骨架与模板载荷（`AGENTS-TEMPLATE.md`、`.agents/skills/mturtle-*`、`.specify/` 等），init 时整体复制进用户项目；其 README 不再承载初始化提示词。
-- **本仓**：承载团队**流程**——初始化步骤与版本钉子（`monorepo-setup/references/init.md`，与模板仓巡检表两处同步）、诊断基线、speckit 流程规范。项目内的 pack 技能由 init 第 7 步的同步动作拷入；全局安装覆盖个人所有项目。
