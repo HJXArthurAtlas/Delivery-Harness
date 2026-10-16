@@ -20,7 +20,7 @@ import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const PACK_SKILLS = ["ncw-monorepo-init", "ncw-speckit-constitution", "ncw-speckit-flow"];
+const PACK_SKILLS = ["ncw-monorepo-init", "ncw-speckit-analyze", "ncw-speckit-constitution", "ncw-speckit-flow"];
 
 const args = process.argv.slice(2);
 if (args.includes("--help") || args.includes("-h")) {
