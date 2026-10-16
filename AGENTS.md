@@ -33,6 +33,7 @@ skills/<name>/SKILL.md (+ references/ scripts/)
 | `skills/ncw-speckit-flow/` | 单文件 `SKILL.md`：8 阶段流程表 + 交接门禁 + 对账纪律 |
 | `tests/skills/` | 结构校验脚本（见 Testing & QA） |
 | `.githooks/` | `commit-msg` 提交信息格式校验 |
+| `.omp/commands/` | oh-my-pi（omp）斜杠命令（`*.md` + frontmatter `description`，文件名即命令名，如 `/readme-refresh`） |
 
 ## Development Commands
 
