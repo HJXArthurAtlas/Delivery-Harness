@@ -7,6 +7,17 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | skill | 用途 | 触发语示例 |
 |---|---|---|
 | `ncw-monorepo-init` | 项目初始化（init）/ 结构环境诊断（diagnose），migrate 待标注 | 「按团队 monorepo 规范初始化/诊断这个项目」 |
+| `ncw-compound-intent` | intent 访谈：目标 + 约束 + 失败条件（上游 spec-kit-compound v0.7.0 的 pack 分发，正文英文原文；运行期数据落在项目 `docs/intents/` 等，不经扩展安装） | 「先做 intent 访谈」「锁定目标与约束」 |
+| `ncw-compound-expectations` | 期望访谈：正/边缘场景与 intent 分文件存放（builder 不可见，防 reward-hack） | 「补期望场景」「写 expectations」 |
+| `ncw-compound-load` | 会话开始加载 compound store（ADR/纠偏/模式）进上下文，缺目录时按 bundled 模板 scaffold | 「加载 compound store」 |
+| `ncw-compound-writeback` | intentguard PASS 后把本次 ADR/纠偏/模式写回 compound store | 「writeback 本次经验」 |
+| `ncw-compound-gapfill` | intent + expectations 对照 tasks.md 找覆盖缺口并追加任务（带来源注释） | 「补任务缺口」「gapfill」 |
+| `ncw-compound-planverify` | 实现前由独立 checker（跨模型优先）判定 plan + 任务是否偏离锁定 intent | 「验证 plan」「planverify」 |
+| `ncw-compound-planverify-gate` | before_implement 门禁脚本包装器：`SKC_PLANVERIFY_GATE=block` 时拦截未验证/BLOCKED_DRIFT 的实现 | （hook 触发） |
+| `ncw-compound-intentguard` | 实现后 L3 校验：密封 briefing + 独立 checker 判 diff 是否越出 intent/期望 | 「intentguard 校验本次实现」 |
+| `ncw-compound-require-intent` | before_specify 门禁脚本包装器：`docs/intents/` 无 intent 文档时拦截 specify | （hook 触发） |
+| `ncw-compound-install-hooks` | 一次性安装 Claude Code PreToolUse hooks（纠偏匹配 + planverify 门）到项目 `.claude/` | 「安装 compound hooks」 |
+| `ncw-compound-dashboard` | 只读 SDD 流水线仪表盘（localhost 后台 HTTP 服务，stdlib 单文件 dashboard.py） | 「打开流水线仪表盘」 |
 | `ncw-speckit-analyze` | 跨工件一致性只读分析（上游 spec-kit /speckit.analyze 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「分析 spec/plan/tasks 一致性」 |
 | `ncw-speckit-clarify` | 规格澄清问答（上游 spec-kit /speckit.clarify 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「澄清规格歧义」「补全需求细节」 |
 | `ncw-speckit-constitution` | 创建/更新项目章程（上游 spec-kit /speckit.constitution 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「立章程」「修订治理原则」 |

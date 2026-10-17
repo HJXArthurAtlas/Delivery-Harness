@@ -20,7 +20,7 @@ import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const PACK_SKILLS = ["ncw-monorepo-init", "ncw-speckit-analyze", "ncw-speckit-clarify", "ncw-speckit-constitution", "ncw-speckit-converge", "ncw-speckit-flow", "ncw-speckit-implement", "ncw-speckit-plan", "ncw-speckit-specify", "ncw-speckit-tasks"];
+const PACK_SKILLS = ["ncw-compound-dashboard", "ncw-compound-expectations", "ncw-compound-gapfill", "ncw-compound-install-hooks", "ncw-compound-intent", "ncw-compound-intentguard", "ncw-compound-load", "ncw-compound-planverify", "ncw-compound-planverify-gate", "ncw-compound-require-intent", "ncw-compound-writeback", "ncw-monorepo-init", "ncw-speckit-analyze", "ncw-speckit-clarify", "ncw-speckit-constitution", "ncw-speckit-converge", "ncw-speckit-flow", "ncw-speckit-implement", "ncw-speckit-plan", "ncw-speckit-specify", "ncw-speckit-tasks"];
 
 const args = process.argv.slice(2);
 if (args.includes("--help") || args.includes("-h")) {
