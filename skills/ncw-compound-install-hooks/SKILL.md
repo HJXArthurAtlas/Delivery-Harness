@@ -25,12 +25,13 @@ The script:
 
 1. Anchors to the spec-kit project root (the directory containing `.specify/`)
 2. Copies the hook scripts shipped inside this skill — `references/hooks/compound-correction-match.sh` and `references/hooks/planverify-pretooluse.sh` (+ the shared `scripts/bash/planverify-lib.sh`) — into the project's `.claude/hooks/` directory; creates the directory if it does not exist; marks the scripts executable.
-3. Merges `PreToolUse` hook entries into `.claude/settings.json`:
+3. Delivers the correction-note schema: copies the skill's `references/CORRECTIONS-SCHEMA.md` to `docs/compound/CORRECTIONS-SCHEMA.md` (creating `docs/compound/` if needed). An existing copy at that path is never overwritten.
+4. Merges `PreToolUse` hook entries into `.claude/settings.json`:
    - If the file does not exist, creates it with only our entry
    - If it exists, removes any prior compound entry (matched by command path), then appends a fresh one
    - All non-compound entries (user's own hooks, other extensions' hooks) are preserved byte-for-byte
-4. Validates the resulting JSON parses; aborts atomically if it does not
-5. Prints a confirmation block showing test instructions and the two bypass mechanisms (`// compound-allow:` comment per-file, `COMPOUND_BYPASS=1` env var per-session)
+5. Validates the resulting JSON parses; aborts atomically if it does not
+6. Prints a confirmation block showing test instructions and the two bypass mechanisms (`// compound-allow:` comment per-file, `COMPOUND_BYPASS=1` env var per-session)
 
 After the script returns 0, tell the user:
 
@@ -62,7 +63,7 @@ The actual hook script itself (`compound-correction-match.sh`) is also a shell s
 - `references/CORRECTIONS-SCHEMA.md` — the correction-note frontmatter schema the hook enforces; a copy also belongs at `docs/compound/CORRECTIONS-SCHEMA.md` in the project (runtime path cited above)
 - `references/hooks-research.md` — research notes on the four agentic CLIs' hook systems (why the PreToolUse contract works cross-vendor)
 - `references/settings.template.json` — reference shape of the merged `.claude/settings.json` entry
-- `scripts/validate.sh` — validates the compound docs layout of the current project (`docs/compound/` structure, correction schema presence)
+- `scripts/validate.sh` — validates the compound docs layout of the current project (anchored at the nearest `.specify/` ancestor, falling back to cwd with a warning): `docs/compound/` structure (README.md, adr/, corrections/, patterns/), `CORRECTIONS-SCHEMA.md` presence, and required `paths`/`match`/`rule`/`context` keys in every frontmatter-bearing correction; prints PASS/FAIL per check and exits 1 on any FAIL
 - `scripts/check-chain-fired.sh` — prints which chain artifacts exist for a slug (`docs/intents/`, `docs/expectations/`, guard/planverify reports)
 
 ---

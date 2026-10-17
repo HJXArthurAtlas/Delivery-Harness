@@ -4,12 +4,13 @@
 # Installer for spec-kit-compound v0.3+ Claude Code hooks.
 #
 # Invoked by the /ncw-compound-install-hooks slash command.
-# Does three things:
+# Does four things:
 #   1. Anchors to the spec-kit project root (.specify/ ancestor)
-#   2. Copies the correction-match.sh hook script into the project's
-#      .claude/hooks/ directory (creating the dir if needed) and marks it
-#      executable
-#   3. Merges the hook registration entry into the project's
+#   2. Copies the hook scripts into the project's .claude/hooks/ directory
+#      (creating the dir if needed) and marks them executable
+#   3. Delivers references/CORRECTIONS-SCHEMA.md to docs/compound/
+#      (never overwriting an existing copy)
+#   4. Merges the hook registration entry into the project's
 #      .claude/settings.json (preserving all non-compound entries — C6
 #      pragmatic merge)
 #
@@ -71,6 +72,23 @@ if [ -f "$PV_HOOK_SRC" ] && [ -f "$PV_LIB_SRC" ]; then
   INSTALL_PV=1
 else
   INSTALL_PV=0
+fi
+
+# ─────────────────────────────────────────────────────────────────
+# Deliver the correction-note schema to the project store
+# (runtime path the hook messages cite; never overwrite an existing copy)
+# ─────────────────────────────────────────────────────────────────
+SCHEMA_SRC="$SKILL_DIR/references/CORRECTIONS-SCHEMA.md"
+if [ -f "$SCHEMA_SRC" ]; then
+  mkdir -p docs/compound
+  if [ ! -f docs/compound/CORRECTIONS-SCHEMA.md ]; then
+    cp "$SCHEMA_SRC" docs/compound/CORRECTIONS-SCHEMA.md
+    echo "✓ Installed docs/compound/CORRECTIONS-SCHEMA.md (correction format reference)"
+  else
+    echo "• docs/compound/CORRECTIONS-SCHEMA.md already exists — left untouched"
+  fi
+else
+  echo "• WARNING: skill's references/CORRECTIONS-SCHEMA.md missing; skipped schema delivery" >&2
 fi
 
 # ─────────────────────────────────────────────────────────────────

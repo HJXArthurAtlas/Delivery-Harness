@@ -4,7 +4,7 @@
     "name": "newchiwan"
   },
   "metadata": {
-    "description": "newchiwan 团队跨端 agent skill pack（ncw-monorepo-init + ncw-speckit-flow）"
+    "description": "newchiwan 团队跨端 agent skill pack（monorepo 初始化/诊断 + speckit 流程 + adrkit/speckit-grill/compound 扩展组）"
   },
   "plugins": [
     {

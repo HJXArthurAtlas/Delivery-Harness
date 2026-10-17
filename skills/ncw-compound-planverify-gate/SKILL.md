@@ -10,22 +10,32 @@ shell-script wrapper** — not an interactive prompt — so it dispatches cleanl
 through spec-kit's hook executor (the same pattern `/ncw-compound-require-intent`
 uses for `before_specify`, and that bundled git's hooks use).
 
-Its job: optionally gate `/ncw-speckit-implement` on the latest planverify verdict.
+Its job: optionally gate `/ncw-speckit-implement` on the planverify verdict of the feature about to be implemented.
 
 This is the **spec-kit phase-boundary** half of the planverify gate (fires under
 Claude + spec-kit). The **cross-vendor** half — a `PreToolUse` hook that works
 under both Claude Code and Codex CLI — is installed separately via
 `/ncw-compound-install-hooks`.
 
+> **Note:** in this skill pack nothing executes `before_implement` hooks — the
+> pack's speckit skills never run hooks. Here the gate runs as a manual or
+> agent-invoked check before `/ncw-speckit-implement` of the given feature.
+> The automated paths, where present, are the upstream compound extension's
+> `extension.yml` hook wiring or the `/ncw-compound-install-hooks` `.claude`
+> PreToolUse wiring.
+
 ---
 
 ## What you must do
 
-Run the gate script via Bash:
+Run the gate script via Bash before implementing the feature, passing that
+feature's slug (run before `/ncw-speckit-implement` of that feature):
 
 ```bash
-.agents/skills/ncw-compound-planverify-gate/scripts/bash/planverify-gate.sh
+.agents/skills/ncw-compound-planverify-gate/scripts/bash/planverify-gate.sh <slug>
 ```
+
+(Global install: `~/.agents/skills/ncw-compound-planverify-gate/scripts/bash/planverify-gate.sh <slug>`.)
 
 The script:
 
@@ -33,9 +43,9 @@ The script:
 2. Resolves the gate mode — `SKC_PLANVERIFY_GATE` env, else `planverify_gate:` in `docs/compound/compound-config.yml`, default `off`
 3. If mode is not `block` → exits 0 silently — `/ncw-speckit-implement` proceeds normally
 4. If mode is `block`:
-   - No planverify report exists → exits 1 (run `/ncw-compound-planverify` first)
-   - Latest verdict is `BLOCKED_DRIFT` → exits 1 (replan first)
-   - Latest verdict is `PASS` or `REPLAN_ALLOWED` → exits 0 (proceed)
+   - No planverify report exists for `<slug>` (`docs/intents/<slug>.planverify.md`) → exits 1 (run `/ncw-compound-planverify` for that feature first)
+   - That report's verdict is `BLOCKED_DRIFT` → exits 1 (replan first)
+   - That report's verdict is `PASS` or `REPLAN_ALLOWED` → exits 0 (proceed)
 
 If the script exits non-zero, **do not continue with `/ncw-speckit-implement`**. Relay
 the script's message to the user:

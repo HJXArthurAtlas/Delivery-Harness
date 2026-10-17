@@ -9,6 +9,12 @@ This command is registered as a `before_specify` hook. It is a **thin shell-scri
 
 Its job: gate `/ncw-speckit-specify` on the existence of at least one intent doc.
 
+> **Note:** in this skill pack nothing executes `before_specify` hooks — the
+> pack's speckit skills never run hooks. Here the gate runs as a manual or
+> agent-invoked check before `/ncw-speckit-specify`. The automated paths,
+> where present, are the upstream compound extension's `extension.yml` hook
+> wiring or the `/ncw-compound-install-hooks` `.claude` PreToolUse wiring.
+
 ---
 
 ## What you must do

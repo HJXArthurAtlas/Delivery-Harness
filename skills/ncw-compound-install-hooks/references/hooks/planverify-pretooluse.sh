@@ -79,6 +79,9 @@ case "$FILE_REL" in
 esac
 
 # This is a source-file write under block mode. Check the verdict.
+# NOTE: repo-wide verdict (no slug) is intentional here — a PreToolUse hook
+# sees only the tool call, not which feature is being implemented, so it
+# cannot scope to a slug the way planverify-gate.sh does.
 VERDICT="$(pv_latest_verdict "$ROOT")"
 
 if [ -z "$VERDICT" ]; then

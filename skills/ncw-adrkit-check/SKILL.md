@@ -10,7 +10,10 @@ description: Check a produced plan against the decisions that govern it. Read-on
 Runs after a plan exists, and answers one question: does this plan sit inside
 the decisions already made, or does it quietly cross one?
 
-This is the command the optional `after_plan` hook offers to run.
+This is the command the optional `after_plan` hook offers to run. Hook firing
+requires the upstream adrkit extension's hook registration (installed by
+ncw-monorepo-init via `specify extension add adrkit`); without it, run this
+check manually after `/ncw-speckit-plan`.
 
 ## User Input
 
@@ -21,7 +24,12 @@ $ARGUMENTS
 1. Treat any arguments as the repo-relative paths this plan intends to touch.
    Pass them — the check is only as sharp as the paths it is given. With no
    arguments it falls back to the plan artifact itself.
-2. Run `.specify/extensions/adrkit/scripts/check.sh` with those paths.
+2. Run the pack-bundled script with those paths — project install:
+   `.agents/skills/ncw-adrkit-check/scripts/check.sh`; global install:
+   `~/.agents/skills/ncw-adrkit-check/scripts/check.sh`. (When
+   `specify extension add adrkit` has been run, e.g. via ncw-monorepo-init, the
+   upstream extension copy at `.specify/extensions/adrkit/scripts/check.sh` is
+   equivalent.)
 3. Read the output. It is one or two marker-introduced sections, each followed
    by a single JSON document:
    - `==> adrkit:check` — the `CheckOutcome`: which decisions govern these
@@ -43,6 +51,9 @@ $ARGUMENTS
 
 ## Notes
 
+- Feature resolution requires a specify-initialized project
+  (`.specify/scripts/bash/check-prerequisites.sh` present). If it is absent,
+  run ncw-monorepo-init first.
 - Read-only, and that is load-bearing rather than incidental: this command is
   reachable from a lifecycle hook, so it must never write.
 - Exit code 1 means findings exist (corpus errors, or the evaluator returned the

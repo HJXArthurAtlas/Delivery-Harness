@@ -81,7 +81,9 @@ Given that feature description, do this:
 
 5. **IF EXISTS**: Load `.specify/memory/constitution.md` for project principles and governance constraints.
 
-6. Follow this execution flow:
+6. **Ensure the unified-language glossary exists**: The spec template's mandatory 统一语言 section references the central glossary `.specify/memory/glossary.md`. If that file is missing, scaffold it before writing the spec: create `.specify/memory/` if needed and write a minimal glossary there — one section per project domain (域节) plus a 「使用规则」 section stating that spec terms must be registered in the matching 域节 and that definitions live in the glossary, not in individual specs. Never overwrite an existing glossary. When writing the spec (step 8), register any new domain concepts introduced by this feature into the matching 域节, as the template requires.
+
+7. Follow this execution flow:
     1. Parse user description from arguments
        If empty: ERROR "No feature description provided"
     2. Extract key concepts from description
@@ -106,9 +108,9 @@ Given that feature description, do this:
     7. Identify Key Entities (if data involved)
     8. Return: SUCCESS (spec ready for planning)
 
-7. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
+8. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
 
-8. **Specification Quality Validation**: After writing the initial spec, validate it against quality criteria:
+9. **Specification Quality Validation**: After writing the initial spec, validate it against quality criteria:
 
    a. **Create Spec Quality Checklist**: Generate a checklist file at `SPECIFY_FEATURE_DIRECTORY/checklists/requirements.md` using the checklist template structure with these validation items:
 

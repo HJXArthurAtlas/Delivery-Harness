@@ -7,32 +7,34 @@ description: 团队基于 spec-kit + PingCode 的 AI native 开发流程操作�
 
 团队 AI native 开发流程的**衔接与门禁层**：不替代 `/speckit.*` 命令与 `/speckit.pingcode.*` 扩展命令（它们各自的规则以自身为准），也不复述 `pingcode` skill 的 ID 安全规则与 `mturtle-commit` 的提交格式——本 skill 只定义角色怎么交接、什么才算交接完成、卡片与产物怎么对得上账。
 
+**前提**：项目已按 `ncw-monorepo-init` 初始化（spec-kit + pingcode 扩展已装，`pingcode-config.yml` 由 `/speckit.pingcode.init` 生成）。after_specify / after_tasks / before_implement 等 hook 由扩展的 `extension.yml` 注册执行——本 pack 的技能本体不执行 hook；hook 未触发时，按对应门禁项的要求手动跑命令补做。
+
 ## 流程主线
 
 | 阶段 | 角色 | 动作 | 产物 / 卡片 |
 |---|---|---|---|
-| 1. specify | 产品 | `/speckit.specify` 生成规格 | `specs/<NNN>-SPEC.md`（含 `### User Story N` 章节） |
+| 1. specify | 产品 | `/speckit.specify` 生成规格 | `specs/<NNN>-<short-name>/spec.md`（含 `### User Story N` 章节） |
 | 2. 建卡 | 产品 | after_specify hook → `/speckit.pingcode.specstoissues`（optional，priority 99） | 需求树 idea → epic → feature(spec 卡) → story 卡；登记 `specs/pingcode-mapping.json` |
 | 3. 交接 | 产品→开发 | 门禁检查（下节），通过后转开发 | — |
 | 4. plan | 开发 | `/speckit.plan` | 计划产物 |
-| 5. tasks | 开发 | `/speckit.tasks`；配置了 `task_artifact` 时 after_tasks hook 自动补建任务卡 | `tasks.md`（+ 任务卡挂 story/spec 卡下） |
+| 5. tasks | 开发 | `/speckit.tasks`；配置了 `mapping.task_artifact` 时 after_tasks hook 自动补建任务卡 | `tasks.md`（+ 任务卡挂 story/spec 卡下） |
 | 6. implement 前 | 开发 | before_implement hook → `/speckit.pingcode.sync-cards` 对账 | spec 后续修改与卡片的增删改对齐 |
 | 7. implement | 开发 | `/speckit.implement`；提交走 `mturtle-commit`，消息带故事卡 ID | 代码 + 测试 |
 | 8. 收尾 | 开发 | 本地任务全部 `[x]` → `/speckit.pingcode.sync-status` | 卡片流转完成（单向，不回退） |
 
 ## 交接门禁（阶段 3，spec 转开发前逐项核对）
 
-1. `### User Story N` 章节齐备，每章尾注优先级 `P1/P2/P3`——这是卡片优先级映射的来源，缺了卡片优先级落不下来。
+1. `### User Story N` 章节齐备，每章标题行内标注优先级 `(Priority: P1/P2/P3)`（bundled spec 模板的既有格式）——这是卡片优先级映射的来源，缺了卡片优先级落不下来。
 2. `specs/pingcode-mapping.json` 已登记：每张卡的 id 与状态可追溯。没有登记 = 建卡没完成，不能交接。
 3. after_specify 是 **optional** hook：specify 时选了跳过的，交接前手动补跑 `/speckit.pingcode.specstoissues`。
-4. `pingcode-config.yml` 在位（没有就先 `/speckit.pingcode.init`，这是扩展的必需配置）。
+4. `pingcode-config.yml` 在位（没有就先 `/speckit.pingcode.init`，这是扩展的必需配置；未装 pingcode 扩展的项目先走 `ncw-monorepo-init` 初始化）。
 
 任何一项不过 → 留在产品侧处理完再交接，不要把半成品 spec 推给开发。
 
 ## 开发侧纪律
 
 - **implement 前必对账**：spec 在建卡后有过修改的，先 `sync-cards` 消化差异再动代码——卡片描述与 spec 漂移会让收尾阶段对不上账。
-- **溯源链**：`SPEC.md 章节 → mapping.json 卡片 id → 提交消息故事卡 ID → sync-status 收尾`。动手前先把当前任务的卡片 id 从 `pingcode-mapping.json` 里查出来，提交时才有 ID 可写。
+- **溯源链**：`specs/<NNN>-<short-name>/spec.md 章节 → mapping.json 卡片 id → 提交消息故事卡 ID → sync-status 收尾`。动手前先把当前任务的卡片 id 从 `pingcode-mapping.json` 里查出来，提交时才有 ID 可写。
 - **收尾单向**：任务卡随本地勾选收尾，不回退；需要重开就走新的工作项，不要手动改回收尾态以外的状态。
 
 ## 幂等与边界
