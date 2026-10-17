@@ -91,3 +91,27 @@ frontmatter 严格两字段 `name` + `description`（丢弃源 `compatibility`/`
 - 源仓 freight-mono 的 8 个 `speckit-*` 目录未删除。
 - `ncw-speckit-flow` 的 8 阶段流程表未纳入 constitution/analyze 等阶段（沿用首迁决策：治理与质量动作不在产品↔开发交接主线）。
 - extension hook 机制整体不迁移；如未来需要，须另行设计不依赖 HookExecutor 的等价机制。
+
+## 追加（2026-10-17）：bundled spec-kit 运行时（偏离 C 作废）
+
+**动因**：使用环境不执行 `specify init`；且模板仓 `council/monorepo-template` 的 `.specify/` skeleton 仅含 `memory/constitution.md` + `.gitkeep`，不含 `scripts/python/` 与 `templates/`。按原迁移形态，技能在目标项目里的 `python3` 调用与模板解析全部会失败。
+
+**变更**：
+
+- 7 个技能携带 spec-kit v1.1.3 脚本逐字副本于各自 `scripts/`（SKILL.md 以 `scripts/<name>.py` 字面引用，`npm test` 规则 4 反向成为存在性保障）：
+  - analyze / clarify / converge / implement：`check_prerequisites.py` + `common.py`
+  - plan：`setup_plan.py` + `common.py`；tasks：`setup_tasks.py` + `common.py`；constitution：`resolve_template.py` + `common.py`
+  - specify 无脚本调用（agent 原生建目录与 feature.json），仅携带 `references/spec-template.md`
+- 4 个技能携带模板于 `references/`：specify / plan / tasks / constitution 各带对应 `<name>-template.md`
+- SKILL.md 调用行改写：偏离 C 的「`.specify/scripts` → `python/<script>.py`」分段表述全部替换为本技能 `scripts/<name>.py` 直引 + 「verbatim spec-kit v1.1.3 helper」标注；模板消费技能增加 scaffold 指令——项目模板栈无法解析时，从本技能 `references/` 复制到项目 `.specify/templates/`（建目录、绝不覆盖已有项目模板）。
+- 脚本以 CWD=项目根运行；`common.py` 经 `sys.path.insert(脚本所在目录)` 兜底导入，与脚本存放位置无关（已实测）。`common.py` 内 `.specify/scripts/python` 字样为上游注释，逐字保留。
+
+**取舍**：`check_prerequisites.py` / `common.py` 在 4 技能间逐字重复——跨技能相对引用在项目级/全局级混合安装下不可靠，且规则 4 要求引用文件落于本技能目录内。升级 spec-kit 时须同步全部副本（`grep -rl check_prerequisites.py skills` 定位）；版本事实源仍为 `references/init.md` 的 v1.1.3 钉子。
+
+**验证（全部实跑）**：
+
+- `npm test`：89 passed, 0 failed（规则 4 新增 11 个存在性检查全过）。
+- 无 init 冒烟（/tmp/speckit-smoke，无 `.specify/scripts`、无 specify CLI）：scaffold 4 模板后，analyze / clarify 检查器、setup_plan（plan.md 与捆绑模板字节一致）、setup_tasks、resolve_template(constitution-template) 全部 exit 0，输出字段符合 SKILL.md 要求。
+- 负例（/tmp/speckit-neg）：tasks-template / constitution-template 缺失时 setup_tasks、resolve_template 按预期硬失败 exit 1——新 scaffold 指令覆盖的恰好是这两个失败点。
+- 18 个捆绑文件与 freight-mono 源 `cmp` 字节一致；泄漏扫描无 `/Users/`、`/home/`。
+- `sync.mjs --dry-run`：10 技能 PLAN 不变；`scripts/`、`references/` 随技能目录整树拷贝，安装器零改动。

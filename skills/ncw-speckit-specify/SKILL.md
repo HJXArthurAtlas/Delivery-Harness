@@ -60,7 +60,7 @@ Given that feature description, do this:
 
    **Create the directory and spec file**:
    - `mkdir -p SPECIFY_FEATURE_DIRECTORY`
-   - Resolve the active `spec-template` through the Spec Kit preset/template resolution stack (the shared template resolver used by the other Spec Kit commands)
+   - Resolve the active `spec-template` through the Spec Kit preset/template resolution stack (the shared template resolver used by the other Spec Kit commands). If the project cannot resolve `spec-template` (`.specify/templates/spec-template.md` missing and no override/preset/extension layer provides it), scaffold it first: copy this skill's `references/spec-template.md` to `.specify/templates/spec-template.md`, creating directories as needed; never overwrite an existing project template
    - Copy the resolved `spec-template` file to `SPECIFY_FEATURE_DIRECTORY/spec.md` as the starting point
    - Set `SPEC_FILE` to `SPECIFY_FEATURE_DIRECTORY/spec.md`
    - Persist the resolved path to `.specify/feature.json`:

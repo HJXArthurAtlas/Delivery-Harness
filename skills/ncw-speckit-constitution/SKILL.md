@@ -47,7 +47,8 @@ preset/template resolution stack.
 
 Follow this execution flow:
 
-1. Run `python3` on the shared template resolver — `.specify/scripts` → `python/resolve_template.py` — with arguments `constitution-template --json`, from the repository root, and parse `TEMPLATE_CONTENT` as the active template.
+1. Run `python3` on this skill's bundled template resolver `scripts/resolve_template.py` (verbatim spec-kit v1.1.3 helper) with arguments `constitution-template --json`, from the repository root, and parse `TEMPLATE_CONTENT` as the active template.
+   - If the project cannot resolve `constitution-template` (`.specify/templates/constitution-template.md` missing and no override/preset/extension layer provides it), scaffold it first: copy this skill's `references/constitution-template.md` to `.specify/templates/constitution-template.md`, creating directories as needed; never overwrite an existing project template, then re-run the resolver.
    - The shared resolver applies project overrides, composing preset layers, and extension layers
      before the core template fallback. It MUST succeed before continuing.
    - If it fails, stop and report the resolution error; do not continue with only one contributing

@@ -22,7 +22,7 @@ entry) so they can run them manually before/after the planning.
 
 ## Outline
 
-1. **Setup**: Run `python3` on the plan setup script — `.specify/scripts` → `python/setup_plan.py` — with argument `--json`, from repo root, and parse JSON for FEATURE_SPEC, IMPL_PLAN, FEATURE_DIR, BRANCH. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+1. **Setup**: Run `python3` on this skill's bundled plan setup script `scripts/setup_plan.py` (verbatim spec-kit v1.1.3 helper) with argument `--json`, from repo root, and parse JSON for FEATURE_SPEC, IMPL_PLAN, FEATURE_DIR, BRANCH. If the project cannot resolve `plan-template` (`.specify/templates/plan-template.md` missing and no override/preset/extension layer provides it), scaffold it first: copy this skill's `references/plan-template.md` to `.specify/templates/plan-template.md`, creating directories as needed; never overwrite an existing project template. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 2. **Load context**: Read FEATURE_SPEC and `.specify/memory/constitution.md`. Load IMPL_PLAN template (already copied).
 

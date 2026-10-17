@@ -34,7 +34,7 @@ Identify inconsistencies, duplications, ambiguities, and underspecified items ac
 
 ### 1. Initialize Analysis Context
 
-Run `python3` on the shared prerequisite checker — `.specify/scripts` → `python/check_prerequisites.py` — with arguments `--json --require-spec --require-tasks --include-tasks` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive absolute paths:
+Run `python3` on this skill's bundled prerequisite checker `scripts/check_prerequisites.py` (verbatim spec-kit v1.1.3 helper) with arguments `--json --require-spec --require-tasks --include-tasks` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive absolute paths:
 
 - SPEC = FEATURE_DIR/spec.md
 - PLAN = FEATURE_DIR/plan.md
