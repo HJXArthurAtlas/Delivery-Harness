@@ -2,6 +2,7 @@
 
 ## 例外
 
+0. this repo is standalone harness from scratch
 1. skills/ncw-monorepo-init 是独立模块，没有用户明确指令，禁止改动或引用 
 
 ## Project Overview
@@ -45,7 +46,7 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 | `skills/ncw-speckit-plan/` | SKILL.md + `scripts/`（bundled `setup_plan.py` + `common.py`）+ `references/plan-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：上游 spec-kit /speckit.plan 命令（实现规划 + research/data-model/contracts/quickstart 工件），正文英文原文；extension hook 机制未迁移 |
 | `skills/ncw-speckit-specify/` | SKILL.md + `references/spec-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：上游 spec-kit /speckit-specify 命令（特性规格创建/更新 + 质量清单），正文英文原文；extension hook 机制未迁移 |
 | `skills/ncw-speckit-tasks/` | SKILL.md + `scripts/`（bundled `setup_tasks.py` + `common.py`）+ `references/tasks-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：上游 spec-kit /speckit-tasks 命令（按用户故事生成依赖有序 tasks.md），正文英文原文；extension hook 机制未迁移 |
-| `tests/skills/` | 结构校验脚本（见 Testing & QA） |
+| `tests/skills/` | 结构校验脚本 + `ncw-speckit-constitution` 运行时契约测试（见 Testing & QA） |
 | `.githooks/` | `commit-msg` 提交信息格式校验 |
 | `.agents/commands/` | 斜杠命令（通用 agent 发现路径，omp 实测可读；`*.md` + frontmatter `description`，文件名即命令名，如 `/readme-refresh`）。**禁止**用工具专属的 `.omp/commands/` |
 | `.omp-plugin/` | omp marketplace catalog（`marketplace.json` 单文件；插件 `ncw-delivery`，`source: "./"`）。**禁止**加 `plugin.json`——插件面只含 skills，命令不经插件分发 |
@@ -91,7 +92,7 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 
 ## Testing & QA
 
-`npm test` = `bash tests/skills/test-skill-structure.sh`，零依赖、可从任意 CWD 运行（路径自定位），退出码 0/1。
+`npm test` = `bash tests/skills/test-skill-structure.sh`（结构校验）+ `bash tests/skills/test-speckit-constitution.sh`（技能运行时契约测试），零依赖、可从任意 CWD 运行（路径自定位），退出码 0/1。
 
 强制规则（改技能内容后必须跑）：
 
@@ -104,5 +105,6 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 7. `.agents/commands/*.md` frontmatter 合规（`---` 定界 + 非空 `description`），且不存在工具专属 `.omp/commands/`；
 8. `.omp-plugin/marketplace.json` 为合法 JSON，marketplace/plugin 名合规（小写开头结尾、可含 `-`/`.`、≤64），plugin `source` 恰为 `"./"`，`version` 与 `package.json` 一致且符合 omp 缓存路径字符集。JSON 校验用 node 内联脚本完成（node 是运行前提，非新增依赖）；
 9. `.omp-plugin/plugin.json` 绝不许存在（manifest remap 会把 `.agents/` 带进 omp 插件安装面，插件只分发 skills）。
+10. `tests/skills/test-speckit-constitution.sh` 用临时夹具项目驱动 `ncw-speckit-constitution` 的 bundled `resolve_template.py`，钉模板分辨栈契约：层优先级 `overrides/` > `presets/` > `extensions/` > 核心层、`presets/.registry` 的 priority 取舍、全层缺失非零退出并报 `Could not resolve required`（SKILL.md 的 scaffold 触发条件）、`references/constitution-template.md` 落核心层后字节级 round-trip、非安全模板名拒绝；python3 是技能运行时前提而非本仓测试前提，缺失则 SKIP（退出 0，不计 pass/fail）。
 
 新增检查：在 `for skill_dir in …` 循环内加 per-skill 规则（用 `ok` / `bad "<msg>"` 助手计数），循环后加全局规则；保持 `set -u` 与结尾的 `printf` + `[ "$fail" -eq 0 ]` 不变。

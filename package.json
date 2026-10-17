@@ -6,7 +6,7 @@
     "ncw-delivery-harness": "skills/ncw-monorepo-init/scripts/sync.mjs"
   },
   "scripts": {
-    "test": "bash tests/skills/test-skill-structure.sh"
+    "test": "bash tests/skills/test-skill-structure.sh && bash tests/skills/test-speckit-constitution.sh"
   },
   "files": [
     "skills"

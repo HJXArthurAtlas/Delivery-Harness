@@ -57,7 +57,7 @@ omp plugin install ncw-delivery@ncw-delivery-harness
 ## 开发
 
 ```bash
-npm test   # 校验 skills/ 结构：SKILL.md 存在与 frontmatter 格式（name/description）、引用文件存在、绝对路径泄漏扫描、PACK_SKILLS 与目录一一对应；另校验 .agents/commands/ frontmatter 与 .omp-plugin/marketplace.json（命名合规、source 恰为 ./、version 与 package.json 同步）
+npm test   # ① tests/skills/test-skill-structure.sh：skills/ 结构与分发面校验（frontmatter、引用文件存在、泄漏扫描、PACK_SKILLS 与目录一一对应、.agents/commands/ frontmatter、.omp-plugin/marketplace.json 合规）；② tests/skills/test-speckit-constitution.sh：临时夹具驱动 ncw-speckit-constitution bundled resolve_template.py 的模板分辨栈契约（层优先级、缺层报错退出、scaffold 字节级 round-trip），无 python3 时 SKIP
 ```
 
 新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）+ 在 `sync.mjs` 的 `PACK_SKILLS` 登记一行；`npm test` 会把关，缺登记即失败。命名格式 `ncw-{submodule}-action`（如 `ncw-monorepo-init`），全名 ≤32 字符。
