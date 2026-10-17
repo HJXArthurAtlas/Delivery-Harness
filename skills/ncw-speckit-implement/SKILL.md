@@ -12,14 +12,6 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-## Extension Hooks Not Handled
-
-This skill does not evaluate the extension hook mechanism. If the project
-registers `hooks.before_implement` or `hooks.after_implement` in
-`.specify/extensions.yml`, those hooks are NOT executed by this skill. Tell the user
-which of these two hook points are registered (extension name and command for each
-entry) so they can run them manually before/after the implementation.
-
 ## Outline
 
 1. Run `python3` on this skill's bundled prerequisite checker `scripts/check_prerequisites.py` (verbatim v1.1.3 helper) with arguments `--json --require-tasks --include-tasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").

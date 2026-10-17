@@ -14,7 +14,7 @@ Following the "Interview discipline (applies to every round)" in this file, perf
 
 > **See the Glossary for terms such as design tree, question candidate pool, frontier, round, category, decision-point status, aggregate category status, and coverage map.**
 
-**This command must be able to run as an alternative to `ncw-speckit-clarify` in a macOS / Linux + Bash environment.** In supported environments, preserve compatibility with clarify's artifacts and side effects by producing them in the same form (`## Clarifications`, incorporation into the relevant sections, validation after every write, revalidation of `checklists/requirements.md`, extension-hook processing, and a completion report with coverage), while adding the canonical knowledge artifacts defined in this command. The internal elicitation and convergence algorithm intentionally differs to achieve deeper clarification.
+**This command must be able to run as an alternative to `ncw-speckit-clarify` in a macOS / Linux + Bash environment.** In supported environments, preserve compatibility with clarify's artifacts and side effects by producing them in the same form (`## Clarifications`, incorporation into the relevant sections, validation after every write, revalidation of `checklists/requirements.md`, and a completion report with coverage), while adding the canonical knowledge artifacts defined in this command. The internal elicitation and convergence algorithm intentionally differs to achieve deeper clarification.
 
 This compatibility applies to **artifacts and side effects**. It does not mean that this command supports every runtime environment supported by the base toolkit. Use only the Bash prerequisite script; do not automatically select or fall back to the PowerShell or Python versions.
 
@@ -154,16 +154,6 @@ Persistence incomplete is not a decision-point status from the Glossary. Keep th
 - **Handle answers or research that conflict with recorded documents through the conflict-confirmation discipline in this command.** Update related documents only after the change is settled, and mark the point Resolved only after saving and verification.
 - **On the interrupted completion path, preserve settled, saved, and verified document changes and do not write unaccepted content.** Include updated knowledge documents in the completion report.
 
-## Extension hooks (same processing as clarify)
-
-If `.specify/extensions.yml` exists, process `hooks.before_clarify` before asking questions and `hooks.after_clarify` before the completion report. If the file is absent or cannot be parsed, skip it silently.
-
-- Exclude hooks with `enabled: false`; treat an omitted `enabled` as enabled.
-- Do not evaluate hooks with a non-empty `condition`; skip them and leave them to HookExecutor.
-- Invoke hook command IDs using the current agent's command syntax (for example, a hook ID like `git.commit` may be invoked as `/git-commit`, `git-commit`, or `$git-commit` depending on the agent).
-- `optional: false` → Output `EXECUTE_COMMAND: {command}`, actually invoke that hook in the current agent/session, and wait for it to finish. Do not treat outputting the command as execution.
-- `optional: true` → Only present the command, description, and prompt.
-
 ## Glossary
 
 The following terms apply throughout this file. All subsequent steps rely on these definitions.
@@ -286,7 +276,7 @@ A list associating the semantic identity of every decision point (category, deci
 - **Follow up on ambiguous or contradictory answers.** Do not stop until the answer is precise. You may create hypothetical scenarios to probe boundaries, but explicitly label them "hypothetical" in the question. Until the user accepts them, do not treat them as project facts, requirements, or decisions and do not incorporate them into the spec. Add each follow-up to the question candidate pool and confirm it on a later frontier.
 - **Do not preview later questions.** Present only the current question. Do not reveal or list the remaining questions in the current round or any future round ahead of time.
 - **Do not act on a decision until shared understanding is confirmed.** Incorporate only into spec.md and the canonical domain-knowledge artifacts permitted by this command; do not begin plans, tasks, code, or configuration.
-- **Respect interruption signals such as "stop," "that's enough," or "let's move on for now."** Stop presenting new questions immediately and enter the "Interrupted completion path." Ending the question loop does not mean skipping the checklist, hooks, or completion report.
+- **Respect interruption signals such as "stop," "that's enough," or "let's move on for now."** Stop presenting new questions immediately and enter the "Interrupted completion path." Ending the question loop does not mean skipping the checklist or completion report.
 
 ### Interrupted completion path
 
@@ -296,8 +286,7 @@ If the user asks to stop after the spec has been loaded and any decision point h
 2. Change every remaining Partial / Missing decision point to Deferred, including the current question, unpresented candidates, candidates blocked by dependencies, unfinished factual research, and points reopened for conflict confirmation. Record the reason as "User interruption" and move corresponding design-tree nodes to terminal hold. Empty the frontier and question candidate pool, then recalculate aggregate category statuses.
 3. Run the final full validation from Step 4C against the already saved spec. Do not fill unresolved content by assumption or create new Clarifications Q&A entries.
 4. Skip the Step 5 rescan and Step 6 satisfaction gate, and proceed to checklist revalidation in Step 7.
-5. After Step 7, process `hooks.after_clarify` according to the extension-hook rules. Actually invoke required hooks and wait for completion; present optional hooks only as guidance.
-6. Issue the Step 8 completion report as "Completed by user interruption." Include the interruption point, decision points deferred with reasons, coverage table, checklist results, hook results, and a recommendation on whether to proceed to planning or rerun this command later.
+5. Issue the Step 8 completion report as "Completed by user interruption." Include the interruption point, decision points deferred with reasons, coverage table, checklist results, and a recommendation on whether to proceed to planning or rerun this command later.
 
 ### Question format
 
@@ -445,7 +434,7 @@ If `FEATURE_DIR/checklists/requirements.md` exists, perform the following. If it
 
 ### Step 8. Completion report
 
-After processing the `after_clarify` hook, report:
+Report:
 
 - Completion type (normal / user interruption). For an interruption, include where it occurred and that no post-interruption question or answer was incorporated.
 - Number of rounds and total questions; optionally include a per-round breakdown. The question-and-answer list may refer to Clarifications.
@@ -472,7 +461,6 @@ After processing the `after_clarify` hook, report:
 - [ ] Every decision point has reached one of the final statuses—Clear / Resolved / Outstanding / Deferred—and aggregate category statuses have been recalculated.
 - [ ] User satisfaction is explicit, except upon interruption.
 - [ ] `checklists/requirements.md` has been revalidated against the updated spec, if present.
-- [ ] Extension hooks have been processed or skipped according to the rules.
 - [ ] A completion report has been issued with rounds, question count, changed sections, checklist status, and a coverage table containing aggregate category statuses and per-point breakdowns.
 - [ ] Settled canonical terminology and domain knowledge have been saved and read back from `CONTEXT_FILE` or topic documents under `KNOWLEDGE_ROOT`; qualifying decisions have been saved and read back from `ADR_DIR`.
 - [ ] Every new topic document is linked relatively from `CONTEXT_FILE`, and every new ADR passes the three-condition recording gate, was allocated through the adrkit scaffold entry point (never hand-numbered), and passes `adr lint`.

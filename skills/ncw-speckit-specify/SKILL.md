@@ -12,14 +12,6 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-## Extension Hooks Not Handled
-
-This skill does not evaluate the extension hook mechanism. If the project
-registers `hooks.before_specify` or `hooks.after_specify` in
-`.specify/extensions.yml`, those hooks are NOT executed by this skill. Tell the user
-which of these two hook points are registered (extension name and command for each
-entry) so they can run them manually before/after the specification.
-
 ## Outline
 
 The text the user typed after `/ncw-speckit-specify` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
@@ -38,11 +30,9 @@ Given that feature description, do this:
      - "Create a dashboard for analytics" → "analytics-dashboard"
      - "Fix payment processing timeout bug" → "fix-payment-timeout"
 
-2. **Branch creation** (optional, via hook):
+2. **Branch creation**:
 
-   If a `before_specify` hook was run manually before this skill (see Extension Hooks Not Handled above), it may have created/switched to a git branch and output JSON containing `BRANCH_NAME` and `FEATURE_NUM`. Note these values for reference, but the branch name does **not** dictate the spec directory name.
-
-   If the user explicitly provided `GIT_BRANCH_NAME`, pass it through to the hook so the branch script uses the exact value as the branch name (bypassing all prefix/suffix generation).
+   This skill does not create or switch git branches. The spec directory name is independent of any git branch name; if the user asks for a branch, create or switch to it using their requested name before continuing.
 
 3. **Create the spec feature directory**:
 
@@ -75,7 +65,7 @@ Given that feature description, do this:
    **IMPORTANT**:
    - You must only create one feature per `/ncw-speckit-specify` invocation
    - The spec directory name and the git branch name are independent — they may be the same but that is the user's choice
-   - The spec directory and file are always created by this command, never by the hook
+   - The spec directory and file are always created by this command
 
 4. Load the resolved active `spec-template` file to understand required sections.
 
@@ -209,8 +199,6 @@ Report completion to the user with:
 - `SPEC_FILE` — the spec file path
 - Checklist results summary
 - Readiness for the next phase (`/ncw-speckit-clarify` or `/ncw-speckit-plan`)
-
-**NOTE:** Branch creation is handled by the `before_specify` hook (git extension). Spec directory and file creation are always handled by this core command.
 
 ## Quick Guidelines
 

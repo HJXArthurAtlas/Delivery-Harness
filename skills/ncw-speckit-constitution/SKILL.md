@@ -31,14 +31,6 @@ and commands read the constitution at runtime and are not modified here.
   as `/ncw-speckit-specify`, without invoking it.
 - If there are no non-governance intents, omit the `Next Actions` section.
 
-## Extension Hooks Not Handled
-
-This skill does not evaluate the extension hook mechanism. If the project
-registers `hooks.before_constitution` or `hooks.after_constitution` in
-`.specify/extensions.yml`, those hooks are NOT executed by this skill. Tell the user
-which of these two hook points are registered (extension name and command for each
-entry) so they can run them manually before/after the constitution update.
-
 ## Outline
 
 You are updating the project constitution at `.specify/memory/constitution.md`. The active

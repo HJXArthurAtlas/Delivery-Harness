@@ -12,14 +12,6 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-## Extension Hooks Not Handled
-
-This skill does not evaluate the extension hook mechanism. If the project
-registers `hooks.before_analyze` or `hooks.after_analyze` in
-`.specify/extensions.yml`, those hooks are NOT executed by this skill. Tell the user
-which of these two hook points are registered (extension name and command for each
-entry) so they can run them manually before/after the analysis.
-
 ## Goal
 
 Identify inconsistencies, duplications, ambiguities, and underspecified items across the three core artifacts (`spec.md`, `plan.md`, `tasks.md`) before implementation. This command MUST run only after `/ncw-speckit-tasks` has successfully produced a complete `tasks.md`.

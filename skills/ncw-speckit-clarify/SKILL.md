@@ -12,14 +12,6 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-## Extension Hooks Not Handled
-
-This skill does not evaluate the extension hook mechanism. If the project
-registers `hooks.before_clarify` or `hooks.after_clarify` in
-`.specify/extensions.yml`, those hooks are NOT executed by this skill. Tell the user
-which of these two hook points are registered (extension name and command for each
-entry) so they can run them manually before/after the clarification.
-
 ## Outline
 
 Goal: Detect and reduce ambiguity or missing decision points in the active feature specification and record the clarifications directly in the spec file.
