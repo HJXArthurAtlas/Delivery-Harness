@@ -1,5 +1,9 @@
 # Repository Guidelines
 
+## 例外
+
+1. skills/ncw-monorepo-init 是独立模块，没有用户明确指令，禁止改动或引用 
+
 ## Project Overview
 
 newchiwan 团队跨端 **agent skill pack**（`ncw-delivery-harness`）：把团队标准 monorepo 的初始化/诊断流程与 speckit + PingCode 规格驱动开发流程，做成可安装的 agent skill，部署到 DSH / OpenCode / omp 等端。GitLab 项目：`council/ncw-delivery-harness`（内部仓，默认分支 `main`，无 CI——本地 `npm test` 是唯一质量门）。
