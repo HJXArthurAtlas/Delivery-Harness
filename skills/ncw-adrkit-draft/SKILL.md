@@ -22,7 +22,12 @@ $ARGUMENTS
    between real alternatives with consequences that outlast this feature. If the
    plan made no such choice, say so and stop. Not every plan contains an ADR,
    and manufacturing one is worse than not writing it.
-2. Run `.specify/extensions/adrkit/scripts/draft.sh` with the decision's title as arguments. Write the title as the
+2. Run the pack-bundled script with the decision's title as arguments —
+   project install: `.agents/skills/ncw-adrkit-draft/scripts/draft.sh`; global
+   install: `~/.agents/skills/ncw-adrkit-draft/scripts/draft.sh`. (When
+   `specify extension add adrkit` has been run, e.g. via ncw-monorepo-init, the
+   upstream extension copy at `.specify/extensions/adrkit/scripts/draft.sh` is
+   equivalent.) Write the title as the
    decision itself, in the imperative — "Adopt Postgres for the read model", not
    "Database choice".
 3. The script prints `{ "id", "path" }`. It has scaffolded a schema-valid draft
@@ -45,10 +50,30 @@ $ARGUMENTS
 
 ## Notes
 
+- Feature resolution requires a specify-initialized project
+  (`.specify/scripts/bash/check-prerequisites.sh` present). If it is absent,
+  run ncw-monorepo-init first.
 - This is the only command in the extension that writes, and it is deliberately
   not reachable from any hook. A plan-phase hook that created records
   unprompted would manufacture decision memory instead of recording it.
 - It writes exactly one new file and never edits an existing record. If the
   target path is already taken it refuses rather than overwriting (exit 1).
+- Single corpus: since the ADR-unification cutover, `docs/adr` (or
+  `$ADRKIT_DIR`) is the project's only ADR corpus. `ncw-speckit-grill-with-docs`
+  and `ncw-compound-writeback` allocate their records here too, through this
+  skill's `scripts/scaffold.sh` — the plan-less variant of this command's
+  deterministic half (same CLI, same id allocation, no plan required). All
+  writers share one numbering sequence; never hand-number.
+- Migrating a pre-cutover split corpus (records still under
+  `docs/domain_knowledge/adr/` or `docs/compound/adr/`): the pinned CLI owns
+  the conversion. Dry-run `adr migrate --from madr --rename --dir <legacy-dir>`
+  on each legacy directory to preview the findings; renumber one legacy set by
+  renaming its files (the filename drives the record id, so `NNNN-slug.md`
+  must not collide across the two sets — `adr lint` does not report duplicate
+  ids, verified against the pinned CLI, so this renumber step is the merge's
+  only collision guard); move everything into `docs/adr/`; run
+  `adr migrate --from madr --rename --dir docs/adr` once over the merged
+  corpus; backfill the reported findings (date, status, deciders); finish with
+  `adr lint`.
 - A plan must exist. Drafting "from the plan artifact" without a plan is not a
   degraded mode, it is a different and worse thing.

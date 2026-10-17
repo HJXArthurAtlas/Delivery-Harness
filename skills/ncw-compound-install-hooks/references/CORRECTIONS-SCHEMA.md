@@ -160,7 +160,7 @@ Use one of:
 
 ## Related ADRs
 
-- `docs/compound/adr/008-images-render-at-native-brightness.md` (codified this rule as an architecture decision)
+- `docs/adr/008-images-render-at-native-brightness.md` (codified this rule as an architecture decision)
 ```
 
 When the agent later tries to Write a CSS file containing `img { filter: brightness(0.9) }` to this codebase, the hook fires and blocks with:

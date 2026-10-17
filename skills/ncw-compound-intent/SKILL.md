@@ -45,7 +45,7 @@ If the user tries to skip a phase, refuse politely and explain which specific te
 ## Inputs you have
 
 - The user's rough description of the outcome (provided in chat after `/ncw-compound-intent` is invoked, or asked for as the first question)
-- The compound store at `docs/compound/*` if it was loaded via `/ncw-compound-load`. Use ADRs, corrections, and patterns to inform your pushback (see "Compound store interaction" below).
+- The context loaded by `/ncw-compound-load` — settled ADRs from the adrkit corpus (`docs/adr/`) plus corrections and patterns from the compound store (`docs/compound/`). Use them to inform your pushback (see "Compound store interaction" below).
 
 ## Output you produce
 
@@ -167,10 +167,10 @@ Ask the user (use AskUserQuestion with three options):
 
 If `docs/compound/` exists and was loaded:
 
-- **Before Phase 1**, scan `docs/compound/adr/` for decisions relevant to this work. Mention them upfront: *"I see ADR-007 settled the auth approach for this codebase. Any intent here should respect it. Proceed?"*
+- **Before Phase 1**, scan the settled ADRs loaded from the adrkit corpus (`docs/adr/`) for decisions relevant to this work. Mention them upfront: *"I see ADR-007 settled the auth approach for this codebase. Any intent here should respect it. Proceed?"*
 - **During Phase 5 (constraints)**, if the user proposes a constraint that conflicts with a settled ADR, flag it: *"This conflicts with ADR-{N}. Either revise the constraint or open a new ADR to override."*
 - **During Phase 6 (failure conditions)**, scan `docs/compound/corrections/` for relevant correction patterns and suggest failure conditions that would catch repeats: *"Correction note from 2026-04 flagged that {pattern} caused {issue}. Want to add a failure condition for it?"*
-- **Throughout**, do not re-debate any decision present in `docs/compound/adr/`. Assume it holds.
+- **Throughout**, do not re-debate any settled ADR present in the adrkit corpus. Assume it holds.
 
 ---
 

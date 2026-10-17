@@ -67,8 +67,9 @@ fi
 echo ""
 echo "Note: /ncw-compound-load and /ncw-compound-writeback don't have"
 echo "      single-artifact signals — load injects into context (no file written),"
-echo "      writeback drafts ADRs/corrections/patterns under docs/compound/{adr,corrections,patterns}/"
-echo "      (check those folders manually for new entries since the last run)."
+echo "      writeback lands corrections/patterns under docs/compound/{corrections,patterns}/"
+echo "      and elevates ADRs to the adrkit corpus docs/adr/ (check those folders"
+echo "      manually for new entries since the last run)."
 
 if [ "$MISSING" -gt 0 ]; then
   echo ""

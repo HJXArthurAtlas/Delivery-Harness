@@ -9,11 +9,11 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | `ncw-monorepo-init` | 项目初始化（init）/ 结构环境诊断（diagnose），migrate 待标注 | 「按团队 monorepo 规范初始化/诊断这个项目」 |
 | `ncw-adrkit-context` | 规划前取治理决策进上下文：带路径给 governedBy/activeProposals/history，无路径列 ARB 待评审队列（上游 adrkit 扩展 speckit.adrkit.context 命令的 pack 分发，正文英文原文；只读） | 「这个改动受哪些决策约束」「列出待评审决策」 |
 | `ncw-adrkit-check` | plan 产出后对照 ADR 语料只读校验是否越界，配 ADRKIT_SNAPSHOT 时追加确定性路由报告（上游 adrkit 扩展 speckit.adrkit.check 命令的 pack 分发；after_plan 可选 hook 目标） | 「check 这个 plan 越没越决策」 |
-| `ncw-adrkit-draft` | 从当前 plan 工件 scaffold 一条新 ADR 草稿（扩展内唯一写操作、不经 hook；落稿后接 ncw-adrkit-check 校验） | 「把这个决策落成 ADR」 |
+| `ncw-adrkit-draft` | 从当前 plan 工件 scaffold 一条新 ADR 草稿（不经 hook；其 `scripts/scaffold.sh` 还是 grill-with-docs / compound-writeback 的免 plan 分配入口——ADR 统一归口语料 `docs/adr/`；落稿后接 `adr lint` 校验） | 「把这个决策落成 ADR」 |
 | `ncw-compound-intent` | intent 访谈：目标 + 约束 + 失败条件（上游 spec-kit-compound v0.7.0 的 pack 分发，正文英文原文；运行期数据落在项目 `docs/intents/` 等，不经扩展安装） | 「先做 intent 访谈」「锁定目标与约束」 |
 | `ncw-compound-expectations` | 期望访谈：正/边缘场景与 intent 分文件存放（builder 不可见，防 reward-hack） | 「补期望场景」「写 expectations」 |
-| `ncw-compound-load` | 会话开始加载 compound store（ADR/纠偏/模式）进上下文，缺目录时按 bundled 模板 scaffold | 「加载 compound store」 |
-| `ncw-compound-writeback` | intentguard PASS 后把本次 ADR/纠偏/模式写回 compound store | 「writeback 本次经验」 |
+| `ncw-compound-load` | 会话开始加载 adrkit ADR 语料（`docs/adr/`）+ compound store（纠偏/模式）进上下文，缺目录时按 bundled 模板 scaffold | 「加载 compound store」 |
+| `ncw-compound-writeback` | intentguard PASS 后把本次纠偏/模式写回 compound store，耐久纠偏升格为 ADR 进 adrkit 语料 `docs/adr/` | 「writeback 本次经验」 |
 | `ncw-compound-gapfill` | intent + expectations 对照 tasks.md 找覆盖缺口并追加任务（带来源注释） | 「补任务缺口」「gapfill」 |
 | `ncw-compound-planverify` | 实现前由独立 checker（跨模型优先）判定 plan + 任务是否偏离锁定 intent | 「验证 plan」「planverify」 |
 | `ncw-compound-planverify-gate` | before_implement 门禁脚本包装器：`SKC_PLANVERIFY_GATE=block` 时拦截未验证/BLOCKED_DRIFT 的实现 | （hook 触发） |
@@ -21,8 +21,8 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | `ncw-compound-require-intent` | before_specify 门禁脚本包装器：`docs/intents/` 无 intent 文档时拦截 specify | （hook 触发） |
 | `ncw-compound-install-hooks` | 一次性安装 Claude Code PreToolUse hooks（纠偏匹配 + planverify 门）到项目 `.claude/` | 「安装 compound hooks」 |
 | `ncw-compound-dashboard` | 只读 SDD 流水线仪表盘（localhost 后台 HTTP 服务，stdlib 单文件 dashboard.py） | 「打开流水线仪表盘」 |
-| `ncw-grill-me` | 无上限轮次澄清访谈（clarify 的深化替代）：前沿/轮次/设计树把 spec.md 决策点推进到 Clear/Resolved/Outstanding/Deferred（上游 grill 扩展 speckit.grill.me 命令的 pack 分发，正文英文原文） | 「深度澄清这份 spec」「grill me」 |
-| `ncw-grill-with-docs` | 同 grill-me 澄清流程 +  settled 跨特性术语/领域知识/决策即时落盘 docs/domain_knowledge/（CONTEXT.md + 主题文档 + ADR 目录，ADR 过三条件记录门）（上游 grill 扩展 speckit.grill.with-docs 命令的 pack 分发，正文英文原文） | 「澄清并沉淀领域知识」 |
+| `ncw-speckit-grill-me` | 无上限轮次澄清访谈（clarify 的深化替代）：前沿/轮次/设计树把 spec.md 决策点推进到 Clear/Resolved/Outstanding/Deferred（上游 grill 扩展 speckit.grill.me 命令的 pack 分发，正文英文原文） | 「深度澄清这份 spec」「grill me」 |
+| `ncw-speckit-grill-with-docs` | 同 grill-me 澄清流程 + settled 跨特性术语/领域知识即时落盘 docs/domain_knowledge/（CONTEXT.md + 主题文档）；过三条件记录门的决策经 adrkit scaffold 归口为 ADR（`docs/adr/`，pack fork 段）（上游 grill 扩展 speckit.grill.with-docs 命令的 pack 分发） | 「澄清并沉淀领域知识」 |
 | `ncw-speckit-analyze` | 跨工件一致性只读分析（上游 spec-kit /speckit.analyze 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「分析 spec/plan/tasks 一致性」 |
 | `ncw-speckit-clarify` | 规格澄清问答（上游 spec-kit /speckit.clarify 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「澄清规格歧义」「补全需求细节」 |
 | `ncw-speckit-constitution` | 创建/更新项目章程（上游 spec-kit /speckit.constitution 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「立章程」「修订治理原则」 |
@@ -65,7 +65,7 @@ omp plugin marketplace add https://git.newchiwan.com/council/ncw-delivery-harnes
 omp plugin install ncw-delivery@ncw-delivery-harness
 ```
 
-- 插件**只含 skills**，不含斜杠命令（`.agents/commands/` 不经插件分发）；要 `/readme-refresh` 等命令仍走上面的 sync 安装。
+- 插件**只含 skills**，不含斜杠命令；`.agents/commands/`（`/readme-refresh`）是本仓维护者工具，不经插件也不经 sync 分发——sync 只装 `skills/`。
 - 更新：`omp plugin upgrade ncw-delivery@ncw-delivery-harness`；装完 `/reload-plugins` 或开新会话生效。
 - 注意 `marketplace.autoUpdate` 默认 `notify` 只写 debug log 不提示；要自动更新执行 `omp config set marketplace.autoUpdate auto`。
 - catalog `version` 与 `package.json` 版本同步维护，`npm test` 校验二者一致。

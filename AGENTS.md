@@ -7,7 +7,7 @@
 
 ## Project Overview
 
-newchiwan 团队跨端 **agent skill pack**（`ncw-delivery-harness`）：把团队标准 monorepo 的初始化/诊断流程与 speckit + PingCode 规格驱动开发流程，做成可安装的 agent skill，部署到 DSH / OpenCode / omp 等端。GitLab 项目：`council/ncw-delivery-harness`（内部仓，默认分支 `main`，无 CI——本地 `npm test` 是唯一质量门）。
+newchiwan 团队跨端 **agent skill pack**（`ncw-delivery-harness`）：把团队标准 monorepo 的初始化/诊断流程、speckit + PingCode 规格驱动开发流程，以及 adrkit / grill / compound 三组上游扩展技能，做成可安装的 agent skill，部署到 DSH / OpenCode / omp 等端。GitLab 项目：`council/ncw-delivery-harness`（内部仓，默认分支 `main`，无 CI——本地 `npm test` 是唯一质量门）。
 
 本仓是「消费模板的元工具」：skill 承载流程与版本钉子，骨架载荷在模板仓 `council/monorepo-template`，两者独立发版。
 
@@ -25,7 +25,7 @@ skills/<name>/SKILL.md (+ references/ scripts/)
    agent 运行时加载 skill
 ```
 
-omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 是 catalog（插件 `ncw-delivery`，`source: "./"` 即仓根），用户 `omp plugin marketplace add <仓 URL>` + `omp plugin install ncw-delivery@ncw-delivery-harness` 后由 omp 从插件树 `skills/<name>/SKILL.md` 发现。**插件只含 skills**——绝不加 `.omp-plugin/plugin.json` manifest（remap 会把 `.agents/` 带进安装面）；斜杠命令仍只走 `.agents/commands/` + sync.mjs。catalog `version` 与 `package.json` 版本同步维护。
+omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 是 catalog（插件 `ncw-delivery`，`source: "./"` 即仓根），用户 `omp plugin marketplace add <仓 URL>` + `omp plugin install ncw-delivery@ncw-delivery-harness` 后由 omp 从插件树 `skills/<name>/SKILL.md` 发现。**插件只含 skills**——绝不加 `.omp-plugin/plugin.json` manifest（remap 会把 `.agents/` 带进安装面）；`.agents/commands/` 斜杠命令是本仓维护者工具（`/readme-refresh`），不经插件、不经 sync 分发——sync.mjs 只拷 `skills/`。catalog `version` 与 `package.json` 版本同步维护。
 
 职责分层与外部委托：
 
@@ -36,6 +36,9 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 
 | 路径 | 用途 |
 |---|---|
+| `skills/ncw-adrkit-{check,context,draft}/` | adrkit 上游扩展（speckit.adrkit.* 命令）的 pack 分发：SKILL.md（正文英文原文）+ `scripts/`（`adrkit-lib.sh` 三份逐字副本 + 各自入口脚本；draft 另含 pack 新增的 `scaffold.sh`——免 plan 的语料分配入口，供 grill-with-docs / compound-writeback 归口写入 `docs/adr/`）。脚本路径指向 pack 安装位 `.agents/skills/ncw-adrkit-*/scripts/`；after_plan hook 触发依赖上游 adrkit 扩展的 `extension.yml`（init.md 第 6 步安装），否则手动跑 |
+| `skills/ncw-compound-*/` | spec-kit-compound 上游 v0.3 技能组（11 个）：intent/expectations/gapfill/planverify/intentguard/writeback/load/dashboard/install-hooks/require-intent/planverify-gate。运行期数据落项目 `docs/intents/`、`docs/expectations/`、`docs/compound/`（仅 corrections/patterns + README/SCHEMA/config）；**ADR 已归口 adrkit 语料 `docs/adr/`**（writeback 升格、load 读取、intent 引用均指向语料，load/intent/writeback/install-hooks 正文含 pack fork 段，上游升级需 port）。hook 本体只走 `.claude` PreToolUse（install-hooks 安装）或手动调用，pack 无 hook 执行机制 |
+| `skills/ncw-speckit-grill-{me,with-docs}/` | grill 上游扩展（speckit.grill.* 命令）的 pack 分发：单文件 SKILL.md（正文英文原文）。特性解析依赖 specify init 产物 `.specify/scripts/bash/check-prerequisites.sh`；**grill-with-docs 为 pack fork**——ADR 不再落 `docs/domain_knowledge/adr/`，而是经 `ncw-adrkit-draft/scripts/scaffold.sh` 归口 adrkit 语料 `docs/adr/`（`ncw-speckit-grill-me` 仍为逐字上游）；上游 grill 升级时需 port 该 fork 段 |
 | `skills/ncw-monorepo-init/` | 初始化（init）/ 诊断（diagnose）skill：`SKILL.md`（模式判定、安全边界、分发说明）、`references/init.md`（init 流程 + 版本钉子）、`references/checklist.md`（diagnose 基线）、`scripts/sync.mjs`（pack 安装器） |
 | `skills/ncw-speckit-analyze/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，spec-kit v1.1.3 逐字副本，免 specify init）：上游 spec-kit /speckit.analyze 命令（spec/plan/tasks 一致性只读分析），正文英文原文；extension hook 机制未迁移 |
 | `skills/ncw-speckit-clarify/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，spec-kit v1.1.3 逐字副本，免 specify init）：上游 spec-kit /speckit.clarify 命令（≤5 问澄清并回写 spec），正文英文原文；extension hook 机制未迁移 |
@@ -99,7 +102,7 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 1. `SKILL.md` 存在，frontmatter 由 `---` 定界且闭合；
 2. `name:` = 目录名，匹配 `^ncw-[a-z0-9]+-[a-z0-9]+(-[a-z0-9]+)*$`，≤32 字符；
 3. `description:` 非空、≤1024 字符；
-4. `SKILL.md` 中字面引用的 `references/`、`scripts/` 文件必须存在（引用即契约，改名要同步建文件）；
+4. `SKILL.md` 中字面引用的 `references/`、`scripts/` 文件必须存在（引用即契约，改名要同步建文件；`.agents/`、`.specify/`、`~/` 等安装位/宿主路径是运行时路径，不做仓内存在性校验）；
 5. 泄漏扫描：`skills/` 与 `.omp-plugin/` 内禁止 `/Users/`、`/home/` 绝对路径；
 6. `sync.mjs` `PACK_SKILLS` 与 `skills/` 目录一一对应（防新增技能忘登记）；
 7. `.agents/commands/*.md` frontmatter 合规（`---` 定界 + 非空 `description`），且不存在工具专属 `.omp/commands/`；

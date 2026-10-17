@@ -10,20 +10,17 @@ Every feature contributes back via `/ncw-compound-writeback`. Every feature inhe
 
 ```
 docs/compound/
-├── adr/           ← Architecture Decision Records (settled decisions)
 ├── corrections/   ← AI correction notes (past mistakes and derived rules)
 └── patterns/      ← Approved patterns (proven approaches for this codebase)
 ```
 
-### `adr/`
+ADR records live in the shared adrkit corpus at `docs/adr/` — same numbering and schema as `/ncw-adrkit-draft`, validated by `adr lint`. They are allocated by the scaffold entry point in `ncw-adrkit-draft/scripts/`, not by this store.
 
-Architecture decisions made during real features. Each file:
+### ADRs live in the adrkit corpus (`docs/adr/`)
 
-- Numeric ID (auto-incremented): `001-{slug}.md`, `002-{slug}.md`, ...
-- Frontmatter with status (Accepted / Superseded)
-- Context → Decision → Consequences → **Rule for AI** (one-line directive for future agents)
+Architecture decisions made during real features are allocated by the adrkit scaffold entry point (`ncw-adrkit-draft/scripts/scaffold.sh`), which owns the numeric id and the schema frontmatter (`status`, `affects`, `relatesTo`, ...). Bodies follow the writeback shape: Context → Decision → Options considered → Consequences → **Rule for AI** (one-line directive for future agents).
 
-The "Rule for AI" line is what `/ncw-compound-load` injects into context. Future agents are instructed not to re-debate these decisions.
+The "Rule for AI" line is what `/ncw-compound-load` injects into context, together with the rest of the corpus. Future agents are instructed not to re-debate these decisions, and `/ncw-adrkit-check` validates plans against the corpus at plan time.
 
 ### `corrections/`
 
@@ -52,14 +49,16 @@ Patterns require explicit user approval at writeback; they are the most opiniona
 ## Lifecycle
 
 ```
-/ncw-compound-load                  →  reads everything here, injects into agent context
+/ncw-compound-load                  →  reads the adrkit corpus + this store, injects into agent context
                                             (at the start of every feature)
 
 [feature work happens — intent, plan, implement, intentguard]
 
-/ncw-compound-writeback             →  drafts new ADRs/corrections/patterns from session
-                                            user approves each, accepted ones land here
-                                            (at the end of every feature, after intentguard PASS)
+/ncw-compound-writeback             →  drafts new corrections/patterns from the session
+                                            (and elevates durable corrections into ADRs in the
+                                            adrkit corpus); user approves each, accepted ones land
+                                            in place (at the end of every feature, after
+                                            intentguard PASS)
 ```
 
 ---
@@ -81,4 +80,4 @@ The compound store is **committed to the repo**. It survives all of the above an
 
 This directory is created automatically by `/ncw-compound-load` on first invocation in a project. You do not need to pre-populate it. The store grows naturally from the first feature onward.
 
-The first feature contributes 0–2 ADRs at most. By feature 10, expect a non-trivial set. By feature 50, the store contains more applied wisdom than any constitution doc you would have written upfront.
+The first feature contributes 0–2 ADRs (in the corpus) at most. By feature 10, expect a non-trivial set. By feature 50, the store contains more applied wisdom than any constitution doc you would have written upfront.

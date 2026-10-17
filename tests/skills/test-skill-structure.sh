@@ -48,10 +48,18 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     bad "$skill: description 缺失或超长（${desc_len:-0} chars）"
   fi
 
-  # 4. SKILL.md 引用的 references/、scripts/ 文件存在
+  # 4. SKILL.md 引用的 references/、scripts/ 文件必须存在（引用即契约）。
+  #    仅反引号括起的路径参与校验：以 references/ 或 scripts/ 开头的按 pack 内相对引用
+  #    校验存在性；其余（.agents/、.specify/、~/、绝对路径等安装位/宿主路径）运行时才有，
+  #    不在仓内校验——跨技能引用（如 grill-with-docs 指向 ncw-adrkit-draft 的
+  #    scaffold.sh）属此类。
   while IFS= read -r ref; do
-    [ -e "$skill_dir$ref" ] && ok || bad "$skill: SKILL.md 引用缺失 $ref"
-  done < <(grep -oE '(references|scripts)/[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+' "$skill_md" | sort -u)
+    case "$ref" in
+      references/*|scripts/*)
+        [ -e "$skill_dir$ref" ] && ok || bad "$skill: SKILL.md 引用缺失 $ref" ;;
+      *) ok ;; # 安装位/宿主路径，运行时解析
+    esac
+  done < <(grep -oE '`[^`]+`' "$skill_md" | tr -d '`' | grep -E '(references|scripts)/' | sort -u)
 done
 
 # 5. 泄漏扫描：技能与 omp 目录文件不得含本机绝对路径

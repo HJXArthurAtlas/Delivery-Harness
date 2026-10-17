@@ -1,11 +1,11 @@
 ---
 name: ncw-compound-load
-description: Load the compound store (ADRs, corrections, patterns from docs/compound/) into agent context at the start of a feature. Auto-scaffolds docs/compound/ if missing.
+description: Load settled ADRs (adrkit corpus, docs/adr/) plus the compound store (corrections, patterns from docs/compound/) into agent context at the start of a feature. Auto-scaffolds docs/compound/ if missing.
 ---
 
 # Load Compound Store
 
-You load the committed compound store at `docs/compound/` and inject its contents into the current session's agent context. Settled decisions, past mistakes, and approved patterns should constrain everything the agent does for the rest of the session.
+You load the project's settled decisions and the committed compound store, and inject them into the current session's agent context. Settled ADRs come from the adrkit corpus at `docs/adr/` (override with `ADRKIT_DIR`); past mistakes and approved patterns come from the compound store at `docs/compound/`. All of them should constrain everything the agent does for the rest of the session.
 
 ---
 
@@ -18,16 +18,15 @@ If `docs/compound/` does not exist, create the scaffold:
 ```
 docs/compound/
 ├── README.md         (explains the structure)
-├── adr/              (empty)
 ├── corrections/      (empty)
 └── patterns/         (empty)
 ```
 
-Copy this skill's bundled `references/compound-store-README.md` verbatim to `docs/compound/README.md` (it documents the store contract for future contributors — ADR numbering, correction frontmatter, pattern slots).
+Copy this skill's bundled `references/compound-store-README.md` verbatim to `docs/compound/README.md` (it documents the store contract for future contributors — correction frontmatter and pattern slots; settled ADRs live in the adrkit corpus at `docs/adr/`, not in this store).
 
 Then tell the user: *"Compound store initialized at `docs/compound/`. Empty for now — it will fill over the next few features via `/ncw-compound-writeback`."*
 
-**2. Read all files** in `docs/compound/adr/`, `docs/compound/corrections/`, and `docs/compound/patterns/`.
+**2. Read all files** in the adrkit corpus (`docs/adr/`, or `$ADRKIT_DIR` when the project overrides it) and in `docs/compound/corrections/` and `docs/compound/patterns/`. If a legacy `docs/compound/adr/` directory still exists, ignore it — those records were or will be migrated into the corpus.
 
 **3. Inject a context summary** at the start of the agent's working memory:
 
@@ -50,7 +49,7 @@ Patterns (approved approaches, reach for these by default):
 
 **4. Confirm to user**:
 
-*"Compound store loaded: {N} ADRs, {N} corrections, {N} patterns. Settled decisions will be respected; known corrections will be avoided; patterns will be reached for during the rest of this session."*
+*"Loaded: {N} ADRs from the adrkit corpus, {N} corrections and {N} patterns from the compound store. Settled decisions will be respected; known corrections will be avoided; patterns will be reached for during the rest of this session."*
 
 ---
 
