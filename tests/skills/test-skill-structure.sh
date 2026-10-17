@@ -51,7 +51,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   # 4. SKILL.md 引用的 references/、scripts/ 文件存在
   while IFS= read -r ref; do
     [ -e "$skill_dir$ref" ] && ok || bad "$skill: SKILL.md 引用缺失 $ref"
-  done < <(grep -oE '(references|scripts)/[A-Za-z0-9._-]+' "$skill_md" | sort -u)
+  done < <(grep -oE '(references|scripts)/[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+' "$skill_md" | sort -u)
 done
 
 # 5. 泄漏扫描：技能与 omp 目录文件不得含本机绝对路径
