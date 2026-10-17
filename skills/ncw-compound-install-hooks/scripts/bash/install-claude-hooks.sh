@@ -1,11 +1,11 @@
 #!/bin/bash
 # scripts/bash/install-claude-hooks.sh
 #
-# Installer for spec-kit-compound v0.3+ Claude Code hooks.
+# Installer for ncw-compound v0.3+ Claude Code hooks.
 #
 # Invoked by the /ncw-compound-install-hooks slash command.
 # Does four things:
-#   1. Anchors to the spec-kit project root (.specify/ ancestor)
+#   1. Anchors to the project root (.specify/ ancestor)
 #   2. Copies the hook scripts into the project's .claude/hooks/ directory
 #      (creating the dir if needed) and marks them executable
 #   3. Delivers references/CORRECTIONS-SCHEMA.md to docs/compound/
@@ -21,14 +21,14 @@ set -u
 set -o pipefail
 
 # ─────────────────────────────────────────────────────────────────
-# Anchor to spec-kit project root
+# Anchor to project root
 # ─────────────────────────────────────────────────────────────────
 PROJECT_ROOT="$(pwd)"
 while [ "$PROJECT_ROOT" != "/" ] && [ ! -d "$PROJECT_ROOT/.specify" ]; do
   PROJECT_ROOT="$(dirname "$PROJECT_ROOT")"
 done
 if [ ! -d "$PROJECT_ROOT/.specify" ]; then
-  echo "ERROR: not in a spec-kit project (.specify/ not found in any parent of $(pwd))" >&2
+  echo "ERROR: not in an SDD project (.specify/ not found in any parent of $(pwd))" >&2
   exit 1
 fi
 cd "$PROJECT_ROOT"
@@ -38,8 +38,8 @@ cd "$PROJECT_ROOT"
 #   <skill>/scripts/bash/planverify-lib.sh
 #   <skill>/references/hooks/compound-correction-match.sh
 #   <skill>/references/hooks/planverify-pretooluse.sh
-# (Pack distribution of spec-kit-compound v0.7.0: same payload as the
-# spec-kit extension, with source paths resolved relative to this script
+# (Pack distribution of ncw-compound v0.7.0: same payload as the
+# standalone extension, with source paths resolved relative to this script
 # instead of an installed .specify/extensions/compound/ directory.)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"

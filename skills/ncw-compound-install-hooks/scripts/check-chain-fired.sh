@@ -1,11 +1,11 @@
 #!/bin/bash
 # scripts/check-chain-fired.sh
 #
-# Verifies which steps of the spec-kit-compound chain actually wrote their
+# Verifies which steps of the ncw-compound chain actually wrote their
 # artifacts. Run this after /ncw-speckit-implement (or after any partial run)
 # to see which commands ran and which were silently skipped.
 #
-# v0.2.1 added this because spec-kit's hook system does not dispatch
+# v0.2.1 added this because the harness's hook system does not dispatch
 # agent-prompt hooks under Claude Code — our commands install fine but
 # may not fire when expected, leaving zero artifacts behind. This script
 # is the eval that catches that.

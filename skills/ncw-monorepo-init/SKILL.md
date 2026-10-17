@@ -1,6 +1,6 @@
 ---
 name: ncw-monorepo-init
-description: 把团队标准 monorepo 框架（monorepo-template）初始化进用户项目，或对既有项目做结构/环境诊断。当用户说"初始化项目""按团队规范搭 monorepo""接入模板仓""结构诊断""环境检查""我的项目为什么不符规范"，或任务涉及 monorepo-template 初始化、骨架复制、spec-kit / adrkit / pingcode / grill / codegraph / AOCI 接入时使用本 skill——即使用户没提"monorepo"三个字，只要意图是把项目对齐团队 monorepo 规范也要使用。三种模式：init（空项目/缺骨架 → 全新初始化）、diagnose（已有骨架 → 结构与环境基线核对）、migrate（非空项目结构迁移，能力待标注）。
+description: 把团队标准 monorepo 框架（monorepo-template）初始化进用户项目，或对既有项目做结构/环境诊断。当用户说"初始化项目""按团队规范搭 monorepo""接入模板仓""结构诊断""环境检查""我的项目为什么不符规范"，或任务涉及 monorepo-template 初始化、骨架复制、specify / adrkit / pingcode / grill / codegraph / AOCI 接入时使用本 skill——即使用户没提"monorepo"三个字，只要意图是把项目对齐团队 monorepo 规范也要使用。三种模式：init（空项目/缺骨架 → 全新初始化）、diagnose（已有骨架 → 结构与环境基线核对）、migrate（非空项目结构迁移，能力待标注）。
 ---
 
 # ncw-monorepo-init

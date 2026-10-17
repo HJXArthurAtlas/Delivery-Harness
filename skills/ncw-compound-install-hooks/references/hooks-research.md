@@ -1,8 +1,8 @@
 # Agentic CLI hooks — research findings (June 2026)
 
-Research kicked off by the question: *do Claude Code, Codex, Cursor, Gemini CLI have hooks that intercept file read/write and run validation (complexity check, intent-justification, etc.) **before** the action completes? Goal: build pre-action quality hooks for spec-kit-compound v0.3+.*
+Research kicked off by the question: *do Claude Code, Codex, Cursor, Gemini CLI have hooks that intercept file read/write and run validation (complexity check, intent-justification, etc.) **before** the action completes? Goal: build pre-action quality hooks for ncw-compound v0.3+.*
 
-**TL;DR:** yes, all four major agentic CLIs shipped hook systems in 2025–2026 with converged shape. Pre-action interception with blocking is idiomatic across vendors. The opportunity for spec-kit-compound v0.3 is to enforce discipline at the **tool level** (every Write/Edit) instead of only at the **spec-kit phase boundaries** (before /ncw-speckit-specify, after /ncw-speckit-implement) it currently uses.
+**TL;DR:** yes, all four major agentic CLIs shipped hook systems in 2025–2026 with converged shape. Pre-action interception with blocking is idiomatic across vendors. The opportunity for ncw-compound v0.3 is to enforce discipline at the **tool level** (every Write/Edit) instead of only at the **phase boundaries** (before /ncw-speckit-specify, after /ncw-speckit-implement) it currently uses.
 
 ---
 
@@ -32,7 +32,7 @@ The vendors copied each other. Codex CLI's hooks doc is structurally identical t
 
 ## Claude Code in depth (the 80% case)
 
-Claude Code is the harness most spec-kit-compound users run, so this is where v0.3 hook investment pays back the most.
+Claude Code is the harness most ncw-compound users run, so this is where v0.3 hook investment pays back the most.
 
 ### Configuration
 
@@ -110,13 +110,13 @@ The stderr message becomes context the model reads — it knows *why* the action
 
 ---
 
-## What this enables for spec-kit-compound v0.3+
+## What this enables for ncw-compound v0.3+
 
-Today the discipline fires only when the user types a spec-kit slash command:
+Today the discipline fires only when the user runs a slash command from the chain:
 - `before_specify`: our require-intent gate hook (v0.2.2)
 - `after_implement`: user manually runs `/ncw-compound-intentguard`
 
-If the user just opens Claude and starts coding without spec-kit at all, our extension is invisible. With `PreToolUse` hooks, we can enforce discipline **at the moment the agent attempts a tool call** — regardless of whether spec-kit is in the loop.
+If the user just opens Claude and starts coding without any discipline command at all, our extension is invisible. With `PreToolUse` hooks, we can enforce discipline **at the moment the agent attempts a tool call** — regardless of whether the chain is in the loop.
 
 Four concrete hook designs:
 
@@ -158,16 +158,16 @@ Four concrete hook designs:
 
 **Block:** exit 2 with *"No active intent doc found in `docs/intents/`. Run `/ncw-compound-intent` to capture goal, constraints, and failure conditions before writing source code."*
 
-**Value:** today the v0.2.2 `before_specify` gate enforces the discipline when the user types `/ncw-speckit-specify`. With this hook, the discipline is enforced even when the user **skips spec-kit entirely and just starts coding** — the agent literally cannot write source files without an intent doc on disk.
+**Value:** today the v0.2.2 `before_specify` gate enforces the discipline when the user types `/ncw-speckit-specify`. With this hook, the discipline is enforced even when the user **skips the chain entirely and just starts coding** — the agent literally cannot write source files without an intent doc on disk.
 
 ---
 
 ## v0.3 architecture sketch
 
-The Claude Code hooks live in `.claude/settings.json` — that's a **project file**, not part of our extension's `.specify/extensions/compound/`. So shipping these as part of spec-kit-compound means:
+The Claude Code hooks live in `.claude/settings.json` — that's a **project file**, not part of our extension's `.specify/extensions/compound/`. So shipping these as part of ncw-compound means:
 
 ```
-spec-kit-compound/
+ncw-compound/
 ├── .claude/                               ← NEW in v0.3
 │   ├── settings.template.json             ← hook registrations template
 │   └── hooks/                             ← bash hook scripts
@@ -176,7 +176,7 @@ spec-kit-compound/
 │       ├── compound-correction-match.sh
 │       └── compound-require-intent.sh
 ├── commands/
-│   └── speckit.compound.install-hooks.md  ← NEW one-time installer
+│   └── ncw-compound-install-hooks.md      ← NEW one-time installer
 └── scripts/
     └── install-claude-hooks.sh            ← does the merge into user's settings.json
 ```
@@ -196,16 +196,16 @@ After install, every Write/Edit the agent attempts in that project goes through 
 
 | Layer | Mechanism | Trigger | Today | v0.3 |
 |---|---|---|---|---|
-| **L1 — Phase boundaries** | spec-kit hooks (`before_specify`) | User types `/ncw-speckit-specify` | ✓ (v0.2.2) | ✓ (unchanged) |
+| **L1 — Phase boundaries** | phase-boundary hooks (`before_specify`) | User types `/ncw-speckit-specify` | ✓ (v0.2.2) | ✓ (unchanged) |
 | **L2 — Tool calls** | Claude Code `PreToolUse` hooks | Agent attempts Write/Edit | — | ✓ (v0.3+) |
 
-L2 catches everything L1 catches, plus everything L1 misses (raw agent sessions without spec-kit).
+L2 catches everything L1 catches, plus everything L1 misses (raw agent sessions that never invoke the chain).
 
 ---
 
 ## Per-CLI portability
 
-If we want spec-kit-compound to enforce at the tool level across all four CLIs, we need a per-CLI installer:
+If we want ncw-compound to enforce at the tool level across all four CLIs, we need a per-CLI installer:
 
 - **Claude Code**: write `.claude/settings.json` entries + `.claude/hooks/` scripts (as designed above)
 - **Codex CLI**: write `.codex/config` entries pointing at the same bash scripts (Codex's hook contract is identical)

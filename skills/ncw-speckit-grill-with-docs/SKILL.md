@@ -6,7 +6,7 @@ description: Exhaustively clarify a feature specification and persist canonical 
 
 # Grill With Docs Skill
 
-# SpecKit Grill With Docs
+# Grill With Docs
 
 Purpose: Detect, reduce, and clarify ambiguities and unresolved decisions in the active feature specification, while synchronizing settled cross-feature knowledge to canonical Markdown documents.
 
@@ -16,7 +16,7 @@ Following the "Interview discipline (applies to every round)" in this file, perf
 
 **This command must be able to run as an alternative to `ncw-speckit-clarify` in a macOS / Linux + Bash environment.** In supported environments, preserve compatibility with clarify's artifacts and side effects by producing them in the same form (`## Clarifications`, incorporation into the relevant sections, validation after every write, revalidation of `checklists/requirements.md`, extension-hook processing, and a completion report with coverage), while adding the canonical knowledge artifacts defined in this command. The internal elicitation and convergence algorithm intentionally differs to achieve deeper clarification.
 
-This compatibility applies to **artifacts and side effects**. It does not mean that this command supports every runtime environment supported by official Spec Kit. Use only the Bash prerequisite script; do not automatically select or fall back to the PowerShell or Python versions.
+This compatibility applies to **artifacts and side effects**. It does not mean that this command supports every runtime environment supported by the base toolkit. Use only the Bash prerequisite script; do not automatically select or fall back to the PowerShell or Python versions.
 
 ## Language
 
@@ -160,7 +160,7 @@ If `.specify/extensions.yml` exists, process `hooks.before_clarify` before askin
 
 - Exclude hooks with `enabled: false`; treat an omitted `enabled` as enabled.
 - Do not evaluate hooks with a non-empty `condition`; skip them and leave them to HookExecutor.
-- Invoke hook command IDs using the current agent's command syntax (for example, `speckit.git.commit` may be `/speckit.git.commit`, `/speckit-git-commit`, or `$speckit-git-commit`).
+- Invoke hook command IDs using the current agent's command syntax (for example, a hook ID like `git.commit` may be invoked as `/git-commit`, `git-commit`, or `$git-commit` depending on the agent).
 - `optional: false` → Output `EXECUTE_COMMAND: {command}`, actually invoke that hook in the current agent/session, and wait for it to finish. Do not treat outputting the command as execution.
 - `optional: true` → Only present the command, description, and prompt.
 

@@ -1,4 +1,4 @@
-"""Shared helpers for Spec Kit Python scripts."""
+"""Shared helpers for the bundled Python scripts."""
 
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ def resolve_specify_init_dir() -> Path:
         raise SystemExit(1)
     if not (init_root / ".specify").is_dir():
         print(
-            "ERROR: SPECIFY_INIT_DIR is not a Spec Kit project "
+            "ERROR: SPECIFY_INIT_DIR is not a spec-driven development project "
             f"(no .specify/ directory): {init_root}",
             file=sys.stderr,
         )
@@ -521,40 +521,12 @@ def resolve_template_content(template_name: str, repo_root: Path) -> str | None:
     )
 
 
-def get_invoke_separator(repo_root: Path) -> str:
-    integration_json = repo_root / ".specify" / "integration.json"
-    if not integration_json.is_file():
-        return "."
-    # Split the parse out of the lookup and guard the top-level shape, matching
-    # read_feature_json_feature_directory above and the bash/PowerShell twins,
-    # which both fall back to "." for any unusable integration.json:
-    #   * a non-mapping top level ([], "forge", 42, null) is valid JSON, so
-    #     json.JSONDecodeError never fires and state.get(...) raised
-    #     AttributeError;
-    #   * a non-UTF-8 file raises UnicodeDecodeError, which is a ValueError --
-    #     not an OSError -- so it escaped the except tuple. Realistic on
-    #     Windows, where PowerShell 5.1's Out-File/`>` default to UTF-16.
-    try:
-        state = json.loads(integration_json.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError):
-        return "."
-    if not isinstance(state, dict):
-        return "."
-    key = state.get("default_integration") or state.get("integration") or ""
-    settings = state.get("integration_settings")
-    if isinstance(key, str) and isinstance(settings, dict):
-        entry = settings.get(key)
-        if isinstance(entry, dict) and entry.get("invoke_separator") in {".", "-"}:
-            return entry["invoke_separator"]
-    return "."
+def format_pack_command(command_name: str) -> str:
+    """Format the pack slash-command path for a core workflow step.
 
-
-def format_speckit_command(command_name: str, repo_root: Path) -> str:
-    separator = get_invoke_separator(repo_root)
+    Example: ``format_pack_command("specify")`` returns ``/ncw-speckit-specify``.
+    """
     name = command_name.lstrip("/")
-    if name.startswith("speckit."):
-        name = name[len("speckit.") :]
-    elif name.startswith("speckit-"):
-        name = name[len("speckit-") :]
-    name = name.replace(".", separator)
-    return f"/speckit{separator}{name}"
+    if name.startswith("ncw-speckit-"):
+        name = name[len("ncw-speckit-") :]
+    return f"/ncw-speckit-{name}"

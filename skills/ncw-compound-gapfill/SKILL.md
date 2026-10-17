@@ -1,11 +1,11 @@
 ---
 name: ncw-compound-gapfill
-description: Cross-reference intent + expectations against the spec-kit-generated tasks.md; append missing constraint-violation, failure-condition, out-of-scope-regression, and edge tests with source comments.
+description: Cross-reference intent + expectations against the generated tasks.md; append missing constraint-violation, failure-condition, out-of-scope-regression, and edge tests with source comments.
 ---
 
 # Gap-Fill Analysis
 
-You are running a **gap-fill analysis**. Your job is to cross-reference the intent doc + expectations doc against the spec-kit-generated tasks list, identify coverage gaps, and append the missing tasks to `specs/{slug}/tasks.md`.
+You are running a **gap-fill analysis**. Your job is to cross-reference the intent doc + expectations doc against the generated tasks list, identify coverage gaps, and append the missing tasks to `specs/{slug}/tasks.md`.
 
 This is **not an interview**. It is automated analysis + diff review. The user's role is to approve, reject, or edit your proposed additions.
 
@@ -15,7 +15,7 @@ This is **not an interview**. It is automated analysis + diff review. The user's
 
 1. **Intent doc** at `docs/intents/{slug}.intent.md` — for constraints, failure conditions, in-scope items, out-of-scope items
 2. **Expectations doc** at `docs/expectations/{slug}.expectations.md` — for positive and edge scenarios
-3. **Tasks file** at `specs/{slug}/tasks.md` — the spec-kit-generated task list to augment
+3. **Tasks file** at `specs/{slug}/tasks.md` — the generated task list to augment
 
 If any of these are missing, stop and tell the user which to generate first.
 
@@ -33,7 +33,7 @@ If any of these are missing, stop and tell the user which to generate first.
 
 - Read intent doc; extract lists of: constraints, failure conditions, in-scope items, out-of-scope items
 - Read expectations doc; extract lists of: positive scenarios, edge scenarios
-- Read tasks.md; extract existing tasks. Match spec-kit's formatting conventions (likely markdown checkboxes with brief descriptions).
+- Read tasks.md; extract existing tasks. Match the existing formatting conventions (likely markdown checkboxes with brief descriptions).
 
 Confirm to user: *"Loaded intent ({Nc} constraints, {Nf} failure conditions, {No} out-of-scope items), expectations ({Np} positive + {Ne} edge scenarios), and {Nt} existing tasks. Analyzing coverage..."*
 
@@ -84,7 +84,7 @@ Then ask (use AskUserQuestion):
 
 ### Phase 4 — Append to tasks.md
 
-Append accepted entries. Preserve spec-kit's formatting. Add a section header before the additions:
+Append accepted entries. Preserve the existing formatting. Add a section header before the additions:
 
 ```markdown
 ## Gap-filling tasks (from /ncw-compound-gapfill)

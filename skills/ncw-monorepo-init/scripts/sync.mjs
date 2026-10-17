@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 // 技能 pack 安装器：把本 pack 的技能目录拷入各端 skill 发现目录。
-// 本脚本随 ncw-monorepo-init 技能分发，是整个 pack（PACK_SKILLS 列表）的统一安装入口；
+// 本脚本随 monorepo-setup 技能分发，是整个 pack（PACK_SKILLS 列表）的统一安装入口；
 // 新增 pack 技能时在 PACK_SKILLS 里加一行，不要复制本脚本。
 //
 // 覆盖矩阵（项目级同名覆盖全局级）：
 //   .agents/skills/   → DSH / OpenCode / omp
+//   .claude/skills/   → Claude Code（镜像）
 //
 // 用法：
-//   node sync.mjs               # 项目级：拷入 <cwd>/.agents/skills/
-//   node sync.mjs --global      # 用户级：拷入 ~/.agents/skills/
+//   node sync.mjs               # 项目级：拷入 <cwd>/.agents/skills/ 与 <cwd>/.claude/skills/
+//   node sync.mjs --global      # 用户级：拷入 ~/.agents/skills/ 与 ~/.claude/skills/
 //   node sync.mjs --dry-run     # 只打印计划，不写盘
 //   node sync.mjs --force       // 同名覆盖（默认跳过并列出冲突）
 //   node sync.mjs --help
@@ -20,7 +21,7 @@ import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const PACK_SKILLS = ["ncw-adrkit-check", "ncw-adrkit-context", "ncw-adrkit-draft", "ncw-compound-dashboard", "ncw-compound-expectations", "ncw-compound-gapfill", "ncw-compound-install-hooks", "ncw-compound-intent", "ncw-compound-intentguard", "ncw-compound-load", "ncw-compound-planverify", "ncw-compound-planverify-gate", "ncw-compound-require-intent", "ncw-compound-writeback", "ncw-monorepo-init", "ncw-speckit-analyze", "ncw-speckit-clarify", "ncw-speckit-constitution", "ncw-speckit-converge", "ncw-speckit-flow", "ncw-speckit-grill-me", "ncw-speckit-grill-with-docs", "ncw-speckit-implement", "ncw-speckit-plan", "ncw-speckit-specify", "ncw-speckit-tasks"];
+const PACK_SKILLS = ["monorepo-setup", "speckit-flow"];
 
 const args = process.argv.slice(2);
 if (args.includes("--help") || args.includes("-h")) {
@@ -29,7 +30,7 @@ if (args.includes("--help") || args.includes("-h")) {
       "用法: node sync.mjs [--global] [--dry-run] [--force]",
       "",
       `  pack 技能: ${PACK_SKILLS.join(", ")}`,
-      "  --global    装到用户级 ~/.agents/skills/（默认项目级 <cwd>/...）",
+      "  --global    装到用户级 ~/.agents/skills/ 与 ~/.claude/skills/（默认项目级 <cwd>/...）",
       "  --dry-run   只打印计划，不写盘",
       "  --force     同名覆盖（默认跳过并列出冲突）",
     ].join("\n"),
@@ -53,7 +54,7 @@ if (!global && existsSync(join(base, "skills", PACK_SKILLS[0]))) {
   console.error("当前目录是 pack 仓本身，项目级安装无意义；加 --global 装到用户级。");
   process.exit(1);
 }
-const targetRoots = [join(base, ".agents", "skills")];
+const targetRoots = [join(base, ".agents", "skills"), join(base, ".claude", "skills")];
 
 const sources = PACK_SKILLS.map((name) => {
   const dir = join(skillsRoot, name);
@@ -93,7 +94,7 @@ for (const root of targetRoots) {
 if (!dryRun) {
   console.log(
     `\n完成: 拷贝 ${copied} 个目标${skipped ? `，跳过 ${skipped} 个同名` : ""}。` +
-      `\n生效范围: .agents/skills/ → DSH / OpenCode / omp。` +
+      `\n生效范围: .agents/skills/ → DSH / OpenCode / omp；.claude/skills/ → Claude Code。` +
       `${global ? "" : "\n提示: 项目内安装由 init 流程的 pack 安装步完成，已初始化项目通常无需手动 sync。"}`,
   );
 }

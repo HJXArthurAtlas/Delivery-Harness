@@ -18,9 +18,9 @@
    - 空目录（`services/`、`apps/`、`docs/adr/` 等）补 `.gitkeep`。
    - **同名文件不覆盖**：目标已存在的跳过并记录，最后列出来问用户。
 3. **环境就绪（缺了才装）**：Node.js ≥ 22 用本机包管理器装 LTS 或从 nodejs.org 装；uv 在 macOS/Linux 跑 `curl -LsSf https://astral.sh/uv/install.sh | sh`，Windows 跑 `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`。
-4. **装 spec-kit**：`uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v1.1.3 --force`。
+4. **装 specify CLI**：`uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@v1.1.3 --force`。
 5. 项目根目录跑 `specify init --here --force --non-interactive --integration codex --ignore-agent-tools`，产出共享 skills：`.agents/skills/speckit-*/SKILL.md`。
-6. **接入五个 spec-kit 扩展**（项目根目录执行，全部自动以共享 skill 形态落 `.agents/skills/`，不产生宿主私有目录；确认提示用 `printf 'y\n' |` 应答）：
+6. **接入五个扩展**（项目根目录执行，全部自动以共享 skill 形态落 `.agents/skills/`，不产生宿主私有目录；确认提示用 `printf 'y\n' |` 应答）：
    - adrkit：`npm i -g @adrkit/cli@0.20.0`，然后 `printf 'y\n' | specify extension add adrkit --from https://github.com/mbeacom/adrkit/releases/download/spec-kit-v0.1.5/adrkit.zip`
    - pingcode：`npm i -g @metaphorli/pingcode-cli@latest`，然后 `printf 'y\n' | specify extension add pingcode --from https://github.com/HJXArthurAtlas/Spec-Kit-PingCode/releases/download/v2.9.0/pingcode-2.9.0.zip`
    - grill：`printf 'y\n' | specify extension add grill --from https://github.com/yoshi1220/speckit-grill-me/releases/download/v1.0.1/speckit-grill-me-extension-v1.0.1.zip`

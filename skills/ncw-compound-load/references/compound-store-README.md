@@ -1,6 +1,6 @@
 # Compound Store
 
-This directory is the **committed memory** of the codebase — the layer that makes spec-kit-compound *compound*.
+This directory is the **committed memory** of the codebase — the layer that makes the workflow *compound*.
 
 Every feature contributes back via `/ncw-compound-writeback`. Every feature inherits the accumulated store via `/ncw-compound-load`. Over time, the store outweighs any static constitution document you could write upfront.
 

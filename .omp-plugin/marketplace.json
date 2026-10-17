@@ -4,16 +4,13 @@
     "name": "newchiwan"
   },
   "metadata": {
-    "description": "newchiwan 团队跨端 agent skill pack（monorepo 初始化/诊断 + speckit 流程 + adrkit/speckit-grill/compound 扩展组）"
+    "description": "newchiwan 团队跨端 agent skill pack（monorepo 初始化/诊断 + 规格驱动开发流程 + adrkit/grill/compound 扩展组）"
   },
   "plugins": [
     {
       "name": "ncw-delivery",
-      "description": "newchiwan 团队跨端 agent skill pack：monorepo 初始化/诊断 + speckit 规格驱动开发流程",
+      "description": "newchiwan 团队跨端 agent skill pack：monorepo 初始化/诊断 + 规格驱动开发流程",
       "version": "0.1.0",
-      "author": {
-        "name": "newchiwan"
-      },
       "homepage": "https://git.newchiwan.com/council/ncw-delivery-harness",
       "repository": "https://git.newchiwan.com/council/ncw-delivery-harness.git",
       "category": "development",

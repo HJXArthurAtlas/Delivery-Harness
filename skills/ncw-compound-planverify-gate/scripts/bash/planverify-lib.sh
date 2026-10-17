@@ -2,11 +2,11 @@
 # scripts/bash/planverify-lib.sh
 #
 # Shared verdict/config resolution for the planverify gates. Sourced by both
-# the spec-kit before_implement gate (planverify-gate.sh) and the cross-vendor
+# the before_implement gate (planverify-gate.sh) and the cross-vendor
 # PreToolUse gate (planverify-pretooluse.sh) so the two never drift apart.
 #
 # Provides:
-#   pv_find_root            -> echoes the spec-kit project root, or "" if none
+#   pv_find_root            -> echoes the project root, or "" if none
 #   pv_gate_mode <root>     -> echoes "off" | "block"  (env first, then config)
 #   pv_latest_verdict <root> [slug]
 #                           -> with a slug, the verdict of

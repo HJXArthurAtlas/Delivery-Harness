@@ -4,8 +4,8 @@
 # Cross-vendor PreToolUse gate for planverify (Claude Code AND Codex CLI —
 # both ship a PreToolUse event with the same stdin-JSON / exit-2 contract;
 # Gemini's BeforeTool is compatible too). This is the PRIMARY enforcement
-# path because spec-kit's before_implement hook only fires under Claude +
-# spec-kit, whereas this fires for any harness on any source-file write.
+# path because the before_implement hook only fires under the Claude
+# harness, whereas this fires for any harness on any source-file write.
 #
 # Behavior (only when block-mode is on):
 #   - acts on Write/Edit to a SOURCE file (docs/, specs/, .specify/, .claude/,
@@ -42,7 +42,7 @@ fi
 
 ROOT="$(pv_find_root)"
 if [ -z "$ROOT" ]; then
-  exit 0  # not a spec-kit project; nothing to gate
+  exit 0  # not an SDD project; nothing to gate
 fi
 cd "$ROOT"
 
@@ -73,7 +73,7 @@ if [[ "$FILE_REL" == "$ROOT"* ]]; then
 fi
 
 # Exempt non-source paths: writing the plan, the planverify artifacts, specs,
-# the spec-kit/harness config, and dotfiles must never be blocked.
+# the harness config, and dotfiles must never be blocked.
 case "$FILE_REL" in
   docs/*|specs/*|.specify/*|.claude/*|.codex/*|.gemini/*|.*) exit 0 ;;
 esac

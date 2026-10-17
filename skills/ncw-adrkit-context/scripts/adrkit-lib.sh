@@ -1,11 +1,11 @@
 #!/bin/sh
-# Shared resolution helpers for the adrkit Spec Kit extension.
+# Shared resolution helpers for the adrkit extension scripts.
 #
 # Sourced by the command scripts, never executed directly.
 #
 # Every resolver here either yields a usable value or exits non-zero with a
 # message naming exactly what is missing. That is the failure contract spike 008
-# verified against live Spec Kit: never a silent success, never a fabricated
+# verified against a live project: never a silent success, never a fabricated
 # payload, never an unhandled crash. Nothing here reaches the network or reads
 # a credential.
 
@@ -75,7 +75,7 @@ adrkit_corpus_dir() {
 	printf '%s' "$_adrkit_corpus"
 }
 
-# The current Spec Kit feature directory. Prefer the project's own resolver over
+# The current feature directory. Prefer the project's own resolver over
 # reimplementing its branch/feature.json logic, which is upstream's to change.
 adrkit_feature_dir() {
 	if [ -n "${ADRKIT_FEATURE_DIR:-}" ]; then
@@ -87,15 +87,15 @@ adrkit_feature_dir() {
 
 	_adrkit_prereq='.specify/scripts/bash/check-prerequisites.sh'
 	[ -x "$_adrkit_prereq" ] ||
-		adrkit_fail "no Spec Kit feature context reachable — '$_adrkit_prereq' is missing or not executable and ADRKIT_FEATURE_DIR is unset. Run this from a Spec Kit project root, or set ADRKIT_FEATURE_DIR."
+		adrkit_fail "no feature context reachable — '$_adrkit_prereq' is missing or not executable and ADRKIT_FEATURE_DIR is unset. Run this from a project root (a directory containing .specify/), or set ADRKIT_FEATURE_DIR."
 
 	_adrkit_paths="$("$_adrkit_prereq" --paths-only 2>/dev/null)" || _adrkit_paths=''
 	_adrkit_feature="$(printf '%s\n' "$_adrkit_paths" | sed -n 's/^FEATURE_DIR: *//p' | head -n 1)"
 
 	[ -n "$_adrkit_feature" ] ||
-		adrkit_fail "Spec Kit resolved no FEATURE_DIR — run /ncw-speckit-specify first, or set ADRKIT_FEATURE_DIR"
+		adrkit_fail "Resolver returned no FEATURE_DIR — run /ncw-speckit-specify first, or set ADRKIT_FEATURE_DIR"
 	[ -d "$_adrkit_feature" ] ||
-		adrkit_fail "Spec Kit resolved FEATURE_DIR '$_adrkit_feature', but that directory does not exist"
+		adrkit_fail "Resolver returned FEATURE_DIR '$_adrkit_feature', but that directory does not exist"
 
 	printf '%s' "$_adrkit_feature"
 }

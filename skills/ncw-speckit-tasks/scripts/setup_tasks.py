@@ -11,7 +11,7 @@ try:
     from common import (
         FeaturePaths,
         TemplateResolutionError,
-        format_speckit_command,
+        format_pack_command,
         get_feature_paths,
         resolve_template,
         resolve_template_content,
@@ -21,7 +21,7 @@ except ImportError:  # pragma: no cover - direct execution from unusual cwd
     from common import (
         FeaturePaths,
         TemplateResolutionError,
-        format_speckit_command,
+        format_pack_command,
         get_feature_paths,
         resolve_template,
         resolve_template_content,
@@ -109,7 +109,7 @@ def main(argv: list[str] | None = None) -> int:
     if not paths.impl_plan.is_file():
         print(f"ERROR: plan.md not found in {paths.feature_dir}", file=sys.stderr)
         print(
-            f"Run {format_speckit_command('plan', paths.repo_root)} first to create the implementation plan.",
+            f"Run {format_pack_command('plan')} first to create the implementation plan.",
             file=sys.stderr,
         )
         return 1
@@ -117,7 +117,7 @@ def main(argv: list[str] | None = None) -> int:
     if not paths.feature_spec.is_file():
         print(f"ERROR: spec.md not found in {paths.feature_dir}", file=sys.stderr)
         print(
-            f"Run {format_speckit_command('specify', paths.repo_root)} first to create the feature structure.",
+            f"Run {format_pack_command('specify')} first to create the feature structure.",
             file=sys.stderr,
         )
         return 1

@@ -7,13 +7,13 @@
 
 ## Project Overview
 
-newchiwan 团队跨端 **agent skill pack**（`ncw-delivery-harness`）：把团队标准 monorepo 的初始化/诊断流程、speckit + PingCode 规格驱动开发流程，以及 adrkit / grill / compound 三组上游扩展技能，做成可安装的 agent skill，部署到 DSH / OpenCode / omp 等端。GitLab 项目：`council/ncw-delivery-harness`（内部仓，默认分支 `main`，无 CI——本地 `npm test` 是唯一质量门）。
+newchiwan 团队跨端 **agent skill pack**（`ncw-delivery-harness`）：把团队标准 monorepo 的初始化/诊断流程、PingCode 规格驱动开发流程，以及 adrkit / grill / compound 三组上游扩展技能，做成可安装的 agent skill，部署到 DSH / OpenCode / omp 等端。GitLab 项目：`council/ncw-delivery-harness`（内部仓，默认分支 `main`，无 CI——本地 `npm test` 是唯一质量门）。
 
 本仓是「消费模板的元工具」：skill 承载流程与版本钉子，骨架载荷在模板仓 `council/monorepo-template`，两者独立发版。
 
 ## Architecture & Data Flow
 
-无构建步骤——「源码」即 `skills/` 下的 Markdown 规则 + speckit 技能携带的 spec-kit python 运行时逐字副本 + 一个安装脚本，端侧按目录约定直接扫描发现。
+无构建步骤——「源码」即 `skills/` 下的 Markdown 规则 + 技能携带的 python 运行时逐字副本 + 一个安装脚本，端侧按目录约定直接扫描发现。
 
 ```
 skills/<name>/SKILL.md (+ references/ scripts/)
@@ -30,25 +30,25 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 职责分层与外部委托：
 
 - `ncw-monorepo-init` 承载流程与**版本钉子**（`references/init.md` 是唯一载体）；模板仓承载骨架（`AGENTS-TEMPLATE.md`、`.specify/`、`docs/adr/` 等），**版本双落点同改**：init.md 的钉子 = 初始化基线，模板仓巡检表 = 巡检基线。
-- `ncw-speckit-flow` 是流程衔接与门禁层，按引用委托 `/speckit.*`、`pingcode` skill、`mturtle-commit`，**不内联它们的规则**。
+- `ncw-speckit-flow` 是流程衔接与门禁层，按引用委托 `ncw-speckit-*` 系技能、`pingcode` skill、`mturtle-commit`，**不内联它们的规则**。
 
 ## Key Directories
 
 | 路径 | 用途 |
 |---|---|
-| `skills/ncw-adrkit-{check,context,draft}/` | adrkit 上游扩展（speckit.adrkit.* 命令）的 pack 分发：SKILL.md（正文英文原文）+ `scripts/`（`adrkit-lib.sh` 三份逐字副本 + 各自入口脚本；draft 另含 pack 新增的 `scaffold.sh`——免 plan 的语料分配入口，供 grill-with-docs / compound-writeback 归口写入 `docs/adr/`）。脚本路径指向 pack 安装位 `.agents/skills/ncw-adrkit-*/scripts/`；after_plan hook 触发依赖上游 adrkit 扩展的 `extension.yml`（init.md 第 6 步安装），否则手动跑 |
-| `skills/ncw-compound-*/` | spec-kit-compound 上游 v0.3 技能组（11 个）：intent/expectations/gapfill/planverify/intentguard/writeback/load/dashboard/install-hooks/require-intent/planverify-gate。运行期数据落项目 `docs/intents/`、`docs/expectations/`、`docs/compound/`（仅 corrections/patterns + README/SCHEMA/config）；**ADR 已归口 adrkit 语料 `docs/adr/`**（writeback 升格、load 读取、intent 引用均指向语料，load/intent/writeback/install-hooks 正文含 pack fork 段，上游升级需 port）。hook 本体只走 `.claude` PreToolUse（install-hooks 安装）或手动调用，pack 无 hook 执行机制 |
-| `skills/ncw-speckit-grill-{me,with-docs}/` | grill 上游扩展（speckit.grill.* 命令）的 pack 分发：单文件 SKILL.md（正文英文原文）。特性解析依赖 specify init 产物 `.specify/scripts/bash/check-prerequisites.sh`；**grill-with-docs 为 pack fork**——ADR 不再落 `docs/domain_knowledge/adr/`，而是经 `ncw-adrkit-draft/scripts/scaffold.sh` 归口 adrkit 语料 `docs/adr/`（`ncw-speckit-grill-me` 仍为逐字上游）；上游 grill 升级时需 port 该 fork 段 |
+| `skills/ncw-adrkit-{check,context,draft}/` | adrkit 上游扩展（adrkit.* 命令）的 pack 分发：SKILL.md（正文英文原文）+ `scripts/`（`adrkit-lib.sh` 三份逐字副本 + 各自入口脚本；draft 另含 pack 新增的 `scaffold.sh`——免 plan 的语料分配入口，供 grill-with-docs / compound-writeback 归口写入 `docs/adr/`）。脚本路径指向 pack 安装位 `.agents/skills/ncw-adrkit-*/scripts/`；after_plan hook 触发依赖上游 adrkit 扩展的 `extension.yml`（init.md 第 6 步安装），否则手动跑 |
+| `skills/ncw-compound-*/` | compound 上游 v0.3 技能组（11 个）：intent/expectations/gapfill/planverify/intentguard/writeback/load/dashboard/install-hooks/require-intent/planverify-gate。运行期数据落项目 `docs/intents/`、`docs/expectations/`、`docs/compound/`（仅 corrections/patterns + README/SCHEMA/config）；**ADR 已归口 adrkit 语料 `docs/adr/`**（writeback 升格、load 读取、intent 引用均指向语料，load/intent/writeback/install-hooks 正文含 pack fork 段，上游升级需 port）。hook 本体只走 `.claude` PreToolUse（install-hooks 安装）或手动调用，pack 无 hook 执行机制 |
+| `skills/ncw-speckit-grill-{me,with-docs}/` | grill 上游扩展（grill.* 命令）的 pack 分发：单文件 SKILL.md（正文英文原文）。特性解析依赖 specify init 产物 `.specify/scripts/bash/check-prerequisites.sh`；**grill-with-docs 为 pack fork**——ADR 不再落 `docs/domain_knowledge/adr/`，而是经 `ncw-adrkit-draft/scripts/scaffold.sh` 归口 adrkit 语料 `docs/adr/`（`ncw-speckit-grill-me` 仍为逐字上游）；上游 grill 升级时需 port 该 fork 段 |
 | `skills/ncw-monorepo-init/` | 初始化（init）/ 诊断（diagnose）skill：`SKILL.md`（模式判定、安全边界、分发说明）、`references/init.md`（init 流程 + 版本钉子）、`references/checklist.md`（diagnose 基线）、`scripts/sync.mjs`（pack 安装器） |
-| `skills/ncw-speckit-analyze/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，spec-kit v1.1.3 逐字副本，免 specify init）：上游 spec-kit /speckit.analyze 命令（spec/plan/tasks 一致性只读分析），正文英文原文；extension hook 机制未迁移 |
-| `skills/ncw-speckit-clarify/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，spec-kit v1.1.3 逐字副本，免 specify init）：上游 spec-kit /speckit.clarify 命令（≤5 问澄清并回写 spec），正文英文原文；extension hook 机制未迁移 |
-| `skills/ncw-speckit-constitution/` | SKILL.md + `scripts/`（bundled `resolve_template.py` + `common.py`）+ `references/constitution-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：上游 spec-kit /speckit.constitution 命令（建/改 .specify/memory/constitution.md），正文英文原文；extension hook 机制未迁移 |
-| `skills/ncw-speckit-converge/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，spec-kit v1.1.3 逐字副本，免 specify init）：上游 spec-kit /speckit.converge 命令（代码现状 vs 工件差距→追加收敛任务），正文英文原文；extension hook 机制未迁移 |
+| `skills/ncw-speckit-analyze/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，v1.1.3 逐字副本，免 specify init）：analyze 命令（spec/plan/tasks 一致性只读分析），正文英文原文；extension hook 机制未迁移 |
+| `skills/ncw-speckit-clarify/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，v1.1.3 逐字副本，免 specify init）：clarify 命令（≤5 问澄清并回写 spec），正文英文原文；extension hook 机制未迁移 |
+| `skills/ncw-speckit-constitution/` | SKILL.md + `scripts/`（bundled `resolve_template.py` + `common.py`）+ `references/constitution-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：constitution 命令（建/改 .specify/memory/constitution.md），正文英文原文；extension hook 机制未迁移 |
+| `skills/ncw-speckit-converge/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，v1.1.3 逐字副本，免 specify init）：converge 命令（代码现状 vs 工件差距→追加收敛任务），正文英文原文；extension hook 机制未迁移 |
 | `skills/ncw-speckit-flow/` | 单文件 `SKILL.md`：8 阶段流程表 + 交接门禁 + 对账纪律 |
-| `skills/ncw-speckit-implement/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，spec-kit v1.1.3 逐字副本，免 specify init）：上游 spec-kit /speckit.implement 命令（按 tasks.md 执行实现），正文英文原文；extension hook 机制未迁移 |
-| `skills/ncw-speckit-plan/` | SKILL.md + `scripts/`（bundled `setup_plan.py` + `common.py`）+ `references/plan-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：上游 spec-kit /speckit.plan 命令（实现规划 + research/data-model/contracts/quickstart 工件），正文英文原文；extension hook 机制未迁移 |
-| `skills/ncw-speckit-specify/` | SKILL.md + `references/spec-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：上游 spec-kit /speckit-specify 命令（特性规格创建/更新 + 质量清单），正文英文原文；extension hook 机制未迁移 |
-| `skills/ncw-speckit-tasks/` | SKILL.md + `scripts/`（bundled `setup_tasks.py` + `common.py`）+ `references/tasks-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：上游 spec-kit /speckit-tasks 命令（按用户故事生成依赖有序 tasks.md），正文英文原文；extension hook 机制未迁移 |
+| `skills/ncw-speckit-implement/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，v1.1.3 逐字副本，免 specify init）：implement 命令（按 tasks.md 执行实现），正文英文原文；extension hook 机制未迁移 |
+| `skills/ncw-speckit-plan/` | SKILL.md + `scripts/`（bundled `setup_plan.py` + `common.py`）+ `references/plan-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：plan 命令（实现规划 + research/data-model/contracts/quickstart 工件），正文英文原文；extension hook 机制未迁移 |
+| `skills/ncw-speckit-specify/` | SKILL.md + `references/spec-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：specify 命令（特性规格创建/更新 + 质量清单），正文英文原文；extension hook 机制未迁移 |
+| `skills/ncw-speckit-tasks/` | SKILL.md + `scripts/`（bundled `setup_tasks.py` + `common.py`）+ `references/tasks-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：tasks 命令（按用户故事生成依赖有序 tasks.md），正文英文原文；extension hook 机制未迁移 |
 | `tests/skills/` | 结构校验脚本 + `ncw-speckit-constitution` 运行时契约测试（见 Testing & QA） |
 | `.githooks/` | `commit-msg` 提交信息格式校验 |
 | `.agents/commands/` | 斜杠命令（通用 agent 发现路径，omp 实测可读；`*.md` + frontmatter `description`，文件名即命令名，如 `/readme-refresh`）。**禁止**用工具专属的 `.omp/commands/` |
@@ -81,7 +81,7 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 |---|---|
 | `package.json` | `bin` = sync.mjs（`npx git+…` 直装的入口）、`scripts.test`、`files: ["skills"]`（npm 只发 skills/）、`engines.node >=22` |
 | `skills/ncw-monorepo-init/scripts/sync.mjs:23` | `PACK_SKILLS` —— 安装清单唯一事实源 |
-| `skills/ncw-monorepo-init/references/init.md` | init 流程 + 工具链版本钉子唯一载体（spec-kit v1.1.3、adrkit 0.20.0 等） |
+| `skills/ncw-monorepo-init/references/init.md` | init 流程 + 工具链版本钉子唯一载体（v1.1.3、adrkit 0.20.0 等） |
 | `skills/ncw-monorepo-init/references/checklist.md` | diagnose 基线；版本事实源是项目 `AGENTS.md` 或模板仓，本文件不复写版本号 |
 | `.githooks/commit-msg` | 提交格式校验（`core.hooksPath` 已在本仓激活） |
 | `.omp-plugin/marketplace.json` | omp marketplace catalog（omp 插件分发唯一入口；`version` 必须与 `package.json` 一致，`npm test` 强制） |
@@ -104,7 +104,7 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 3. `description:` 非空、≤1024 字符；
 4. `SKILL.md` 中字面引用的 `references/`、`scripts/` 文件必须存在（引用即契约，改名要同步建文件；`.agents/`、`.specify/`、`~/` 等安装位/宿主路径是运行时路径，不做仓内存在性校验）；
 5. 泄漏扫描：`skills/` 与 `.omp-plugin/` 内禁止 `/Users/`、`/home/` 绝对路径；
-6. `sync.mjs` `PACK_SKILLS` 与 `skills/` 目录一一对应（防新增技能忘登记）；
+6. `sync.mjs` `PACK_SKILLS` 与 `skills/` 目录一一对应（防新增技能忘登记；已知偏差 `monorepo-setup`/`speckit-flow` 经测试内显式别名表钉住）；
 7. `.agents/commands/*.md` frontmatter 合规（`---` 定界 + 非空 `description`），且不存在工具专属 `.omp/commands/`；
 8. `.omp-plugin/marketplace.json` 为合法 JSON，marketplace/plugin 名合规（小写开头结尾、可含 `-`/`.`、≤64），plugin `source` 恰为 `"./"`，`version` 与 `package.json` 一致且符合 omp 缓存路径字符集。JSON 校验用 node 内联脚本完成（node 是运行前提，非新增依赖）；
 9. `.omp-plugin/plugin.json` 绝不许存在（manifest remap 会把 `.agents/` 带进 omp 插件安装面，插件只分发 skills）。

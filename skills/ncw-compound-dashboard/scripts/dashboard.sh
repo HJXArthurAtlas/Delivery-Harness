@@ -1,7 +1,7 @@
 #!/bin/bash
 # scripts/dashboard.sh
 #
-# Launch the spec-kit-compound pipeline dashboard (read-only localhost view).
+# Launch the ncw-compound pipeline dashboard (read-only localhost view).
 #
 #   ./scripts/dashboard.sh              # serve on the default port
 #   ./scripts/dashboard.sh --open       # ...and open a browser

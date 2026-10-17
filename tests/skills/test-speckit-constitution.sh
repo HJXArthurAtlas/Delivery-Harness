@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ncw-speckit-constitution 技能运行时契约测试。
 #
-# 该技能的机器可执行面 = bundled scripts/resolve_template.py（spec-kit v1.1.3 逐字副本），
+# 该技能的机器可执行面 = bundled scripts/resolve_template.py（v1.1.3 逐字副本），
 # 本脚本在临时夹具项目里驱动它，钉住 SKILL.md 依赖的模板分辨栈契约：
 #   1. 核心层 .specify/templates/ 可解析（--json 形状 + 非 ASCII 内容透传）；
 #   2. 层优先级 overrides/ > presets/ > extensions/ > 核心层；

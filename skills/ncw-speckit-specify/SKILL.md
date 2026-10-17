@@ -1,6 +1,6 @@
 ---
 name: ncw-speckit-specify
-description: Create or update the feature specification from a natural language feature description. Requires a spec-kit project structure with a .specify/ directory. Use when the user runs or mentions /speckit-specify, or asks to create or update a feature spec, write requirements, or kick off speckit feature specification.
+description: Create or update the feature specification from a natural language feature description. Requires a project with a .specify/ directory structure. Use when the user runs or mentions /ncw-speckit-specify, or asks to create or update a feature spec, write requirements, or kick off feature specification.
 ---
 
 
@@ -14,7 +14,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Extension Hooks Not Handled
 
-This skill does not evaluate the Spec Kit extension hook mechanism. If the project
+This skill does not evaluate the extension hook mechanism. If the project
 registers `hooks.before_specify` or `hooks.after_specify` in
 `.specify/extensions.yml`, those hooks are NOT executed by this skill. Tell the user
 which of these two hook points are registered (extension name and command for each
@@ -22,7 +22,7 @@ entry) so they can run them manually before/after the specification.
 
 ## Outline
 
-The text the user typed after `/speckit-specify` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
+The text the user typed after `/ncw-speckit-specify` in the triggering message **is** the feature description. Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
 
 Given that feature description, do this:
 
@@ -60,7 +60,7 @@ Given that feature description, do this:
 
    **Create the directory and spec file**:
    - `mkdir -p SPECIFY_FEATURE_DIRECTORY`
-   - Resolve the active `spec-template` through the Spec Kit preset/template resolution stack (the shared template resolver used by the other Spec Kit commands). If the project cannot resolve `spec-template` (`.specify/templates/spec-template.md` missing and no override/preset/extension layer provides it), scaffold it first: copy this skill's `references/spec-template.md` to `.specify/templates/spec-template.md`, creating directories as needed; never overwrite an existing project template
+   - Resolve the active `spec-template` through the preset/template resolution stack (the shared template resolver used by the other commands). If the project cannot resolve `spec-template` (`.specify/templates/spec-template.md` missing and no override/preset/extension layer provides it), scaffold it first: copy this skill's `references/spec-template.md` to `.specify/templates/spec-template.md`, creating directories as needed; never overwrite an existing project template
    - Copy the resolved `spec-template` file to `SPECIFY_FEATURE_DIRECTORY/spec.md` as the starting point
    - Set `SPEC_FILE` to `SPECIFY_FEATURE_DIRECTORY/spec.md`
    - Persist the resolved path to `.specify/feature.json`:
@@ -70,10 +70,10 @@ Given that feature description, do this:
      }
      ```
      Write the actual resolved directory path value (for example, `specs/003-user-auth`), not the literal string `SPECIFY_FEATURE_DIRECTORY`.
-     This allows downstream commands (`/speckit-plan`, `/speckit-tasks`, etc.) to locate the feature directory without relying on git branch name conventions.
+     This allows downstream commands (`/ncw-speckit-plan`, `/ncw-speckit-tasks`, etc.) to locate the feature directory without relying on git branch name conventions.
 
    **IMPORTANT**:
-   - You must only create one feature per `/speckit-specify` invocation
+   - You must only create one feature per `/ncw-speckit-specify` invocation
    - The spec directory name and the git branch name are independent — they may be the same but that is the user's choice
    - The spec directory and file are always created by this command, never by the hook
 
@@ -148,7 +148,7 @@ Given that feature description, do this:
 
       ## Notes
 
-      - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`
+      - Items marked incomplete require spec updates before `/ncw-speckit-clarify` or `/ncw-speckit-plan`
       ```
 
    b. **Run Validation Check**: Review the spec against each checklist item:
@@ -208,7 +208,7 @@ Report completion to the user with:
 - `SPECIFY_FEATURE_DIRECTORY` — the feature directory path
 - `SPEC_FILE` — the spec file path
 - Checklist results summary
-- Readiness for the next phase (`/speckit-clarify` or `/speckit-plan`)
+- Readiness for the next phase (`/ncw-speckit-clarify` or `/ncw-speckit-plan`)
 
 **NOTE:** Branch creation is handled by the `before_specify` hook (git extension). Spec directory and file creation are always handled by this core command.
 

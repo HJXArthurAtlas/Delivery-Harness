@@ -11,7 +11,7 @@ You are running an **expectations interview** — the compartmented counterpart 
 
 ## Project root anchor (read this first — v0.2.2 cwd fix)
 
-**Critical:** operate from the spec-kit project root for all file I/O. The project root is the directory containing `.specify/`.
+**Critical:** operate from the project root for all file I/O. The project root is the directory containing `.specify/`.
 
 Before any Read, Write, or Edit:
 
@@ -20,7 +20,7 @@ PROJECT_ROOT="$(pwd)"
 while [ "$PROJECT_ROOT" != "/" ] && [ ! -d "$PROJECT_ROOT/.specify" ]; do
   PROJECT_ROOT="$(dirname "$PROJECT_ROOT")"
 done
-[ ! -d "$PROJECT_ROOT/.specify" ] && { echo "ERROR: not in a spec-kit project"; exit 1; }
+[ ! -d "$PROJECT_ROOT/.specify" ] && { echo "ERROR: not in an SDD project"; exit 1; }
 cd "$PROJECT_ROOT"
 ```
 
@@ -138,7 +138,7 @@ Apply the user's choice before writing. Then, when scenarios are within cap and 
 ### Phase 4 — Chain
 
 Ask the user (use AskUserQuestion with three options):
-- **Continue to /ncw-speckit-specify** — invoke spec-kit's `/ncw-speckit-specify` next, prefilled with goal + in-scope from the intent doc
+- **Continue to /ncw-speckit-specify** — invoke `/ncw-speckit-specify` next, prefilled with goal + in-scope from the intent doc
 - **Stop here** — user will run later phases manually
 - **Quit** — stop the chain entirely
 

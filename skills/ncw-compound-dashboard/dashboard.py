@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""spec-kit-compound pipeline dashboard — read-only localhost view of the chain."""
+"""ncw-compound pipeline dashboard — read-only localhost view of the chain."""
 
 import re
 import json
@@ -704,7 +704,7 @@ PAGE_HTML = r"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>spec-kit-compound · pipeline</title>
+<title>ncw-compound · pipeline</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Doto:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap');
 
@@ -1047,7 +1047,7 @@ function renderMaster(){
   </div>`;
 
   if(!feats.length){
-    h+=`<div class="feat" style="cursor:default"><div class="name lbl">RUN /SPECKIT-COMPOUND-INTENT</div></div>`;
+    h+=`<div class="feat" style="cursor:default"><div class="name lbl">RUN /NCW-COMPOUND-INTENT</div></div>`;
     m.innerHTML=h; wireControls(m); return;
   }
 
@@ -1322,7 +1322,7 @@ function renderDetail(){
   // both to 0 — capture and restore so the view doesn't jump to the top.
   const _detailTop=d.scrollTop;
   const _vb=d.querySelector(".vbody"); const _vbTop=_vb?_vb.scrollTop:0;
-  if(!feat){ d.innerHTML=`<div class="empty">${(STATE.features||[]).length?"[ SELECT A FEATURE ]":"[ NO FEATURES — RUN /SPECKIT-COMPOUND-INTENT ]"}</div>`; return; }
+  if(!feat){ d.innerHTML=`<div class="empty">${(STATE.features||[]).length?"[ SELECT A FEATURE ]":"[ NO FEATURES — RUN /NCW-COMPOUND-INTENT ]"}</div>`; return; }
   const [ck,ctxt]=guardChip(feat), c=feat.content||{};
   const done=doneCount(feat), total=STATE.stages.length;
   let h=`<div class="hero">
@@ -1453,10 +1453,10 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
 def find_repo_root(start):
-    """Resolve the spec-kit project root to scan.
+    """Resolve the project root to scan.
 
-    Walks up from ``start`` and prefers a ``.specify/`` directory (the spec-kit
-    project root — this is what holds ``docs/`` and ``specs/``, and is the
+    Walks up from ``start`` and prefers a ``.specify/`` directory (the project
+    root — this is what holds ``docs/`` and ``specs/``, and is the
     correct anchor when this script ships inside ``.specify/extensions/compound/``
     of a host repo like equal). Falls back to a directory containing
     ``extension.yml`` for dev mode in this repo, which has no ``.specify/``.
@@ -1540,11 +1540,11 @@ def _live_dashboard(port, repo_name):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="spec-kit-compound pipeline dashboard")
+    ap = argparse.ArgumentParser(description="ncw-compound pipeline dashboard")
     ap.add_argument("--port", type=int, default=8787)
     ap.add_argument("--open", action="store_true", help="open the dashboard in a browser")
     ap.add_argument("--repo", default=None,
-                    help="path to the spec-kit project to scan (default: auto-detect from cwd, "
+                    help="path to the project to scan (default: auto-detect from cwd, "
                          "then this script's location)")
     args = ap.parse_args(argv)
 
@@ -1579,7 +1579,7 @@ def main(argv=None):
         return 1
 
     url = f"http://127.0.0.1:{httpd.server_address[1]}/"
-    print(f"spec-kit-compound dashboard → {url}  (scanning {repo_root})", flush=True)
+    print(f"ncw-compound dashboard → {url}  (scanning {repo_root})", flush=True)
     if args.open:
         webbrowser.open(url)
     try:

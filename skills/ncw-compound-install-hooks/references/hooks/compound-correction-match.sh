@@ -1,7 +1,7 @@
 #!/bin/bash
 # .claude/hooks/compound-correction-match.sh
 #
-# Claude Code PreToolUse hook for spec-kit-compound v0.3+ (active-corrections).
+# Claude Code PreToolUse hook for ncw-compound v0.3+ (active-corrections).
 #
 # Reads tool_input JSON via stdin. For Write/Edit operations, checks the
 # proposed file path + content against every correction in
@@ -44,7 +44,7 @@ while [ "$PROJECT_ROOT" != "/" ] && [ ! -d "$PROJECT_ROOT/.specify" ]; do
   PROJECT_ROOT="$(dirname "$PROJECT_ROOT")"
 done
 if [ ! -d "$PROJECT_ROOT/.specify" ]; then
-  # Not a spec-kit project; no corrections to check; let the write proceed.
+  # Not an SDD project; no corrections to check; let the write proceed.
   exit 0
 fi
 cd "$PROJECT_ROOT"

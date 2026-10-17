@@ -1,6 +1,6 @@
 ---
 name: ncw-speckit-plan
-description: Execute the implementation planning workflow using the plan template to generate design artifacts. Requires a spec-kit project structure with a .specify/ directory. Use when the user runs or mentions /speckit.plan, or asks to plan the implementation, produce the design artifacts, or turn a spec into an implementation plan.
+description: Execute the implementation planning workflow using the plan template to generate design artifacts. Requires a project with a .specify/ directory structure. Use when the user runs or mentions /ncw-speckit-plan, or asks to plan the implementation, produce the design artifacts, or turn a spec into an implementation plan.
 ---
 
 
@@ -14,7 +14,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Extension Hooks Not Handled
 
-This skill does not evaluate the Spec Kit extension hook mechanism. If the project
+This skill does not evaluate the extension hook mechanism. If the project
 registers `hooks.before_plan` or `hooks.after_plan` in
 `.specify/extensions.yml`, those hooks are NOT executed by this skill. Tell the user
 which of these two hook points are registered (extension name and command for each
@@ -22,7 +22,7 @@ entry) so they can run them manually before/after the planning.
 
 ## Outline
 
-1. **Setup**: Run `python3` on this skill's bundled plan setup script `scripts/setup_plan.py` (verbatim spec-kit v1.1.3 helper) with argument `--json`, from repo root, and parse JSON for FEATURE_SPEC, IMPL_PLAN, FEATURE_DIR, BRANCH. If the project cannot resolve `plan-template` (`.specify/templates/plan-template.md` missing and no override/preset/extension layer provides it), scaffold it first: copy this skill's `references/plan-template.md` to `.specify/templates/plan-template.md`, creating directories as needed; never overwrite an existing project template. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+1. **Setup**: Run `python3` on this skill's bundled plan setup script `scripts/setup_plan.py` (verbatim v1.1.3 helper) with argument `--json`, from repo root, and parse JSON for FEATURE_SPEC, IMPL_PLAN, FEATURE_DIR, BRANCH. If the project cannot resolve `plan-template` (`.specify/templates/plan-template.md` missing and no override/preset/extension layer provides it), scaffold it first: copy this skill's `references/plan-template.md` to `.specify/templates/plan-template.md`, creating directories as needed; never overwrite an existing project template. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 2. **Load context**: Read FEATURE_SPEC and `.specify/memory/constitution.md`. Load IMPL_PLAN template (already copied).
 

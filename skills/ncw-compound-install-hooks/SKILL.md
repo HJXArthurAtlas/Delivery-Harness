@@ -5,7 +5,7 @@ description: 'One-shot installer (shell-script wrapper): copies the v0.3 PreTool
 
 # Install Claude Code Hooks
 
-This command installs the spec-kit-compound v0.3+ active-corrections hook system into the user's project. It is a **thin shell-script wrapper** (the pattern that DOES dispatch under Claude Code's hook executor; see v0.2.1 / v0.2.2 release notes for why agent-prompt hooks silently no-op).
+This command installs the ncw-compound v0.3+ active-corrections hook system into the user's project. It is a **thin shell-script wrapper** (the pattern that DOES dispatch under Claude Code's hook executor; see v0.2.1 / v0.2.2 release notes for why agent-prompt hooks silently no-op).
 
 After running, the user's `.claude/settings.json` registers a `PreToolUse` hook that fires on every `Write` or `Edit` tool call, runs `.claude/hooks/compound-correction-match.sh`, and blocks the call (exit 2) if any correction in `docs/compound/corrections/` matches the proposed write.
 
@@ -23,7 +23,7 @@ Run the installer script via Bash:
 
 The script:
 
-1. Anchors to the spec-kit project root (the directory containing `.specify/`)
+1. Anchors to the project root (the directory containing `.specify/`)
 2. Copies the hook scripts shipped inside this skill — `references/hooks/compound-correction-match.sh` and `references/hooks/planverify-pretooluse.sh` (+ the shared `scripts/bash/planverify-lib.sh`) — into the project's `.claude/hooks/` directory; creates the directory if it does not exist; marks the scripts executable.
 3. Delivers the correction-note schema: copies the skill's `references/CORRECTIONS-SCHEMA.md` to `docs/compound/CORRECTIONS-SCHEMA.md` (creating `docs/compound/` if needed). An existing copy at that path is never overwritten.
 4. Merges `PreToolUse` hook entries into `.claude/settings.json`:
@@ -37,13 +37,13 @@ After the script returns 0, tell the user:
 
 > *"Active-corrections hook is now wired. Next agent Write/Edit will be checked against `docs/compound/corrections/`. To test, commit a correction note with `paths:` + `match:` frontmatter (see `docs/compound/CORRECTIONS-SCHEMA.md`), then ask me to write a file that matches it."*
 
-If the script exits non-zero, show the stderr output to the user and stop — do not retry blindly. Most likely causes: not in a spec-kit project (no `.specify/`), `jq` not installed (`brew install jq` or equivalent), or the skill's bundled `references/hooks/` files are missing.
+If the script exits non-zero, show the stderr output to the user and stop — do not retry blindly. Most likely causes: not in an SDD project (no `.specify/`), `jq` not installed (`brew install jq` or equivalent), or the skill's bundled `references/hooks/` files are missing.
 
 ---
 
 ## Why this is a shell-script wrapper (not an interview)
 
-Spec-kit's hook executor dispatches shell-script command files cleanly under Claude Code — confirmed by both the bundled `git` extension's hooks (which fire reliably) and spec-kit-compound's own `/ncw-compound-require-intent` gate (v0.2.2). Agent-prompt command files (which ask the agent to do interactive work) silently no-op under the same executor. That's why this installer is a deterministic shell-script wrapper rather than an interactive prompt — it dispatches reliably whether invoked directly by the user or as part of a chain.
+The harness's hook executor dispatches shell-script command files cleanly under Claude Code — confirmed by both the bundled `git` extension's hooks (which fire reliably) and this pack's own `/ncw-compound-require-intent` gate (v0.2.2). Agent-prompt command files (which ask the agent to do interactive work) silently no-op under the same executor. That's why this installer is a deterministic shell-script wrapper rather than an interactive prompt — it dispatches reliably whether invoked directly by the user or as part of a chain.
 
 The actual hook script itself (`compound-correction-match.sh`) is also a shell script for the same reason: it runs as part of Claude Code's `PreToolUse` dispatch, which expects a shell command with stdin JSON / exit code / stderr message contract.
 

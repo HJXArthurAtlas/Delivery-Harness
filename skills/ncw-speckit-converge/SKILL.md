@@ -1,6 +1,6 @@
 ---
 name: ncw-speckit-converge
-description: Assess the current codebase against the feature's spec, plan, and tasks, then append any remaining unbuilt work as new tasks to tasks.md so implement can complete it. Requires a spec-kit project structure with a .specify/ directory. Use when the user runs or mentions /speckit.converge, or asks to close the gap between spec/plan/tasks and the codebase, find unbuilt remaining work, or append convergence tasks.
+description: Assess the current codebase against the feature's spec, plan, and tasks, then append any remaining unbuilt work as new tasks to tasks.md so implement can complete it. Requires a project with a .specify/ directory structure. Use when the user runs or mentions /ncw-speckit-converge, or asks to close the gap between spec/plan/tasks and the codebase, find unbuilt remaining work, or append convergence tasks.
 ---
 
 
@@ -14,7 +14,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Extension Hooks Not Handled
 
-This skill does not evaluate the Spec Kit extension hook mechanism. If the project
+This skill does not evaluate the extension hook mechanism. If the project
 registers `hooks.before_converge` or `hooks.after_converge` in
 `.specify/extensions.yml`, those hooks are NOT executed by this skill. Tell the user
 which of these two hook points are registered (extension name and command for each
@@ -28,8 +28,8 @@ source of intent** (with the constitution as governing constraints), assess the 
 state of the code, determine which requirements, acceptance criteria, plan decisions, and
 existing tasks are unmet, incomplete, or only partially satisfied, and **append each piece
 of remaining work as a new, traceable task** at the bottom of `tasks.md` so that
-`/speckit-implement` can complete it. This command MUST run only after
-`/speckit-implement` has run on the current `tasks.md`, and after `/speckit-tasks` has produced a complete `tasks.md`.
+`/ncw-speckit-implement` can complete it. This command MUST run only after
+`/ncw-speckit-implement` has run on the current `tasks.md`, and after `/ncw-speckit-tasks` has produced a complete `tasks.md`.
 
 This is **not** a diff tool and does **not** track changes. It assesses the present state
 of the code relative to the feature's artifacts — no git, no branch comparison, no history.
@@ -43,7 +43,7 @@ of the code relative to the feature's artifacts — no git, no branch comparison
 - rewrite, renumber, reorder, or delete any existing task (including tasks from a prior
   Convergence phase);
 - modify, create, or delete any application code — completing the appended tasks is the
-  job of `/speckit-implement`.
+  job of `/ncw-speckit-implement`.
 
 When the codebase already satisfies everything, the command MUST leave `tasks.md`
 **byte-for-byte unchanged** (no empty Convergence header) and report a clean result.
@@ -57,15 +57,15 @@ skip constitution checks gracefully rather than failing.
 
 ### 1. Initialize Convergence Context
 
-Run `python3` on this skill's bundled prerequisite checker `scripts/check_prerequisites.py` (verbatim spec-kit v1.1.3 helper) with arguments `--json --require-spec --require-tasks --include-tasks` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive absolute paths:
+Run `python3` on this skill's bundled prerequisite checker `scripts/check_prerequisites.py` (verbatim v1.1.3 helper) with arguments `--json --require-spec --require-tasks --include-tasks` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive absolute paths:
 
 - SPEC = FEATURE_DIR/spec.md
 - PLAN = FEATURE_DIR/plan.md
 - TASKS = FEATURE_DIR/tasks.md
 - CONSTITUTION = `.specify/memory/constitution.md` (if present)
 If `spec.md`, `plan.md`, or `tasks.md` is missing, STOP with a clear, actionable message naming the
-prerequisite command to run (`/speckit-specify` for a missing spec, `/speckit-plan` for a missing plan,
-`/speckit-tasks` for missing tasks). Do not produce partial output.
+prerequisite command to run (`/ncw-speckit-specify` for a missing spec, `/ncw-speckit-plan` for a missing plan,
+`/ncw-speckit-tasks` for missing tasks). Do not produce partial output.
 For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 ### 2. Load Artifacts (Progressive Disclosure)
@@ -200,7 +200,7 @@ Append to the **end** of `tasks.md`, per the append contract:
 ### 8. Provide Next Actions (Handoff)
 
 - On `tasks_appended`: state how many tasks were appended under which phase, and recommend
-  running `/speckit-implement` to complete them; note that a follow-up converge
+  running `/ncw-speckit-implement` to complete them; note that a follow-up converge
   run will find fewer or no remaining items.
 - On `converged`: recommend proceeding to review / opening a PR. No further implement pass
   is needed for this feature's specified scope.

@@ -1,6 +1,6 @@
 ---
 name: ncw-speckit-constitution
-description: Create or update the project constitution from interactive or provided principle inputs. Requires a spec-kit project structure with a .specify/ directory (its template resolver script and memory/). Use when the user runs or mentions /speckit.constitution, or asks to create or amend the project constitution, governance principles, or project charter.
+description: Create or update the project constitution from interactive or provided principle inputs. Requires a project with a .specify/ directory structure (its template resolver script and memory/). Use when the user runs or mentions /ncw-speckit-constitution, or asks to create or amend the project constitution, governance principles, or project charter.
 ---
 
 
@@ -27,13 +27,13 @@ and commands read the constitution at runtime and are not modified here.
 - If it is unclear whether an instruction is constitution content, ask for clarification before
   making changes.
 - After completing the constitution update, include a `Next Actions` section for each deferred
-  intent. List the original intent and suggest the appropriate follow-up Spec Kit command, such
-  as `/speckit-specify`, without invoking it.
+  intent. List the original intent and suggest the appropriate follow-up command, such
+  as `/ncw-speckit-specify`, without invoking it.
 - If there are no non-governance intents, omit the `Next Actions` section.
 
 ## Extension Hooks Not Handled
 
-This skill does not evaluate the Spec Kit extension hook mechanism. If the project
+This skill does not evaluate the extension hook mechanism. If the project
 registers `hooks.before_constitution` or `hooks.after_constitution` in
 `.specify/extensions.yml`, those hooks are NOT executed by this skill. Tell the user
 which of these two hook points are registered (extension name and command for each
@@ -42,12 +42,12 @@ entry) so they can run them manually before/after the constitution update.
 ## Outline
 
 You are updating the project constitution at `.specify/memory/constitution.md`. The active
-constitution scaffold is resolved at command time from `constitution-template` through the Spec Kit
+constitution scaffold is resolved at command time from `constitution-template` through the
 preset/template resolution stack.
 
 Follow this execution flow:
 
-1. Run `python3` on this skill's bundled template resolver `scripts/resolve_template.py` (verbatim spec-kit v1.1.3 helper) with arguments `constitution-template --json`, from the repository root, and parse `TEMPLATE_CONTENT` as the active template.
+1. Run `python3` on this skill's bundled template resolver `scripts/resolve_template.py` (verbatim v1.1.3 helper) with arguments `constitution-template --json`, from the repository root, and parse `TEMPLATE_CONTENT` as the active template.
    - If the project cannot resolve `constitution-template` (`.specify/templates/constitution-template.md` missing and no override/preset/extension layer provides it), scaffold it first: copy this skill's `references/constitution-template.md` to `.specify/templates/constitution-template.md`, creating directories as needed; never overwrite an existing project template, then re-run the resolver.
    - The shared resolver applies project overrides, composing preset layers, and extension layers
      before the core template fallback. It MUST succeed before continuing.

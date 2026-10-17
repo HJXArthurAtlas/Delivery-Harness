@@ -1,7 +1,7 @@
 #!/bin/bash
 # scripts/bash/planverify-gate.sh
 #
-# spec-kit before_implement gate (Claude + spec-kit). Optionally blocks
+# before_implement gate (Claude harness). Optionally blocks
 # /ncw-speckit-implement until the planverify verdict for the feature about to
 # be implemented is acceptable.
 #
@@ -12,9 +12,9 @@
 #
 # This is the phase-boundary half of the belt-and-suspenders gate. The
 # cross-vendor half (works for BOTH Claude Code and Codex CLI) is the
-# PreToolUse hook planverify-pretooluse.sh. spec-kit before_* hooks fire
-# only when the user runs spec-kit slash commands under a harness that
-# dispatches them — i.e. Claude + spec-kit — so this gate is a bonus, not
+# PreToolUse hook planverify-pretooluse.sh. before_* hooks fire
+# only when the user runs slash commands under a harness that
+# dispatches them — i.e. the Claude harness — so this gate is a bonus, not
 # the primary enforcement path.
 #
 # Default behavior is OFF (no-op) — consistent with every other compound
@@ -28,7 +28,7 @@
 #   - verdict: PASS | REPLAN_ALLOWED       -> exit 0 (proceed)
 #
 # Shell script, not an agent-prompt hook: agent-prompt hooks silently no-op
-# under spec-kit's executor (verified v0.2.1). Mirrors require-intent.sh.
+# under the harness's executor (verified v0.2.1). Mirrors require-intent.sh.
 
 set -u
 
@@ -38,7 +38,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 ROOT="$(pv_find_root)"
 if [ -z "$ROOT" ]; then
-  echo "ERROR: not in a spec-kit project (.specify/ not found in any parent of $(pwd))"
+  echo "ERROR: not in an SDD project (.specify/ not found in any parent of $(pwd))"
   exit 1
 fi
 cd "$ROOT"

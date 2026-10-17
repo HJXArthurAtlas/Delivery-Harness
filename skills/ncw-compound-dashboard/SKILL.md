@@ -1,11 +1,11 @@
 ---
 name: ncw-compound-dashboard
-description: Launch the read-only pipeline dashboard for the current spec-kit project (intent → spec → plan → tasks → expectations → intentguard, plus content, drift, tokens, architecture). Serves on localhost; background process.
+description: Launch the read-only pipeline dashboard for the current project (intent → spec → plan → tasks → expectations → intentguard, plus content, drift, tokens, architecture). Serves on localhost; background process.
 ---
 
 # Pipeline Dashboard
 
-This command launches the spec-kit-compound **pipeline dashboard** — a read-only,
+This command launches the ncw-compound **pipeline dashboard** — a read-only,
 self-contained localhost view of the SDD chain for the project you are currently
 working in: intents, specs, plans, tasks, expectations, the L3 intentguard drift
 panel, token usage, and the architecture diagram.
@@ -18,8 +18,8 @@ the session.
 
 ## What you must do
 
-1. Determine the spec-kit project root — the directory containing `.specify/`.
-   When invoked from a spec-kit project this is the current working directory.
+1. Determine the project root — the directory containing `.specify/`.
+   When invoked from inside a project this is the current working directory.
 
 2. Launch the dashboard **in the background**, scanning that project root, via Bash:
 
@@ -43,7 +43,7 @@ the session.
 
 ## Flags you may pass through
 
-- `--repo PATH` — scan a different spec-kit project than the cwd
+- `--repo PATH` — scan a different project than the cwd
 - `--port N` — start probing from port `N` (default `8787`; falls forward 10 ports if busy)
 - `--open` — open the URL in a browser (skip when running headless)
 
@@ -63,6 +63,6 @@ the session.
   would freeze the session. Always background it (`&`) and report the URL.
 - **Do not point `--repo` at the extension's own directory**
   (`.specify/extensions/compound/`). That dir has no `docs/` or `specs/` and the
-  dashboard would render an empty chain. Use the spec-kit **project** root.
+  dashboard would render an empty chain. Use the **project** root.
 - **Do not treat this as part of the enforced pipeline.** It is a visualization
   aid only — it never writes, gates, or validates anything.

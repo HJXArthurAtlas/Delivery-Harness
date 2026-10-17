@@ -11,7 +11,7 @@
 #   - every docs/compound/corrections/*.md that carries YAML frontmatter has
 #     the four enforcement keys: paths, match, rule, context
 #
-# Run from anywhere inside a spec-kit project: ./scripts/validate.sh
+# Run from anywhere inside a project: ./scripts/validate.sh
 #
 # Prints PASS/FAIL per check; exit 0 only if every check passes.
 
@@ -23,7 +23,7 @@ pass() { echo "  PASS: $1"; }
 fail() { echo "  FAIL: $1"; ERRORS=$((ERRORS + 1)); }
 
 # ─────────────────────────────────────────────────────────────────
-# Anchor at the spec-kit project root
+# Anchor at the project root
 # ─────────────────────────────────────────────────────────────────
 PROJECT_ROOT="$(pwd)"
 while [ "$PROJECT_ROOT" != "/" ] && [ ! -d "$PROJECT_ROOT/.specify" ]; do
