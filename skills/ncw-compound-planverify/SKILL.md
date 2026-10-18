@@ -29,12 +29,9 @@ Run **after `gapfill`, before `implement`**. It must run after gapfill so it jud
 the **complete obligation set** (constraints + failure conditions + OOS regressions
 + edge cases), not the incomplete generated task list.
 
-When the gate is enabled (`SKC_PLANVERIFY_GATE=block`, default `off`), enforcement is
-belt-and-suspenders across both target harnesses:
-- **PreToolUse hook** (Claude Code *and* Codex CLI) — the cross-vendor layer. Blocks
-  the first source-file Write/Edit if the latest verdict is missing or BLOCKED_DRIFT.
-- **`before_implement` hook** (Claude harness) — a bonus phase-boundary
-  gate for users who drive implementation via `/ncw-speckit-implement`.
+When the gate is enabled (`SKC_PLANVERIFY_GATE=block`, default `off`), run
+`/ncw-compound-planverify-gate` before `/ncw-speckit-implement`. It rejects a
+missing verdict or `BLOCKED_DRIFT` for the feature about to be implemented.
 
 ---
 

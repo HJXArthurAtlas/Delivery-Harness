@@ -11,9 +11,9 @@ Its job: gate `/ncw-speckit-specify` on the existence of at least one intent doc
 
 > **Note:** in this skill pack nothing executes `before_specify` hooks — the
 > pack's `/ncw-speckit-*` skills never run hooks. Here the gate runs as a manual or
-> agent-invoked check before `/ncw-speckit-specify`. The automated paths,
-> where present, are the upstream compound extension's `extension.yml` hook
-> wiring or the `/ncw-compound-install-hooks` `.claude` PreToolUse wiring.
+> agent-invoked check before `/ncw-speckit-specify`. The automated path,
+> where present, is the upstream compound extension's `extension.yml` hook
+> wiring.
 
 ---
 

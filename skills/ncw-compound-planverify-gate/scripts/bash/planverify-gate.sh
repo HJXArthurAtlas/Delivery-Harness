@@ -10,12 +10,9 @@
 #   gates this implement run. When that report is missing, the gate is closed
 #   (exit 1) under block mode.
 #
-# This is the phase-boundary half of the belt-and-suspenders gate. The
-# cross-vendor half (works for BOTH Claude Code and Codex CLI) is the
-# PreToolUse hook planverify-pretooluse.sh. before_* hooks fire
-# only when the user runs slash commands under a harness that
-# dispatches them — i.e. the Claude harness — so this gate is a bonus, not
-# the primary enforcement path.
+# This is the phase-boundary gate. before_* hooks fire only when the user
+# runs slash commands under a harness that dispatches them; otherwise invoke
+# this script manually before implementation.
 #
 # Default behavior is OFF (no-op) — consistent with every other compound
 # command being advisory. Opt in via:

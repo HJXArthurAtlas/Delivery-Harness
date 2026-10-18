@@ -73,7 +73,7 @@ fi
 # 6. sync.mjs PACK_SKILLS 与 skills/ 目录一一对应。
 #    已知偏差（用户已接受，2026-10 回退 0cea95a 最早版本）：清单固定为原始名
 #    monorepo-setup / speckit-flow，经别名对应目录 ncw-monorepo-init / ncw-speckit-flow；
-#    其余 23 个技能显式登记为「已知未入清单」。除此之外任何新差异（新技能忘登记
+#    其余 22 个技能显式登记为「已知未入清单」。除此之外任何新差异（新技能忘登记
 #    安装器、清单新增悬空项、别名对缺任一端）仍会 FAIL。
 listed="$(grep -oE '^const PACK_SKILLS = \[.*\];' "$SYNC_SCRIPT" | grep -oE '"[^"]+"' | tr -d '"' | sort)"
 actual="$(ls "$SKILLS_DIR" | sort)"
@@ -86,7 +86,6 @@ ncw-adrkit-context
 ncw-adrkit-draft
 ncw-compound-expectations
 ncw-compound-gapfill
-ncw-compound-install-hooks
 ncw-compound-intent
 ncw-compound-intentguard
 ncw-compound-load

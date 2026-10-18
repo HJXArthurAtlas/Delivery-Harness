@@ -1,9 +1,8 @@
 #!/bin/bash
 # scripts/bash/planverify-lib.sh
 #
-# Shared verdict/config resolution for the planverify gates. Sourced by both
-# the before_implement gate (planverify-gate.sh) and the cross-vendor
-# PreToolUse gate (planverify-pretooluse.sh) so the two never drift apart.
+# Verdict/config resolution for the before_implement planverify gate.
+# Sourced by planverify-gate.sh.
 #
 # Provides:
 #   pv_find_root            -> echoes the project root, or "" if none

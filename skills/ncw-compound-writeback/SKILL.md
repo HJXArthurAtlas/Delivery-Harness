@@ -51,7 +51,7 @@ Append one final section the scaffold does not carry:
 
 **Correction template:**
 
-The YAML frontmatter is what makes the correction enforceable by the active-corrections `PreToolUse` hook — all four keys (`paths`, `match`, `rule`, `context`) are required for enforcement; a correction without frontmatter is loaded as context only and never blocks a write. See `docs/compound/CORRECTIONS-SCHEMA.md` for the field semantics and `match:` regex gotchas.
+The YAML frontmatter keeps corrections structured and compatible with upstream active-corrections tooling. Include all four keys (`paths`, `match`, `rule`, `context`) to record the scope, forbidden pattern, directive, and background.
 
 ```markdown
 ---
@@ -59,7 +59,7 @@ slug: {YYYY-MM-DD}-{slug}
 paths:
   - "{glob of the files this rule applies to, e.g. **/*.ts}"
 match: "{extended regex matching the forbidden pattern — POSIX ERE only; test with grep -E first}"
-rule: "{one-line directive the hook cites when it blocks a write}"
+rule: "{one-line directive future agents should follow}"
 context: "{one line of background: the past mistake and why the rule exists}"
 ---
 

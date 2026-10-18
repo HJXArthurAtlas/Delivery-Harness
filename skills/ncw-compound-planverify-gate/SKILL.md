@@ -1,6 +1,6 @@
 ---
 name: ncw-compound-planverify-gate
-description: 'Gate hook for before_implement: when SKC_PLANVERIFY_GATE=block, refuses /ncw-speckit-implement if the latest planverify verdict is missing or BLOCKED_DRIFT. No-op by default. The Claude-harness half of the gate; the cross-vendor half is the PreToolUse hook.'
+description: 'Gate hook for before_implement: when SKC_PLANVERIFY_GATE=block, refuses /ncw-speckit-implement if the latest planverify verdict is missing or BLOCKED_DRIFT. No-op by default.'
 ---
 
 # Planverify Gate (before_implement)
@@ -12,17 +12,14 @@ uses for `before_specify`, and that bundled git's hooks use).
 
 Its job: optionally gate `/ncw-speckit-implement` on the planverify verdict of the feature about to be implemented.
 
-This is the **phase-boundary** half of the planverify gate (fires under the
-Claude harness). The **cross-vendor** half — a `PreToolUse` hook that works
-under both Claude Code and Codex CLI — is installed separately via
-`/ncw-compound-install-hooks`.
+This is the **phase-boundary** planverify gate, firing under the Claude
+harness when the upstream extension wires it.
 
 > **Note:** in this skill pack nothing executes `before_implement` hooks — the
 > pack's `/ncw-speckit-*` skills never run hooks. Here the gate runs as a manual or
 > agent-invoked check before `/ncw-speckit-implement` of the given feature.
-> The automated paths, where present, are the upstream compound extension's
-> `extension.yml` hook wiring or the `/ncw-compound-install-hooks` `.claude`
-> PreToolUse wiring.
+> The automated path, where present, is the upstream compound extension's
+> `extension.yml` hook wiring.
 
 ---
 
