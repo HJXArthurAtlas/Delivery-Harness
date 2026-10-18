@@ -1,11 +1,11 @@
 ---
 name: ncw-compound-load
-description: Load settled ADRs (adrkit corpus, docs/adr/) plus the compound store (corrections, patterns from docs/compound/) into agent context at the start of a feature. Auto-scaffolds docs/compound/ if missing.
+description: Load settled ADRs (adrkit corpus, docs/adr/) plus corrections and patterns (docs/corrections/, docs/patterns/) into agent context at the start of a feature. Auto-scaffolds the store metadata and artifact directories if missing.
 ---
 
 # Load Compound Store
 
-You load the project's settled decisions and the committed compound store, and inject them into the current session's agent context. Settled ADRs come from the adrkit corpus at `docs/adr/` (override with `ADRKIT_DIR`); past mistakes and approved patterns come from the compound store at `docs/compound/`. All of them should constrain everything the agent does for the rest of the session.
+You load the project's settled decisions and the committed compound store, and inject them into the current session's agent context. Settled ADRs come from the adrkit corpus at `docs/adr/` (override with `ADRKIT_DIR`); past mistakes and approved patterns come from `docs/corrections/` and `docs/patterns/`. All of them should constrain everything the agent does for the rest of the session.
 
 ---
 
@@ -13,20 +13,21 @@ You load the project's settled decisions and the committed compound store, and i
 
 **1. Detect or create the compound store.**
 
-If `docs/compound/` does not exist, create the scaffold:
+If any part of the scaffold is missing, create the missing directories and README:
 
 ```
-docs/compound/
-├── README.md         (explains the structure)
+docs/
+├── compound/
+│   └── README.md     (explains the structure)
 ├── corrections/      (empty)
 └── patterns/         (empty)
 ```
 
-Copy this skill's bundled `references/compound-store-README.md` verbatim to `docs/compound/README.md` (it documents the store contract for future contributors — correction frontmatter and pattern slots; settled ADRs live in the adrkit corpus at `docs/adr/`, not in this store).
+Copy this skill's bundled `references/compound-store-README.md` verbatim to `docs/compound/README.md` if the README is missing (it documents the store contract for future contributors — correction frontmatter and pattern slots; settled ADRs live in the adrkit corpus at `docs/adr/`).
 
-Then tell the user: *"Compound store initialized at `docs/compound/`. Empty for now — it will fill over the next few features via `/ncw-compound-writeback`."*
+When initializing a new store, tell the user: *"Compound store initialized: README at `docs/compound/README.md`, corrections at `docs/corrections/`, and patterns at `docs/patterns/`. Empty for now — it will fill over the next few features via `/ncw-compound-writeback`."*
 
-**2. Read all files** in the adrkit corpus (`docs/adr/`, or `$ADRKIT_DIR` when the project overrides it) and in `docs/compound/corrections/` and `docs/compound/patterns/`. If a legacy `docs/compound/adr/` directory still exists, ignore it — those records were or will be migrated into the corpus.
+**2. Migrate legacy artifacts, then read all files.** Migrate a legacy `docs/compound/adr/` corpus into the canonical adrkit corpus with the legacy-corpus instructions in `/ncw-adrkit-draft`. Move any legacy `docs/compound/corrections/` and `docs/compound/patterns/` files to `docs/corrections/` and `docs/patterns/`. Then read all files in the adrkit corpus (`docs/adr/`, or `$ADRKIT_DIR` when the project overrides it) and in `docs/corrections/` and `docs/patterns/`.
 
 **3. Inject a context summary** at the start of the agent's working memory:
 
@@ -78,7 +79,7 @@ When invoked as a `before_constitution` hook, this command runs silently at proj
 ## Tool choices
 
 - **Read** for scanning compound store files
-- **Bash** (`mkdir`, `ls`, `cp`) for scaffold creation if missing — copy `references/compound-store-README.md` into place rather than composing a fresh README
+- **Bash** (`mkdir`, `ls`, `cp`, `mv`) for scaffold creation and the explicit legacy migrations above — copy `references/compound-store-README.md` into place rather than composing a fresh README
 - **Write** for the auto-created `docs/compound/README.md` only if the bundled reference is unavailable
 
 ---
@@ -92,6 +93,6 @@ When invoked as a `before_constitution` hook, this command runs silently at proj
 
 ## What you do NOT do
 
-- **Modify any compound store file during load** — load is strictly read-only. Edits happen via `/ncw-compound-writeback`.
+- **Edit compound store content during load** — scaffolding and the explicit legacy migrations above are the only exceptions; new learnings are written via `/ncw-compound-writeback`.
 - **Re-load mid-session unsolicited** — load happens at the start of a feature; only re-run if the user explicitly invokes it after context compaction.
 - **Block the rest of the session if the store is empty** — empty store is normal on a fresh project; just confirm scaffold and continue.

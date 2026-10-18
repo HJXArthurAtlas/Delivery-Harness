@@ -114,7 +114,7 @@ Write `docs/intents/{slug}.planverify.briefing.md` containing **only**:
 - **The plan**: full `specs/{slug}/plan.md`
 - **The tasks**: full `specs/{slug}/tasks.md`
 - **Surface analysis**: the drift-candidate list from Phase 1 (path, classification, requested/unrequested) as plain facts
-- Relevant ADRs and `docs/compound/corrections/` notes (so the checker can flag a plan that contradicts a recorded decision)
+- Relevant ADRs and `docs/corrections/` notes (so the checker can flag a plan that contradicts a recorded decision)
 - **The verdict contract** (below)
 
 It must contain **NONE** of: your chat history, the planner's reasoning narration,

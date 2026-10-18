@@ -55,7 +55,7 @@ If the user tries to skip, refuse politely and explain which specific test would
 ## Inputs you have
 
 - **Required**: the corresponding intent doc at `docs/intents/{slug}.intent.md`. If it does not exist, stop and instruct the user to run `/ncw-compound-intent` first.
-- Compound store at `docs/compound/*` if loaded via `/ncw-compound-load`
+- Compound store artifacts at `docs/adr/`, `docs/corrections/`, and `docs/patterns/`, if loaded via `/ncw-compound-load`
 
 ## Output you produce
 
@@ -192,10 +192,10 @@ The boundary: if a non-technical user could read it aloud and understand what is
 
 ## Compound store interaction
 
-If `docs/compound/` exists and was loaded:
+If the compound store was loaded:
 
-- **Scan `docs/compound/patterns/`** for relevant test patterns — if a pattern exists for "how we test dark mode" or "how we test feature flags", reference it as a starting template.
-- **Scan `docs/compound/corrections/`** for past failure scenarios that became known issues — propose edge scenarios that would catch repeats: *"Correction note from {date} flagged that {pattern} caused {issue}. Worth an edge scenario for it."*
+- **Scan `docs/patterns/`** for relevant test patterns — if a pattern exists for "how we test dark mode" or "how we test feature flags", reference it as a starting template.
+- **Scan `docs/corrections/`** for past failure scenarios that became known issues — propose edge scenarios that would catch repeats: *"Correction note from {date} flagged that {pattern} caused {issue}. Worth an edge scenario for it."*
 - **Do not contradict** the intent doc's locked constraints. If an expectation seems to require violating a constraint, flag it: *"This scenario requires X, but C{N} forbids it. Either drop the scenario or revise the constraint via `/ncw-compound-intent` re-run."*
 
 ---

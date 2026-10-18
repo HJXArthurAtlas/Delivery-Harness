@@ -35,7 +35,7 @@ If non-empty, treat it as a request to prioritize the specified area for deeper 
 1. Confirm that the environment is macOS / Linux and that both the `bash` command and `.specify/scripts/bash/check-prerequisites.sh` are available. If not, state that the environment is unsupported and stop. Do not switch to an alternative PowerShell or Python script. Feature resolution requires a specify-initialized project — `.specify/scripts/bash/check-prerequisites.sh` exists only after `specify init`; if it is absent, run ncw-monorepo-init first.
 2. From the repository root, run `bash .specify/scripts/bash/check-prerequisites.sh --json --paths-only` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC`. If it does not return JSON, stop and recommend rerunning the agent-specific invocation of `ncw-speckit-specify` or checking the active feature environment.
 3. If spec.md does not exist, stop and recommend running the agent-specific invocation of `ncw-speckit-specify` first. Do not create a new specification here.
-4. Read `.specify/memory/constitution.md` (project principles) if it exists. In addition, inspect **only the existing materials relevant to the work at hand** using ordinary file search, file reading, and symbol search:
+4. Read `docs/constitution/constitution.md` (project principles) if it exists. In addition, inspect **only the existing materials relevant to the work at hand** using ordinary file search, file reading, and symbol search:
    - `README*` / `CONTEXT.md` / `CLAUDE.md` / `AGENTS.md` / `documents/**` / `docs/**` — domain terminology, stakeholders, business flows, and design decisions
    - Related existing specs / plans / ADRs — existing requirements, constraints, and accepted or rejected decisions
    - Source code / schemas / migrations / models / interfaces / tests — implemented behavior, data shapes, and boundary conditions
@@ -96,7 +96,7 @@ Use the following authoritative source for each type of content.
 
 | Content | Authoritative source |
 | --- | --- |
-| Project principles | `.specify/memory/constitution.md`, when present; it constrains all other requirements and decisions |
+| Project principles | `docs/constitution/constitution.md`, when present; it constrains all other requirements and decisions |
 | Feature-specific requirements and expected behavior | The current `FEATURE_SPEC` and decisions explicitly settled by the user in this session |
 | Cross-feature terminology, domain knowledge, and design decisions | The canonical `CONTEXT_FILE`, topic documents under `KNOWLEDGE_ROOT`, and ADRs under `ADR_DIR`, unless the user explicitly settles a change in this session and the new decision has been saved and verified |
 | Current implementation state | Primary sources such as code, schemas, migrations, models, interfaces, and tests |

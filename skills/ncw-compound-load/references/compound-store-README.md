@@ -1,6 +1,6 @@
 # Compound Store
 
-This directory is the **committed memory** of the codebase — the layer that makes the workflow *compound*.
+This compound store is the **committed memory** of the codebase — the layer that makes the workflow *compound*.
 
 Every feature contributes back via `/ncw-compound-writeback`. Every feature inherits the accumulated store via `/ncw-compound-load`. Over time, the store outweighs any static constitution document you could write upfront.
 
@@ -9,12 +9,15 @@ Every feature contributes back via `/ncw-compound-writeback`. Every feature inhe
 ## Structure
 
 ```
-docs/compound/
-├── corrections/   ← AI correction notes (past mistakes and derived rules)
-└── patterns/      ← Approved patterns (proven approaches for this codebase)
+docs/
+├── adr/              ← ADR records (shared adrkit corpus)
+├── corrections/      ← AI correction notes (past mistakes and derived rules)
+├── patterns/         ← Approved patterns (proven approaches for this codebase)
+└── compound/
+    └── README.md     ← This store guide
 ```
 
-ADR records live in the shared adrkit corpus at `docs/adr/` — same numbering and schema as `/ncw-adrkit-draft`, validated by `adr lint`. They are allocated by the scaffold entry point in `ncw-adrkit-draft/scripts/`, not by this store.
+ADR records live in the shared adrkit corpus at `docs/adr/` — same numbering and schema as `/ncw-adrkit-draft`, validated by `adr lint`. They are allocated by the scaffold entry point in `ncw-adrkit-draft/scripts/`, never hand-numbered.
 
 ### ADRs live in the adrkit corpus (`docs/adr/`)
 
@@ -22,7 +25,7 @@ Architecture decisions made during real features are allocated by the adrkit sca
 
 The "Rule for AI" line is what `/ncw-compound-load` injects into context, together with the rest of the corpus. Future agents are instructed not to re-debate these decisions, and `/ncw-adrkit-check` validates plans against the corpus at plan time.
 
-### `corrections/`
+### `docs/corrections/`
 
 Captured during `/ncw-speckit-implement` when the user pushes back on the agent. Each file:
 
@@ -32,7 +35,7 @@ Captured during `/ncw-speckit-implement` when the user pushes back on the agent.
 
 Corrections auto-capture without user approval (because the correction was already made by the user). They are reviewed at writeback time and can be promoted to ADRs if they describe a durable principle rather than a one-off.
 
-### `patterns/`
+### `docs/patterns/`
 
 Approaches that worked well enough to template for future features. Each file:
 
@@ -78,6 +81,6 @@ The compound store is **committed to the repo**. It survives all of the above an
 
 ## Bootstrapping
 
-This directory is created automatically by `/ncw-compound-load` on first invocation in a project. You do not need to pre-populate it. The store grows naturally from the first feature onward.
+This scaffold is created automatically by `/ncw-compound-load` on first invocation in a project, with this README at `docs/compound/README.md` and artifact directories at `docs/corrections/` and `docs/patterns/`. You do not need to pre-populate it. The store grows naturally from the first feature onward.
 
 The first feature contributes 0–2 ADRs (in the corpus) at most. By feature 10, expect a non-trivial set. By feature 50, the store contains more applied wisdom than any constitution doc you would have written upfront.

@@ -102,16 +102,19 @@ Claude Code's memory files are stored locally, not permanently in the project's 
 
 **The compound store (committed, version-controlled):**
 ```
-docs/compound/
-├── corrections/   ← what AI did wrong + derived rule to avoid repeat
-└── patterns/      ← reusable implementation patterns for this codebase
+docs/
+├── adr/              ← settled architecture decisions (shared adrkit corpus)
+├── corrections/      ← what AI did wrong + derived rule to avoid repeat
+├── patterns/         ← reusable implementation patterns for this codebase
+└── compound/
+    └── README.md     ← compound store guide
 ```
-(Settled ADRs were consolidated into the shared adrkit corpus at `docs/adr/` —
+(Settled ADRs live in the shared adrkit corpus at `docs/adr/` —
 same schema as `/ncw-adrkit-draft`, validated by `adr lint`.)
 
 **The compounding effect:**
-Each feature run writes back learnings — corrections and patterns to the compound store, ADRs to the shared adrkit corpus (`docs/adr/`).
-The next feature loads both before starting.
+Each feature run writes back learnings — corrections and patterns to `docs/corrections/` and `docs/patterns/`, ADRs to the shared adrkit corpus (`docs/adr/`).
+The next feature loads these artifacts before starting.
 Over time: fewer loop iterations, fewer corrections, faster merge.
 
 In v0.2 we expose this as two separate commands (the extension system does not support subactions):
@@ -151,7 +154,7 @@ The most critical architectural decision.
 
 The toolkit and its harnesses store agent memory locally. This breaks across sessions, machines, and team members.
 
-The compound store (`docs/compound/`) is version-controlled and committed. It is treated as a first-class repo artifact, the same way the ADR corpus is — because that is exactly what it is.
+The compound store is version-controlled and committed: artifacts live in `docs/adr/`, `docs/corrections/`, and `docs/patterns/`, while metadata remains under `docs/compound/`. It is treated as a first-class repo artifact — because that is exactly what it is.
 
 ### Intent and Expectations are separate commands (soft compartmentation, v0.2)
 Per IDSD's compartmentation principle, success scenarios must not appear in the same artifact the builder reads, because LLMs reward-hack — the builder will optimize for the scenarios the validator checks if both come from the same file.

@@ -58,6 +58,6 @@ $ARGUMENTS
   reachable from a lifecycle hook, so it must never write.
 - Exit code 1 means findings exist (corpus errors, or the evaluator returned the
   proposal). The report is still complete. Exit code 2 is a usage error.
-- Configuration: `ADRKIT_DIR` (corpus, default `docs/adr`), `ADRKIT_SNAPSHOT`
+- Configuration: `ADRKIT_DIR` (corpus, default `docs/adr/`), `ADRKIT_SNAPSHOT`
   (evaluator snapshot bundle), `ADRKIT_AS_OF` (evaluation date, default today
   UTC), `ADRKIT_CLI` (explicit path to the `adr` entry point).

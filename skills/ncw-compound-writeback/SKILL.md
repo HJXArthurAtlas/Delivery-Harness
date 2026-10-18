@@ -101,11 +101,11 @@ Show each draft and ask (use AskUserQuestion per draft):
 - **reject** — drop this draft
 - **defer** — save to a scratch file `docs/compound/_drafts/` for later review
 
-**5. Write accepted files.** ADRs go to the shared adrkit corpus; corrections and patterns stay in the compound store.
+**5. Write accepted files.** ADRs go to the shared adrkit corpus at `docs/adr/`; corrections and patterns go to `docs/corrections/` and `docs/patterns/`.
 
 - For ADRs: allocate each accepted ADR through the scaffold entry point `.agents/skills/ncw-adrkit-draft/scripts/scaffold.sh <title>` (global install: `~/.agents/skills/ncw-adrkit-draft/scripts/scaffold.sh`). It writes a schema-valid draft with the next free corpus id into `docs/adr/` (override with `ADRKIT_DIR`), printing `{ "id", "path" }`; write the drafted body into that file and run `adr lint` afterwards. Status stays `draft` — ratification is a human act, as in `/ncw-adrkit-draft`. Never hand-number and never edit an existing ADR; a changed decision gets a new record that supersedes the old one.
-- For corrections: prefix with date. Format: `{YYYY-MM-DD}-{slug}.md`. Always include the `paths:`/`match:`/`rule:`/`context:` frontmatter from the template above so the correction is enforceable — only fall back to a frontmatter-less body if the user explicitly wants a context-only note.
-- For patterns: use slug only. Format: `{slug}.md`.
+- For corrections: write `docs/corrections/{YYYY-MM-DD}-{slug}.md`, prefixing the filename with the date. Always include the `paths:`/`match:`/`rule:`/`context:` frontmatter from the template above so the correction is enforceable — only fall back to a frontmatter-less body if the user explicitly wants a context-only note.
+- For patterns: write `docs/patterns/{slug}.md`, using the slug only as the filename.
 
 **6. Update intent doc status.**
 
@@ -117,7 +117,7 @@ completed: {YYYY-MM-DD}
 
 **7. Summary**:
 
-*"Writeback complete. {N} ADRs committed to the adrkit corpus (`docs/adr/`), {N} corrections and {N} patterns committed to the compound store. Intent `{slug}` marked completed. Corpus size: {N} ADRs; store size: {N} corrections / {N} patterns."*
+*"Writeback complete. {N} ADRs committed to the adrkit corpus (`docs/adr/`), {N} corrections committed to `docs/corrections/`, and {N} patterns committed to `docs/patterns/`. Intent `{slug}` marked completed. Corpus size: {N} ADRs; store size: {N} corrections / {N} patterns."*
 
 ---
 

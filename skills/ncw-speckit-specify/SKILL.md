@@ -69,7 +69,7 @@ Given that feature description, do this:
 
 4. Load the resolved active `spec-template` file to understand required sections.
 
-5. **IF EXISTS**: Load `.specify/memory/constitution.md` for project principles and governance constraints.
+5. **IF EXISTS**: Load `docs/constitution/constitution.md` for project principles and governance constraints.
 
 6. **Ensure the unified-language glossary exists**: The spec template's mandatory 统一语言 section references the central glossary `.specify/memory/glossary.md`. If that file is missing, scaffold it before writing the spec: create `.specify/memory/` if needed and write a minimal glossary there — one section per project domain (域节) plus a 「使用规则」 section stating that spec terms must be registered in the matching 域节 and that definitions live in the glossary, not in individual specs. Never overwrite an existing glossary. When writing the spec (step 8), register any new domain concepts introduced by this feature into the matching 域节, as the template requires.
 

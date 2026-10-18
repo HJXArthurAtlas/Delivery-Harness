@@ -40,7 +40,7 @@ of the code relative to the feature's artifacts — no git, no branch comparison
 When the codebase already satisfies everything, the command MUST leave `tasks.md`
 **byte-for-byte unchanged** (no empty Convergence header) and report a clean result.
 
-**Constitution Authority**: The project constitution (`.specify/memory/constitution.md`) is
+**Constitution Authority**: The project constitution (`docs/constitution/constitution.md`) is
 **non-negotiable**. Code that violates a MUST principle is the highest-severity finding and
 produces a corresponding remediation task. If the constitution is an unfilled template,
 skip constitution checks gracefully rather than failing.
@@ -54,7 +54,7 @@ Run `python3` on this skill's bundled prerequisite checker `scripts/check_prereq
 - SPEC = FEATURE_DIR/spec.md
 - PLAN = FEATURE_DIR/plan.md
 - TASKS = FEATURE_DIR/tasks.md
-- CONSTITUTION = `.specify/memory/constitution.md` (if present)
+- CONSTITUTION = `docs/constitution/constitution.md` (if present)
 If `spec.md`, `plan.md`, or `tasks.md` is missing, STOP with a clear, actionable message naming the
 prerequisite command to run (`/ncw-speckit-specify` for a missing spec, `/ncw-speckit-plan` for a missing plan,
 `/ncw-speckit-tasks` for missing tasks). Do not produce partial output.

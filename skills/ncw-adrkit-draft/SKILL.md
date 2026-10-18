@@ -58,20 +58,23 @@ $ARGUMENTS
   unprompted would manufacture decision memory instead of recording it.
 - It writes exactly one new file and never edits an existing record. If the
   target path is already taken it refuses rather than overwriting (exit 1).
-- Single corpus: since the ADR-unification cutover, `docs/adr` (or
+- Single corpus: since the ADR-unification cutover, `docs/adr/` (or
   `$ADRKIT_DIR`) is the project's only ADR corpus. `ncw-speckit-grill-with-docs`
   and `ncw-compound-writeback` allocate their records here too, through this
   skill's `scripts/scaffold.sh` — the plan-less variant of this command's
   deterministic half (same CLI, same id allocation, no plan required). All
   writers share one numbering sequence; never hand-number.
-- Migrating a pre-cutover split corpus (records still under
-  `docs/domain_knowledge/adr/` or `docs/compound/adr/`): the pinned CLI owns
-  the conversion. Dry-run `adr migrate --from madr --rename --dir <legacy-dir>`
-  on each legacy directory to preview the findings; renumber one legacy set by
-  renaming its files (the filename drives the record id, so `NNNN-slug.md`
-  must not collide across the two sets — `adr lint` does not report duplicate
-  ids, verified against the pinned CLI, so this renumber step is the merge's
-  only collision guard); move everything into `docs/adr/`; run
+- Migrating legacy corpus locations (records still under
+  `docs/compound/adr/` or `docs/domain_knowledge/adr/`): records already in
+  `docs/adr/` are canonical and need no relocation. The pinned CLI owns the
+  conversion. Dry-run `adr migrate --from madr --rename --dir <legacy-dir>`
+  on each legacy directory to preview the findings; before moving anything,
+  renumber incoming legacy records by renaming their files so that every
+  `NNNN-slug.md` id is unique across the existing canonical records and all
+  incoming legacy sets (the filename drives the record id, and `adr lint`
+  does not report duplicate ids, verified against the pinned CLI, so this
+  renumber step is the merge's only collision guard); move only the legacy
+  records into `docs/adr/`; run
   `adr migrate --from madr --rename --dir docs/adr` once over the merged
   corpus; backfill the reported findings (date, status, deciders); finish with
   `adr lint`.

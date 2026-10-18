@@ -50,7 +50,7 @@ $ARGUMENTS
   run ncw-monorepo-init first. `ADRKIT_FEATURE_DIR` overrides feature-dir
   resolution (skip check-prerequisites.sh).
 - Read-only. This command never writes to `docs/adr/**` or anything else.
-- The corpus directory defaults to `docs/adr` and is overridable with
+- The corpus directory defaults to `docs/adr/` and is overridable with
   `ADRKIT_DIR`. Since the ADR-unification cutover this is the project's only
   ADR corpus: ncw-speckit-grill-with-docs and ncw-compound-writeback allocate
   their records here through the scaffold entry point at

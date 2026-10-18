@@ -242,7 +242,7 @@ diff_files: {N}
 
 ## Compound store interaction
 
-- Include any ADRs and relevant `docs/compound/corrections/` notes **in the briefing** so the checker can flag a diff that contradicts a recorded decision (BLOCKED-level) or repeats a past mistake (*"matches correction `{date}-{slug}`"*).
+- Include any ADRs and relevant `docs/corrections/` notes **in the briefing** so the checker can flag a diff that contradicts a recorded decision (BLOCKED-level) or repeats a past mistake (*"matches correction `{date}-{slug}`"*).
 
 ---
 

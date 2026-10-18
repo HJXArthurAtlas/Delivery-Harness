@@ -84,7 +84,6 @@ ncw-speckit-flow"
 known_unregistered="ncw-adrkit-check
 ncw-adrkit-context
 ncw-adrkit-draft
-ncw-compound-dashboard
 ncw-compound-expectations
 ncw-compound-gapfill
 ncw-compound-install-hooks

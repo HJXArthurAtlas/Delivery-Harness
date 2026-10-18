@@ -123,9 +123,9 @@ If they confirm, accept and move on.
 
 ## Compound store interaction
 
-If `docs/compound/patterns/` exists, scan for "gapfill" templates — past tasks-list augmentations that proved valuable. Propose them as additional candidates if relevant.
+If `docs/patterns/` exists, scan for "gapfill" templates — past tasks-list augmentations that proved valuable. Propose them as additional candidates if relevant.
 
-If `docs/compound/corrections/` exists, scan for past gap-misses that became bugs — propose tasks that would catch them. Cite the correction by slug.
+If `docs/corrections/` exists, scan for past gap-misses that became bugs — propose tasks that would catch them. Cite the correction by slug.
 
 ---
 

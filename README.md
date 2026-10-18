@@ -12,20 +12,19 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | `ncw-adrkit-draft` | 从当前 plan 工件 scaffold 一条新 ADR 草稿（不经 hook；其 `scripts/scaffold.sh` 还是 grill-with-docs / compound-writeback 的免 plan 分配入口——ADR 统一归口语料 `docs/adr/`；落稿后接 `adr lint` 校验） | 「把这个决策落成 ADR」 |
 | `ncw-compound-intent` | intent 访谈：目标 + 约束 + 失败条件（compound v0.7.0 的 pack 分发，正文英文原文；运行期数据落在项目 `docs/intents/` 等，不经扩展安装） | 「先做 intent 访谈」「锁定目标与约束」 |
 | `ncw-compound-expectations` | 期望访谈：正/边缘场景与 intent 分文件存放（builder 不可见，防 reward-hack） | 「补期望场景」「写 expectations」 |
-| `ncw-compound-load` | 会话开始加载 adrkit ADR 语料（`docs/adr/`）+ compound store（纠偏/模式）进上下文，缺目录时按 bundled 模板 scaffold | 「加载 compound store」 |
-| `ncw-compound-writeback` | intentguard PASS 后把本次纠偏/模式写回 compound store，耐久纠偏升格为 ADR 进 adrkit 语料 `docs/adr/` | 「writeback 本次经验」 |
+| `ncw-compound-load` | 会话开始加载 adrkit ADR 语料（`docs/adr/`）+ compound store（`docs/corrections/` + `docs/patterns/`）进上下文，缺目录时按 bundled 模板 scaffold | 「加载 compound store」 |
+| `ncw-compound-writeback` | intentguard PASS 后把本次纠偏/模式写回 `docs/corrections/` + `docs/patterns/`，耐久纠偏升格为 ADR 进 adrkit 语料 `docs/adr/` | 「writeback 本次经验」 |
 | `ncw-compound-gapfill` | intent + expectations 对照 tasks.md 找覆盖缺口并追加任务（带来源注释） | 「补任务缺口」「gapfill」 |
 | `ncw-compound-planverify` | 实现前由独立 checker（跨模型优先）判定 plan + 任务是否偏离锁定 intent | 「验证 plan」「planverify」 |
 | `ncw-compound-planverify-gate` | before_implement 门禁脚本包装器：`SKC_PLANVERIFY_GATE=block` 时拦截未验证/BLOCKED_DRIFT 的实现 | （hook 触发） |
 | `ncw-compound-intentguard` | 实现后 L3 校验：密封 briefing + 独立 checker 判 diff 是否越出 intent/期望 | 「intentguard 校验本次实现」 |
 | `ncw-compound-require-intent` | before_specify 门禁脚本包装器：`docs/intents/` 无 intent 文档时拦截 specify | （hook 触发） |
 | `ncw-compound-install-hooks` | 一次性安装 Claude Code PreToolUse hooks（纠偏匹配 + planverify 门）到项目 `.claude/` | 「安装 compound hooks」 |
-| `ncw-compound-dashboard` | 只读 SDD 流水线仪表盘（localhost 后台 HTTP 服务，stdlib 单文件 dashboard.py） | 「打开流水线仪表盘」 |
 | `ncw-speckit-grill-me` | 无上限轮次澄清访谈（clarify 的深化替代）：前沿/轮次/设计树把 spec.md 决策点推进到 Clear/Resolved/Outstanding/Deferred（grill me 命令的 pack 分发，正文英文原文） | 「深度澄清这份 spec」「grill me」 |
 | `ncw-speckit-grill-with-docs` | 同 grill-me 澄清流程 + settled 跨特性术语/领域知识即时落盘 docs/domain_knowledge/（CONTEXT.md + 主题文档）；过三条件记录门的决策经 adrkit scaffold 归口为 ADR（`docs/adr/`，pack fork 段）（grill with-docs 命令的 pack 分发） | 「澄清并沉淀领域知识」 |
 | `ncw-speckit-analyze` | 跨工件一致性只读分析（analyze 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「分析 spec/plan/tasks 一致性」 |
 | `ncw-speckit-clarify` | 规格澄清问答（clarify 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「澄清规格歧义」「补全需求细节」 |
-| `ncw-speckit-constitution` | 创建/更新项目章程（constitution 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「立章程」「修订治理原则」 |
+| `ncw-speckit-constitution` | 创建/更新项目章程 `docs/constitution/constitution.md`（constitution 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「立章程」「修订治理原则」 |
 | `ncw-speckit-converge` | 差距收敛（converge 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「收敛剩余工作」「补齐未实现需求」 |
 | `ncw-speckit-flow` | 规格驱动开发 + PingCode AI native 开发流程的衔接与门禁（出规格建卡 → 接规格规划实现 → 卡片收尾） | 「这个需求转开发了，开始 plan」「出 spec 并建卡」 |
 | `ncw-speckit-implement` | 按 tasks.md 执行任务实现（implement 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「开始实现」「按任务清单编码」 |
