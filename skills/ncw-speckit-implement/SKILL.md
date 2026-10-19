@@ -58,6 +58,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **IF EXISTS**: Read research.md for technical decisions and constraints
    - **IF EXISTS**: Read docs/constitution/constitution.md for governance constraints
    - **IF EXISTS**: Read quickstart.md for integration scenarios
+   - **IF EXISTS**: Read `$FEATURE_DIR/design-tasks.md` (**pack fork (ncw), port on upstream upgrade**): implement UI tasks against its interaction rules and page states, and verify each applicable design requirement (UI-xx) before marking its task complete. An external visual design draft, if any, is the visual source of truth; conflicts with spec/plan go back to the user, never resolved silently.
 
 4. **Project Setup Verification**:
    - **REQUIRED**: Create/verify ignore files based on actual project setup:

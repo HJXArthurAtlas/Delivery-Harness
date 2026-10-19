@@ -1,6 +1,6 @@
 ---
 name: ncw-speckit-flow
-description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流程操作规范（产品出规格建卡 → 开发接规格规划实现 → 卡片随实现收尾）。当用户要执行或提到 /ncw-speckit-specify、/ncw-speckit-plan、/ncw-speckit-tasks、/ncw-speckit-implement、specstoissues、sync-cards、sync-status，或说"出 spec""写规格""这个需求转开发了""接需求开始 plan""建卡""对账卡片""任务卡收尾"，或任务涉及 specs/ 产物、pingcode-mapping.json、需求树（idea/epic/feature/story）与本地任务的对应关系时使用本 skill——即使用户没提"ncw-speckit"命令名，只要是在这套规格驱动流程里干活（产品侧或开发侧）也要使用。
+description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流程操作规范（产品出规格建卡 → 开发接规格规划实现 → 卡片随实现收尾）。当用户要执行或提到 /ncw-speckit-specify、/ncw-speckit-design、/ncw-speckit-plan、/ncw-speckit-tasks、/ncw-speckit-implement、specstoissues、sync-cards、sync-status，或说"出 spec""写规格""这个需求转开发了""接需求开始 plan""建卡""对账卡片""任务卡收尾"，或任务涉及 specs/ 产物、pingcode-mapping.json、需求树（idea/epic/feature/story）与本地任务的对应关系时使用本 skill——即使用户没提"ncw-speckit"命令名，只要是在这套规格驱动流程里干活（产品侧或开发侧）也要使用。
 ---
 
 # ncw-speckit-flow
@@ -14,15 +14,16 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 | 阶段 | 角色 | 动作 | 产物 / 卡片 |
 |---|---|---|---|
 | 1. specify | 产品 | `/ncw-speckit-specify` 生成规格 | `specs/<NNN>-<short-name>/spec.md`（含 `### User Story N` 章节） |
-| 2. 建卡 | 产品 | pingcode 扩展的 specstoissues 命令（optional，priority 99） | 需求树 idea → epic → feature(spec 卡) → story 卡；登记 `specs/pingcode-mapping.json` |
-| 3. 交接 | 产品→开发 | 门禁检查（下节），通过后转开发 | — |
-| 4. plan | 开发 | `/ncw-speckit-plan` | 计划产物 |
-| 5. tasks | 开发 | `/ncw-speckit-tasks`；配置了 `mapping.task_artifact` 时 tasks 后补建任务卡（pingcode 扩展命令） | `tasks.md`（+ 任务卡挂 story/spec 卡下） |
-| 6. implement 前 | 开发 | pingcode 扩展的 sync-cards 命令对账 | spec 后续修改与卡片的增删改对齐 |
-| 7. implement | 开发 | `/ncw-speckit-implement`；提交走 `mturtle-commit`，消息带故事卡 ID | 代码 + 测试 |
-| 8. 收尾 | 开发 | 本地任务全部 `[x]` → pingcode 扩展的 sync-status 命令 | 卡片流转完成（单向，不回退） |
+| 2. 设计任务书 | 产品/设计 | 涉 UI 的特性跑 `/ncw-speckit-design`（先 `/ncw-speckit-clarify` 更佳）；无 UI 跳过；与建卡并行 | `specs/<NNN>-<short-name>/design-tasks.md`（交付设计师；不是交接门禁项，不阻塞建卡与交接） |
+| 3. 建卡 | 产品 | pingcode 扩展的 specstoissues 命令（optional，priority 99） | 需求树 idea → epic → feature(spec 卡) → story 卡；登记 `specs/pingcode-mapping.json` |
+| 4. 交接 | 产品→开发 | 门禁检查（下节），通过后转开发 | — |
+| 5. plan | 开发 | `/ncw-speckit-plan`；特性目录存在 `design-tasks.md` 时必须先读，交互/页面状态按它对齐后再规划，与 spec 冲突时回产品/设计侧对齐 | 计划产物 |
+| 6. tasks | 开发 | `/ncw-speckit-tasks`；配置了 `mapping.task_artifact` 时 tasks 后补建任务卡（pingcode 扩展命令） | `tasks.md`（+ 任务卡挂 story/spec 卡下） |
+| 7. implement 前 | 开发 | pingcode 扩展的 sync-cards 命令对账 | spec 后续修改与卡片的增删改对齐 |
+| 8. implement | 开发 | `/ncw-speckit-implement`；UI 任务按设计稿 + `design-tasks.md` 设计要求清单验收；提交走 `mturtle-commit`，消息带故事卡 ID | 代码 + 测试 |
+| 9. 收尾 | 开发 | 本地任务全部 `[x]` → pingcode 扩展的 sync-status 命令 | 卡片流转完成（单向，不回退） |
 
-## 交接门禁（阶段 3，spec 转开发前逐项核对）
+## 交接门禁（阶段 4，spec 转开发前逐项核对）
 
 1. `### User Story N` 章节齐备，每章标题行内标注优先级 `(Priority: P1/P2/P3)`（bundled spec 模板的既有格式）——这是卡片优先级映射的来源，缺了卡片优先级落不下来。
 2. `specs/pingcode-mapping.json` 已登记：每张卡的 id 与状态可追溯。没有登记 = 建卡没完成，不能交接。
@@ -31,9 +32,12 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 
 任何一项不过 → 留在产品侧处理完再交接，不要把半成品 spec 推给开发。
 
+设计任务书（阶段 2 的 `design-tasks.md`）不在本门禁清单内：无 UI 特性不产出；涉 UI 未产出也不阻塞产品→开发交接，由设计侧自行跟进。
+
 ## 开发侧纪律
 
 - **implement 前必对账**：spec 在建卡后有过修改的，先 `sync-cards` 消化差异再动代码——卡片描述与 spec 漂移会让收尾阶段对不上账。
+- **涉 UI 必对 design-tasks**：特性目录有 `design-tasks.md` 的，plan 前先读——交互规则、页面状态、设计要求清单（UI-01…）是 plan 的 UX 输入；它与 spec 冲突时回产品/设计侧对齐，绝不自行裁决；实现与验收对照设计稿 + 设计要求清单，不让 plan 即兴发明交互。
 - **溯源链**：`specs/<NNN>-<short-name>/spec.md 章节 → mapping.json 卡片 id → 提交消息故事卡 ID → sync-status 收尾`。动手前先把当前任务的卡片 id 从 `pingcode-mapping.json` 里查出来，提交时才有 ID 可写。
 - **收尾单向**：任务卡随本地勾选收尾，不回退；需要重开就走新的工作项，不要手动改回收尾态以外的状态。
 
