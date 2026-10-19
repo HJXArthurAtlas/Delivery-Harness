@@ -25,7 +25,7 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | `ncw-speckit-clarify` | 规格澄清问答（clarify 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「澄清规格歧义」「补全需求细节」 |
 | `ncw-speckit-constitution` | 创建/更新项目章程 `docs/constitution/constitution.md`（constitution 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「立章程」「修订治理原则」 |
 | `ncw-speckit-converge` | 差距收敛（converge 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「收敛剩余工作」「补齐未实现需求」 |
-| `ncw-speckit-design` | 需求澄清与设计任务书转化（design 命令，pack 新增非上游）：四盲区问句库澄清 + 设计规约/自检七域走查，产出 `design-tasks.md` 交付设计师（依赖活动特性 spec.md；澄清不回写 spec，产物不进交接门禁） | 「出设计任务书」「把这份 spec 转成设计任务」 |
+| `ncw-speckit-design` | 需求澄清与设计明细产出（design 命令，pack 新增非上游）：四盲区问句库澄清 + 设计规约/自检七域走查，产出 `design-tasks.md` 设计明细（依赖活动特性 spec.md；澄清不回写 spec，产物不进交接门禁） | 「出设计明细」「把这份 spec 转成设计明细」 |
 | `ncw-speckit-flow` | 规格驱动开发 + PingCode AI native 开发流程的衔接与门禁（出规格建卡 → 接规格规划实现 → 卡片收尾） | 「这个需求转开发了，开始 plan」「出 spec 并建卡」 |
 | `ncw-speckit-implement` | 按 tasks.md 执行任务实现（implement 命令的 pack 分发，正文英文原文；不含 extension hook 机制；含 pack fork：涉 UI 按 `design-tasks.md` 交互规则实现并核验设计要求清单） | 「开始实现」「按任务清单编码」 |
 | `ncw-speckit-plan` | 实现规划与设计工件生成（plan 命令的 pack 分发，正文英文原文；不含 extension hook 机制；含 pack fork：存在 `design-tasks.md` 时必读并对齐 UX，冲突回用户裁决） | 「做这个需求的实现计划」「出 plan」 |

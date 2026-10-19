@@ -30,7 +30,7 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 职责分层与外部委托：
 
 - `ncw-monorepo-init` 承载流程与**版本钉子**（`references/init.md` 是唯一载体）；模板仓承载骨架（`AGENTS-TEMPLATE.md`、`.specify/`、`docs/adr/` 等），**版本双落点同改**：init.md 的钉子 = 初始化基线，模板仓巡检表 = 巡检基线。
-- `ncw-speckit-flow` 是流程衔接与门禁层，按引用委托 `ncw-speckit-*` 系技能、`pingcode` skill、`mturtle-commit`，**不内联它们的规则**。
+- `ncw-speckit-flow` 是流程衔接与门禁层，按引用委托 `ncw-speckit-*` 系技能、`pingcode` skill、`mturtle-commit`，**不内联它们的规则**。主线命令技能（specify/clarify/design/plan/tasks/implement）的 Completion Report 末尾带统一「Pack fork」下一步提示（按 9 阶段表引导下一命令与建卡/对账/收尾提醒，上游升级需 port）。
 
 ## Key Directories
 
@@ -44,7 +44,7 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 | `skills/ncw-speckit-clarify/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，v1.1.3 逐字副本，免 specify init）：clarify 命令（≤5 问澄清并回写 spec），正文英文原文 |
 | `skills/ncw-speckit-constitution/` | SKILL.md + `scripts/`（bundled `resolve_template.py` + `common.py`）+ `references/constitution-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：constitution 命令（建/改 docs/constitution/constitution.md），正文英文原文 |
 | `skills/ncw-speckit-converge/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，v1.1.3 逐字副本，免 specify init）：converge 命令（代码现状 vs 工件差距→追加收敛任务），正文英文原文 |
-| `skills/ncw-speckit-design/` | 设计任务书转化（design 命令，pack 新增非上游，逐字吸收自 loyalty-platform 的 requirement-to-des-tasks）：SKILL.md（四盲区澄清 + 设计规约/自检七域走查 → 产出 `$FEATURE_DIR/design-tasks.md` 交付设计师；澄清不回写 spec，产物不进 flow 交接门禁）+ `references/`（`question-bank.md` 问句库、`design-spec.md` 设计规约、`design-selfcheck.md` 设计自检、`design-tasks-template.md` 任务书模板）；特性解析委托 `ncw-speckit-analyze` 的 bundled helper |
+| `skills/ncw-speckit-design/` | 设计明细产出（design 命令，pack 新增非上游，逐字吸收自 loyalty-platform 的 requirement-to-des-tasks）：SKILL.md（四盲区澄清 + 设计规约/自检七域走查 → 产出 `$FEATURE_DIR/design-tasks.md` 设计明细；澄清不回写 spec，产物不进 flow 交接门禁）+ `references/`（`question-bank.md` 问句库、`design-spec.md` 设计规约、`design-selfcheck.md` 设计自检、`design-tasks-template.md` 明细模板）；特性解析委托 `ncw-speckit-analyze` 的 bundled helper |
 | `skills/ncw-speckit-flow/` | 单文件 `SKILL.md`：9 阶段流程表 + 交接门禁 + 对账纪律 |
 | `skills/ncw-speckit-implement/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，v1.1.3 逐字副本，免 specify init）：implement 命令（按 tasks.md 执行实现），正文英文原文；含 pack fork 段——存在 `$FEATURE_DIR/design-tasks.md` 时 UI 任务按其交互规则/页面状态实现，逐项核验设计要求清单 UI-xx 后才算完成（上游升级需 port） |
 | `skills/ncw-speckit-plan/` | SKILL.md + `scripts/`（bundled `setup_plan.py` + `common.py`）+ `references/plan-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：plan 命令（实现规划 + research/data-model/contracts/quickstart 工件），正文英文原文；含 pack fork 段——存在 `$FEATURE_DIR/design-tasks.md` 时必读并作为 UX 约束输入，与 spec 冲突回用户裁决（上游升级需 port） |

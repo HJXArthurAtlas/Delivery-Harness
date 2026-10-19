@@ -14,7 +14,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 | 阶段 | 角色 | 动作 | 产物 / 卡片 |
 |---|---|---|---|
 | 1. specify | 产品 | `/ncw-speckit-specify` 生成规格 | `specs/<NNN>-<short-name>/spec.md`（含 `### User Story N` 章节） |
-| 2. 设计任务书 | 产品/设计 | 涉 UI 的特性跑 `/ncw-speckit-design`（先 `/ncw-speckit-clarify` 更佳）；无 UI 跳过；与建卡并行 | `specs/<NNN>-<short-name>/design-tasks.md`（交付设计师；不是交接门禁项，不阻塞建卡与交接） |
+| 2. 设计明细 | 产品/设计 | 涉 UI 的特性跑 `/ncw-speckit-design`（先 `/ncw-speckit-clarify` 更佳）；无 UI 跳过；与建卡并行 | `specs/<NNN>-<short-name>/design-tasks.md`（设计明细；不是交接门禁项，不阻塞建卡与交接） |
 | 3. 建卡 | 产品 | pingcode 扩展的 specstoissues 命令（optional，priority 99） | 需求树 idea → epic → feature(spec 卡) → story 卡；登记 `specs/pingcode-mapping.json` |
 | 4. 交接 | 产品→开发 | 门禁检查（下节），通过后转开发 | — |
 | 5. plan | 开发 | `/ncw-speckit-plan`；特性目录存在 `design-tasks.md` 时必须先读，交互/页面状态按它对齐后再规划，与 spec 冲突时回产品/设计侧对齐 | 计划产物 |
@@ -32,7 +32,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 
 任何一项不过 → 留在产品侧处理完再交接，不要把半成品 spec 推给开发。
 
-设计任务书（阶段 2 的 `design-tasks.md`）不在本门禁清单内：无 UI 特性不产出；涉 UI 未产出也不阻塞产品→开发交接，由设计侧自行跟进。
+设计明细（阶段 2 的 `design-tasks.md`）不在本门禁清单内：无 UI 特性不产出；涉 UI 未产出也不阻塞产品→开发交接，由设计侧自行跟进。
 
 ## 开发侧纪律
 

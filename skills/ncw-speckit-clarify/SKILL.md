@@ -207,6 +207,7 @@ Report completion (after questioning loop ends or early termination):
 - Coverage summary table listing each taxonomy category with Status: Resolved (was Partial/Missing and addressed), Deferred (exceeds question quota, or remaining item is specifically implementation method, tech-stack comparison, or task breakdown), Clear (already sufficient), Outstanding (still Partial/Missing but low impact).
 - If any Outstanding or Deferred remain, recommend whether to proceed to `/ncw-speckit-plan` or run `/ncw-speckit-clarify` again later post-plan.
 - Suggested next command.
+- **Pack fork (ncw), port on upstream upgrade**: per the ncw flow, for UI features suggest `/ncw-speckit-design` (design details, `design-tasks.md`) before `/ncw-speckit-plan`; card creation (pingcode extension's specstoissues) and the stage-4 handoff gate sit between design and plan on the product side
 
 ## Done When
 

@@ -55,6 +55,7 @@ Output path to generated tasks.md and summary:
 - Independent test criteria for each story
 - Suggested MVP scope (typically just User Story 1)
 - Format validation: Confirm ALL tasks follow the checklist format (checkbox, ID, labels, file paths)
+- **Pack fork (ncw), port on upstream upgrade**: suggest the next command `/ncw-speckit-implement`; if `mapping.task_artifact` is configured, remind the user to create story-task cards via the pingcode extension now, and to run `sync-cards` before implementation if the spec changed after card creation
 
 Context for task generation: $ARGUMENTS
 

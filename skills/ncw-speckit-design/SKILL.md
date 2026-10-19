@@ -1,13 +1,13 @@
 ---
 name: ncw-speckit-design
-description: 需求澄清与设计任务书转化（design 命令）：按四盲区问句库逐项澄清需求，按设计规约与设计自检对方案做七域走查，产出页面级设计任务书 design-tasks.md 到当前特性目录交付设计师。依赖活动特性（spec.md）才能执行；澄清结论不回写 spec。当用户运行或提到 /ncw-speckit-design，或说「出设计任务书」「design-tasks」「给设计师出任务」「把这份 spec 转成设计任务」「设计走查这份需求」，或要在 spec 之后、开发之前做设计层澄清与设计任务产出时使用本 skill——即使用户没提「ncw-speckit-design」命令名，只要是规格之后的设计澄清与任务书转化意图也用本 skill。
+description: 需求澄清与设计明细产出（design 命令）：按四盲区问句库逐项澄清需求，按设计规约与设计自检对方案做七域走查，产出页面级设计明细 design-tasks.md 到当前特性目录。依赖活动特性（spec.md）才能执行；澄清结论不回写 spec。当用户运行或提到 /ncw-speckit-design，或说「出设计明细」「design-tasks」「把这份 spec 转成设计明细」「设计走查这份需求」，或要在 spec 之后、开发之前做设计层澄清与设计明细产出时使用本 skill——即使用户没提「ncw-speckit-design」命令名，只要是规格之后的设计澄清与设计明细转化意图也用本 skill。
 ---
 
 # ncw-speckit-design
 
-本 skill 只产出设计任务书（`design-tasks.md`），绝不产出视觉稿、原型或代码；绝不代替用户拍板业务口径。
+本 skill 只产出设计明细（`design-tasks.md`），绝不产出视觉稿、原型或代码；绝不代替用户拍板业务口径。
 
-与 `ncw-speckit-clarify` 的分工：clarify 把澄清结论回写 spec.md（≤5 问）；本 skill 的澄清是设计层，结论落设计任务书，绝不修改 spec.md。顺序上先 clarify 后 design（本 skill 消化的是 spec 之外的设计层歧义）。
+与 `ncw-speckit-clarify` 的分工：clarify 把澄清结论回写 spec.md（≤5 问）；本 skill 的澄清是设计层，结论落设计明细，绝不修改 spec.md。顺序上先 clarify 后 design（本 skill 消化的是 spec 之外的设计层歧义）。
 
 ## User Input
 
@@ -29,7 +29,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 1. 确认环境是 macOS / Linux 且 `python3` 可用，并确认 pack 安装位 `.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py` 存在（全局安装位 `~/.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py`）。不可用则声明环境不受支持并停止。绝不退回项目 `.specify/` 下 `specify init` 生成的脚本——pack 契约是不依赖 specify init 产物。
 2. 从仓库根运行 `python3 .agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py --json --paths-only` **恰好一次**，解析 JSON 取 `FEATURE_DIR` / `FEATURE_SPEC`。
 3. 校验 `$FEATURE_DIR/spec.md` 存在：脚本失败或 spec 缺失时停止，提示先运行 `/ncw-speckit-specify`，绝不凭空继续。
-4. 本 skill 依赖一个具体的 spec 才能执行：后续澄清以该 spec 为需求材料，设计任务书最终落到 `$FEATURE_DIR/design-tasks.md`（特性目录本身即唯一标识）。
+4. 本 skill 依赖一个具体的 spec 才能执行：后续澄清以该 spec 为需求材料，设计明细最终落到 `$FEATURE_DIR/design-tasks.md`（特性目录本身即唯一标识）。
 
 ### 段三：四盲区澄清
 
@@ -51,16 +51,16 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **P0/P1 发现**：必须修订方案后再继续；规则缺失或冲突时标「待补」，向用户提出确认，绝不自行补充规则。
    - **P2 或「待补」项**：整理为待确认清单向用户提出，绝不自行判定违规、绝不替用户拍板。
 
-### 段五：产出设计任务书
+### 段五：产出设计明细
 
-方案无任何待解决事项（无「待补」、无未决疑问）后，按段四确定的规则与自检结论，参照 `references/design-tasks-template.md` 输出设计任务书到 `$FEATURE_DIR/design-tasks.md`；功能名称与所属迭代记录在文档「任务目标」节，故事卡号（如有）一并写入，便于设计侧对齐 flow 溯源链。
+方案无任何待解决事项（无「待补」、无未决疑问）后，按段四确定的规则与自检结论，参照 `references/design-tasks-template.md` 输出设计明细到 `$FEATURE_DIR/design-tasks.md`；功能名称与所属迭代记录在文档「任务目标」节，故事卡号（如有）一并写入，便于设计侧对齐 flow 溯源链。
 
-输出后向用户确认。用户提出任何改动建议、或自检发现需调整时，重新过一遍 `references/design-spec.md` 与 `references/design-selfcheck.md`（段四），再按段五重新产出。产出物确认后本 skill 结束。
+输出后向用户确认。用户提出任何改动建议、或自检发现需调整时，重新过一遍 `references/design-spec.md` 与 `references/design-selfcheck.md`（段四），再按段五重新产出。产出物确认后本 skill 结束；结束时按 flow 提示下一步：设计明细已落 `design-tasks.md`，尚未建卡的提示跑 pingcode 扩展的 specstoissues 命令（登记 `specs/pingcode-mapping.json`），随后过交接门禁转开发。
 
 ## 行为规则
 
 - 需求澄清未收敛，或涉及设计规约未覆盖的业务决策：必须停下向用户提问，绝不带疑问产出。
-- 绝不修改 spec.md；绝不产出设计任务书以外的交付物。
+- 绝不修改 spec.md；绝不产出设计明细以外的交付物。
 - 走查中发现设计规约缺口时走其内置回流闭环：先在走查记录标「待补」，经用户确认具有通用性后更新 `references/design-spec.md` 并同步对应自检项；单个页面问题绝不自动升格为通用规则。
 
 ## Done When

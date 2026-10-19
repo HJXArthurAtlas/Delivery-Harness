@@ -199,6 +199,7 @@ Report completion to the user with:
 - `SPEC_FILE` — the spec file path
 - Checklist results summary
 - Readiness for the next phase (`/ncw-speckit-clarify` or `/ncw-speckit-plan`)
+- **Pack fork (ncw), port on upstream upgrade**: suggest the flow's next steps in order — clarify (`/ncw-speckit-clarify`, or `/ncw-speckit-grill-me` for deep clarification); for UI features `/ncw-speckit-design` to produce the design details (`design-tasks.md`); then card creation via the pingcode extension's specstoissues command (optional) and the handoff gate before development starts
 
 ## Quick Guidelines
 

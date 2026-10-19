@@ -28,7 +28,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Completion Report
 
-Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated artifacts.
+Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated artifacts. **Pack fork (ncw), port on upstream upgrade**: end with the suggested next command `/ncw-speckit-tasks`; if `mapping.task_artifact` is configured, story-task cards are created after tasks via the pingcode extension, and `sync-cards` must run before implementation when the spec changed after card creation.
 
 ## Phases
 

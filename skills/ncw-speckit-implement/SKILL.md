@@ -142,7 +142,7 @@ Note: This command assumes a complete task breakdown exists in tasks.md. If task
 
 ## Completion Report
 
-Report final status with summary of completed work.
+Report final status with summary of completed work. **Pack fork (ncw), port on upstream upgrade**: once all tasks are `[x]`, suggest running the pingcode extension's sync-status command to close the story cards (one-way; reopening requires a new work item).
 
 ## Done When
 
