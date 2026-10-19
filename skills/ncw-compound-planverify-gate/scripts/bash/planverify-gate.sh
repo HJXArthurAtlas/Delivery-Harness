@@ -1,7 +1,7 @@
 #!/bin/bash
 # scripts/bash/planverify-gate.sh
 #
-# before_implement gate (Claude harness). Optionally blocks
+# before_implement gate. Optionally blocks
 # /ncw-speckit-implement until the planverify verdict for the feature about to
 # be implemented is acceptable.
 #
@@ -10,9 +10,8 @@
 #   gates this implement run. When that report is missing, the gate is closed
 #   (exit 1) under block mode.
 #
-# This is the phase-boundary gate. before_* hooks fire only when the user
-# runs slash commands under a harness that dispatches them; otherwise invoke
-# this script manually before implementation.
+# This is the phase-boundary gate. Invoke it manually or via the agent before
+# running /ncw-speckit-implement for the given feature.
 #
 # Default behavior is OFF (no-op) — consistent with every other compound
 # command being advisory. Opt in via:
@@ -24,8 +23,8 @@
 #   - verdict: BLOCKED_DRIFT               -> exit 1 (replan first)
 #   - verdict: PASS | REPLAN_ALLOWED       -> exit 0 (proceed)
 #
-# Shell script, not an agent-prompt hook: agent-prompt hooks silently no-op
-# under the harness's executor (verified v0.2.1). Mirrors require-intent.sh.
+# Shell script, not an interactive prompt, so the gate executes
+# deterministically. Mirrors require-intent.sh.
 
 set -u
 

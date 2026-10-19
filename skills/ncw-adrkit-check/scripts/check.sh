@@ -1,9 +1,7 @@
 #!/bin/sh
 # ncw-adrkit-check — check a produced plan against the decisions that govern
-# it. This is the `after_plan` hook target, so it writes nothing, ever.
-# Note: hook firing requires the upstream adrkit extension's hook registration
-# (installed by ncw-monorepo-init); the skill pack itself never executes hooks —
-# without that registration, run this script manually after planning.
+# it. Run manually after /ncw-speckit-plan has produced a plan. It is a
+# read-only check, so it writes nothing, ever.
 #
 # Emits one or two sections on stdout, each introduced by a fixed marker line and
 # followed by a single JSON document:

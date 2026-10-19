@@ -70,12 +70,6 @@ If the session's context is compacted by the harness, the compound store summary
 
 ---
 
-## Hook behavior
-
-When invoked as a `before_constitution` hook, this command runs silently at project start, scaffolding the directory if needed and confirming "loaded N items" briefly. The full summary injection is the same; only the user-facing prompt is shorter.
-
----
-
 ## Tool choices
 
 - **Read** for scanning compound store files
@@ -96,3 +90,12 @@ When invoked as a `before_constitution` hook, this command runs silently at proj
 - **Edit compound store content during load** — scaffolding and the explicit legacy migrations above are the only exceptions; new learnings are written via `/ncw-compound-writeback`.
 - **Re-load mid-session unsolicited** — load happens at the start of a feature; only re-run if the user explicitly invokes it after context compaction.
 - **Block the rest of the session if the store is empty** — empty store is normal on a fresh project; just confirm scaffold and continue.
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-compound-intent` —— 锁定目标/约束/失败条件
+- **条件**：每个特性开始时装载一次后进入 intent；本次会话已装载过则 intent 隐式跳过本步；context 被压缩后可由用户手动重跑 load，绝不 unsolicited 重载

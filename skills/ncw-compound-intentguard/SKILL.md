@@ -269,3 +269,13 @@ diff_files: {N}
 - **Auto-merge or auto-revert** — you only report. The human decides.
 - **Modify the diff** — you are a validator, not a fixer.
 - **Re-write the intent or expectations** — those are locked. If they need to change, the user re-runs `/ncw-compound-intent` or `/ncw-compound-expectations`.
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-compound-writeback` —— 把本特性的 ADR/修正/模式回写 compound store
+- **条件**：判定 PASS 直接交接；REVIEW NEEDED 须人工逐条清除后才可 writeback
+- **回退**：BLOCKED → 回到 implement 修复违规项后重跑 intentguard，writeback 被拒绝

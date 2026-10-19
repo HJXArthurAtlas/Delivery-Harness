@@ -154,3 +154,16 @@ Report final status with summary of completed work. **Pack fork (ncw), port on u
 - [ ] All tasks in tasks.md completed and marked `[X]`
 - [ ] Implementation validated against specification, plan, and test coverage
 - [ ] Completion reported to user with summary of completed work
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-compound-intentguard` —— 独立 checker 审判实现 diff
+- **条件**：
+  - tasks.md 全部 `[x]`
+  - 涉 UI 任务已逐项核验 design-tasks.md 的 UI-xx 清单
+  - 前置门禁 `/ncw-compound-planverify-gate`（block 模式时）已放行
+  - 提交走 mturtle-commit 带故事卡 ID

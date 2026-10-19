@@ -466,3 +466,14 @@ Report:
 - [ ] Every new topic document is linked relatively from `CONTEXT_FILE`, and every new ADR passes the three-condition recording gate, was allocated through the adrkit scaffold entry point (never hand-numbered), and passes `.agents/skills/ncw-adrkit-draft/scripts/adr.sh lint`.
 - [ ] No decision point has Persistence incomplete, and no point became Resolved before every required spec and knowledge artifact was saved and verified.
 - [ ] The completion report lists the resolved knowledge locations, changed knowledge documents, and summaries of the terms and decisions recorded.
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-speckit-design`（涉 UI）或 `/ncw-speckit-plan`（无 UI）
+- **条件**：
+  - 追问结论已落 ADR（经 `ncw-adrkit-draft` 归口 `docs/adr/`）
+  - 需回写 spec 先跑 `/ncw-speckit-clarify`

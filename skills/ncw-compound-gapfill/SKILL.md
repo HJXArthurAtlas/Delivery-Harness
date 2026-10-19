@@ -101,7 +101,7 @@ Append accepted entries. Preserve the existing formatting. Add a section header 
 
 Show summary: *"Appended {N} tasks to specs/{slug}/tasks.md across {N} categories."*
 
-Ask: *"Continue to /ncw-speckit-implement? [yes / no]"*
+Ask: *"Continue to /ncw-compound-planverify? [yes / no]"*
 
 ---
 
@@ -144,3 +144,12 @@ If `docs/corrections/` exists, scan for past gap-misses that became bugs — pro
 - **Add tasks unrelated to the intent or expectations** — every addition must trace to a specific source (C, F, OOS, E, or a named cross-cutting concern)
 - **Run the tasks** — that's `/ncw-speckit-implement`
 - **Validate after the fact** — that's `/ncw-compound-intentguard`
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-compound-planverify` —— 独立 checker 审判 plan+tasks 是否漂移
+- **条件**：缺口任务已追加进 tasks.md（约束违反/失败条件/越界回归/边界四类）；planverify 必须在 implement 前完成

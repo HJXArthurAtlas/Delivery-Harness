@@ -143,3 +143,14 @@ Every task MUST strictly follow this format:
 
 - [ ] tasks.md generated with all phases, task IDs, and file paths
 - [ ] Completion reported to user with task count, story breakdown, and MVP scope
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-compound-gapfill` —— 补约束违反/失败条件/越界回归/边界测试任务
+- **条件**：
+  - tasks.md 已按用户故事生成且依赖有序
+  - 配了 `mapping.task_artifact` 时任务卡已补建

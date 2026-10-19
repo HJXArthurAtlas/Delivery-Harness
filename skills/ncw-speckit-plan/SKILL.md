@@ -94,3 +94,15 @@ Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated 
 
 - [ ] Plan workflow executed and design artifacts generated
 - [ ] Completion reported to user with branch, plan path, and generated artifacts
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-speckit-tasks` —— 生成依赖有序任务清单
+- **条件**：
+  - plan 工件齐备
+  - 存在 `design-tasks.md` 时已按其 UX 约束对齐
+  - 可选先跑 `/ncw-adrkit-check` 对照 ADR 语料校验越界

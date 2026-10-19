@@ -1,25 +1,13 @@
 ---
 name: ncw-compound-planverify-gate
-description: 'Gate hook for before_implement: when SKC_PLANVERIFY_GATE=block, refuses /ncw-speckit-implement if the latest planverify verdict is missing or BLOCKED_DRIFT. No-op by default.'
+description: 'Gate before implement: when SKC_PLANVERIFY_GATE=block, refuses /ncw-speckit-implement if the latest planverify verdict is missing or BLOCKED_DRIFT. Run as a manual check before implement; no-op by default.'
 ---
 
 # Planverify Gate (before_implement)
 
-This command is registered as a `before_implement` hook. It is a **thin
-shell-script wrapper** — not an interactive prompt — so it dispatches cleanly
-through the Claude harness's hook executor (the same pattern `/ncw-compound-require-intent`
-uses for `before_specify`, and that bundled git's hooks use).
+This gate runs manually — invoked by the user or the agent via Bash before `/ncw-speckit-implement` of the given feature. It is a **thin shell-script wrapper** — not an interactive prompt — so it runs deterministically.
 
 Its job: optionally gate `/ncw-speckit-implement` on the planverify verdict of the feature about to be implemented.
-
-This is the **phase-boundary** planverify gate, firing under the Claude
-harness when the upstream extension wires it.
-
-> **Note:** in this skill pack nothing executes `before_implement` hooks — the
-> pack's `/ncw-speckit-*` skills never run hooks. Here the gate runs as a manual or
-> agent-invoked check before `/ncw-speckit-implement` of the given feature.
-> The automated path, where present, is the upstream compound extension's
-> `extension.yml` hook wiring.
 
 ---
 
@@ -53,10 +41,9 @@ the script's message to the user:
 
 ## Why this is a shell script and not an interview
 
-The harness's hook executor dispatches **shell-script** command files cleanly under
-both Claude Code and Codex; **agent-prompt** hooks silently no-op (verified in
-v0.2.1). Mirroring `/ncw-compound-require-intent`, the gate is a script-runner
-so it fires reliably whether invoked directly or as part of the chain.
+A gate must execute deterministically; a shell script does. Mirroring
+`/ncw-compound-require-intent`, the gate is a script-runner invoked manually
+via Bash, so it fires reliably whether run directly or as part of the chain.
 
 ---
 
@@ -64,3 +51,10 @@ so it fires reliably whether invoked directly or as part of the chain.
 
 - **Bash** to invoke the gate script
 - No Read, Write, or Edit needed
+
+---
+
+## Handoff
+
+- **目标**：`/ncw-speckit-implement` —— 在 plan 判定通过后执行实现
+- **条件**：gate 模式非 block → 直接放行；block 模式下该特性 `docs/intents/<slug>.planverify.md` 判定为 PASS 或 REPLAN_ALLOWED 才放行；缺失或 BLOCKED_DRIFT 拒绝，先跑/重跑 `/ncw-compound-planverify`

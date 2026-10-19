@@ -74,3 +74,13 @@ You **MUST** consider the user input before proceeding (if not empty).
 - [ ] 四盲区澄清完成，需求清单与用户对齐，无未决疑问
 - [ ] 七域走查完成，无 P0/P1 未处理项、无未决「待补」
 - [ ] `design-tasks.md` 已按模板产出并经用户确认
+
+---
+
+## Handoff
+
+- **目标**：`/ncw-speckit-plan`（交接门禁通过后）
+- **条件**：
+  - `design-tasks.md` 已产出
+  - 它不是交接门禁项，不阻塞交接
+  - 与 spec 冲突回产品/设计裁决，绝不自行解决

@@ -121,12 +121,6 @@ completed: {YYYY-MM-DD}
 
 ---
 
-## Hook behavior
-
-When invoked as an `after_implement` hook, this command runs only AFTER `/ncw-compound-intentguard` has produced a verdict. The hook is `optional: true` — the user is prompted: *"Writeback learnings from this feature? [yes / no]"*. If yes, run the full flow above. If no, skip cleanly.
-
----
-
 ## Tool choices
 
 - **Read** for scanning session history and intent guard verdict
@@ -143,3 +137,12 @@ When invoked as an `after_implement` hook, this command runs only AFTER `/ncw-co
 - **Auto-elevate patterns** — patterns require explicit user approval; corrections can auto-capture without approval if the correction was made by the user mid-session
 - **Modify existing ADRs** — if a decision changes, create a new ADR in the adrkit corpus (`docs/adr/`) that supersedes the old one (don't edit the old; the historical record matters)
 - **Write back if intent guard is BLOCKED** — failure modes don't contribute to compound learning until resolved
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：无 —— 链终点；产物落 `docs/adr/`、`docs/corrections/`、`docs/patterns/`
+- **条件**：仅在 intentguard PASS（或 REVIEW NEEDED 经人工确认）后执行；BLOCKED 必须拒绝

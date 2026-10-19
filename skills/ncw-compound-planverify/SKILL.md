@@ -283,3 +283,13 @@ drift_candidates: {N}
 - **Auto-patch the plan.** You report; the user replans. Validator, not fixer.
 - **Silently degrade tiers.** Record the tier actually achieved.
 - **Re-write intent or expectations.** Those are locked.
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-speckit-implement`
+- **条件**：判定 PASS 才放行 implement；`SKC_PLANVERIFY_GATE=block` 时另需过 `/ncw-compound-planverify-gate`
+- **回退**：REPLAN_ALLOWED → 改 plan 后重跑 planverify；BLOCKED_DRIFT → 回到 plan 修正，gate 为 block 时 implement 被拒绝

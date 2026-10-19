@@ -220,3 +220,15 @@ Report completion (after questioning loop ends or early termination):
 - [ ] Spec ambiguities identified and clarifications integrated into spec file
 - [ ] Spec quality checklist re-validated against updated spec (if `FEATURE_DIR/checklists/requirements.md` exists)
 - [ ] Completion reported to user with questions answered, sections touched, checklist status, and coverage summary
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-speckit-design`（涉 UI）或 `/ncw-speckit-plan`（无 UI，交接门禁通过后）
+- **条件**：
+  - 澄清结论已回写 spec
+  - 可选 `/ncw-speckit-grill-me` 继续追问
+  - 交接门禁（spec 章节齐备 + pingcode-mapping.json 登记）通过后才进 plan

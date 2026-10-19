@@ -272,3 +272,15 @@ Success criteria must be:
 
 - [ ] Specification written to `SPEC_FILE` and validated against quality checklist
 - [ ] Completion reported to user with feature directory, spec file path, and checklist results
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-speckit-clarify`（或 `/ncw-speckit-grill-me`）—— 澄清 spec 歧义
+- **条件**：
+  - spec.md 已写入且质量清单通过
+  - 前置门禁 `/ncw-compound-require-intent` 必须已放行（`docs/intents/` 存在 intent doc）
+  - 涉 UI 特性澄清后进 `/ncw-speckit-design`，无 UI 可跳过 design

@@ -257,3 +257,12 @@ intent: ../intents/{slug}.intent.md
 1. Show the file path in chat: *"Wrote `docs/expectations/{slug}.expectations.md`."*
 2. Show a one-line summary: *"{N} positive scenarios, {N} edge scenarios, all E1–E4 ✓."*
 3. Use AskUserQuestion to offer the chain handoff (continue to /ncw-speckit-specify / stop here / quit).
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-speckit-specify` —— 创建特性规格 spec.md
+- **条件**：期望文档已写入 `docs/expectations/`；chain continue 时以 intent 的 goal + in-scope 预填 specify

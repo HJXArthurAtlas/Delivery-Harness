@@ -1,6 +1,6 @@
 # Skill 交接流程与门禁清单
 
-> 来源：`skills/` 各 SKILL.md 正文（2026-10-19 盘点）。分发面技能共 20 个，本文覆盖全部交接（handoff）与门禁（gate/hook）机制。
+> 来源：`skills/` 各 SKILL.md 正文（2026-10-19 盘点，hook 机制已清除、统一 Handoff 块）。分发面技能共 20 个，本文覆盖全部交接（handoff）与门禁（gate）机制。
 
 ## 1. 流程主线（`ncw-speckit-flow`，9 阶段）
 
@@ -43,28 +43,43 @@
 - `ncw-speckit-plan`：`$FEATURE_DIR/design-tasks.md` 存在时必读，交互规则/页面状态/UI-xx 清单是 plan 的绑定 UX 输入；与 spec 冲突 → 停下回产品/设计裁决，**绝不自行解决**。
 - `ncw-speckit-implement`：有 `design-tasks.md` 时 UI 任务按其交互规则/页面状态实现，逐项核验设计要求清单 UI-xx 后才算完成。
 
-## 5. compound 链式交接（AskUserQuestion 显式提示）
+## 5. 统一 Handoff 块（每个链上技能末尾）
 
-- `ncw-compound-intent` → 完成后提供 chain handoff：continue → `/ncw-compound-expectations`；stop/quit → 干净结束，可稍后手动续。
-- `ncw-compound-expectations` → 被 intent 链式调用时跳过冗长确认（skip-when-chained）；完成后 handoff 到 `/ncw-speckit-specify`。
+hook 机制已**全部清除**（原 `before_*` / `after_*` 挂点与 `extension.yml` 接线表述一并移除）；交接统一改为 SKILL.md 末尾的中文 `## Handoff` 块，显式声明**目标**与**条件**（有回退则加**回退**行）。上游原文技能带 `> Pack fork (ncw), port on upstream upgrade.` 引用行，上游升级需 port；pack 原生技能（design / require-intent / planverify-gate）省略该行。
 
-## 6. Hook 机制技能清单（`before_*` / `after_*`，共 5 个）
+主线全链（planverify 必须在 gapfill 后、implement 前，审判完整义务集）：
 
-| 技能 | Hook 挂点 | 触发时机与行为 | 性质 |
-|---|---|---|---|
-| `ncw-compound-require-intent` | `before_specify` | `/ncw-speckit-specify` 前检查 `docs/intents/` 无意图文档则拒绝，强制先跑 `/ncw-compound-intent` | 门禁（gate），shell 脚本 |
-| `ncw-compound-planverify-gate` | `before_implement` | `SKC_PLANVERIFY_GATE=block` 时，planverify 判定缺失或 `BLOCKED_DRIFT` 则拒绝 `/ncw-speckit-implement` | 门禁（gate），shell 脚本，默认 no-op |
-| `ncw-compound-load` | `before_constitution` | 项目启动时静默 scaffold 目录 + 简报 "loaded N items" | 注入，非门禁 |
-| `ncw-adrkit-check` | `after_plan` | plan 产出后对照 ADR 语料校验越界；**只读是硬性约束**（hook 可达故绝不写） | 检查，optional |
-| `ncw-compound-writeback` | `after_implement` | 只在 `/ncw-compound-intentguard` 出判定后运行；`optional: true`，用户确认才执行 | 写回，optional |
+```
+load → intent → expectations → specify → clarify|grill-me → design(涉UI) → plan
+     → tasks → gapfill → planverify → implement → intentguard → writeback
+```
 
-### Hook 共同边界
+| 技能 | Handoff 目标 | 条件 / 回退 |
+|---|---|---|
+| `ncw-compound-load` | `/ncw-compound-intent` | 每特性开始装载一次；会话已装载则 intent 隐式跳过；context 压缩后用户手动重跑，绝不 unsolicited 重载 |
+| `ncw-compound-intent` | `/ncw-compound-expectations` | intent doc 已写入且用户确认；AskUserQuestion continue 链式调用，stop/quit 手动续 |
+| `ncw-compound-expectations` | `/ncw-speckit-specify` | 期望文档已写入；continue 时以 intent 的 goal+in-scope 预填 |
+| `ncw-compound-require-intent`（门禁） | `/ncw-speckit-specify` | `docs/intents/` 有 `*.intent.md`（脚本退 0）才放行；否则拒绝，先跑 intent。**手动/agent 调用的 shell 门禁** |
+| `ncw-speckit-specify` | `/ncw-speckit-clarify`（或 grill-me） | spec 质量清单通过；require-intent 已放行；涉 UI 澄清后接 design |
+| `ncw-speckit-clarify` | design（涉 UI）/ plan | 结论回写 spec；交接门禁（§2）通过才进 plan |
+| `ncw-speckit-grill-{me,with-docs}` | design（涉 UI）/ plan | grill-me 不回写 spec（需回写先 clarify）；with-docs 结论落 `docs/adr/` |
+| `ncw-speckit-design` | `/ncw-speckit-plan` | `design-tasks.md` 已产出；非门禁项；与 spec 冲突回产品/设计裁决 |
+| `ncw-speckit-plan` | `/ncw-speckit-tasks` | 工件齐备；有 design-tasks.md 已对齐；可选先 `/ncw-adrkit-check` |
+| `ncw-adrkit-check` | `/ncw-speckit-tasks` | plan 后手动跑，只读；发现越界先回 plan 修正或立正式 ADR 变更 |
+| `ncw-speckit-tasks` | `/ncw-compound-gapfill` | tasks.md 依赖有序；配 `mapping.task_artifact` 时任务卡已补建 |
+| `ncw-compound-gapfill` | `/ncw-compound-planverify` | 四类缺口任务已追加进 tasks.md |
+| `ncw-compound-planverify` | `/ncw-speckit-implement` | PASS 放行；回退：REPLAN_ALLOWED 改 plan 后重跑、BLOCKED_DRIFT 回 plan |
+| `ncw-compound-planverify-gate`（门禁） | `/ncw-speckit-implement` | 非 block 直接放行；block 模式需 PASS/REPLAN_ALLOWED，缺失或 BLOCKED_DRIFT 拒绝。**手动/agent 调用的 shell 门禁** |
+| `ncw-speckit-implement` | `/ncw-compound-intentguard` | tasks 全 `[x]`；UI 任务逐项核验 UI-xx；planverify-gate（block 时）已放行 |
+| `ncw-compound-intentguard` | `/ncw-compound-writeback` | PASS 直接交接；REVIEW 须人工清除；回退：BLOCKED 回 implement 修复后重跑 |
+| `ncw-compound-writeback` | 无（链终点） | 仅 PASS（或 REVIEW 经人工确认）后执行；BLOCKED 必须拒绝 |
 
-- **pack 自身不执行任何 hook**——自动化触发一律依赖上游扩展的 `extension.yml` 接线（adrkit 由 `ncw-monorepo-init` 经 `specify extension add adrkit` 注册；compound 走上游 compound 扩展）；无接线时全部降级为手动/agent 调用。
-- 门禁类统一做成 **shell 脚本 wrapper** 而非 agent-prompt hook：harness 的 hook executor 对 agent-prompt hook 会静默 no-op（上游 v0.2.1 实测）。
-- `ncw-adrkit-draft` 反向约束：唯一写命令，**刻意不可达任何 hook**（plan 阶段自动建记录会制造虚假决策记忆）。
-- grill 两个技能（`ncw-speckit-grill-me` / `-with-docs`）已**删除**上游 extension-hook 段，不再有 hook 机制。
+### 门禁边界（hook 清除后的保留约束）
 
-## 7. 无交接/门禁定义的技能
+- 两个门禁（require-intent / planverify-gate）仍是 **shell 脚本 wrapper**，手动或 agent 在边界前调用——脚本保证确定性判定，不依赖任何 hook 分发机制。
+- `ncw-adrkit-draft` 反向约束不变：唯一写命令，**刻意不进任何交接链自动触发**（plan 阶段自动建记录会制造虚假决策记忆）。
+- `ncw-compound-intent` / `-expectations` 的 AskUserQuestion 三段链（continue / stop / quit）是链内**显式**交接，与末尾 Handoff 块互补：块声明目标与条件，AskUserQuestion 执行当次选择。
 
-`ncw-speckit-analyze`、`ncw-speckit-converge`、`ncw-speckit-constitution`、`ncw-speckit-grill-me`、`ncw-speckit-grill-with-docs`、`ncw-adrkit-context`、`ncw-adrkit-draft`，以及 compound 组的 `gapfill` / `planverify` / `intentguard` / `writeback`（writeback 仅 hook 挂点见 §6）。
+## 6. 无交接定义的技能
+
+`ncw-speckit-analyze`、`ncw-speckit-converge`、`ncw-speckit-constitution`、`ncw-adrkit-context`、`ncw-adrkit-draft`（draft 见 §5 反向约束）。

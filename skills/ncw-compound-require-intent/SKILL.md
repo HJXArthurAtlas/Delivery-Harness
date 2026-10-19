@@ -1,19 +1,13 @@
 ---
 name: ncw-compound-require-intent
-description: 'Gate hook for before_specify: refuses to let /ncw-speckit-specify proceed if no intent doc exists in docs/intents/. Forces /ncw-compound-intent to be run first.'
+description: 'Gate before specify: refuses to let /ncw-speckit-specify proceed if no intent doc exists in docs/intents/. Run as a manual check before specify; forces /ncw-compound-intent first.'
 ---
 
 # Require Intent Before Specify
 
-This command is registered as a `before_specify` hook. It is a **thin shell-script wrapper** — not an interactive prompt — so it dispatches cleanly through the Claude harness's hook executor (the pattern that bundled git's hooks use).
+This gate runs manually — invoked by the user or the agent before `/ncw-speckit-specify`. It is a **thin shell-script wrapper** — not an interactive prompt — so it runs deterministically via Bash.
 
 Its job: gate `/ncw-speckit-specify` on the existence of at least one intent doc.
-
-> **Note:** in this skill pack nothing executes `before_specify` hooks — the
-> pack's `/ncw-speckit-*` skills never run hooks. Here the gate runs as a manual or
-> agent-invoked check before `/ncw-speckit-specify`. The automated path,
-> where present, is the upstream compound extension's `extension.yml` hook
-> wiring.
 
 ---
 
@@ -40,9 +34,7 @@ If the script exits non-zero, **do not continue with `/ncw-speckit-specify`**. T
 
 ## Why this is a shell script and not an interview
 
-The harness's hook executor dispatches **shell-script** hooks cleanly (verified: bundled `git`'s `feature` hook fires correctly because its command file invokes a bash script). It does **not** dispatch **agent-prompt** hooks like our `/ncw-compound-intent` (verified in v0.2.1's diagnostic: the hook entry installs but the interactive interview never starts).
-
-By making this gate a script-runner, we get the discipline (refuse to spec without intent) without depending on the broken agent-prompt-hook dispatch path. The actual intent capture still happens via the interactive `/ncw-compound-intent` skill — the user types it manually after this gate blocks them.
+A gate must execute deterministically; a shell script does. The actual intent capture still happens via the interactive `/ncw-compound-intent` skill — the user runs it after this gate blocks them.
 
 ---
 
@@ -50,3 +42,10 @@ By making this gate a script-runner, we get the discipline (refuse to spec witho
 
 - **Bash** to invoke the gate script
 - No Read, Write, Edit, or other tools needed
+
+---
+
+## Handoff
+
+- **目标**：`/ncw-speckit-specify` —— 在 intent 已捕获的前提下生成特性规格
+- **条件**：`docs/intents/` 存在至少一个 `*.intent.md`（脚本退出 0）才放行 specify；否则拒绝并要求先跑 `/ncw-compound-intent`

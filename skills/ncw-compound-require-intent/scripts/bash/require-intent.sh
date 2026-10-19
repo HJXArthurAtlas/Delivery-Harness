@@ -1,15 +1,12 @@
 #!/bin/bash
 # scripts/bash/require-intent.sh
 #
-# Gate hook: refuses to let /ncw-speckit-specify proceed if no intent doc exists.
-# Registered as before_specify hook in extension.yml (v0.2.2+).
+# Gate: refuses to let /ncw-speckit-specify proceed if no intent doc exists.
+# Invoked manually or by the agent before /ncw-speckit-specify.
 #
-# The harness's hook executor dispatches shell-script hooks cleanly under
-# Claude Code (verified: bundled git extension's hooks fire correctly).
-# Agent-prompt hooks (our interactive /ncw-compound-intent) do NOT
-# dispatch under the same executor. By making this gate a shell script,
-# we get reliable hook firing — the gate blocks /ncw-speckit-specify, the
-# user types /ncw-compound-intent manually, then re-runs /ncw-speckit-specify.
+# A shell script, not an interactive prompt, so the gate executes
+# deterministically: it blocks /ncw-speckit-specify, the user runs
+# /ncw-compound-intent manually, then re-runs /ncw-speckit-specify.
 #
 # Behavior:
 #   - Walks up from cwd to find the project root (.specify/)

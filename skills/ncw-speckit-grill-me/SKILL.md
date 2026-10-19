@@ -346,3 +346,14 @@ Report:
 - [ ] User satisfaction is explicit, except upon interruption.
 - [ ] `checklists/requirements.md` has been revalidated against the updated spec, if present.
 - [ ] A completion report has been issued with rounds, question count, changed sections, checklist status, and a coverage table containing aggregate category statuses and per-point breakdowns.
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-speckit-design`（涉 UI）或 `/ncw-speckit-plan`（无 UI）
+- **条件**：
+  - 追问结论已明确
+  - grill 不回写 spec，需回写先跑 `/ncw-speckit-clarify`

@@ -247,3 +247,12 @@ created: {YYYY-MM-DD}
 3. Use AskUserQuestion to offer the chain handoff (continue / stop here / quit).
 4. If "continue": invoke `/ncw-compound-expectations` next.
 5. If "stop here" or "quit": end the session cleanly. The user can resume later by running `/ncw-compound-expectations` manually.
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-compound-expectations` —— 起草正/边界场景期望
+- **条件**：`docs/intents/{slug}.intent.md` 已写入且用户确认；AskUserQuestion 选 continue 直接链式调用，stop/quit 由用户稍后手动跑

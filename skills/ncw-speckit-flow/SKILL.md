@@ -7,7 +7,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 
 团队 AI native 开发流程的**衔接与门禁层**：不替代 `/ncw-speckit-*` 命令与 pingcode 扩展命令（它们各自的规则以自身为准），也不复述 `pingcode` skill 的 ID 安全规则与 `mturtle-commit` 的提交格式——本 skill 只定义角色怎么交接、什么才算交接完成、卡片与产物怎么对得上账。
 
-**前提**：项目已按 `ncw-monorepo-init` 初始化（规格驱动开发 + pingcode 扩展已装，`pingcode-config.yml` 由 pingcode 扩展的 init 命令生成）。本 pack 的技能本体不携带 hook 自动化——建卡、对账、补建任务卡均由对应命令手动执行，按各阶段要求跑命令即可。
+**前提**：项目已按 `ncw-monorepo-init` 初始化（规格驱动开发 + pingcode 扩展已装，`pingcode-config.yml` 由 pingcode 扩展的 init 命令生成）。本 pack 的技能本体不携带 hook 自动化——建卡、对账、补建任务卡均由对应命令手动执行，按各阶段要求跑命令即可。阶段间交接以各技能 SKILL.md 末尾的 `## Handoff` 块为准（目标 + 条件 + 回退；全链清单见 `docs/skill-handoff-and-gates.md`，仓外消费者以技能内块为准）。
 
 ## 流程主线
 

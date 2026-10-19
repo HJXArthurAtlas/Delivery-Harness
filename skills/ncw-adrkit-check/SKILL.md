@@ -10,10 +10,7 @@ description: Check a produced plan against the decisions that govern it. Read-on
 Runs after a plan exists, and answers one question: does this plan sit inside
 the decisions already made, or does it quietly cross one?
 
-This is the command the optional `after_plan` hook offers to run. Hook firing
-requires the upstream adrkit extension's hook registration (installed by
-ncw-monorepo-init via `specify extension add adrkit`); without it, run this
-check manually after `/ncw-speckit-plan`.
+Run this check manually after `/ncw-speckit-plan` has produced a plan.
 
 ## User Input
 
@@ -56,9 +53,18 @@ $ARGUMENTS
   `.agents/skills/ncw-adrkit-draft/scripts/adr.mjs`; no `@adrkit/cli` install is
   required. `ADRKIT_CLI` is an explicit opt-in override.
 - Read-only, and that is load-bearing rather than incidental: this command is
-  reachable from a lifecycle hook, so it must never write.
+  part of the plan-review chain, so it must never write.
 - Exit code 1 means findings exist (corpus errors, or the evaluator returned the
   proposal). The report is still complete. Exit code 2 is a usage error.
 - Configuration: `ADRKIT_DIR` (corpus, default `docs/adr/`), `ADRKIT_SNAPSHOT`
   (evaluator snapshot bundle), `ADRKIT_AS_OF` (evaluation date, default today
   UTC), `ADRKIT_CLI` (explicit path to the `adr` entry point).
+
+---
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **目标**：`/ncw-speckit-tasks` —— 在 plan 通过检查后拆解为可执行任务
+- **条件**：plan 已产出；本检查只读，发现 plan 越界（departure）时先回 plan 修正或记录为正式 ADR 变更，再进 tasks
