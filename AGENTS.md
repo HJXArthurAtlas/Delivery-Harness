@@ -30,7 +30,7 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 职责分层与外部委托：
 
 - `ncw-monorepo-init` 承载流程与**版本钉子**（`references/init.md` 是唯一载体）；模板仓承载骨架（`AGENTS-TEMPLATE.md`、`.specify/`、`docs/adr/` 等），**版本双落点同改**：init.md 的钉子 = 初始化基线，模板仓巡检表 = 巡检基线。
-- `ncw-speckit-flow` 是流程衔接与门禁层，按引用委托 `ncw-speckit-*` 系技能、`pingcode` skill、`mturtle-commit`，**不内联它们的规则**。主线命令技能（specify/clarify/design/plan/tasks/implement）的 Completion Report 末尾带统一「Pack fork」下一步提示（按 9 阶段表引导下一命令与建卡/对账/收尾提醒，上游升级需 port）。
+- `ncw-speckit-flow` 是流程衔接与门禁层，按引用委托 `ncw-speckit-*` 系技能、`pingcode` skill、`mturtle-commit`，**不内联它们的规则**。主线命令技能（specify/clarify/design/plan/tasks/implement）的 Completion Report 末尾带统一「Pack fork」下一步提示——按主流程/可选分组，条目格式 `- /命令: [可选] 能做什么`（按 9 阶段表引导下一命令与建卡/对账/收尾提醒，上游升级需 port）。
 
 ## Key Directories
 

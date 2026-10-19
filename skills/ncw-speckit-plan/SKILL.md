@@ -28,7 +28,13 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Completion Report
 
-Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated artifacts. **Pack fork (ncw), port on upstream upgrade**: end with the suggested next command `/ncw-speckit-tasks`; if `mapping.task_artifact` is configured, story-task cards are created after tasks via the pingcode extension, and `sync-cards` must run before implementation when the spec changed after card creation.
+Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated artifacts. **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
+  主流程:
+  - /ncw-speckit-tasks: 按 spec 用户故事生成依赖有序任务清单
+  可选:
+  - /ncw-adrkit-check: [可选] 对照 ADR 语料校验 plan 是否越决策边界
+  - /ncw-speckit-analyze: [可选] spec/plan 工件一致性只读分析
+  - specstoissues（pingcode 扩展命令）: [可选] 配了 mapping.task_artifact 时 tasks 后补建任务卡（implement 前 spec 有改动先跑 sync-cards 对账）
 
 ## Phases
 

@@ -199,7 +199,13 @@ Report completion to the user with:
 - `SPEC_FILE` — the spec file path
 - Checklist results summary
 - Readiness for the next phase (`/ncw-speckit-clarify` or `/ncw-speckit-plan`)
-- **Pack fork (ncw), port on upstream upgrade**: suggest the flow's next steps in order — clarify (`/ncw-speckit-clarify`, or `/ncw-speckit-grill-me` for deep clarification); for UI features `/ncw-speckit-design` to produce the design details (`design-tasks.md`); then card creation via the pingcode extension's specstoissues command (optional) and the handoff gate before development starts
+- **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows (`- /cmd: [可选] what-it-does` item shape; `[可选]` tag only on optional items):
+  主流程:
+  - /ncw-speckit-clarify: 澄清 spec 歧义并把结论回写 spec（≤5 问）
+  - /ncw-speckit-design: 出设计明细 design-tasks.md（涉 UI 特性必跑）
+  可选:
+  - /ncw-speckit-grill-me: [可选] 无上限深度澄清，替代 clarify
+  - specstoissues（pingcode 扩展命令）: [可选] 建需求树卡片并登记 specs/pingcode-mapping.json（不建则交接前必须补跑）
 
 ## Quick Guidelines
 

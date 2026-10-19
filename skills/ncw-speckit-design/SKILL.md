@@ -55,7 +55,12 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 方案无任何待解决事项（无「待补」、无未决疑问）后，按段四确定的规则与自检结论，参照 `references/design-tasks-template.md` 输出设计明细到 `$FEATURE_DIR/design-tasks.md`；功能名称与所属迭代记录在文档「任务目标」节，故事卡号（如有）一并写入，便于设计侧对齐 flow 溯源链。
 
-输出后向用户确认。用户提出任何改动建议、或自检发现需调整时，重新过一遍 `references/design-spec.md` 与 `references/design-selfcheck.md`（段四），再按段五重新产出。产出物确认后本 skill 结束；结束时按 flow 提示下一步：设计明细已落 `design-tasks.md`，尚未建卡的提示跑 pingcode 扩展的 specstoissues 命令（登记 `specs/pingcode-mapping.json`），随后过交接门禁转开发。
+输出后向用户确认。用户提出任何改动建议、或自检发现需调整时，重新过一遍 `references/design-spec.md` 与 `references/design-selfcheck.md`（段四），再按段五重新产出。产出物确认后本 skill 结束；结束时按 flow 分组提示下一步（条目格式 `- /命令: [可选] 能做什么`）：
+
+主流程:
+- /ncw-speckit-plan: 交接门禁通过后开发侧出实现计划
+可选:
+- specstoissues（pingcode 扩展命令）: [可选] 建需求树卡片并登记 `specs/pingcode-mapping.json`（不建则交接前必须补跑）
 
 ## 行为规则
 

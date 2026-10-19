@@ -55,7 +55,12 @@ Output path to generated tasks.md and summary:
 - Independent test criteria for each story
 - Suggested MVP scope (typically just User Story 1)
 - Format validation: Confirm ALL tasks follow the checklist format (checkbox, ID, labels, file paths)
-- **Pack fork (ncw), port on upstream upgrade**: suggest the next command `/ncw-speckit-implement`; if `mapping.task_artifact` is configured, remind the user to create story-task cards via the pingcode extension now, and to run `sync-cards` before implementation if the spec changed after card creation
+- **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
+  主流程:
+  - /ncw-speckit-implement: 按 tasks.md 逐任务实现（涉 UI 按设计明细核验；spec 建卡后有改动先跑 sync-cards 对账）
+  可选:
+  - specstoissues（pingcode 扩展命令）: [可选] 配了 mapping.task_artifact 时现在补建任务卡
+  - /ncw-speckit-analyze: [可选] spec/plan/tasks 三工件一致性只读分析
 
 Context for task generation: $ARGUMENTS
 

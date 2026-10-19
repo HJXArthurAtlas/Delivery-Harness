@@ -142,7 +142,12 @@ Note: This command assumes a complete task breakdown exists in tasks.md. If task
 
 ## Completion Report
 
-Report final status with summary of completed work. **Pack fork (ncw), port on upstream upgrade**: once all tasks are `[x]`, suggest running the pingcode extension's sync-status command to close the story cards (one-way; reopening requires a new work item).
+Report final status with summary of completed work. **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
+  主流程:
+  - sync-status（pingcode 扩展命令）: 全部任务 [x] 后收尾故事卡（单向流转，重开需新建工作项）
+  可选:
+  - /ncw-speckit-converge: [可选] 实现与工件有差距时追加收敛任务
+  - /ncw-adrkit-draft: [可选] 把本次耐久决策落成 ADR 归口 docs/adr/
 
 ## Done When
 
