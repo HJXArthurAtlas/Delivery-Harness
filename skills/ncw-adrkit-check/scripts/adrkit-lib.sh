@@ -19,8 +19,8 @@ adrkit_fail() {
 	exit "${2:-$ADRKIT_EXIT_MISSING}"
 }
 
-# Resolve the `adr` binary once, in a fixed, documented order. No branch of this
-# reaches the network: a missing CLI is reported, never fetched.
+# Resolve the CLI once. ADRKIT_CLI is an explicit opt-in override; the default
+# is the pack-bundled adrkit 0.20.0 runtime, never a project or PATH install.
 _adrkit_cli_resolved=''
 
 adrkit_resolve_cli() {
@@ -35,17 +35,9 @@ adrkit_resolve_cli() {
 		return 0
 	fi
 
-	if [ -x ./node_modules/.bin/adr ]; then
-		_adrkit_cli_resolved='./node_modules/.bin/adr'
-		return 0
-	fi
-
-	if command -v adr >/dev/null 2>&1; then
-		_adrkit_cli_resolved="$(command -v adr)"
-		return 0
-	fi
-
-	adrkit_fail "adrkit's CLI is not installed — install it with 'npm install -g @adrkit/cli', add @adrkit/cli to this project, or set ADRKIT_CLI to its entry point"
+	_adrkit_cli_resolved="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)/../../ncw-adrkit-draft/scripts/adr.mjs"
+	[ -f "$_adrkit_cli_resolved" ] ||
+		adrkit_fail "pack-bundled adrkit runtime is missing at '$_adrkit_cli_resolved' — reinstall the complete pack"
 }
 
 # Run the resolved CLI, propagating its exit code verbatim. `adr` uses 1 for
@@ -71,12 +63,12 @@ adrkit_cli() {
 adrkit_corpus_dir() {
 	_adrkit_corpus="${ADRKIT_DIR:-docs/adr}"
 	[ -d "$_adrkit_corpus" ] ||
-		adrkit_fail "no ADR corpus at '$_adrkit_corpus' — point ADRKIT_DIR at the corpus directory, or create the first record with 'adr new'"
+		adrkit_fail "no ADR corpus at '$_adrkit_corpus' — point ADRKIT_DIR at the corpus directory, or create the first record with /ncw-adrkit-draft"
 	printf '%s' "$_adrkit_corpus"
 }
 
-# The current feature directory. Prefer the project's own resolver over
-# reimplementing its branch/feature.json logic, which is upstream's to change.
+# The current feature directory. Resolve through the pack's bundled speckit
+# helper so a project-local specify installation is never required.
 adrkit_feature_dir() {
 	if [ -n "${ADRKIT_FEATURE_DIR:-}" ]; then
 		[ -d "$ADRKIT_FEATURE_DIR" ] ||
@@ -85,11 +77,15 @@ adrkit_feature_dir() {
 		return 0
 	fi
 
-	_adrkit_prereq='.specify/scripts/bash/check-prerequisites.sh'
-	[ -x "$_adrkit_prereq" ] ||
-		adrkit_fail "no feature context reachable — '$_adrkit_prereq' is missing or not executable and ADRKIT_FEATURE_DIR is unset. Run this from a project root (a directory containing .specify/), or set ADRKIT_FEATURE_DIR."
+	_adrkit_scripts_dir="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
+	_adrkit_prereq="$_adrkit_scripts_dir/../../ncw-speckit-analyze/scripts/check_prerequisites.py"
+	[ -f "$_adrkit_prereq" ] ||
+		adrkit_fail "pack feature resolver is missing at '$_adrkit_prereq' — reinstall the pack, or set ADRKIT_FEATURE_DIR"
+	command -v python3 >/dev/null 2>&1 ||
+		adrkit_fail "pack feature resolver needs python3 on PATH, or set ADRKIT_FEATURE_DIR"
 
-	_adrkit_paths="$("$_adrkit_prereq" --paths-only 2>/dev/null)" || _adrkit_paths=''
+	_adrkit_paths="$(python3 "$_adrkit_prereq" --paths-only)" ||
+		adrkit_fail "pack feature resolver failed — run /ncw-speckit-specify first, or set ADRKIT_FEATURE_DIR"
 	_adrkit_feature="$(printf '%s\n' "$_adrkit_paths" | sed -n 's/^FEATURE_DIR: *//p' | head -n 1)"
 
 	[ -n "$_adrkit_feature" ] ||

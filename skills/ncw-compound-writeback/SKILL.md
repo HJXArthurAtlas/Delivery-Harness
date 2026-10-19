@@ -103,7 +103,7 @@ Show each draft and ask (use AskUserQuestion per draft):
 
 **5. Write accepted files.** ADRs go to the shared adrkit corpus at `docs/adr/`; corrections and patterns go to `docs/corrections/` and `docs/patterns/`.
 
-- For ADRs: allocate each accepted ADR through the scaffold entry point `.agents/skills/ncw-adrkit-draft/scripts/scaffold.sh <title>` (global install: `~/.agents/skills/ncw-adrkit-draft/scripts/scaffold.sh`). It writes a schema-valid draft with the next free corpus id into `docs/adr/` (override with `ADRKIT_DIR`), printing `{ "id", "path" }`; write the drafted body into that file and run `adr lint` afterwards. Status stays `draft` — ratification is a human act, as in `/ncw-adrkit-draft`. Never hand-number and never edit an existing ADR; a changed decision gets a new record that supersedes the old one.
+- For ADRs: allocate each accepted ADR through the scaffold entry point `.agents/skills/ncw-adrkit-draft/scripts/scaffold.sh <title>` (global install: `~/.agents/skills/ncw-adrkit-draft/scripts/scaffold.sh`). It writes a schema-valid draft with the next free corpus id into `docs/adr/` (override with `ADRKIT_DIR`), printing `{ "id", "path" }`; write the drafted body into that file and run `.agents/skills/ncw-adrkit-draft/scripts/adr.sh lint` afterwards (global install: `~/.agents/skills/ncw-adrkit-draft/scripts/adr.sh lint`). Status stays `draft` — ratification is a human act, as in `/ncw-adrkit-draft`. Never hand-number and never edit an existing ADR; a changed decision gets a new record that supersedes the old one.
 - For corrections: write `docs/corrections/{YYYY-MM-DD}-{slug}.md`, prefixing the filename with the date. Always include the `paths:`/`match:`/`rule:`/`context:` frontmatter from the template above so the correction is enforceable — only fall back to a frontmatter-less body if the user explicitly wants a context-only note.
 - For patterns: write `docs/patterns/{slug}.md`, using the slug only as the filename.
 
@@ -130,7 +130,7 @@ When invoked as an `after_implement` hook, this command runs only AFTER `/ncw-co
 ## Tool choices
 
 - **Read** for scanning session history and intent guard verdict
-- **Bash** for the adrkit scaffold entry point and `adr lint`
+- **Bash** for the adrkit scaffold entry point and `.agents/skills/ncw-adrkit-draft/scripts/adr.sh lint`
 - **Write** for new compound files
 - **Edit** for updating intent doc status (frontmatter only)
 - **AskUserQuestion** for per-draft accept/edit/reject/defer

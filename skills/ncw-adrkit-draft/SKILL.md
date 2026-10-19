@@ -24,10 +24,7 @@ $ARGUMENTS
    and manufacturing one is worse than not writing it.
 2. Run the pack-bundled script with the decision's title as arguments —
    project install: `.agents/skills/ncw-adrkit-draft/scripts/draft.sh`; global
-   install: `~/.agents/skills/ncw-adrkit-draft/scripts/draft.sh`. (When
-   `specify extension add adrkit` has been run, e.g. via ncw-monorepo-init, the
-   upstream extension copy at `.specify/extensions/adrkit/scripts/draft.sh` is
-   equivalent.) Write the title as the
+   install: `~/.agents/skills/ncw-adrkit-draft/scripts/draft.sh`. Write the title as the
    decision itself, in the imperative — "Adopt Postgres for the read model", not
    "Database choice".
 3. The script prints `{ "id", "path" }`. It has scaffolded a schema-valid draft
@@ -50,9 +47,13 @@ $ARGUMENTS
 
 ## Notes
 
-- Feature resolution requires a specify-initialized project
-  (`.specify/scripts/bash/check-prerequisites.sh` present). If it is absent,
-  run ncw-monorepo-init first.
+- Feature resolution uses the pack-bundled
+  `.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py`; neither
+  `specify init` nor `.specify/scripts/` is required. `ADRKIT_FEATURE_DIR`
+  overrides feature-dir resolution.
+- The adrkit 0.20.0 CLI is bundled as `scripts/adr.mjs`, with `scripts/adr.sh`
+  as the cross-skill lint/migration entry point; no `@adrkit/cli` install is
+  required. `ADRKIT_CLI` is an explicit opt-in override.
 - This is the only command in the extension that writes, and it is deliberately
   not reachable from any hook. A plan-phase hook that created records
   unprompted would manufacture decision memory instead of recording it.
@@ -66,17 +67,20 @@ $ARGUMENTS
   writers share one numbering sequence; never hand-number.
 - Migrating legacy corpus locations (records still under
   `docs/compound/adr/` or `docs/domain_knowledge/adr/`): records already in
-  `docs/adr/` are canonical and need no relocation. The pinned CLI owns the
-  conversion. Dry-run `adr migrate --from madr --rename --dir <legacy-dir>`
+  `docs/adr/` are canonical and need no relocation. The bundled CLI owns the
+  conversion. In the commands below, `<adrkit>` means
+  `.agents/skills/ncw-adrkit-draft/scripts/adr.sh` (global install:
+  `~/.agents/skills/ncw-adrkit-draft/scripts/adr.sh`). Dry-run
+  `<adrkit> migrate --from madr --rename --dir <legacy-dir>`
   on each legacy directory to preview the findings; before moving anything,
   renumber incoming legacy records by renaming their files so that every
   `NNNN-slug.md` id is unique across the existing canonical records and all
-  incoming legacy sets (the filename drives the record id, and `adr lint`
-  does not report duplicate ids, verified against the pinned CLI, so this
+  incoming legacy sets (the filename drives the record id, and `<adrkit> lint`
+  does not report duplicate ids, verified against the bundled CLI, so this
   renumber step is the merge's only collision guard); move only the legacy
   records into `docs/adr/`; run
-  `adr migrate --from madr --rename --dir docs/adr` once over the merged
+  `<adrkit> migrate --from madr --rename --dir docs/adr` once over the merged
   corpus; backfill the reported findings (date, status, deciders); finish with
-  `adr lint`.
+  `<adrkit> lint`.
 - A plan must exist. Drafting "from the plan artifact" without a plan is not a
   degraded mode, it is a different and worse thing.

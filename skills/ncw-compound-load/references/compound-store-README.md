@@ -17,7 +17,7 @@ docs/
     └── README.md     ← This store guide
 ```
 
-ADR records live in the shared adrkit corpus at `docs/adr/` — same numbering and schema as `/ncw-adrkit-draft`, validated by `adr lint`. They are allocated by the scaffold entry point in `ncw-adrkit-draft/scripts/`, never hand-numbered.
+ADR records live in the shared adrkit corpus at `docs/adr/` — same numbering and schema as `/ncw-adrkit-draft`, validated by `.agents/skills/ncw-adrkit-draft/scripts/adr.sh lint`. They are allocated by the scaffold entry point in `ncw-adrkit-draft/scripts/`, never hand-numbered.
 
 ### ADRs live in the adrkit corpus (`docs/adr/`)
 

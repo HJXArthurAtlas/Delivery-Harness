@@ -40,6 +40,10 @@ The checker is selected at runtime by climbing to the **highest available** tier
 
 Read it from the `SKC_CHECKER` env var, or a `checker:` line in `docs/compound/compound-config.yml` if present. Default `auto`.
 
+Tier 1 is optional. Without a cross-model CLI, `auto` continues through native
+Tier 2 / Tier 3; a fresh default-model subagent is the pack-local baseline. Only
+an explicit `cross-model` or `cli:model` policy requires an external model CLI.
+
 ---
 
 ## Inputs you must load

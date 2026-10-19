@@ -22,10 +22,7 @@ $ARGUMENTS
    none.
 2. Run the pack-bundled script with those paths as arguments — project install:
    `.agents/skills/ncw-adrkit-context/scripts/context.sh`; global install:
-   `~/.agents/skills/ncw-adrkit-context/scripts/context.sh`. (When
-   `specify extension add adrkit` has been run, e.g. via ncw-monorepo-init, the
-   upstream extension copy at `.specify/extensions/adrkit/scripts/context.sh` is
-   equivalent.)
+   `~/.agents/skills/ncw-adrkit-context/scripts/context.sh`.
    - **With paths**, it emits a `CheckOutcome` JSON document: the decisions
      governing each path, plus findings for any ADR among them.
    - **With no paths**, it emits the ARB queue as JSON: every proposed decision
@@ -40,15 +37,16 @@ $ARGUMENTS
    - `history` — superseded and rejected records. This is where "we tried that"
      lives, and it is the reason not to re-propose it.
 4. If the command exits non-zero, read the message on stderr. It names the
-   missing thing (no CLI on PATH, no corpus at `ADRKIT_DIR`) rather than
-   returning an empty result that reads like "nothing governs this."
+   missing thing (the bundled runtime, a Node runtime, or the corpus at
+   `ADRKIT_DIR`) rather than returning an empty result that reads as "nothing
+   governs this."
 
 ## Notes
 
-- Feature resolution requires a specify-initialized project
-  (`.specify/scripts/bash/check-prerequisites.sh` present). If it is absent,
-  run ncw-monorepo-init first. `ADRKIT_FEATURE_DIR` overrides feature-dir
-  resolution (skip check-prerequisites.sh).
+- The adrkit 0.20.0 CLI is bundled at
+  `.agents/skills/ncw-adrkit-draft/scripts/adr.mjs`; no `@adrkit/cli` install or
+  feature resolver is required for this command. `ADRKIT_CLI` is an explicit
+  opt-in override.
 - Read-only. This command never writes to `docs/adr/**` or anything else.
 - The corpus directory defaults to `docs/adr/` and is overridable with
   `ADRKIT_DIR`. Since the ADR-unification cutover this is the project's only

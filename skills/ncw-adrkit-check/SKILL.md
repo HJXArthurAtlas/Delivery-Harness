@@ -26,10 +26,7 @@ $ARGUMENTS
    arguments it falls back to the plan artifact itself.
 2. Run the pack-bundled script with those paths — project install:
    `.agents/skills/ncw-adrkit-check/scripts/check.sh`; global install:
-   `~/.agents/skills/ncw-adrkit-check/scripts/check.sh`. (When
-   `specify extension add adrkit` has been run, e.g. via ncw-monorepo-init, the
-   upstream extension copy at `.specify/extensions/adrkit/scripts/check.sh` is
-   equivalent.)
+   `~/.agents/skills/ncw-adrkit-check/scripts/check.sh`.
 3. Read the output. It is one or two marker-introduced sections, each followed
    by a single JSON document:
    - `==> adrkit:check` — the `CheckOutcome`: which decisions govern these
@@ -51,9 +48,13 @@ $ARGUMENTS
 
 ## Notes
 
-- Feature resolution requires a specify-initialized project
-  (`.specify/scripts/bash/check-prerequisites.sh` present). If it is absent,
-  run ncw-monorepo-init first.
+- Feature resolution uses the pack-bundled
+  `.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py`; neither
+  `specify init` nor `.specify/scripts/` is required. `ADRKIT_FEATURE_DIR`
+  overrides feature-dir resolution.
+- The adrkit 0.20.0 CLI is bundled at
+  `.agents/skills/ncw-adrkit-draft/scripts/adr.mjs`; no `@adrkit/cli` install is
+  required. `ADRKIT_CLI` is an explicit opt-in override.
 - Read-only, and that is load-bearing rather than incidental: this command is
   reachable from a lifecycle hook, so it must never write.
 - Exit code 1 means findings exist (corpus errors, or the evaluator returned the

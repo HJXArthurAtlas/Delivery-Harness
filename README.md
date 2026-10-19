@@ -9,7 +9,7 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | `ncw-monorepo-init` | 项目初始化（init）/ 结构环境诊断（diagnose），migrate 待标注 | 「按团队 monorepo 规范初始化/诊断这个项目」 |
 | `ncw-adrkit-context` | 规划前取治理决策进上下文：带路径给 governedBy/activeProposals/history，无路径列 ARB 待评审队列（adrkit context 命令的 pack 分发，正文英文原文；只读） | 「这个改动受哪些决策约束」「列出待评审决策」 |
 | `ncw-adrkit-check` | plan 产出后对照 ADR 语料只读校验是否越界，配 ADRKIT_SNAPSHOT 时追加确定性路由报告（adrkit check 命令的 pack 分发；after_plan 可选 hook 目标） | 「check 这个 plan 越没越决策」 |
-| `ncw-adrkit-draft` | 从当前 plan 工件 scaffold 一条新 ADR 草稿（不经 hook；其 `scripts/scaffold.sh` 还是 grill-with-docs / compound-writeback 的免 plan 分配入口——ADR 统一归口语料 `docs/adr/`；落稿后接 `adr lint` 校验） | 「把这个决策落成 ADR」 |
+| `ncw-adrkit-draft` | 从当前 plan 工件 scaffold 一条新 ADR 草稿（不经 hook；其 `scripts/scaffold.sh` 还是 grill-with-docs / compound-writeback 的免 plan 分配入口——ADR 统一归口语料 `docs/adr/`；落稿后接 `scripts/adr.sh lint` 校验） | 「把这个决策落成 ADR」 |
 | `ncw-compound-intent` | intent 访谈：目标 + 约束 + 失败条件（compound v0.7.0 的 pack 分发，正文英文原文；运行期数据落在项目 `docs/intents/` 等，不经扩展安装） | 「先做 intent 访谈」「锁定目标与约束」 |
 | `ncw-compound-expectations` | 期望访谈：正/边缘场景与 intent 分文件存放（builder 不可见，防 reward-hack） | 「补期望场景」「写 expectations」 |
 | `ncw-compound-load` | 会话开始加载 adrkit ADR 语料（`docs/adr/`）+ compound store（`docs/corrections/` + `docs/patterns/`）进上下文，缺目录时按 bundled 模板 scaffold | 「加载 compound store」 |
@@ -30,6 +30,20 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | `ncw-speckit-plan` | 实现规划与设计工件生成（plan 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「做这个需求的实现计划」「出 plan」 |
 | `ncw-speckit-specify` | 特性规格创建/更新（specify 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「出 spec」「写特性需求」 |
 | `ncw-speckit-tasks` | 任务清单生成（tasks 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「出任务清单」「拆任务」 |
+
+## 自包含运行时（排除 init / flow）
+
+`ncw-adrkit-*`、grill 与相关 compound 写入路径默认不需要安装项目外 CLI 或脚本：
+
+| 能力 | Pack 内实现 | 运行时前提 |
+|---|---|---|
+| adrkit `new/check/queue/lint/migrate/evaluate` | `skills/ncw-adrkit-draft/scripts/adr.mjs`（上游 CLI 与依赖的单文件 bundle）；`adr.sh` 是跨技能入口 | Node ≥22；无需 `@adrkit/cli`、`node_modules` 或 PATH 上的 `adr` |
+| grill 与 adrkit check/draft 的特性路径解析 | `skills/ncw-speckit-analyze/scripts/check_prerequisites.py` | python3；无需 `specify init` 或项目 `.specify/scripts/` |
+| ADR scaffold / lint / legacy migration | `ncw-adrkit-draft/scripts/{scaffold.sh,adr.sh}` | 同上；全部走 pack-local 跨技能调用 |
+
+`ADRKIT_CLI` 仅是显式覆盖入口，不是默认依赖。`planverify` / `intentguard` 的默认 `auto` 策略在没有跨模型 CLI 时使用原生 Tier 2/3 subagent；只有用户强制 `cross-model` 或 `cli:model` 才需要对应外部模型 CLI。
+
+**范围边界**：`ncw-monorepo-init` 与 `ncw-speckit-flow` 不属于自包含改造范围；前者保留初始化工具链，后者保留 PingCode 卡流程依赖。目标项目自身的 git / build / test / lint 工具链也不随 pack 内置。
 
 ## 安装
 
@@ -71,7 +85,7 @@ omp plugin install ncw-delivery@ncw-delivery-harness
 ## 开发
 
 ```bash
-npm test   # ① tests/skills/test-skill-structure.sh：skills/ 结构与分发面校验（frontmatter、引用文件存在、泄漏扫描、PACK_SKILLS 与目录一一对应、.agents/commands/ frontmatter、.omp-plugin/marketplace.json 合规）；② tests/skills/test-speckit-constitution.sh：临时夹具驱动 ncw-speckit-constitution bundled resolve_template.py 的模板分辨栈契约（层优先级、缺层报错退出、scaffold 字节级 round-trip），无 python3 时 SKIP
+npm test   # ① test-skill-structure.sh：结构与分发面；② test-speckit-constitution.sh：模板分辨栈契约；③ test-pack-runtime.sh：临时 .agents/skills 安装 + 无 adr/specify/git 的最小 PATH，驱动特性解析、ADR scaffold/draft/lint/check/evaluate/context/queue/migrate（无 python3 时 SKIP）
 ```
 
 新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）+ 在 `sync.mjs` 的 `PACK_SKILLS` 登记一行；`npm test` 会把关，缺登记即失败。命名格式 `ncw-{submodule}-action`（如 `ncw-monorepo-init`），全名 ≤32 字符。

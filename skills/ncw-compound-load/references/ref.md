@@ -110,7 +110,7 @@ docs/
     └── README.md     ← compound store guide
 ```
 (Settled ADRs live in the shared adrkit corpus at `docs/adr/` —
-same schema as `/ncw-adrkit-draft`, validated by `adr lint`.)
+same schema as `/ncw-adrkit-draft`, validated by `.agents/skills/ncw-adrkit-draft/scripts/adr.sh lint`.)
 
 **The compounding effect:**
 Each feature run writes back learnings — corrections and patterns to `docs/corrections/` and `docs/patterns/`, ADRs to the shared adrkit corpus (`docs/adr/`).

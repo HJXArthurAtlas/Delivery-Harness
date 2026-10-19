@@ -50,6 +50,10 @@ requires Tier 1 or fails loudly; `same-family` forces Tier 2; `same-model` force
 Tier 3; `cli:model` is explicit. Read from `SKC_CHECKER` env, else a `checker:` line
 in `docs/compound/compound-config.yml`.
 
+Tier 1 is optional. Without a cross-model CLI, `auto` continues through native
+Tier 2 / Tier 3; a fresh default-model subagent is the pack-local baseline. Only
+an explicit `cross-model` or `cli:model` policy requires an external model CLI.
+
 ---
 
 ## Inputs you must load
