@@ -21,7 +21,7 @@ import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const PACK_SKILLS = ["monorepo-setup", "speckit-flow"];
+const PACK_SKILLS = ["monorepo-setup", "speckit-flow", "ncw-pingcode-init", "ncw-pingcode-discover-context", "ncw-pingcode-specstoissues", "ncw-pingcode-sync-cards", "ncw-pingcode-sync-status"];
 
 const args = process.argv.slice(2);
 if (args.includes("--help") || args.includes("-h")) {
