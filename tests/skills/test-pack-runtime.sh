@@ -59,6 +59,11 @@ for tool in node python3 dirname mkdir sed head date cat; do
 done
 PATH="$TMP/bin"
 export PATH
+# Keep the CLI resolution hermetic: an omp-installed adrkit bin under the real
+# $HOME must not leak into the bundled-runtime contract.
+HOME="$TMP/home"
+mkdir -p "$HOME"
+export HOME
 
 run() { # run <command...>; captures OUT / RC and writes stderr to $TMP/stderr
   OUT="$(cd "$PROJECT" && "$@" 2>"$TMP/stderr")"

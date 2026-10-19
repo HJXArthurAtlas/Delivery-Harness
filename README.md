@@ -42,6 +42,8 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | grill、adrkit check/draft 与 ncw-speckit-design 的特性路径解析 | `skills/ncw-speckit-analyze/scripts/check_prerequisites.py` | python3；无需 `specify init` 或项目 `.specify/scripts/` |
 | ADR scaffold / lint / legacy migration | `ncw-adrkit-draft/scripts/{scaffold.sh,adr.sh}` | 同上；全部走 pack-local 跨技能调用 |
 
+CLI 解析顺序（`adrkit-lib.sh`）：`ADRKIT_CLI` 显式覆盖 > omp 插件依赖安装的 `@adrkit/cli`（`<项目>/.omp/plugins/node_modules/.bin/adrkit`，然后 `~/.omp/plugins/node_modules/.bin/adrkit`）> pack-bundled `adr.mjs` 兜底。PATH 上的 `adr`/`adrkit` 永远不被拾取。
+
 `ADRKIT_CLI` 仅是显式覆盖入口，不是默认依赖。`planverify` / `intentguard` 的默认 `auto` 策略在没有跨模型 CLI 时使用原生 Tier 2/3 subagent；只有用户强制 `cross-model` 或 `cli:model` 才需要对应外部模型 CLI。
 
 **范围边界**：`ncw-monorepo-init` 与 `ncw-speckit-flow` 不属于自包含改造范围；前者保留初始化工具链，后者保留 PingCode 卡流程依赖。目标项目自身的 git / build / test / lint 工具链也不随 pack 内置。
@@ -82,6 +84,17 @@ omp plugin install ncw-delivery@ncw-delivery-harness
 - 更新：`omp plugin upgrade ncw-delivery@ncw-delivery-harness`；装完 `/reload-plugins` 或开新会话生效。
 - 注意 `marketplace.autoUpdate` 默认 `notify` 只写 debug log 不提示；要自动更新执行 `omp config set marketplace.autoUpdate auto`。
 - catalog `version` 与 `package.json` 版本同步维护，`npm test` 校验二者一致。
+- **marketplace 安装不解析 npm 依赖**（只缓存插件树并符号链接），上述路径下 adrkit 技能继续走 pack-bundled `adr.mjs`。
+
+#### omp git 插件安装（带 `@adrkit/cli` 依赖）
+
+想让 adrkit 技能使用真实 `@adrkit/cli`（版本钉在 `package.json#dependencies`，与 bundled `adr.mjs` 同为 0.20.0）时，走 git 插件安装——omp 会用 bun 安装依赖，`adrkit` 二进制落 `~/.omp/plugins/node_modules/.bin/`，技能脚本按上述解析顺序自动优先它：
+
+```bash
+omp plugin install git+https://git.newchiwan.com/council/ncw-delivery-harness.git
+```
+
+`package.json` 的 `"omp": {}` manifest 是这条路径下运行时技能发现的前提（omp 跳过无 manifest 的包）；`npm test` 钉住依赖版本与 `adrkit-bundle.json` 一致。
 
 ## 开发
 

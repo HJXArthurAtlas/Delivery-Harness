@@ -25,7 +25,7 @@ skills/<name>/SKILL.md (+ references/ scripts/)
    agent 运行时加载 skill
 ```
 
-omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 是 catalog（插件 `ncw-delivery`，`source: "./"` 即仓根），用户 `omp plugin marketplace add <仓 URL>` + `omp plugin install ncw-delivery@ncw-delivery-harness` 后由 omp 从插件树 `skills/<name>/SKILL.md` 发现。**插件只含 skills**——绝不加 `.omp-plugin/plugin.json` manifest（remap 会把 `.agents/` 带进安装面）；`.agents/commands/` 斜杠命令是本仓维护者工具（`/readme-refresh`），不经插件、不经 sync 分发——sync.mjs 只拷 `skills/`。catalog `version` 与 `package.json` 版本同步维护。
+omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 是 catalog（插件 `ncw-delivery`，`source: "./"` 即仓根），用户 `omp plugin marketplace add <仓 URL>` + `omp plugin install ncw-delivery@ncw-delivery-harness` 后由 omp 从插件树 `skills/<name>/SKILL.md` 发现。**插件只含 skills**——绝不加 `.omp-plugin/plugin.json` manifest（remap 会把 `.agents/` 带进安装面）；`.agents/commands/` 斜杠命令是本仓维护者工具（`/readme-refresh`），不经插件、不经 sync 分发——sync.mjs 只拷 `skills/`。catalog `version` 与 `package.json` 版本同步维护。marketplace 安装不解析 npm 依赖；另一条 omp 路径 `omp plugin install git+<仓 URL>` 经 bun 安装 `package.json#dependencies` 的 `@adrkit/cli`（版本钉 = `adrkit-bundle.json`，`npm test` 校验一致），`adrkit` bin 落 plugins `node_modules/.bin/`，`adrkit-lib.sh` 解析顺序 `ADRKIT_CLI` > 该 bin > bundled `adr.mjs`。根 `package.json` 的 `"omp": {}` manifest 是 git/npm 安装路径运行时技能发现的前提。
 
 职责分层与外部委托：
 
@@ -91,7 +91,7 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 ## Runtime/Tooling Preferences
 
 - **Node ≥ 22**，ESM（`.mjs`）；bash + POSIX coreutils（`awk/grep/sort`…）。
-- **零依赖、无 lockfile**（刻意）：`sync.mjs` 只用 `node:fs/os/path/url`；测试只用 bash + node 内联脚本（JSON 校验，node ≥22 是运行前提）——不要引入 npm 依赖或 lockfile。
+- **运行时零依赖、无 lockfile（刻意）**：`sync.mjs` 只用 `node:fs/os/path/url`；测试只用 bash + node 内联脚本（JSON 校验，node ≥22 是运行前提）——不要为仓内工具引入 npm 依赖或 lockfile。唯一例外：`package.json#dependencies` 的 `@adrkit/cli` 仅供 omp git/npm 插件安装路径由 bun 安装，仓内代码与测试不消费它（bundle `adr.mjs` 仍是兜底），版本钉必须与 `adrkit-bundle.json` 一致。
 - 无 CI、无构建、无格式化工具链；不要新增这类配置，除非明确要建立。
 
 ## Testing & QA

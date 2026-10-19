@@ -19,8 +19,11 @@ adrkit_fail() {
 	exit "${2:-$ADRKIT_EXIT_MISSING}"
 }
 
-# Resolve the CLI once. ADRKIT_CLI is an explicit opt-in override; the default
-# is the pack-bundled adrkit 0.20.0 runtime, never a project or PATH install.
+# Resolve the CLI once. ADRKIT_CLI is an explicit opt-in override. Next comes
+# an @adrkit/cli installed as an omp plugin dependency (git/npm plugin install
+# puts its `adrkit` bin in the scope's plugins node_modules/.bin; the
+# project-scoped root is cwd-relative because the corpus itself is). The
+# fallback is the pack-bundled adrkit 0.20.0 runtime, never a PATH install.
 _adrkit_cli_resolved=''
 
 adrkit_resolve_cli() {
@@ -32,6 +35,15 @@ adrkit_resolve_cli() {
 		[ -e "$ADRKIT_CLI" ] ||
 			adrkit_fail "ADRKIT_CLI is set to '$ADRKIT_CLI', but nothing exists at that path"
 		_adrkit_cli_resolved="$ADRKIT_CLI"
+		return 0
+	fi
+
+	if [ -x ".omp/plugins/node_modules/.bin/adrkit" ]; then
+		_adrkit_cli_resolved=".omp/plugins/node_modules/.bin/adrkit"
+		return 0
+	fi
+	if [ -n "${HOME:-}" ] && [ -x "$HOME/.omp/plugins/node_modules/.bin/adrkit" ]; then
+		_adrkit_cli_resolved="$HOME/.omp/plugins/node_modules/.bin/adrkit"
 		return 0
 	fi
 
