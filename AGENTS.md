@@ -11,7 +11,18 @@ newchiwan 团队跨端 **agent skill pack**（`ncw-delivery-harness`）：把团
 
 本仓是「消费模板的元工具」：skill 承载流程与版本钉子，骨架载荷在模板仓 `council/monorepo-template`，两者独立发版。
 
-## Architecture & Data Flow
+仓内内容分两层，下文按 **Part I · 用户指南**（消费/安装本 pack 的视角）与 **Part II · 本地开发指南**（维护本仓的视角）组织：
+
+- **分发面**（随 pack 发布，用户可见）：`skills/`、`.omp-plugin/marketplace.json`、`package.json`。
+- **仓内基建**（只服务本仓维护，不随 pack 分发）：`tests/`、`.githooks/`、`.agents/commands/`。
+
+---
+
+# Part I · 用户指南（消费 / 安装本 pack）
+
+本部分面向 pack 的消费者：分发模型、安装方式、安装后得到的技能清单。维护本仓请看 Part II。
+
+## Architecture & Data Flow（分发模型）
 
 无消费端构建步骤——「分发物」即 `skills/` 下的 Markdown 规则 + 技能携带的 Python / shell / Node 运行时 + 一个安装脚本，端侧按目录约定直接扫描发现。`adr.mjs` 是预先 bundle 并随仓提交的单文件运行时，安装与执行都不需要 npm 依赖。
 
@@ -32,7 +43,7 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 - `ncw-monorepo-init` 承载流程与**版本钉子**（`references/init.md` 是唯一载体）；模板仓承载骨架（`AGENTS-TEMPLATE.md`、`.specify/`、`docs/adr/` 等），**版本双落点同改**：init.md 的钉子 = 初始化基线，模板仓巡检表 = 巡检基线。
 - `ncw-speckit-flow` 是流程衔接与门禁层，按引用委托 `ncw-speckit-*` 系技能、`pingcode` skill、`mturtle-commit`，**不内联它们的规则**。主线命令技能（specify/clarify/design/plan/tasks/implement）的 Completion Report 末尾带统一「Pack fork」下一步提示——按主流程/可选分组，条目格式 `- /命令: [可选] 能做什么`（按 9 阶段表引导下一命令与建卡/对账/收尾提醒，上游升级需 port）。
 
-## Key Directories
+## 技能清单（`skills/` 目录导览，全部随 pack 分发）
 
 | 路径 | 用途 |
 |---|---|
@@ -50,19 +61,35 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 | `skills/ncw-speckit-plan/` | SKILL.md + `scripts/`（bundled `setup_plan.py` + `common.py`）+ `references/plan-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：plan 命令（实现规划 + research/data-model/contracts/quickstart 工件），正文英文原文；含 pack fork 段——存在 `$FEATURE_DIR/design-tasks.md` 时必读并作为 UX 约束输入，与 spec 冲突回用户裁决（上游升级需 port） |
 | `skills/ncw-speckit-specify/` | SKILL.md + `references/spec-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：specify 命令（特性规格创建/更新 + 质量清单），正文英文原文 |
 | `skills/ncw-speckit-tasks/` | SKILL.md + `scripts/`（bundled `setup_tasks.py` + `common.py`）+ `references/tasks-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：tasks 命令（按用户故事生成依赖有序 tasks.md），正文英文原文 |
-| `tests/skills/` | 结构校验脚本 + `ncw-speckit-constitution` 模板契约测试 + `test-pack-runtime.sh` 自包含运行时契约测试（见 Testing & QA） |
-| `.githooks/` | `commit-msg` 提交信息格式校验 |
-| `.agents/commands/` | 斜杠命令（通用 agent 发现路径，omp 实测可读；`*.md` + frontmatter `description`，文件名即命令名，如 `/readme-refresh`）。**禁止**用工具专属的 `.omp/commands/` |
-| `.omp-plugin/` | omp marketplace catalog（`marketplace.json` 单文件；插件 `ncw-delivery`，`source: "./"`）。**禁止**加 `plugin.json`——插件面只含 skills，命令不经插件分发 |
+| `tests/skills/` | 结构校验脚本 + `ncw-speckit-constitution` 模板契约测试 + `test-pack-runtime.sh` 自包含运行时契约测试（见 Part II Testing & QA） |
 
-## Development Commands
+## 安装方式
 
 ```bash
-npm test                                                  # 结构校验（唯一测试门）
 node skills/ncw-monorepo-init/scripts/sync.mjs            # 项目级安装到 <cwd>/.agents/skills/
 node skills/ncw-monorepo-init/scripts/sync.mjs --global   # 用户级安装到 ~/.agents/skills/
 node skills/ncw-monorepo-init/scripts/sync.mjs --dry-run  # 只打印 PLAN，不写盘
 npx git+https://git.newchiwan.com/council/ncw-delivery-harness.git --global   # 免克隆直装
+```
+
+omp 原生插件路径（不经拷贝，见上文分发模型）：`omp plugin marketplace add <仓 URL>` + `omp plugin install ncw-delivery@ncw-delivery-harness`，或 `omp plugin install git+<仓 URL>`。
+
+---
+
+# Part II · 本地开发指南（维护本仓）
+
+本部分面向 pack 维护者：开发约定、质量门、仓内基建。以下目录/文件只服务本仓维护，不随 pack 分发：
+
+| 路径 | 用途 |
+|---|---|
+| `tests/skills/` | 三个测试脚本（见下文 Testing & QA） |
+| `.githooks/` | `commit-msg` 提交信息格式校验 |
+| `.agents/commands/` | 斜杠命令（通用 agent 发现路径，omp 实测可读；`*.md` + frontmatter `description`，文件名即命令名，如 `/readme-refresh`）。**禁止**用工具专属的 `.omp/commands/` |
+
+## Development Commands
+
+```bash
+npm test                                                  # 结构校验（唯一测试门，改技能内容后必须跑）
 git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验（一次性）
 ```
 
