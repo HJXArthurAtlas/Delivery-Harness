@@ -50,7 +50,6 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   #    仅反引号括起的路径参与校验：以 references/ 或 scripts/ 开头的按 pack 内相对引用
   #    校验存在性；其余（.agents/、~/、绝对路径等宿主路径）运行时才有，不在仓内校验
   #    ——跨技能引用（如 grill-with-docs 指向 ncw-adrkit-draft 的 scaffold.sh）属此类。
-  #    （.specify/ 已废弃，不再是运行时路径，SKILL.md 不应再引用。）
   while IFS= read -r ref; do
     case "$ref" in
       references/*|scripts/*)

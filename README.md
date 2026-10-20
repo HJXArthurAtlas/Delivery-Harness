@@ -21,7 +21,7 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | `ncw-speckit-grill-me` | 无上限轮次澄清访谈（clarify 的深化替代）：前沿/轮次/设计树把 spec.md 决策点推进到 Clear/Resolved/Outstanding/Deferred（grill me 命令的 pack 分发，正文英文原文） | 「深度澄清这份 spec」「grill me」 |
 | `ncw-speckit-grill-with-docs` | 同 grill-me 澄清流程 + settled 跨特性术语/领域知识即时落盘 docs/domain_knowledge/（CONTEXT.md + 主题文档）；过三条件记录门的决策经 adrkit scaffold 归口为 ADR（`docs/adr/`，pack fork 段）（grill with-docs 命令的 pack 分发） | 「澄清并沉淀领域知识」 |
 | `ncw-speckit-analyze` | 跨工件一致性只读分析（analyze 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「分析 spec/plan/tasks 一致性」 |
-| `ncw-bug-assess` | bug 报告三角定位：粘贴文本/URL → 症状、疑似代码路径、严重度与修复方案，产出 `docs/bugs/<slug>/assessment.md`（spec-kit extension:bug 的 pack 分发，正文英文原文；产物目录由上游 `.specify/bugs/` 改 `docs/bugs/`） | 「评估这个 bug」「看看这个报错是不是真问题」 |
+| `ncw-bug-assess` | bug 报告三角定位：粘贴文本/URL → 症状、疑似代码路径、严重度与修复方案，产出 `docs/bugs/<slug>/assessment.md`（spec-kit extension:bug 的 pack 分发，正文英文原文） | 「评估这个 bug」「看看这个报错是不是真问题」 |
 | `ncw-bug-fix` | 按 assessment 的修复方案实施并记录变更到 `docs/bugs/<slug>/fix.md`（仅 assessment 存在后可用；assessment 有误停下回退） | 「按评估修这个 bug」 |
 | `ncw-bug-test` | 验证修复是否真正解决 bug：重跑复现 + 新增测试 + 回归，产出 `docs/bugs/<slug>/test.md`（failed 回退重跑 assess） | 「验证这个修复」「回归这个 bug」 |
 | `ncw-speckit-clarify` | 规格澄清问答（clarify 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「澄清规格歧义」「补全需求细节」 |
@@ -47,7 +47,7 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | 能力 | Pack 内实现 | 运行时前提 |
 |---|---|---|
 | adrkit `new/check/queue/lint/migrate/evaluate` | `skills/ncw-adrkit-draft/scripts/adr.mjs`（上游 CLI 与依赖的单文件 bundle）；`adr.sh` 是跨技能入口 | Node ≥22；无需 `@adrkit/cli`、`node_modules` 或 PATH 上的 `adr` |
-| grill、adrkit check/draft 与 ncw-speckit-design 的特性路径解析 | `skills/ncw-speckit-analyze/scripts/check_prerequisites.py` | python3；无需 `specify init`（`.specify/` 已废弃，特性指针在 `docs/memory/feature.json`） |
+| grill、adrkit check/draft 与 ncw-speckit-design 的特性路径解析 | `skills/ncw-speckit-analyze/scripts/check_prerequisites.py` | python3；特性指针在 `docs/memory/feature.json` |
 | ADR scaffold / lint / legacy migration | `ncw-adrkit-draft/scripts/{scaffold.sh,adr.sh}` | 同上；全部走 pack-local 跨技能调用 |
 | PingCode 卡操作（ncw-pingcode-* 五技能） | 无 bundle——依赖外部 `pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`） | `pingcode auth login` 认证 + 网络可达 PingCode；pack 不内置（认证凭据与 API 演进留在上游 CLI） |
 
@@ -107,7 +107,7 @@ omp plugin install git+https://git.newchiwan.com/council/ncw-delivery-harness.gi
 ## 开发
 
 ```bash
-npm test   # ① test-skill-structure.sh：结构与分发面；② test-speckit-constitution.sh：模板分辨栈契约；③ test-pack-runtime.sh：临时 .agents/skills 安装 + 无 adr/specify/git 的最小 PATH，驱动特性解析、ADR scaffold/draft/lint/check/evaluate/context/queue/migrate（无 python3 时 SKIP）
+npm test   # ① test-skill-structure.sh：结构与分发面；② test-speckit-constitution.sh：模板分辨栈契约；③ test-pack-runtime.sh：临时 .agents/skills 安装 + 无 adr/git 等外部 CLI 的最小 PATH，驱动特性解析、ADR scaffold/draft/lint/check/evaluate/context/queue/migrate（无 python3 时 SKIP）
 ```
 
 新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）；`npm test` 会把关。omp 插件按 `skills/` 目录自动发现，无需另行登记。命名格式 `ncw-{submodule}-action`（如 `ncw-pingcode-init`），全名 ≤32 字符。

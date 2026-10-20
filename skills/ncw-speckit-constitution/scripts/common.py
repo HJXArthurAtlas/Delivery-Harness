@@ -211,9 +211,7 @@ class TemplateResolutionError(RuntimeError):
 def resolve_template(template_name: str, references_dir: Path) -> Path | None:
     """Resolve a template name to the skill's bundled references/ copy.
 
-    Templates are self-contained in each skill's references/ directory; the
-    project-layer override stack (.specify/templates, presets, extensions)
-    has been removed.
+    Templates are self-contained in each skill's references/ directory.
     """
     if not _is_safe_component(template_name):
         return None

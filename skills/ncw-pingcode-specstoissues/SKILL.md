@@ -5,7 +5,7 @@ description: 把 specs/ 下的 spec 转换为 PingCode 需求树卡片（spec �
 
 # 从 Spec 创建 PingCode 卡片层级
 
-> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.specstoissues` 的 pack 改编。相对上游：配置落项目根 `pingcode-config.yml`（不依赖 specify init）；上游 hook（after_specify/after_tasks）改接为 `/ncw-speckit-specify` / `/ncw-speckit-tasks` Handoff 块的可选目标（optional，`pingcode-config.yml` 在位才提示，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/ncw-pingcode-*`；specs/ 产物契约（`spec.md` 的 `### User Story N` 章节、`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记）与上游逐字一致。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
+> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.specstoissues` 的 pack 改编。相对上游：配置落项目根 `pingcode-config.yml`；上游 hook（after_specify/after_tasks）改接为 `/ncw-speckit-specify` / `/ncw-speckit-tasks` Handoff 块的可选目标（optional，`pingcode-config.yml` 在位才提示，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/ncw-pingcode-*`；specs/ 产物契约（`spec.md` 的 `### User Story N` 章节、`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记）与上游逐字一致。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
 
 本命令把 specs/ 产物转换为 PingCode 需求树卡片（通过 `pingcode` CLI，不依赖 MCP）：
 

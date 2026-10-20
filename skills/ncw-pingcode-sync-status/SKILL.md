@@ -5,7 +5,7 @@ description: 本地任务全部勾选后，把对应的 PingCode 卡片（任务
 
 # 同步任务完成状态到 PingCode
 
-> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.sync-status` 的 pack 改编。相对上游：配置落项目根 `pingcode-config.yml`（不依赖 specify init）；hook 接线移除（pack 无 hook 执行机制，手动调用）；命令名 `/speckit.pingcode.*` 改为 `/ncw-pingcode-*`；specs/ 产物契约（`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记、`pingcode-sync-log.json`）与上游逐字一致。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
+> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.sync-status` 的 pack 改编。相对上游：配置落项目根 `pingcode-config.yml`；hook 接线移除（pack 无 hook 执行机制，手动调用）；命令名 `/speckit.pingcode.*` 改为 `/ncw-pingcode-*`；specs/ 产物契约（`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记、`pingcode-sync-log.json`）与上游逐字一致。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
 
 任务本身默认不是工作项（仅本地 checklist）；配置 `mapping.task_artifact` 后每个任务行有一张任务卡。本命令做两件事，均受 `sync.complete_story_when_tasks_done` 开关控制：
 

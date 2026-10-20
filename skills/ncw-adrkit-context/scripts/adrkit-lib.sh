@@ -80,7 +80,7 @@ adrkit_corpus_dir() {
 }
 
 # The current feature directory. Resolve through the pack's bundled speckit
-# helper so a project-local specify installation is never required.
+# helper.
 adrkit_feature_dir() {
 	if [ -n "${ADRKIT_FEATURE_DIR:-}" ]; then
 		[ -d "$ADRKIT_FEATURE_DIR" ] ||

@@ -9,8 +9,6 @@ description: Assess a bug report (pasted text or URL) against the codebase and p
 
 Triage a bug report against the current codebase: understand the symptom, locate the suspected root cause, judge severity, and propose a remediation. The output is a single assessment file at `docs/bugs/<slug>/assessment.md` that downstream commands (`/ncw-bug-fix`, `/ncw-bug-test`) consume.
 
-> Pack fork (ncw), port on upstream upgrade: bug artifacts live under `docs/bugs/<slug>/` — upstream uses `.specify/bugs/<slug>/`, but `.specify/` is deprecated in this pack and project runtime data homes under `docs/`. Command references are renamed to `/ncw-bug-*`.
-
 ## User Input
 
 ```text
@@ -180,8 +178,6 @@ Do not attempt to validate the URL by issuing a preflight `HEAD` (or any other) 
 ---
 
 ## Handoff
-
-> Pack fork (ncw), port on upstream upgrade.
 
 - **目标**：`/ncw-bug-fix slug=<BUG_SLUG>` —— 按 assessment 的 Proposed Remediation 实施修复
 - **条件**：`docs/bugs/<BUG_SLUG>/assessment.md` 已写入且 verdict 非 `invalid`；verdict 为 `invalid` 时不交接（没有要修的东西）

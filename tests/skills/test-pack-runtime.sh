@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pack runtime contract: no project specify scripts and no external adr CLI.
+# Pack runtime contract: pack-bundled resolution, no external adr CLI.
 # Runs against an installed .agents/skills layout with a minimal PATH.
 set -u
 
@@ -51,7 +51,7 @@ EOF
 printf '%s' '{"schemaVersion":"adrkit.pass0.snapshot/v1"}' > "$TMP/snapshot.json"
 
 # Keep only the host runtimes and POSIX tools used by the wrappers. In
-# particular, this directory never contains adr, specify, jq, or git.
+# particular, this directory never contains adr, jq, or git.
 mkdir -p "$TMP/bin"
 for tool in node python3 dirname mkdir sed head date cat; do
   source="$(command -v "$tool")"
@@ -95,9 +95,8 @@ json_matches() { # json_matches <payload> <partial-json>
 }
 
 command -v adr >/dev/null 2>&1 && bad "fixture: 外部 adr 意外进入最小 PATH" || ok
-[ ! -e "$PROJECT/.specify" ] && ok || bad "fixture: 项目不应存在 .specify 目录（已废弃）"
 
-# Bundled speckit resolution, with no specify-init output in the project.
+# Bundled speckit resolution.
 run python3 "$SKILLS/ncw-speckit-analyze/scripts/check_prerequisites.py" --json --paths-only
 [ "$RC" -eq 0 ] && ok || bad "speckit paths: 退出码 $RC，stderr: $(<"$TMP/stderr")"
 json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"FEATURE_DIR\":\"$PROJECT/specs/001-demo\",\"FEATURE_SPEC\":\"$PROJECT/specs/001-demo/spec.md\"}" \

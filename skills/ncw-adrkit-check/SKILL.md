@@ -46,9 +46,8 @@ $ARGUMENTS
 ## Notes
 
 - Feature resolution uses the pack-bundled
-  `.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py`; no
-  `specify init` is required. `ADRKIT_FEATURE_DIR`
-  overrides feature-dir resolution.
+  `.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py`.
+  `ADRKIT_FEATURE_DIR` overrides feature-dir resolution.
 - The adrkit 0.20.0 CLI is bundled at
   `.agents/skills/ncw-adrkit-draft/scripts/adr.mjs`; no `@adrkit/cli` install is
   required. `ADRKIT_CLI` is an explicit opt-in override.

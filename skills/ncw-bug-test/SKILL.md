@@ -9,8 +9,6 @@ description: Validate that a previously fixed bug is resolved and record the ver
 
 Validate that the fix recorded by `/ncw-bug-fix` actually resolves the bug described by `/ncw-bug-assess`. The output is a verification report at `docs/bugs/<slug>/test.md`.
 
-> Pack fork (ncw), port on upstream upgrade: bug artifacts live under `docs/bugs/<slug>/` — upstream uses `.specify/bugs/<slug>/`, but `.specify/` is deprecated in this pack and project runtime data homes under `docs/`. Command references are renamed to `/ncw-bug-*`.
-
 ## User Input
 
 ```text
@@ -124,8 +122,6 @@ Once resolved, set `BUG_SLUG` and `BUG_DIR = docs/bugs/<BUG_SLUG>`, and briefly 
 ---
 
 ## Handoff
-
-> Pack fork (ncw), port on upstream upgrade.
 
 - **目标**：无（bug 链终点）
 - **条件**：`docs/bugs/<BUG_SLUG>/test.md` 已写入；result 为 `verified` 即收口

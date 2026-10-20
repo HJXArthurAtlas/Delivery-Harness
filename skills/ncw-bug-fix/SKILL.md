@@ -9,8 +9,6 @@ description: Apply the remediation from a bug assessment and record what was cha
 
 Apply the remediation that was proposed by `/ncw-bug-assess` and record the changes in a fix report at `docs/bugs/<slug>/fix.md`. This command is **only** valid after an assessment exists for the given slug.
 
-> Pack fork (ncw), port on upstream upgrade: bug artifacts live under `docs/bugs/<slug>/` — upstream uses `.specify/bugs/<slug>/`, but `.specify/` is deprecated in this pack and project runtime data homes under `docs/`. Command references are renamed to `/ncw-bug-*`.
-
 ## User Input
 
 ```text
@@ -119,8 +117,6 @@ Once resolved, set `BUG_SLUG` and `BUG_DIR = docs/bugs/<BUG_SLUG>`, and briefly 
 ---
 
 ## Handoff
-
-> Pack fork (ncw), port on upstream upgrade.
 
 - **目标**：`/ncw-bug-test slug=<BUG_SLUG>` —— 验证修复并产出 verification report
 - **条件**：`docs/bugs/<BUG_SLUG>/fix.md` 已写入且 status 为 `applied` / `partial`
