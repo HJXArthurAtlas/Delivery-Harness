@@ -1,6 +1,6 @@
 # NCW Delivery Harness
 
-newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始化 / 诊断流程与 PingCode 规格驱动开发流程做成可安装的 agent skill，DSH / OpenCode / omp 等等。GitLab 项目：[Tech Council / ncw-delivery-harness](https://git.newchiwan.com/council/ncw-delivery-harness)（内部仓，默认分支 `main`）。
+newchiwan 团队的跨端 agent skill pack：把 PingCode 规格驱动的 AI native 开发流程（speckit 全流程与建卡收尾）、adrkit / compound 治理与线上排障做成可安装的 agent skill，DSH / OpenCode / omp 等等。GitLab 项目：[Tech Council / ncw-delivery-harness](https://git.newchiwan.com/council/ncw-delivery-harness)（内部仓，默认分支 `main`）。
 
 ## Pack 内容
 
