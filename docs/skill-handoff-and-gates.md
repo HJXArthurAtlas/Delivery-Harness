@@ -1,6 +1,6 @@
 # Skill 交接流程与门禁清单
 
-> 来源：`skills/` 各 SKILL.md 正文（2026-10-19 盘点，hook 机制已清除、统一 Handoff 块）。分发面技能共 20 个，本文覆盖全部交接（handoff）与门禁（gate）机制。
+> 来源：`skills/` 各 SKILL.md 正文（2026-10-19 盘点，hook 机制已清除、统一 Handoff 块）。分发面技能共 23 个，本文覆盖全部交接（handoff）与门禁（gate）机制。
 
 ## 1. 流程主线（`ncw-speckit-flow`，9 阶段）
 
@@ -73,6 +73,18 @@ load → intent → expectations → specify → clarify|grill-me → design(涉
 | `ncw-speckit-implement` | `/ncw-compound-intentguard` | tasks 全 `[x]`；UI 任务逐项核验 UI-xx；planverify-gate（block 时）已放行 |
 | `ncw-compound-intentguard` | `/ncw-compound-writeback` | PASS 直接交接；REVIEW 须人工清除；回退：BLOCKED 回 implement 修复后重跑 |
 | `ncw-compound-writeback` | 无（链终点） | 仅 PASS（或 REVIEW 经人工确认）后执行；BLOCKED 必须拒绝 |
+
+### bug 侧链（独立于主线，任意时刻可进入）
+
+```
+bug-assess → bug-fix → bug-test
+```
+
+| 技能 | Handoff 目标 | 条件 / 回退 |
+|---|---|---|
+| `ncw-bug-assess` | `/ncw-bug-fix slug=<slug>` | `docs/bugs/<slug>/assessment.md` 已写入且 verdict 非 `invalid`；`invalid` 不交接 |
+| `ncw-bug-fix` | `/ncw-bug-test slug=<slug>` | `fix.md` status 为 `applied`/`partial`；回退：assessment 有误 → 偏差记入 fix.md，重跑 assess |
+| `ncw-bug-test` | 无（链终点） | `verified` 收口；回退：`failed` 带 test.md 新证据重跑 assess，`partial` 按 Recommendation 处理 |
 
 ### 门禁边界（hook 清除后的保留约束）
 

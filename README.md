@@ -21,6 +21,9 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | `ncw-speckit-grill-me` | 无上限轮次澄清访谈（clarify 的深化替代）：前沿/轮次/设计树把 spec.md 决策点推进到 Clear/Resolved/Outstanding/Deferred（grill me 命令的 pack 分发，正文英文原文） | 「深度澄清这份 spec」「grill me」 |
 | `ncw-speckit-grill-with-docs` | 同 grill-me 澄清流程 + settled 跨特性术语/领域知识即时落盘 docs/domain_knowledge/（CONTEXT.md + 主题文档）；过三条件记录门的决策经 adrkit scaffold 归口为 ADR（`docs/adr/`，pack fork 段）（grill with-docs 命令的 pack 分发） | 「澄清并沉淀领域知识」 |
 | `ncw-speckit-analyze` | 跨工件一致性只读分析（analyze 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「分析 spec/plan/tasks 一致性」 |
+| `ncw-bug-assess` | bug 报告三角定位：粘贴文本/URL → 症状、疑似代码路径、严重度与修复方案，产出 `docs/bugs/<slug>/assessment.md`（spec-kit extension:bug 的 pack 分发，正文英文原文；产物目录由上游 `.specify/bugs/` 改 `docs/bugs/`） | 「评估这个 bug」「看看这个报错是不是真问题」 |
+| `ncw-bug-fix` | 按 assessment 的修复方案实施并记录变更到 `docs/bugs/<slug>/fix.md`（仅 assessment 存在后可用；assessment 有误停下回退） | 「按评估修这个 bug」 |
+| `ncw-bug-test` | 验证修复是否真正解决 bug：重跑复现 + 新增测试 + 回归，产出 `docs/bugs/<slug>/test.md`（failed 回退重跑 assess） | 「验证这个修复」「回归这个 bug」 |
 | `ncw-speckit-clarify` | 规格澄清问答（clarify 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「澄清规格歧义」「补全需求细节」 |
 | `ncw-speckit-constitution` | 创建/更新项目章程 `docs/constitution/constitution.md`（constitution 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「立章程」「修订治理原则」 |
 | `ncw-speckit-converge` | 差距收敛（converge 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「收敛剩余工作」「补齐未实现需求」 |
