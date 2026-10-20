@@ -1,10 +1,7 @@
 {
   "name": "ncw-delivery-harness",
   "version": "0.2.0",
-  "description": "newchiwan 团队跨端 agent skill pack：monorepo 初始化/诊断 + 规格驱动开发流程 + adrkit/grill/compound 扩展技能组",
-  "bin": {
-    "ncw-delivery-harness": "skills/ncw-monorepo-init/scripts/sync.mjs"
-  },
+  "description": "newchiwan 团队跨端 agent skill pack：规格驱动开发流程 + adrkit/grill/compound 扩展技能组",
   "scripts": {
     "test": "bash tests/skills/test-skill-structure.sh && bash tests/skills/test-speckit-constitution.sh && bash tests/skills/test-pack-runtime.sh"
   },

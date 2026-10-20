@@ -1,12 +1,11 @@
 # NCW Delivery Harness
 
-newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始化 / 诊断流程与 PingCode 规格驱动开发流程做成可安装的 agent skill，DSH / OpenCode / omp 等等。GitLab 项目：[Tech Council / ncw-delivery-harness](https://git.newchiwan.com/council/ncw-delivery-harness)（内部仓，默认分支 `main`）。初始化步骤与工具链版本钉子的单一载体是 `skills/ncw-monorepo-init/references/init.md`（与模板仓 `monorepo-template` 的 `AGENTS-TEMPLATE.md` 巡检表版本同步）。
+newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始化 / 诊断流程与 PingCode 规格驱动开发流程做成可安装的 agent skill，DSH / OpenCode / omp 等等。GitLab 项目：[Tech Council / ncw-delivery-harness](https://git.newchiwan.com/council/ncw-delivery-harness)（内部仓，默认分支 `main`）。
 
 ## Pack 内容
 
 | skill | 用途 | 触发语示例 |
 |---|---|---|
-| `ncw-monorepo-init` | 项目初始化（init）/ 结构环境诊断（diagnose），migrate 待标注 | 「按团队 monorepo 规范初始化/诊断这个项目」 |
 | `ncw-adrkit-context` | 规划前取治理决策进上下文：带路径给 governedBy/activeProposals/history，无路径列 ARB 待评审队列（adrkit context 命令的 pack 分发，正文英文原文；只读） | 「这个改动受哪些决策约束」「列出待评审决策」 |
 | `ncw-adrkit-check` | plan 产出后对照 ADR 语料只读校验是否越界，配 ADRKIT_SNAPSHOT 时追加确定性路由报告（adrkit check 命令的 pack 分发；after_plan 可选 hook 目标） | 「check 这个 plan 越没越决策」 |
 | `ncw-adrkit-draft` | 从当前 plan 工件 scaffold 一条新 ADR 草稿（不经 hook；其 `scripts/scaffold.sh` 还是 grill-with-docs / compound-writeback 的免 plan 分配入口——ADR 统一归口语料 `docs/adr/`；落稿后接 `scripts/adr.sh lint` 校验） | 「把这个决策落成 ADR」 |
@@ -52,21 +51,20 @@ CLI 解析顺序（`adrkit-lib.sh`）：`ADRKIT_CLI` 显式覆盖 > omp 插件�
 
 `ADRKIT_CLI` 仅是显式覆盖入口，不是默认依赖。`planverify` / `intentguard` 的默认 `auto` 策略在没有跨模型 CLI 时使用原生 Tier 2/3 subagent；只有用户强制 `cross-model` 或 `cli:model` 才需要对应外部模型 CLI。
 
-**范围边界**：`ncw-monorepo-init` 与 `ncw-speckit-flow` 不属于自包含改造范围；前者保留初始化工具链，后者保留 PingCode 卡流程依赖。目标项目自身的 git / build / test / lint 工具链也不随 pack 内置。
+**范围边界**：`ncw-speckit-flow` 不属于自包含改造范围（保留 PingCode 卡流程依赖）。目标项目自身的 git / build / test / lint 工具链也不随 pack 内置。
 
 ## 安装
 
-需要 Node ≥ 22。各端全靠文件落位，无需包管理器或插件；项目级同名覆盖全局级（DSH rank 100/200 > 400/500）。
+各端全靠文件落位；项目级同名覆盖全局级（DSH rank 100/200 > 400/500）。
 
 ```bash
-# 方式一：npx 直装（免克隆；私有仓需 git 凭证）
-# 装（用户级）全局 skill 加 --global；装当前项目则去掉该参数
-npx git+https://git.newchiwan.com/council/ncw-delivery-harness.git --global
+# omp 插件（推荐）
+omp plugin marketplace add git+https://git.newchiwan.com/council/ncw-delivery-harness.git
+omp plugin install ncw-delivery@ncw-delivery-harness
 
-# 方式二：克隆后执行
-git clone https://git.newchiwan.com/council/ncw-delivery-harness.git && cd ncw-delivery-harness
-node skills/ncw-monorepo-init/scripts/sync.mjs             # 项目级：<cwd>/.agents/skills/
-node skills/ncw-monorepo-init/scripts/sync.mjs --global    # 用户级：~/.agents/skills/
+# 其他端（DSH / OpenCode）：把 skills/<name>/ 拷入对应 skill 发现目录即可
+git clone https://git.newchiwan.com/council/ncw-delivery-harness.git
+cp -R ncw-delivery-harness/skills/<name> <发现目录>/skills/
 ```
 
 支持 `--dry-run` 预览、`--force` 覆盖同名；默认同名不覆盖。
@@ -108,6 +106,6 @@ omp plugin install git+https://git.newchiwan.com/council/ncw-delivery-harness.gi
 npm test   # ① test-skill-structure.sh：结构与分发面；② test-speckit-constitution.sh：模板分辨栈契约；③ test-pack-runtime.sh：临时 .agents/skills 安装 + 无 adr/specify/git 的最小 PATH，驱动特性解析、ADR scaffold/draft/lint/check/evaluate/context/queue/migrate（无 python3 时 SKIP）
 ```
 
-新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）+ 在 `tests/skills/test-skill-structure.sh` 的 `known_unregistered` 白名单登记一行；`npm test` 会把关，缺登记即失败。安装清单 `PACK_SKILLS` 冻结在回退态（仅 monorepo-setup / speckit-flow 两项，其余技能不在 sync 安装面，见测试内 rule 6 注释）；omp 插件按 `skills/` 目录自动发现，无需另行登记。命名格式 `ncw-{submodule}-action`（如 `ncw-monorepo-init`），全名 ≤32 字符。
+新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）；`npm test` 会把关。omp 插件按 `skills/` 目录自动发现，无需另行登记。命名格式 `ncw-{submodule}-action`（如 `ncw-pingcode-init`），全名 ≤32 字符。
 
 提交信息格式：`<type>(<scope>): #<工作项ID> <主题>`，如 `refactor(skills): #TECH-1234 技能更名`；无对应工作项时 ID 用默认 `#TECH-000`。type 取值：`feat` / `fix` / `refactor` / `docs` / `test` / `chore`。提交时由 `.githooks/commit-msg` 强制校验；首次克隆后执行一次 `git config core.hooksPath .githooks` 激活。

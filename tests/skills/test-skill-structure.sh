@@ -3,8 +3,6 @@
 # 移植自 superpowers tests/diagnosing-superpowers/test-skill-structure.sh，按本仓约定裁剪：
 #   - 保留：frontmatter 校验、引用文件存在性、泄漏扫描、[PASS]/[FAIL] 计数
 #   - 裁剪：superpowers 专属规则（"Use when" 前缀、## Hard rules 标题、词数预算、第二人称策略）
-#   - 新增：sync.mjs PACK_SKILLS 必须与 skills/ 目录一致（新增技能忘登记安装器的防呆；
-#     唯一已接受偏差走测试内显式别名表）
 #   - 新增：.agents/commands/ 斜杠命令 frontmatter 校验，禁止工具专属 .omp/commands/
 #   - 新增：.omp-plugin/marketplace.json 目录校验（JSON 合法、命名合规、source 恰为 "./"、
 #     version 与 package.json 同步），并禁止 .omp-plugin/plugin.json（防 remap 把 .agents/ 带进 omp 插件安装面）
@@ -12,7 +10,6 @@ set -u
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SKILLS_DIR="$REPO_ROOT/skills"
-SYNC_SCRIPT="$SKILLS_DIR/ncw-monorepo-init/scripts/sync.mjs"
 
 pass=0
 fail=0
@@ -70,54 +67,7 @@ else
   ok
 fi
 
-# 6. sync.mjs PACK_SKILLS 与 skills/ 目录一一对应。
-#    已知偏差（用户已接受，2026-10 回退 0cea95a 最早版本）：清单固定为原始名
-#    monorepo-setup / speckit-flow，经别名对应目录 ncw-monorepo-init / ncw-speckit-flow；
-#    其余 23 个技能显式登记为「已知未入清单」。除此之外任何新差异（新技能忘登记
-#    安装器、清单新增悬空项、别名对缺任一端）仍会 FAIL。
-listed="$(grep -oE '^const PACK_SKILLS = \[.*\];' "$SYNC_SCRIPT" | grep -oE '"[^"]+"' | tr -d '"' | sort)"
-actual="$(ls "$SKILLS_DIR" | sort)"
-alias_old="monorepo-setup
-speckit-flow"
-alias_new="ncw-monorepo-init
-ncw-speckit-flow"
-known_unregistered="ncw-adrkit-check
-ncw-adrkit-context
-ncw-adrkit-draft
-ncw-compound-expectations
-ncw-compound-gapfill
-ncw-compound-intent
-ncw-compound-intentguard
-ncw-compound-load
-ncw-compound-planverify
-ncw-compound-planverify-gate
-ncw-compound-require-intent
-ncw-compound-writeback
-ncw-speckit-analyze
-ncw-speckit-clarify
-ncw-speckit-constitution
-ncw-speckit-converge
-ncw-speckit-design
-ncw-speckit-grill-me
-ncw-speckit-grill-with-docs
-ncw-speckit-implement
-ncw-speckit-plan
-ncw-speckit-specify
-ncw-speckit-tasks"
-unregistered="$(comm -23 <(echo "$actual") <(printf '%s\n%s\n' "$listed" "$alias_new" | sort -u))"
-dangling="$(comm -23 <(echo "$listed") <(printf '%s\n%s\n' "$actual" "$alias_old" | sort -u))"
-new_unregistered="$(comm -23 <(echo "$unregistered") <(echo "$known_unregistered" | sort))"
-alias_broken=""
-while read -r old_name new_name; do
-  echo "$listed" | grep -qx "$old_name" && echo "$actual" | grep -qx "$new_name" || alias_broken="${alias_broken}${old_name}↔$new_name "
-done < <(paste -d' ' <(echo "$alias_old") <(echo "$alias_new"))
-if [ -z "$new_unregistered" ] && [ -z "$dangling" ] && [ -z "$alias_broken" ]; then
-  ok
-else
-  bad "sync.mjs PACK_SKILLS 与 skills/ 目录出现未知差异（已知偏差集除外）：未登记目录（${new_unregistered:-无}）；悬空清单项（${dangling:-无}）；别名对缺端（${alias_broken:-无}）"
-fi
-
-# 7. 斜杠命令走通用发现路径 .agents/commands/（omp/DSH/OpenCode 均读 .agents/ 族），禁止回退工具专属 .omp/commands/
+# 6. 斜杠命令走通用发现路径 .agents/commands/（omp/DSH/OpenCode 均读 .agents/ 族），禁止回退工具专属 .omp/commands/
 if [ -d "$REPO_ROOT/.omp/commands" ]; then
   bad "命令目录必须使用通用 .agents/commands/，发现工具专属 .omp/commands/"
 else
@@ -130,7 +80,7 @@ for cmd_md in "$REPO_ROOT"/.agents/commands/*.md; do
   grep -q '^description: .\+' "$cmd_md" && ok || bad "命令 $cmd: frontmatter 缺少非空 description"
 done
 
-# 8. omp marketplace 目录：.omp-plugin/marketplace.json 合法、命名合规、source 锁定 "./"、版本与 package.json 同步
+# 7. omp marketplace 目录：.omp-plugin/marketplace.json 合法、命名合规、source 锁定 "./"、版本与 package.json 同步
 CATALOG="$REPO_ROOT/.omp-plugin/marketplace.json"
 if [ ! -f "$CATALOG" ]; then
   bad "omp 目录缺失：.omp-plugin/marketplace.json"
@@ -201,14 +151,14 @@ else
   bad "omp 目录校验需要 node（engines 要求 >=22）"
 fi
 
-# 9. omp 插件仅分发 skills/：禁止 manifest remap 把 .agents/ 等仓内目录带进安装面
+# 8. omp 插件仅分发 skills/：禁止 manifest remap 把 .agents/ 等仓内目录带进安装面
 if [ -e "$REPO_ROOT/.omp-plugin/plugin.json" ]; then
-  bad ".omp-plugin/plugin.json 不允许存在（remap 会把 .agents/ 带进 omp 插件；斜杠命令仍走 .agents/commands/ + sync.mjs）"
+  bad ".omp-plugin/plugin.json 不允许存在（remap 会把 .agents/ 带进 omp 插件；斜杠命令仍走 .agents/commands/）"
 else
   ok
 fi
 
-# 10. omp git/npm 插件安装路径的 @adrkit/cli 依赖：版本钉与 bundled runtime 一致，且 omp manifest 存在（无 manifest 时运行时跳过技能扫描）
+# 9. omp git/npm 插件安装路径的 @adrkit/cli 依赖：版本钉与 bundled runtime 一致，且 omp manifest 存在（无 manifest 时运行时跳过技能扫描）
 if command -v node >/dev/null 2>&1; then
   while IFS= read -r line; do
     case "$line" in OK) ok ;; FAIL\ *) bad "${line#FAIL }" ;; esac

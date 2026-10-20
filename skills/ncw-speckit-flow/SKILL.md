@@ -7,7 +7,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 
 团队 AI native 开发流程的**衔接与门禁层**：不替代 `/ncw-speckit-*` 命令与 `/ncw-pingcode-*` 命令（它们各自的规则以自身为准），也不复述 `pingcode` skill 的 ID 安全规则与 `mturtle-commit` 的提交格式——本 skill 只定义角色怎么交接、什么才算交接完成、卡片与产物怎么对得上账。
 
-**前提**：项目已按 `ncw-monorepo-init` 初始化（规格驱动开发流程就绪，`pingcode-config.yml` 由 `/ncw-pingcode-init` 生成，`pingcode` CLI ≥ 0.14.0 已安装并认证）。本 pack 无 hook 执行器——pingcode 卡流程经 specify/tasks/implement 的 Handoff 块可选目标/前置对账交接（条件不满足或拒绝即跳过），其余场景按各阶段要求手动跑命令即可。阶段间交接以各技能 SKILL.md 末尾的 `## Handoff` 块为准（目标 + 条件 + 回退；全链清单见 `docs/skill-handoff-and-gates.md`，仓外消费者以技能内块为准）。
+**前提**：规格驱动开发流程就绪（`pingcode-config.yml` 由 `/ncw-pingcode-init` 生成，`pingcode` CLI ≥ 0.14.0 已安装并认证）。本 pack 无 hook 执行器——pingcode 卡流程经 specify/tasks/implement 的 Handoff 块可选目标/前置对账交接（条件不满足或拒绝即跳过），其余场景按各阶段要求手动跑命令即可。阶段间交接以各技能 SKILL.md 末尾的 `## Handoff` 块为准（目标 + 条件 + 回退；全链清单见 `docs/skill-handoff-and-gates.md`，仓外消费者以技能内块为准）。
 
 ## 流程主线
 

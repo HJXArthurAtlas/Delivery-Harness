@@ -2,7 +2,7 @@
 
 ## Scope
 
-Current-state audit of all 24 skills under `skills/`, including their `SKILL.md`, `scripts/`, and `references/` files. Per the self-containment request, `ncw-monorepo-init` and `ncw-speckit-flow` are **excluded from the rewrite scope** and remain documented below without modification.
+Current-state audit of the skills under `skills/`, including their `SKILL.md`, `scripts/`, and `references/` files. Per the self-containment request, `ncw-speckit-flow` is **excluded from the rewrite scope** and remains documented below without modification; `ncw-monorepo-init` has since been **removed from the pack** (2026-10-20).
 
 “External” means outside this pack. Pack-local cross-skill scripts are identified separately. Host runtimes and the target project's own toolchain are not rewritten.
 
@@ -20,8 +20,7 @@ Current-state audit of all 24 skills under `skills/`, including their `SKILL.md`
 
 | Skills | External reference | Current requirement |
 |---|---|---|
-| `ncw-monorepo-init` | `git`, `uv`, `specify`, `npm`/`npx`, `node`, `codegraph`, `aoci`; installs external CLIs and executes remote installers. | **Excluded from the rewrite and unchanged.** These remain required by the initialization flow, not by the bundled adrkit/grill runtime paths above. See `skills/ncw-monorepo-init/references/init.md`. |
-| `ncw-speckit-flow` | PingCode extension commands (`specstoissues`, `sync-cards`, `sync-status`, `discover-context`) and `mturtle-commit`. | **Excluded from the rewrite and unchanged.** They remain required for the PingCode card workflow. |
+| `ncw-speckit-flow` | PingCode card workflow via pack skills `ncw-pingcode-*` (external `pingcode` CLI ≥ 0.14.0, authenticated) and `mturtle-commit`. | **Excluded from the rewrite and unchanged.** They remain required for the PingCode card workflow. |
 | `ncw-compound-{planverify,intentguard}` | `codex exec`, `gemini -p`, or `claude -p` for Tier-1 checking. | **Conditional.** Default `auto` uses native Tier-2/Tier-3 subagents when no cross-model CLI exists; a fresh default-model subagent is the pack-local baseline. Only forced `cross-model` or `cli:model` policy requires an external model CLI. |
 | `ncw-compound-intentguard` | `git` and the target project's build/test/lint toolchain. | **Host capabilities, unchanged.** They inspect the target diff and exercise the target project; they are not pack-downloaded dependencies. |
 
@@ -30,7 +29,6 @@ Current-state audit of all 24 skills under `skills/`, including their `SKILL.md`
 - Seven speckit skills—`analyze`, `clarify`, `constitution`, `converge`, `implement`, `plan`, and `tasks`—run their own bundled Python helpers through `python3`; grill and adrkit feature resolution reuse the `analyze` copy.
 - `ncw-adrkit-{check,context,draft}` run POSIX shell wrappers and the bundled `adr.mjs` through `node`; no npm install or dependency directory is needed at runtime.
 - `ncw-compound-require-intent` and `ncw-compound-planverify-gate` run their own bundled Bash scripts.
-- `ncw-monorepo-init/scripts/sync.mjs` is bundled and runs through `node` (excluded from the rewrite).
 
 ## Verification
 
