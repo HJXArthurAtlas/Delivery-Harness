@@ -35,6 +35,7 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | `ncw-pingcode-specstoissues` | spec → PingCode 需求树卡片：spec 卡/`### User Story N` 章节卡/任务行卡三级相邻映射，动态祖先关联（需求必问、中间层只选已有不代建），登记 `specs/pingcode-mapping.json`（同上 pack 分发；extension hook 改接为 specify/tasks Handoff 块可选目标，任务卡按提示或手动重跑补建） | 「把这个 spec 建成卡」「补建/重建卡片」 |
 | `ncw-pingcode-sync-cards` | 实现前核对 specs/ 制品与卡片一致性，按差异增删改（删除逐项确认），祖先关联沿用登记不重问（同上 pack 分发；implement 开始时前置对账，已建卡才提示） | 「对账卡片」「spec 改了同步卡片」 |
 | `ncw-pingcode-sync-status` | 本地任务全勾后把任务卡/story/spec 卡单向流转完成态（只收尾不回退），写 `pingcode-sync-log.json` 并回写登记（同上 pack 分发） | 「收尾卡片」「同步完成状态」 |
+| `ncw-mturtle-troubleshooting` | 线上问题排查：口头名称（"中台财务"、"网运通"、"调度"…）→ 环境/Loki namespace·app/数据库对号，业务单号/trace_id 追日志 + 数据库核事实互相印证，跨服务调用与推送链逐级定位，收口给时间线与证据边界（自 monorepo-template 吸纳，正文中文；纯知识无 scripts，证据全部来自线上 MCP 数据源，不依赖工作目录） | 「中台财务这笔流水到哪了」「这个报错是哪个服务的」 |
 
 ## 自包含运行时（排除 init / flow）
 
