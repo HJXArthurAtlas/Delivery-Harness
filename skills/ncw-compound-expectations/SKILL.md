@@ -11,16 +11,21 @@ You are running an **expectations interview** — the compartmented counterpart 
 
 ## Project root anchor (read this first — v0.2.2 cwd fix)
 
-**Critical:** operate from the project root for all file I/O. The project root is the directory containing `.specify/`.
+**Critical:** operate from the project root for all file I/O. The project root is the directory containing `.git`.
 
 Before any Read, Write, or Edit:
 
 ```bash
+# TODO: project-root marker is currently the .git directory; revisit when a
+# dedicated SDD marker is introduced.
 PROJECT_ROOT="$(pwd)"
-while [ "$PROJECT_ROOT" != "/" ] && [ ! -d "$PROJECT_ROOT/.specify" ]; do
+while [ "$PROJECT_ROOT" != "/" ] && [ ! -e "$PROJECT_ROOT/.git" ]; do
   PROJECT_ROOT="$(dirname "$PROJECT_ROOT")"
 done
-[ ! -d "$PROJECT_ROOT/.specify" ] && { echo "ERROR: not in an SDD project"; exit 1; }
+if [ ! -e "$PROJECT_ROOT/.git" ]; then
+  echo "ERROR: not in an SDD project (.git not found in any parent of $(pwd))"
+  exit 1
+fi
 cd "$PROJECT_ROOT"
 ```
 

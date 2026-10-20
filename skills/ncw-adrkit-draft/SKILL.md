@@ -48,8 +48,8 @@ $ARGUMENTS
 ## Notes
 
 - Feature resolution uses the pack-bundled
-  `.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py`; neither
-  `specify init` nor `.specify/scripts/` is required. `ADRKIT_FEATURE_DIR`
+  `.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py`; no
+  `specify init` is required. `ADRKIT_FEATURE_DIR`
   overrides feature-dir resolution.
 - The adrkit 0.20.0 CLI is bundled as `scripts/adr.mjs`, with `scripts/adr.sh`
   as the cross-skill lint/migration entry point; no `@adrkit/cli` install is

@@ -1,6 +1,6 @@
 ---
 name: ncw-speckit-analyze
-description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation. Requires a project with a .specify/ directory structure. Use when the user runs or mentions /ncw-speckit-analyze, or asks to analyze spec/plan/tasks consistency, find cross-artifact inconsistencies, or check requirement coverage before implementation.
+description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation. Use when the user runs or mentions /ncw-speckit-analyze, or asks to analyze spec/plan/tasks consistency, find cross-artifact inconsistencies, or check requirement coverage before implementation.
 ---
 
 

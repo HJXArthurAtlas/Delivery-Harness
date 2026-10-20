@@ -19,8 +19,8 @@ https://git.newchiwan.com/council/monorepo-template.git
 
 | 项目根状态 | 用户意图信号 | 模式 |
 |---|---|---|
-| 无 `AGENTS.md`、无 `.agents/`、无 `.specify/` | "初始化""按团队规范搭""从零开始" | **init** → 读 `references/init.md` |
-| 骨架存在（`AGENTS.md` / `.agents/` / `.specify/` 任一在） | "检查一下""环境对不对""结构诊断""巡检" | **diagnose** → 读 `references/checklist.md` |
+| 无 `AGENTS.md`、无 `.agents/` | "初始化""按团队规范搭""从零开始" | **init** → 读 `references/init.md` |
+| 骨架存在（`AGENTS.md` / `.agents/` 任一在） | "检查一下""环境对不对""结构诊断""巡检" | **diagnose** → 读 `references/checklist.md` |
 | 有业务代码但无骨架 | "迁移""改造成团队规范" | **migrate** → 见下，能力未标注 |
 
 ## migrate 模式（能力待标注）
@@ -35,7 +35,7 @@ https://git.newchiwan.com/council/monorepo-template.git
 
 - **同名文件不覆盖**：骨架复制遇同名文件（如用户已有自己的 `README.md`、`Makefile`）一律跳过并列出来问用户，绝不静默覆盖。
 - **不顺手写业务代码**：只做框架接入和结构对齐，业务实现一律不碰。
-- **不改写骨架内容**：`AGENTS-TEMPLATE.md`（复制后改名 `AGENTS.md`）、`.specify/`、`.agents/` 里模板自带的文件按原样落地；需要定制时改的是用户项目自己的登记信息（如 `AGENTS.md` 布局章节），不是骨架正文。
+- **不改写骨架内容**：`AGENTS-TEMPLATE.md`（复制后改名 `AGENTS.md`）、`.agents/` 里模板自带的文件按原样落地；需要定制时改的是用户项目自己的登记信息（如 `AGENTS.md` 布局章节），不是骨架正文。
 - **安装先汇报后执行**：环境检查发现缺失或版本不符时，全部查完后中断对话汇总汇报，经用户逐项确认才安装/升级；不要边查边装。
 - **认知资产不进 .gitignore**：`aoci.txt` / `aoci.meta.txt` / `aoci.code.txt` / `AGENTS.md` 是要提交的认知资产。
 

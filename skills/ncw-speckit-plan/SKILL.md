@@ -1,6 +1,6 @@
 ---
 name: ncw-speckit-plan
-description: Execute the implementation planning workflow using the plan template to generate design artifacts. Requires a project with a .specify/ directory structure. Use when the user runs or mentions /ncw-speckit-plan, or asks to plan the implementation, produce the design artifacts, or turn a spec into an implementation plan.
+description: Execute the implementation planning workflow using the plan template to generate design artifacts. Use when the user runs or mentions /ncw-speckit-plan, or asks to plan the implementation, produce the design artifacts, or turn a spec into an implementation plan.
 ---
 
 
@@ -14,9 +14,9 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
-1. **Setup**: Run `python3` on this skill's bundled plan setup script `scripts/setup_plan.py` (verbatim v1.1.3 helper) with argument `--json`, from repo root, and parse JSON for FEATURE_SPEC, IMPL_PLAN, FEATURE_DIR, BRANCH. If the project cannot resolve `plan-template` (`.specify/templates/plan-template.md` missing and no override/preset/extension layer provides it), scaffold it first: copy this skill's `references/plan-template.md` to `.specify/templates/plan-template.md`, creating directories as needed; never overwrite an existing project template. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+1. **Setup**: Run `python3` on this skill's bundled plan setup script `scripts/setup_plan.py` (verbatim v1.1.3 helper) with argument `--json`, from repo root, and parse JSON for FEATURE_SPEC, IMPL_PLAN, FEATURE_DIR, BRANCH. The `plan-template` is provided by this skill's own `references/plan-template.md` — the setup script resolves it from `references/` automatically; no project scaffolding. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
-2. **Load context**: Read FEATURE_SPEC and `docs/constitution/constitution.md`. Load IMPL_PLAN template (already copied). **Pack fork (ncw, port on upstream upgrade)**: if `$FEATURE_DIR/design-tasks.md` exists, read it too — its interaction rules, page states, and design requirement checklist (UI-xx) are binding UX input for the plan's UX/interaction sections. Align the plan with it; if it conflicts with FEATURE_SPEC, stop and ask the user to reconcile with product/design — never resolve the conflict silently.
+2. **Load context**: Read FEATURE_SPEC and `docs/constitution/constitution.md`. Load IMPL_PLAN template (resolved from this skill's `references/`). **Pack fork (ncw, port on upstream upgrade)**: if `$FEATURE_DIR/design-tasks.md` exists, read it too — its interaction rules, page states, and design requirement checklist (UI-xx) are binding UX input for the plan's UX/interaction sections. Align the plan with it; if it conflicts with FEATURE_SPEC, stop and ask the user to reconcile with product/design — never resolve the conflict silently.
 
 3. **Execute plan workflow**: Follow the structure in IMPL_PLAN template to:
    - Fill Technical Context (mark unknowns as "NEEDS CLARIFICATION")

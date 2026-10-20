@@ -34,7 +34,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 ROOT="$(pv_find_root)"
 if [ -z "$ROOT" ]; then
-  echo "ERROR: not in an SDD project (.specify/ not found in any parent of $(pwd))"
+  echo "ERROR: not in an SDD project (.git not found in any parent of $(pwd))"
   exit 1
 fi
 cd "$ROOT"

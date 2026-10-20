@@ -40,7 +40,7 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 
 职责分层与外部委托：
 
-- `ncw-monorepo-init` 承载流程与**版本钉子**（`references/init.md` 是唯一载体）；模板仓承载骨架（`AGENTS-TEMPLATE.md`、`.specify/`、`docs/adr/` 等），**版本双落点同改**：init.md 的钉子 = 初始化基线，模板仓巡检表 = 巡检基线。
+- `ncw-monorepo-init` 承载流程与**版本钉子**（`references/init.md` 是唯一载体）；模板仓承载骨架（`AGENTS-TEMPLATE.md`、`docs/adr/` 等），**版本双落点同改**：init.md 的钉子 = 初始化基线，模板仓巡检表 = 巡检基线。
 - `ncw-speckit-flow` 是流程衔接与门禁层，按引用委托 `ncw-speckit-*` 系技能、`pingcode` skill、`mturtle-commit`，**不内联它们的规则**。主线命令技能（specify/clarify/design/plan/tasks/implement）的 Completion Report 末尾带统一「Pack fork」下一步提示——按主流程/可选分组，条目格式 `- /命令: [可选] 能做什么`（按 9 阶段表引导下一命令与建卡/对账/收尾提醒，上游升级需 port）。
 
 ## 技能清单（`skills/` 目录导览，全部随 pack 分发）
@@ -53,14 +53,14 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 | `skills/ncw-monorepo-init/` | 初始化（init）/ 诊断（diagnose）skill：`SKILL.md`（模式判定、安全边界、分发说明）、`references/init.md`（init 流程 + 版本钉子）、`references/checklist.md`（diagnose 基线）、`scripts/sync.mjs`（pack 安装器） |
 | `skills/ncw-speckit-analyze/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，v1.1.3 逐字副本，免 specify init）：analyze 命令（spec/plan/tasks 一致性只读分析），正文英文原文；该 helper 同时是 grill、adrkit check/draft 与 speckit-design 的 pack-local 特性解析入口 |
 | `skills/ncw-speckit-clarify/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，v1.1.3 逐字副本，免 specify init）：clarify 命令（≤5 问澄清并回写 spec），正文英文原文 |
-| `skills/ncw-speckit-constitution/` | SKILL.md + `scripts/`（bundled `resolve_template.py` + `common.py`）+ `references/constitution-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：constitution 命令（建/改 docs/constitution/constitution.md），正文英文原文 |
+| `skills/ncw-speckit-constitution/` | SKILL.md + `scripts/`（bundled `resolve_template.py` + `common.py`）+ `references/constitution-template.md`（模板自包含，resolver 直接读 `references/`，无项目层覆盖栈）：constitution 命令（建/改 docs/constitution/constitution.md），正文英文原文 |
 | `skills/ncw-speckit-converge/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，v1.1.3 逐字副本，免 specify init）：converge 命令（代码现状 vs 工件差距→追加收敛任务），正文英文原文 |
 | `skills/ncw-speckit-design/` | 设计明细产出（design 命令，pack 新增非上游，逐字吸收自 loyalty-platform 的 requirement-to-des-tasks）：SKILL.md（四盲区澄清 + 设计规约/自检七域走查 → 产出 `$FEATURE_DIR/design-tasks.md` 设计明细；澄清不回写 spec，产物不进 flow 交接门禁）+ `references/`（`question-bank.md` 问句库、`design-spec.md` 设计规约、`design-selfcheck.md` 设计自检、`design-tasks-template.md` 明细模板）；特性解析委托 `ncw-speckit-analyze` 的 bundled helper |
 | `skills/ncw-speckit-flow/` | 单文件 `SKILL.md`：9 阶段流程表 + 交接门禁 + 对账纪律 |
 | `skills/ncw-speckit-implement/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，v1.1.3 逐字副本，免 specify init）：implement 命令（按 tasks.md 执行实现），正文英文原文；含 pack fork 段——存在 `$FEATURE_DIR/design-tasks.md` 时 UI 任务按其交互规则/页面状态实现，逐项核验设计要求清单 UI-xx 后才算完成（上游升级需 port） |
-| `skills/ncw-speckit-plan/` | SKILL.md + `scripts/`（bundled `setup_plan.py` + `common.py`）+ `references/plan-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：plan 命令（实现规划 + research/data-model/contracts/quickstart 工件），正文英文原文；含 pack fork 段——存在 `$FEATURE_DIR/design-tasks.md` 时必读并作为 UX 约束输入，与 spec 冲突回用户裁决（上游升级需 port） |
-| `skills/ncw-speckit-specify/` | SKILL.md + `references/spec-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：specify 命令（特性规格创建/更新 + 质量清单），正文英文原文 |
-| `skills/ncw-speckit-tasks/` | SKILL.md + `scripts/`（bundled `setup_tasks.py` + `common.py`）+ `references/tasks-template.md`（项目模板缺失时 scaffold 进 `.specify/templates/`）：tasks 命令（按用户故事生成依赖有序 tasks.md），正文英文原文 |
+| `skills/ncw-speckit-plan/` | SKILL.md + `scripts/`（bundled `setup_plan.py` + `common.py`）+ `references/plan-template.md`（模板自包含，`setup_plan.py` 直接读 `references/`）：plan 命令（实现规划 + research/data-model/contracts/quickstart 工件），正文英文原文；含 pack fork 段——存在 `$FEATURE_DIR/design-tasks.md` 时必读并作为 UX 约束输入，与 spec 冲突回用户裁决（上游升级需 port） |
+| `skills/ncw-speckit-specify/` | SKILL.md + `references/spec-template.md`（模板自包含；特性目录编号统一 timestamp `YYYYMMDD-HHMMSS`，特性指针落 `docs/memory/feature.json`，词汇表落 `docs/memory/glossary.md`）：specify 命令（特性规格创建/更新 + 质量清单），正文英文原文 |
+| `skills/ncw-speckit-tasks/` | SKILL.md + `scripts/`（bundled `setup_tasks.py` + `common.py`）+ `references/tasks-template.md`（模板自包含，`setup_tasks.py` 直接读 `references/`）：tasks 命令（按用户故事生成依赖有序 tasks.md），正文英文原文 |
 | `tests/skills/` | 结构校验脚本 + `ncw-speckit-constitution` 模板契约测试 + `test-pack-runtime.sh` 自包含运行时契约测试（见 Part II Testing & QA） |
 
 ## 安装方式
@@ -130,13 +130,13 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 1. `SKILL.md` 存在，frontmatter 由 `---` 定界且闭合；
 2. `name:` = 目录名，匹配 `^ncw-[a-z0-9]+-[a-z0-9]+(-[a-z0-9]+)*$`，≤32 字符；
 3. `description:` 非空、≤1024 字符；
-4. `SKILL.md` 中字面引用的 `references/`、`scripts/` 文件必须存在（引用即契约，改名要同步建文件；`.agents/`、`.specify/`、`~/` 等安装位/宿主路径是运行时路径，不做仓内存在性校验）；
+4. `SKILL.md` 中字面引用的 `references/`、`scripts/` 文件必须存在（引用即契约，改名要同步建文件；`.agents/`、`~/` 等安装位/宿主路径是运行时路径，不做仓内存在性校验）；
 5. 泄漏扫描：`skills/` 与 `.omp-plugin/` 内禁止 `/Users/`、`/home/` 绝对路径；
 6. `sync.mjs` `PACK_SKILLS` 与 `skills/` 目录一一对应（防新增技能忘登记；已知偏差 `monorepo-setup`/`speckit-flow` 经测试内显式别名表钉住）；
 7. `.agents/commands/*.md` frontmatter 合规（`---` 定界 + 非空 `description`），且不存在工具专属 `.omp/commands/`；
 8. `.omp-plugin/marketplace.json` 为合法 JSON，marketplace/plugin 名合规（小写开头结尾、可含 `-`/`.`、≤64），plugin `source` 恰为 `"./"`，`version` 与 `package.json` 一致且符合 omp 缓存路径字符集。JSON 校验用 node 内联脚本完成（node 是运行前提，非新增依赖）；
 9. `.omp-plugin/plugin.json` 绝不许存在（manifest remap 会把 `.agents/` 带进 omp 插件安装面，插件只分发 skills）。
-10. `tests/skills/test-speckit-constitution.sh` 用临时夹具项目驱动 `ncw-speckit-constitution` 的 bundled `resolve_template.py`，钉模板分辨栈契约：层优先级 `overrides/` > `presets/` > `extensions/` > 核心层、`presets/.registry` 的 priority 取舍、全层缺失非零退出并报 `Could not resolve required`（SKILL.md 的 scaffold 触发条件）、`references/constitution-template.md` 落核心层后字节级 round-trip、非安全模板名拒绝；python3 是技能运行时前提而非本仓测试前提，缺失则 SKIP（退出 0，不计 pass/fail）。
-11. `tests/skills/test-pack-runtime.sh` 把 adrkit 三个技能与 analyze 复制到临时 `.agents/skills/` 安装位，以不含 `adr` / `specify` / `jq` / `git` 的最小 PATH 驱动 feature paths、scaffold、draft、lint、check、evaluate、context/queue、MADR migrate；夹具项目不得存在 `.specify/scripts/`，以此钉住默认路径不依赖外部 CLI / specify init 的契约。python3 缺失时同样 SKIP。
+10. `tests/skills/test-speckit-constitution.sh` 驱动 `ncw-speckit-constitution` 的 bundled `resolve_template.py`，钉模板自包含契约：`--json` 输出与 `references/constitution-template.md` 字节级 round-trip、不安全模板名与不存在的模板名均非零退出并报 `Could not resolve required`；python3 是技能运行时前提而非本仓测试前提，缺失则 SKIP（退出 0，不计 pass/fail）。
+11. `tests/skills/test-pack-runtime.sh` 把 adrkit 三个技能与 analyze 复制到临时 `.agents/skills/` 安装位，以不含 `adr` / `specify` / `jq` / `git` 的最小 PATH 驱动 feature paths、scaffold、draft、lint、check、evaluate、context/queue、MADR migrate；夹具项目不得存在 `.specify/` 目录（已废弃，项目根判定用 `.git`，特性指针在 `docs/memory/feature.json`），以此钉住默认路径不依赖外部 CLI / specify init 的契约。python3 缺失时同样 SKIP。
 
 新增检查：在 `for skill_dir in …` 循环内加 per-skill 规则（用 `ok` / `bad "<msg>"` 助手计数），循环后加全局规则；保持 `set -u` 与结尾的 `printf` + `[ "$fail" -eq 0 ]` 不变。

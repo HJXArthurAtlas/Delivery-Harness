@@ -21,7 +21,7 @@ Run the gate script via Bash:
 
 The script:
 
-1. Walks up from cwd to find the project root (the directory containing `.specify/`)
+1. Walks up from cwd to find the project root (the directory containing `.git`)
 2. Checks `docs/intents/` for any `*.intent.md` file
 3. Exits 0 (silently) if at least one intent doc exists — `/ncw-speckit-specify` proceeds normally
 4. Exits 1 with a clear message if none exist — `/ncw-speckit-specify` does not proceed

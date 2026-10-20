@@ -7,7 +7,7 @@
 按下述骨架清单核对项目根（本清单与模板仓当前骨架保持同步），每项记 存在/缺失：
 
 ```
-AGENTS.md（由 AGENTS-TEMPLATE.md 改名而来）、.agents/、.specify/、docs/adr/、
+AGENTS.md（由 AGENTS-TEMPLATE.md 改名而来）、.agents/、docs/adr/、
 scripts/、services/、apps/、Makefile、.gitignore
 ```
 

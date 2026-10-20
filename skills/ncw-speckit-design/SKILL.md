@@ -26,7 +26,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ### 段二：解析当前特性（硬性前置，与其他 speckit 命令同惯例）
 
-1. 确认环境是 macOS / Linux 且 `python3` 可用，并确认 pack 安装位 `.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py` 存在（全局安装位 `~/.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py`）。不可用则声明环境不受支持并停止。绝不退回项目 `.specify/` 下 `specify init` 生成的脚本——pack 契约是不依赖 specify init 产物。
+1. 确认环境是 macOS / Linux 且 `python3` 可用，并确认 pack 安装位 `.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py` 存在（全局安装位 `~/.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py`）。不可用则声明环境不受支持并停止。绝不退回项目内 `specify init` 生成的脚本——pack 契约是不依赖 specify init 产物。
 2. 从仓库根运行 `python3 .agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py --json --paths-only` **恰好一次**，解析 JSON 取 `FEATURE_DIR` / `FEATURE_SPEC`。
 3. 校验 `$FEATURE_DIR/spec.md` 存在：脚本失败或 spec 缺失时停止，提示先运行 `/ncw-speckit-specify`，绝不凭空继续。
 4. 本 skill 依赖一个具体的 spec 才能执行：后续澄清以该 spec 为需求材料，设计明细最终落到 `$FEATURE_DIR/design-tasks.md`（特性目录本身即唯一标识）。

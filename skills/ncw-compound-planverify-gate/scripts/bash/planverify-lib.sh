@@ -14,13 +14,15 @@
 #                              without a slug, the verdict of the newest
 #                              *.planverify.md repo-wide ("" if none exists)
 
-# Walk up from cwd to the directory containing .specify/
+# Walk up from cwd to the directory containing .git
+# TODO: project-root marker is currently the .git directory; revisit when a
+# dedicated SDD marker is introduced.
 pv_find_root() {
   local d="$(pwd)"
-  while [ "$d" != "/" ] && [ ! -d "$d/.specify" ]; do
+  while [ "$d" != "/" ] && [ ! -e "$d/.git" ]; do
     d="$(dirname "$d")"
   done
-  [ -d "$d/.specify" ] && echo "$d" || echo ""
+  [ -e "$d/.git" ] && echo "$d" || echo ""
 }
 
 # Resolve gate mode: SKC_PLANVERIFY_GATE env wins; else planverify_gate: in

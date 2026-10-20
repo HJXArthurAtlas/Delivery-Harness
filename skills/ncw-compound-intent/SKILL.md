@@ -11,19 +11,21 @@ You are running an **intent interview**. Your job is to extract a complete, high
 
 ## Project root anchor (read this first — v0.2.2 cwd fix)
 
-**Critical:** you must operate from the project root for all file I/O. The project root is the directory containing `.specify/`.
+**Critical:** you must operate from the project root for all file I/O. The project root is the directory containing `.git`.
 
 v0.2.1 surfaced a bug where the agent's bash cwd could drift to a parent directory during inspection commands (e.g. `cd ..` to check siblings), and subsequent Write operations landed under the wrong root — intent.md was written to `~/TravvIdea/docs/intents/` instead of `~/TravvIdea/backend-springboot/docs/intents/`.
 
 Before any Read, Write, or Edit (and before any Bash that uses a relative path), run this once:
 
 ```bash
+# TODO: project-root marker is currently the .git directory; revisit when a
+# dedicated SDD marker is introduced.
 PROJECT_ROOT="$(pwd)"
-while [ "$PROJECT_ROOT" != "/" ] && [ ! -d "$PROJECT_ROOT/.specify" ]; do
+while [ "$PROJECT_ROOT" != "/" ] && [ ! -e "$PROJECT_ROOT/.git" ]; do
   PROJECT_ROOT="$(dirname "$PROJECT_ROOT")"
 done
-if [ ! -d "$PROJECT_ROOT/.specify" ]; then
-  echo "ERROR: not in an SDD project (.specify/ not found in any parent of $(pwd))"
+if [ ! -e "$PROJECT_ROOT/.git" ]; then
+  echo "ERROR: not in an SDD project (.git not found in any parent of $(pwd))"
   exit 1
 fi
 cd "$PROJECT_ROOT"

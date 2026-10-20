@@ -1,6 +1,6 @@
 ---
 name: ncw-speckit-tasks
-description: Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts. Requires a project with a .specify/ directory structure. Use when the user runs or mentions /ncw-speckit-tasks, or asks to generate the task list, break the plan into actionable tasks, or produce tasks.md for implementation.
+description: Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts. Use when the user runs or mentions /ncw-speckit-tasks, or asks to generate the task list, break the plan into actionable tasks, or produce tasks.md for implementation.
 ---
 
 
@@ -14,7 +14,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
-1. **Setup**: Run `python3` on this skill's bundled tasks setup script `scripts/setup_tasks.py` (verbatim v1.1.3 helper) with argument `--json`, from repo root, and parse FEATURE_DIR, TASKS_TEMPLATE_CONTENT, TASKS_TEMPLATE, and AVAILABLE_DOCS list. If the project cannot resolve `tasks-template` (`.specify/templates/tasks-template.md` missing and no override/preset/extension layer provides it), scaffold it first: copy this skill's `references/tasks-template.md` to `.specify/templates/tasks-template.md`, creating directories as needed; never overwrite an existing project template. `FEATURE_DIR` and `TASKS_TEMPLATE` must be absolute paths when provided. `AVAILABLE_DOCS` is a list of document names/relative paths available under `FEATURE_DIR` (for example `research.md` or `contracts/`). For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+1. **Setup**: Run `python3` on this skill's bundled tasks setup script `scripts/setup_tasks.py` (verbatim v1.1.3 helper) with argument `--json`, from repo root, and parse FEATURE_DIR, TASKS_TEMPLATE_CONTENT, TASKS_TEMPLATE, and AVAILABLE_DOCS list. The `tasks-template` is provided by this skill's own `references/tasks-template.md` — the setup script resolves it from `references/` automatically; no project scaffolding. `FEATURE_DIR` and `TASKS_TEMPLATE` must be absolute paths when provided. `AVAILABLE_DOCS` is a list of document names/relative paths available under `FEATURE_DIR` (for example `research.md` or `contracts/`). For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 2. **Load design documents**: Read from FEATURE_DIR:
    - **Required**: plan.md (tech stack, libraries, structure), spec.md (user stories with priorities)

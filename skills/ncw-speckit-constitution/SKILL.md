@@ -1,6 +1,6 @@
 ---
 name: ncw-speckit-constitution
-description: Create or update the project constitution from interactive or provided principle inputs. Requires a project with a .specify/ directory structure (its template resolver script and memory/). Use when the user runs or mentions /ncw-speckit-constitution, or asks to create or amend the project constitution, governance principles, or project charter.
+description: Create or update the project constitution from interactive or provided principle inputs. Use when the user runs or mentions /ncw-speckit-constitution, or asks to create or amend the project constitution, governance principles, or project charter.
 ---
 
 
@@ -34,22 +34,16 @@ and commands read the constitution at runtime and are not modified here.
 ## Outline
 
 You are updating the project constitution at `docs/constitution/constitution.md`. The active
-constitution scaffold is resolved at command time from `constitution-template` through the
-preset/template resolution stack.
+constitution scaffold is resolved at command time from this skill's `references/constitution-template.md`.
 
 Follow this execution flow:
 
-1. Run `python3` on this skill's bundled template resolver `scripts/resolve_template.py` (verbatim v1.1.3 helper) with arguments `constitution-template --json`, from the repository root, and parse `TEMPLATE_CONTENT` as the active template.
-   - If the project cannot resolve `constitution-template` (`.specify/templates/constitution-template.md` missing and no override/preset/extension layer provides it), scaffold it first: copy this skill's `references/constitution-template.md` to `.specify/templates/constitution-template.md`, creating directories as needed; never overwrite an existing project template, then re-run the resolver.
-   - The shared resolver applies project overrides, composing preset layers, and extension layers
-     before the core template fallback. It MUST succeed before continuing.
-   - If it fails, stop and report the resolution error; do not continue with only one contributing
-     template layer.
+1. Run `python3` on this skill's bundled template resolver `scripts/resolve_template.py` (verbatim v1.1.3 helper) with arguments `constitution-template --json`, from the repository root, and parse `TEMPLATE_CONTENT` as the active template. The resolver reads directly from this skill's `references/` directory.
+   - If resolution fails (the template is missing from this skill's `references/`), stop and report the resolution error; do not continue.
    - If `docs/constitution/constitution.md` exists, load it as the source of current project-specific
      values and amendments. Preserve information that is still applicable when applying the newly
      resolved scaffold.
    - If it does not exist, use the resolved template as the initial document.
-   - Do not write back to any versioned template layer.
    - Identify every placeholder token of the form `[ALL_CAPS_IDENTIFIER]`.
    **IMPORTANT**: The user might require less or more principles than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly.
 

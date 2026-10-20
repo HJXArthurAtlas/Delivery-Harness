@@ -1,6 +1,6 @@
 ---
 name: ncw-speckit-specify
-description: Create or update the feature specification from a natural language feature description. Requires a project with a .specify/ directory structure. Use when the user runs or mentions /ncw-speckit-specify, or asks to create or update a feature spec, write requirements, or kick off feature specification.
+description: Create or update the feature specification from a natural language feature description. Use when the user runs or mentions /ncw-speckit-specify, or asks to create or update a feature spec, write requirements, or kick off feature specification.
 ---
 
 
@@ -41,25 +41,22 @@ Given that feature description, do this:
    **Resolution order for `SPECIFY_FEATURE_DIRECTORY`**:
    1. If the user explicitly provided `SPECIFY_FEATURE_DIRECTORY` (e.g., via environment variable, argument, or configuration), use it as-is
    2. Otherwise, auto-generate it under `specs/`:
-      - Check `.specify/init-options.json` for `feature_numbering` (preferred) or `branch_numbering` (deprecated, migration only — will be removed in a future release)
-      - If `"timestamp"`: prefix is `YYYYMMDD-HHMMSS` (current timestamp)
-      - If `"sequential"` or absent: prefix is `NNN` (next available 3-digit number after scanning existing directories in `specs/`)
-      - Construct the directory name: `<prefix>-<short-name>` (e.g., `003-user-auth` or `20260319-143022-user-auth`)
+      - Prefix is `YYYYMMDD-HHMMSS` (current timestamp)
+      - Construct the directory name: `<prefix>-<short-name>` (e.g., `20260319-143022-user-auth`)
       - Set `SPECIFY_FEATURE_DIRECTORY` to `specs/<directory-name>`
-      - If `branch_numbering` was used (and `feature_numbering` was absent), emit a one-line warning: "⚠️ `branch_numbering` in init-options.json is deprecated. Rename to `feature_numbering`."
 
    **Create the directory and spec file**:
    - `mkdir -p SPECIFY_FEATURE_DIRECTORY`
-   - Resolve the active `spec-template` through the preset/template resolution stack (the shared template resolver used by the other commands). If the project cannot resolve `spec-template` (`.specify/templates/spec-template.md` missing and no override/preset/extension layer provides it), scaffold it first: copy this skill's `references/spec-template.md` to `.specify/templates/spec-template.md`, creating directories as needed; never overwrite an existing project template
+   - Use this skill's own `references/spec-template.md` as the spec template — no project scaffolding and no override/preset/extension resolution stack
    - Copy the resolved `spec-template` file to `SPECIFY_FEATURE_DIRECTORY/spec.md` as the starting point
    - Set `SPEC_FILE` to `SPECIFY_FEATURE_DIRECTORY/spec.md`
-   - Persist the resolved path to `.specify/feature.json`:
+   - Persist the resolved path to `docs/memory/feature.json`:
      ```json
      {
        "feature_directory": "<resolved feature dir>"
      }
      ```
-     Write the actual resolved directory path value (for example, `specs/003-user-auth`), not the literal string `SPECIFY_FEATURE_DIRECTORY`.
+     Write the actual resolved directory path value (for example, `specs/20260319-143022-user-auth`), not the literal string `SPECIFY_FEATURE_DIRECTORY`.
      This allows downstream commands (`/ncw-speckit-plan`, `/ncw-speckit-tasks`, etc.) to locate the feature directory without relying on git branch name conventions.
 
    **IMPORTANT**:
@@ -71,7 +68,7 @@ Given that feature description, do this:
 
 5. **IF EXISTS**: Load `docs/constitution/constitution.md` for project principles and governance constraints.
 
-6. **Ensure the unified-language glossary exists**: The spec template's mandatory 统一语言 section references the central glossary `.specify/memory/glossary.md`. If that file is missing, scaffold it before writing the spec: create `.specify/memory/` if needed and write a minimal glossary there — one section per project domain (域节) plus a 「使用规则」 section stating that spec terms must be registered in the matching 域节 and that definitions live in the glossary, not in individual specs. Never overwrite an existing glossary. When writing the spec (step 8), register any new domain concepts introduced by this feature into the matching 域节, as the template requires.
+6. **Ensure the unified-language glossary exists**: The spec template's mandatory 统一语言 section references the central glossary `docs/memory/glossary.md`. If that file is missing, scaffold it before writing the spec: create `docs/memory/` if needed and write a minimal glossary there — one section per project domain (域节) plus a 「使用规则」 section stating that spec terms must be registered in the matching 域节 and that definitions live in the glossary, not in individual specs. Never overwrite an existing glossary. When writing the spec (step 8), register any new domain concepts introduced by this feature into the matching 域节, as the template requires.
 
 7. Follow this execution flow:
     1. Parse user description from arguments

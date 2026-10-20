@@ -30,12 +30,12 @@ unset SPECIFY_INIT_DIR SPECIFY_FEATURE SPECIFY_FEATURE_DIRECTORY SPECIFY_FEATURE
 INSTALL="$TMP/install"
 SKILLS="$INSTALL/.agents/skills"
 PROJECT="$TMP/project"
-mkdir -p "$SKILLS" "$PROJECT/.specify" "$PROJECT/specs/001-demo"
+mkdir -p "$SKILLS" "$PROJECT/.git" "$PROJECT/docs/memory" "$PROJECT/specs/001-demo"
 for skill in ncw-adrkit-check ncw-adrkit-context ncw-adrkit-draft ncw-speckit-analyze; do
   cp -R "$REPO_ROOT/skills/$skill" "$SKILLS/$skill"
 done
 
-printf '%s\n' '{"feature_directory":"specs/001-demo"}' > "$PROJECT/.specify/feature.json"
+printf '%s\n' '{"feature_directory":"specs/001-demo"}' > "$PROJECT/docs/memory/feature.json"
 printf '# Demo\n' > "$PROJECT/specs/001-demo/spec.md"
 cat > "$PROJECT/specs/001-demo/plan.md" <<'EOF'
 ---
@@ -95,7 +95,7 @@ json_matches() { # json_matches <payload> <partial-json>
 }
 
 command -v adr >/dev/null 2>&1 && bad "fixture: 外部 adr 意外进入最小 PATH" || ok
-[ ! -e "$PROJECT/.specify/scripts" ] && ok || bad "fixture: 项目不应包含 .specify/scripts"
+[ ! -e "$PROJECT/.specify" ] && ok || bad "fixture: 项目不应存在 .specify 目录（已废弃）"
 
 # Bundled speckit resolution, with no specify-init output in the project.
 run python3 "$SKILLS/ncw-speckit-analyze/scripts/check_prerequisites.py" --json --paths-only

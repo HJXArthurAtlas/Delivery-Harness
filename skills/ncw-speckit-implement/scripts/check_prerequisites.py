@@ -15,6 +15,7 @@ try:
         format_pack_command,
         get_feature_paths,
         resolve_template_content,
+        skill_references_dir,
     )
 except ImportError:  # pragma: no cover - direct execution from unusual cwd
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -24,6 +25,7 @@ except ImportError:  # pragma: no cover - direct execution from unusual cwd
         format_pack_command,
         get_feature_paths,
         resolve_template_content,
+        skill_references_dir,
     )
 
 
@@ -257,7 +259,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.template_name:
         try:
             template_content = resolve_template_content(
-                args.template_name, paths.repo_root
+                args.template_name, skill_references_dir(Path(__file__))
             )
         except TemplateResolutionError as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
@@ -265,7 +267,7 @@ def main(argv: list[str] | None = None) -> int:
         if template_content is None:
             print(
                 f"ERROR: Could not resolve required {args.template_name} from "
-                f"the template override stack for {paths.repo_root}",
+                "this skill's references/ directory",
                 file=sys.stderr,
             )
             return 1

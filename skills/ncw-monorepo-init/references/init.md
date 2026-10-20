@@ -13,7 +13,7 @@
    ```bash
    git clone https://git.newchiwan.com/council/monorepo-template.git /tmp/monorepo-template-$$
    ```
-2. **复制骨架进当前项目根**：`AGENTS-TEMPLATE.md`、`.agents/`、`.specify/`、`docs/adr/`、`scripts/`、`services/`、`apps/`、`Makefile`、`.gitignore`。
+2. **复制骨架进当前项目根**：`AGENTS-TEMPLATE.md`、`.agents/`、`docs/adr/`、`scripts/`、`services/`、`apps/`、`Makefile`、`.gitignore`。
    - `AGENTS-TEMPLATE.md` 复制后改名 `AGENTS.md`；**不复制模板仓的 `README.md`**。
    - 空目录（`services/`、`apps/`、`docs/adr/` 等）补 `.gitkeep`。
    - **同名文件不覆盖**：目标已存在的跳过并记录，最后列出来问用户。

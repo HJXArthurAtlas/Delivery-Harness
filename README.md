@@ -39,7 +39,7 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | 能力 | Pack 内实现 | 运行时前提 |
 |---|---|---|
 | adrkit `new/check/queue/lint/migrate/evaluate` | `skills/ncw-adrkit-draft/scripts/adr.mjs`（上游 CLI 与依赖的单文件 bundle）；`adr.sh` 是跨技能入口 | Node ≥22；无需 `@adrkit/cli`、`node_modules` 或 PATH 上的 `adr` |
-| grill、adrkit check/draft 与 ncw-speckit-design 的特性路径解析 | `skills/ncw-speckit-analyze/scripts/check_prerequisites.py` | python3；无需 `specify init` 或项目 `.specify/scripts/` |
+| grill、adrkit check/draft 与 ncw-speckit-design 的特性路径解析 | `skills/ncw-speckit-analyze/scripts/check_prerequisites.py` | python3；无需 `specify init`（`.specify/` 已废弃，特性指针在 `docs/memory/feature.json`） |
 | ADR scaffold / lint / legacy migration | `ncw-adrkit-draft/scripts/{scaffold.sh,adr.sh}` | 同上；全部走 pack-local 跨技能调用 |
 
 CLI 解析顺序（`adrkit-lib.sh`）：`ADRKIT_CLI` 显式覆盖 > omp 插件依赖安装的 `@adrkit/cli`（`<项目>/.omp/plugins/node_modules/.bin/adrkit`，然后 `~/.omp/plugins/node_modules/.bin/adrkit`）> pack-bundled `adr.mjs` 兜底。PATH 上的 `adr`/`adrkit` 永远不被拾取。

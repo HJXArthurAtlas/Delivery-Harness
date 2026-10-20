@@ -12,6 +12,7 @@ try:
         TemplateResolutionError,
         get_feature_paths,
         resolve_template_content,
+        skill_references_dir,
     )
 except ImportError:  # pragma: no cover - direct execution from unusual cwd
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -19,6 +20,7 @@ except ImportError:  # pragma: no cover - direct execution from unusual cwd
         TemplateResolutionError,
         get_feature_paths,
         resolve_template_content,
+        skill_references_dir,
     )
 
 
@@ -65,7 +67,9 @@ def main(argv: list[str] | None = None) -> int:
         )
     else:
         try:
-            template_content = resolve_template_content("plan-template", paths.repo_root)
+            template_content = resolve_template_content(
+                "plan-template", skill_references_dir(Path(__file__))
+            )
         except TemplateResolutionError as exc:
             print(f"Error: {exc}", file=sys.stderr)
             return 1

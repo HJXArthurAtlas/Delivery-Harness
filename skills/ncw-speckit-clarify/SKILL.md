@@ -1,6 +1,6 @@
 ---
 name: ncw-speckit-clarify
-description: Identify underspecified areas in the current feature spec by asking up to 5 highly targeted clarification questions and encoding answers back into the spec. Requires a project with a .specify/ directory structure. Use when the user runs or mentions /ncw-speckit-clarify, or asks to clarify the feature spec, resolve requirement ambiguities, or reduce underspecified areas before planning.
+description: Identify underspecified areas in the current feature spec by asking up to 5 highly targeted clarification questions and encoding answers back into the spec. Use when the user runs or mentions /ncw-speckit-clarify, or asks to clarify the feature spec, resolve requirement ambiguities, or reduce underspecified areas before planning.
 ---
 
 

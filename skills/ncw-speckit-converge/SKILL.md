@@ -1,6 +1,6 @@
 ---
 name: ncw-speckit-converge
-description: Assess the current codebase against the feature's spec, plan, and tasks, then append any remaining unbuilt work as new tasks to tasks.md so implement can complete it. Requires a project with a .specify/ directory structure. Use when the user runs or mentions /ncw-speckit-converge, or asks to close the gap between spec/plan/tasks and the codebase, find unbuilt remaining work, or append convergence tasks.
+description: Assess the current codebase against the feature's spec, plan, and tasks, then append any remaining unbuilt work as new tasks to tasks.md so implement can complete it. Use when the user runs or mentions /ncw-speckit-converge, or asks to close the gap between spec/plan/tasks and the codebase, find unbuilt remaining work, or append convergence tasks.
 ---
 
 

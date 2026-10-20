@@ -1,6 +1,6 @@
 ---
 name: ncw-speckit-implement
-description: Execute the implementation plan by processing and executing all tasks defined in tasks.md. Requires a project with a .specify/ directory structure. Use when the user runs or mentions /ncw-speckit-implement, or asks to execute the task list, implement the feature per tasks.md, or start coding the planned work.
+description: Execute the implementation plan by processing and executing all tasks defined in tasks.md. Use when the user runs or mentions /ncw-speckit-implement, or asks to execute the task list, implement the feature per tasks.md, or start coding the planned work.
 ---
 
 

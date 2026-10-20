@@ -15,6 +15,7 @@ try:
         get_feature_paths,
         resolve_template,
         resolve_template_content,
+        skill_references_dir,
     )
 except ImportError:  # pragma: no cover - direct execution from unusual cwd
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -25,6 +26,7 @@ except ImportError:  # pragma: no cover - direct execution from unusual cwd
         get_feature_paths,
         resolve_template,
         resolve_template_content,
+        skill_references_dir,
     )
 
 
@@ -124,31 +126,24 @@ def main(argv: list[str] | None = None) -> int:
 
     docs = _available_docs(paths)
 
+    references_dir = skill_references_dir(Path(__file__))
     try:
         tasks_template_content = resolve_template_content(
-            "tasks-template", paths.repo_root
+            "tasks-template", references_dir
         )
     except TemplateResolutionError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
     if tasks_template_content is None:
         print(
-            "ERROR: Could not resolve required tasks-template from the template "
-            f"override stack for {paths.repo_root}",
-            file=sys.stderr,
-        )
-        print(
-            "Template 'tasks-template' was not found in any supported location "
-            "(overrides, presets, extensions, or shared core). Add an override at "
-            ".specify/templates/overrides/tasks-template.md, or run 'specify init' "
-            "/ reinstall shared infra to restore the core "
-            ".specify/templates/tasks-template.md template.",
+            "ERROR: Could not resolve required tasks-template from this "
+            "skill's references/ directory",
             file=sys.stderr,
         )
         return 1
 
     if json_mode:
-        tasks_template = resolve_template("tasks-template", paths.repo_root)
+        tasks_template = resolve_template("tasks-template", references_dir)
         sys.stdout.write(
             _json_line(
                 {
@@ -160,7 +155,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
     else:
-        tasks_template = resolve_template("tasks-template", paths.repo_root)
+        tasks_template = resolve_template("tasks-template", references_dir)
         print(f"FEATURE_DIR: {paths.feature_dir}")
         print(f"TASKS_TEMPLATE: {tasks_template or 'not found'}")
         print("AVAILABLE_DOCS:")

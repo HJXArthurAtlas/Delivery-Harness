@@ -9,20 +9,22 @@
 # /ncw-compound-intent manually, then re-runs /ncw-speckit-specify.
 #
 # Behavior:
-#   - Walks up from cwd to find the project root (.specify/)
+#   - Walks up from cwd to find the project root (.git)
 #   - Checks docs/intents/ for any *.intent.md file
 #   - Exits 0 if at least one exists; exits 1 with message otherwise
 
 set -u
 
 # Find project root by walking up from cwd
+# TODO: project-root marker is currently the .git directory; revisit when a
+# dedicated SDD marker is introduced.
 PROJECT_ROOT="$(pwd)"
-while [ "$PROJECT_ROOT" != "/" ] && [ ! -d "$PROJECT_ROOT/.specify" ]; do
+while [ "$PROJECT_ROOT" != "/" ] && [ ! -e "$PROJECT_ROOT/.git" ]; do
   PROJECT_ROOT="$(dirname "$PROJECT_ROOT")"
 done
 
-if [ ! -d "$PROJECT_ROOT/.specify" ]; then
-  echo "ERROR: not in an SDD project (.specify/ not found in any parent of $(pwd))"
+if [ ! -e "$PROJECT_ROOT/.git" ]; then
+  echo "ERROR: not in an SDD project (.git not found in any parent of $(pwd))"
   exit 1
 fi
 

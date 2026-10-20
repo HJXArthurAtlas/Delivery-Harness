@@ -10,9 +10,9 @@
 
 ## 统一语言 *(mandatory)*
 
-本规格遵循中央统一语言词汇表 `.specify/memory/glossary.md` 的【域名片段】域，
+本规格遵循中央统一语言词汇表 `docs/memory/glossary.md` 的【域名片段】域，
 全文术语以词汇表为准，不重复定义已收录词条。本 spec 新引入的领域概念，
-须已同步登记至词汇表对应域节（治理规则见 `.specify/memory/glossary.md`
+须已同步登记至词汇表对应域节（治理规则见 `docs/memory/glossary.md`
 「使用规则」节）。
 
 <!-- 仅在此处记录本 spec 特有的术语使用约定或跨域引用；词条定义一律进中央词汇表。 -->

@@ -24,7 +24,7 @@ feature's slug (run before `/ncw-speckit-implement` of that feature):
 
 The script:
 
-1. Walks up from cwd to find the project root (the directory containing `.specify/`)
+1. Walks up from cwd to find the project root (the directory containing `.git`)
 2. Resolves the gate mode — `SKC_PLANVERIFY_GATE` env, else `planverify_gate:` in `docs/compound/compound-config.yml`, default `off`
 3. If mode is not `block` → exits 0 silently — `/ncw-speckit-implement` proceeds normally
 4. If mode is `block`:
