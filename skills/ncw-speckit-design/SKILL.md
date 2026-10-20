@@ -60,7 +60,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 主流程:
 - /ncw-speckit-plan: 交接门禁通过后开发侧出实现计划
 可选:
-- specstoissues（pingcode 扩展命令）: [可选] 建需求树卡片并登记 `specs/pingcode-mapping.json`（不建则交接前必须补跑）
+- /ncw-pingcode-specstoissues: [可选] 建需求树卡片并登记 `specs/pingcode-mapping.json`（不建则交接前必须补跑）
 
 ## 行为规则
 

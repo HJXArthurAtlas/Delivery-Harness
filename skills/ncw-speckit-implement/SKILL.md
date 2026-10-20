@@ -144,7 +144,7 @@ Note: This command assumes a complete task breakdown exists in tasks.md. If task
 
 Report final status with summary of completed work. **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
   主流程:
-  - sync-status（pingcode 扩展命令）: 全部任务 [x] 后收尾故事卡（单向流转，重开需新建工作项）
+  - /ncw-pingcode-sync-status: 全部任务 [x] 后收尾故事卡（单向流转，重开需新建工作项）
   可选:
   - /ncw-speckit-converge: [可选] 实现与工件有差距时追加收敛任务
   - /ncw-adrkit-draft: [可选] 把本次耐久决策落成 ADR 归口 docs/adr/
@@ -166,4 +166,5 @@ Report final status with summary of completed work. **Pack fork (ncw), port on u
   - tasks.md 全部 `[x]`
   - 涉 UI 任务已逐项核验 design-tasks.md 的 UI-xx 清单
   - 前置门禁 `/ncw-compound-planverify-gate`（block 模式时）已放行
+  - 前置对账（入向，实现开始时）：spec 建卡后有改动的，`pingcode-config.yml` 在位且 `specs/pingcode-mapping.json` 含本特性条目 → 先 `/ncw-pingcode-sync-cards` 对账（建议先 `--dry-run`）；未建卡或无 config → 跳过
   - 提交走 mturtle-commit 带故事卡 ID

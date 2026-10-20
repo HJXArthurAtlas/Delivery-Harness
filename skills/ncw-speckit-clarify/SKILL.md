@@ -213,7 +213,7 @@ Report completion (after questioning loop ends or early termination):
   - /ncw-speckit-plan: 交接门禁通过后开发侧出实现计划
   可选:
   - /ncw-speckit-grill-me: [可选] 决策点仍有歧义时的深度澄清
-  - specstoissues（pingcode 扩展命令）: [可选] 建卡并登记 mapping.json（不建则交接前补跑）
+  - /ncw-pingcode-specstoissues: [可选] 建卡并登记 mapping.json（不建则交接前补跑）
 
 ## Done When
 

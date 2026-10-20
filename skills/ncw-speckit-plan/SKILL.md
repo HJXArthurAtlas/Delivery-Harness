@@ -34,7 +34,7 @@ Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated 
   可选:
   - /ncw-adrkit-check: [可选] 对照 ADR 语料校验 plan 是否越决策边界
   - /ncw-speckit-analyze: [可选] spec/plan 工件一致性只读分析
-  - specstoissues（pingcode 扩展命令）: [可选] 配了 mapping.task_artifact 时 tasks 后补建任务卡（implement 前 spec 有改动先跑 sync-cards 对账）
+  - /ncw-pingcode-specstoissues: [可选] 配了 mapping.task_artifact 时 tasks 后补建任务卡（implement 前 spec 有改动先跑 /ncw-pingcode-sync-cards 对账）
 
 ## Phases
 

@@ -30,7 +30,12 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | `ncw-speckit-implement` | 按 tasks.md 执行任务实现（implement 命令的 pack 分发，正文英文原文；不含 extension hook 机制；含 pack fork：涉 UI 按 `design-tasks.md` 交互规则实现并核验设计要求清单） | 「开始实现」「按任务清单编码」 |
 | `ncw-speckit-plan` | 实现规划与设计工件生成（plan 命令的 pack 分发，正文英文原文；不含 extension hook 机制；含 pack fork：存在 `design-tasks.md` 时必读并对齐 UX，冲突回用户裁决） | 「做这个需求的实现计划」「出 plan」 |
 | `ncw-speckit-specify` | 特性规格创建/更新（specify 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「出 spec」「写特性需求」 |
-| `ncw-speckit-tasks` | 任务清单生成（tasks 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「出任务清单」「拆任务」 |
+| `ncw-speckit-tasks` | 任务清单生成（tasks 命令的 pack 分发，正文英文原文；不含 extension hook 机制，Handoff 块含 pingcode 补建任务卡可选目标） | 「出任务清单」「拆任务」 |
+| `ncw-pingcode-init` | 交互式初始化 PingCode 集成：选项目/产品/迭代/映射类型（含需求树不跳级校验），生成项目根 `pingcode-config.yml` 并初始化 CLI 运行时上下文（Spec-Kit-PingCode v2.9.0 的 pack 分发，正文中文） | 「配置 PingCode」「重置建卡映射」 |
+| `ncw-pingcode-discover-context` | 探查 PingCode 项目字典（工作项类型/状态/优先级/迭代/产品），生成可粘贴配置片段与 `pingcode-discovered-context.json`（同上 pack 分发） | 「看看 PingCode 有哪些类型/迭代」 |
+| `ncw-pingcode-specstoissues` | spec → PingCode 需求树卡片：spec 卡/`### User Story N` 章节卡/任务行卡三级相邻映射，动态祖先关联（需求必问、中间层只选已有不代建），登记 `specs/pingcode-mapping.json`（同上 pack 分发；extension hook 改接为 specify/tasks Handoff 块可选目标，任务卡按提示或手动重跑补建） | 「把这个 spec 建成卡」「补建/重建卡片」 |
+| `ncw-pingcode-sync-cards` | 实现前核对 specs/ 制品与卡片一致性，按差异增删改（删除逐项确认），祖先关联沿用登记不重问（同上 pack 分发；implement 开始时前置对账，已建卡才提示） | 「对账卡片」「spec 改了同步卡片」 |
+| `ncw-pingcode-sync-status` | 本地任务全勾后把任务卡/story/spec 卡单向流转完成态（只收尾不回退），写 `pingcode-sync-log.json` 并回写登记（同上 pack 分发） | 「收尾卡片」「同步完成状态」 |
 
 ## 自包含运行时（排除 init / flow）
 
@@ -41,6 +46,7 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | adrkit `new/check/queue/lint/migrate/evaluate` | `skills/ncw-adrkit-draft/scripts/adr.mjs`（上游 CLI 与依赖的单文件 bundle）；`adr.sh` 是跨技能入口 | Node ≥22；无需 `@adrkit/cli`、`node_modules` 或 PATH 上的 `adr` |
 | grill、adrkit check/draft 与 ncw-speckit-design 的特性路径解析 | `skills/ncw-speckit-analyze/scripts/check_prerequisites.py` | python3；无需 `specify init`（`.specify/` 已废弃，特性指针在 `docs/memory/feature.json`） |
 | ADR scaffold / lint / legacy migration | `ncw-adrkit-draft/scripts/{scaffold.sh,adr.sh}` | 同上；全部走 pack-local 跨技能调用 |
+| PingCode 卡操作（ncw-pingcode-* 五技能） | 无 bundle——依赖外部 `pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`） | `pingcode auth login` 认证 + 网络可达 PingCode；pack 不内置（认证凭据与 API 演进留在上游 CLI） |
 
 CLI 解析顺序（`adrkit-lib.sh`）：`ADRKIT_CLI` 显式覆盖 > omp 插件依赖安装的 `@adrkit/cli`（`<项目>/.omp/plugins/node_modules/.bin/adrkit`，然后 `~/.omp/plugins/node_modules/.bin/adrkit`）> pack-bundled `adr.mjs` 兜底。PATH 上的 `adr`/`adrkit` 永远不被拾取。
 

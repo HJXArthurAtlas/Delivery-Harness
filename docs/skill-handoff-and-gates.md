@@ -8,20 +8,20 @@
 |---|---|---|---|---|
 | 1 | specify | 产品 | `/ncw-speckit-specify` | `specs/<NNN>-<short-name>/spec.md`（含 `### User Story N`） |
 | 2 | 设计明细 | 产品/设计 | 涉 UI 跑 `/ncw-speckit-design`（先 clarify 更佳）；无 UI 跳过；可与建卡并行 | `design-tasks.md`（**不是门禁项**，不阻塞交接） |
-| 3 | 建卡 | 产品 | pingcode 扩展 specstoissues（optional, priority 99） | 需求树 idea→epic→feature→story；登记 `specs/pingcode-mapping.json` |
+| 3 | 建卡 | 产品 | `/ncw-pingcode-specstoissues`（optional；specify Handoff 可选目标） | 需求树 idea→epic→feature→story；登记 `specs/pingcode-mapping.json` |
 | 4 | **交接门禁** | 产品→开发 | 逐项核对（见 §2） | — |
 | 5 | plan | 开发 | `/ncw-speckit-plan`；有 `design-tasks.md` 必读，冲突回产品/设计裁决 | 计划产物 |
 | 6 | tasks | 开发 | `/ncw-speckit-tasks`；配了 `mapping.task_artifact` 才补建任务卡 | `tasks.md`（+任务卡） |
-| 7 | implement 前 | 开发 | pingcode 扩展 sync-cards 对账 | spec 改动与卡片对齐 |
+| 7 | implement 前 | 开发 | implement 开始 Handoff 前置对账（`/ncw-pingcode-sync-cards`，已建卡才提示） | spec 改动与卡片对齐 |
 | 8 | implement | 开发 | `/ncw-speckit-implement`；提交走 `mturtle-commit`，消息带故事卡 ID | 代码 + 测试 |
-| 9 | 收尾 | 开发 | 本地全 `[x]` → sync-status | 卡片流转完成（单向，不回退） |
+| 9 | 收尾 | 开发 | 本地全 `[x]` → `/ncw-pingcode-sync-status` | 卡片流转完成（单向，不回退） |
 
 ## 2. 交接门禁（阶段 4，spec 转开发前逐项必过）
 
 1. `### User Story N` 章节齐备，标题行标注 `(Priority: P1/P2/P3)` —— 卡片优先级映射来源。
 2. `specs/pingcode-mapping.json` 已登记，每卡 id/状态可追溯 —— 没有 = 建卡没完成，不能交接。
-3. 建卡是 optional：没建卡的交接前手动补跑 specstoissues。
-4. `pingcode-config.yml` 在位（没有先跑 pingcode 扩展 init；未装扩展先 `ncw-monorepo-init`）。
+3. 建卡是 optional：没建卡的交接前手动补跑 `/ncw-pingcode-specstoissues`。
+4. `pingcode-config.yml` 在位（没有先跑 `/ncw-pingcode-init` 生成，`pingcode` CLI ≥ 0.14.0 已装并认证）。
 
 任一不过 → 留在产品侧，不推半成品给开发。`design-tasks.md` 明确**不在**门禁内。
 
@@ -31,12 +31,12 @@
 
 | 技能 | 主流程指向 | 可选指向 |
 |---|---|---|
-| `ncw-speckit-specify` | `/ncw-speckit-clarify`、`/ncw-speckit-design`（涉 UI 必跑） | specstoissues 建卡 |
-| `ncw-speckit-clarify` | `/ncw-speckit-design`、`/ncw-speckit-plan`（交接门禁通过后） | `/ncw-speckit-grill-me`、specstoissues 建卡 |
-| `ncw-speckit-design` | `/ncw-speckit-plan`（交接门禁通过后） | specstoissues 建卡（不建则交接前必须补跑） |
+| `ncw-speckit-specify` | `/ncw-speckit-clarify`、`/ncw-speckit-design`（涉 UI 必跑） | `/ncw-pingcode-specstoissues` 建卡 |
+| `ncw-speckit-clarify` | `/ncw-speckit-design`、`/ncw-speckit-plan`（交接门禁通过后） | `/ncw-speckit-grill-me`、`/ncw-pingcode-specstoissues` 建卡 |
+| `ncw-speckit-design` | `/ncw-speckit-plan`（交接门禁通过后） | `/ncw-pingcode-specstoissues` 建卡（不建则交接前必须补跑） |
 | `ncw-speckit-plan` | `/ncw-speckit-tasks` | `/ncw-adrkit-check`（对照 ADR 语料校验 plan 越界） |
-| `ncw-speckit-tasks` | `/ncw-speckit-implement`（涉 UI 按设计明细核验；spec 有改动先 sync-cards） | specstoissues 补建任务卡（配了 `mapping.task_artifact` 时） |
-| `ncw-speckit-implement` | sync-status 收尾故事卡（单向，重开新建工作项） | `/ncw-speckit-converge`（实现与工件有差距时追加收敛任务） |
+| `ncw-speckit-tasks` | `/ncw-speckit-implement`（涉 UI 按设计明细核验；spec 有改动先 `/ncw-pingcode-sync-cards`） | `/ncw-pingcode-specstoissues` 补建任务卡（配了 `mapping.task_artifact` 时） |
+| `ncw-speckit-implement` | `/ncw-pingcode-sync-status` 收尾故事卡（单向，重开新建工作项） | `/ncw-speckit-converge`（实现与工件有差距时追加收敛任务） |
 
 ## 4. design-tasks 交接约束（plan / implement 的 pack fork 段）
 

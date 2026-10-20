@@ -57,9 +57,9 @@ Output path to generated tasks.md and summary:
 - Format validation: Confirm ALL tasks follow the checklist format (checkbox, ID, labels, file paths)
 - **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
   主流程:
-  - /ncw-speckit-implement: 按 tasks.md 逐任务实现（涉 UI 按设计明细核验；spec 建卡后有改动先跑 sync-cards 对账）
+  - /ncw-speckit-implement: 按 tasks.md 逐任务实现（涉 UI 按设计明细核验；spec 建卡后有改动先跑 /ncw-pingcode-sync-cards 对账）
   可选:
-  - specstoissues（pingcode 扩展命令）: [可选] 配了 mapping.task_artifact 时现在补建任务卡
+  - /ncw-pingcode-specstoissues: [可选] 配了 mapping.task_artifact 时现在补建任务卡
   - /ncw-speckit-analyze: [可选] spec/plan/tasks 三工件一致性只读分析
 
 Context for task generation: $ARGUMENTS
@@ -151,6 +151,9 @@ Every task MUST strictly follow this format:
 > Pack fork (ncw), port on upstream upgrade.
 
 - **目标**：`/ncw-compound-gapfill` —— 补约束违反/失败条件/越界回归/边界测试任务
+- **可选目标**：`/ncw-pingcode-specstoissues`（重跑补建任务卡）
+  - 条件：`pingcode-config.yml` 在位且 `mapping.task_artifact` 已设置
+  - 回退：未配置或用户拒绝 → 跳过，任务留本地 checklist
 - **条件**：
   - tasks.md 已按用户故事生成且依赖有序
   - 配了 `mapping.task_artifact` 时任务卡已补建
