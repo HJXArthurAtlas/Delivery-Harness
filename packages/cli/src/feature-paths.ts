@@ -170,8 +170,8 @@ export function getFeaturePaths(opts: { noPersist?: boolean; scriptDir?: string 
 
 export function formatPackCommand(commandName: string): string {
   let name = commandName.replace(/^\/+/, '');
-  if (name.startsWith('ncw-speckit-')) {
-    name = name.slice('ncw-speckit-'.length);
+  if (name.startsWith('che-compound-')) {
+    name = name.slice('che-compound-'.length);
   }
-  return `/ncw-speckit-${name}`;
+  return `/che-compound-${name}`;
 }

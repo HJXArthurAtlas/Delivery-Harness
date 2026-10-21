@@ -32,10 +32,10 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     ok
   fi
 
-  # 2. name 与目录名一致；命名格式 ncw-{submodule}-action（至少三段 kebab），且简洁（≤32 字符）
+  # 2. name 与目录名一致；命名格式 che-{submodule}-action（至少三段 kebab），且简洁（≤32 字符）
   name="$(awk -F': *' '/^name:/{print $2; exit}' "$skill_md")"
   [ "$name" = "$skill" ] && ok || bad "$skill: name '$name' 与目录名不一致"
-  [[ "$skill" =~ ^ncw-[a-z0-9]+-[a-z0-9]+(-[a-z0-9]+)*$ ]] && ok || bad "$skill: 命名不符 ncw-{submodule}-action 格式"
+  [[ "$skill" =~ ^che-[a-z0-9]+-[a-z0-9]+(-[a-z0-9]+)*$ ]] && ok || bad "$skill: 命名不符 che-{submodule}-action 格式"
   [ "${#skill}" -le 32 ] && ok || bad "$skill: 命名过长（${#skill} chars，简洁上限 32）"
 
   # 3. description 非空、≤1024 字符
@@ -49,7 +49,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   # 4. SKILL.md 引用的 references/、scripts/ 文件必须存在（引用即契约）。
   #    仅反引号括起的路径参与校验：以 references/ 或 scripts/ 开头的按 pack 内相对引用
   #    校验存在性；其余（.agents/、~/、绝对路径等宿主路径）运行时才有，不在仓内校验
-  #    ——跨技能引用（如 grill-with-docs 指向 ncw-adrkit-draft 的 scaffold.sh）属此类。
+  #    ——跨技能引用（如 grill-with-docs 指向 che-adr-draft 的 scaffold.sh）属此类。
   while IFS= read -r ref; do
     case "$ref" in
       references/*|scripts/*)

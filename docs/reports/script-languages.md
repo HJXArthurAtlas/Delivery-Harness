@@ -36,7 +36,7 @@ The seven-way `common.py` / five-way `check_prerequisites.py` duplication died w
 
 ## adrkit-lib.sh
 
-`adrkit-lib.sh` (POSIX `sh`, three verbatim copies under `skills/ncw-adrkit-{check,context,draft}/scripts/`) is the shared helper library for the adrkit command scripts. It is sourced, never executed directly.
+`adrkit-lib.sh` (POSIX `sh`, three verbatim copies under `skills/che-adr-{check,context,draft}/scripts/`) is the shared helper library for the adrkit command scripts. It is sourced, never executed directly.
 
 | Item | Purpose |
 |---|---|
@@ -57,7 +57,7 @@ Seven TS modules, dispatched from `src/index.ts` (adrkit `packages/cli` layout: 
 |---|---|
 | `feature-paths.ts` | Repo-root resolution (`CHE_INIT_DIR` / `.git` walk-up), `.che/feature.json` pointer read/write, env precedence (`CHE_FEATURE_DIRECTORY` → pointer → error; `CHE_FEATURE_NO_PERSIST` gate; `CHE_FEATURE` branch override) |
 | `check.ts` | `che paths` (resolution only, never persists) and `che check` (validation + `AVAILABLE_DOCS` report) |
-| `feature.ts` | `che feature set <dir>` / `che feature show` — the pointer write/read behind `/ncw-speckit-specify` |
+| `feature.ts` | `che feature set <dir>` / `che feature show` — the pointer write/read behind `/che-compound-specify` |
 | `template.ts` | Safe-name (`[a-z0-9-]+`) template resolution from a caller-supplied `references/` dir |
 | `setup.ts` | `che setup-plan` / `che setup-tasks` — template copy and tasks-template resolution |
 | `main-module.ts` | `isMainModule`, verbatim from adrkit |

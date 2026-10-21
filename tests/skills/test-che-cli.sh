@@ -124,7 +124,7 @@ run "$CHE_BIN" feature show
 [ "$RC" -eq 0 ] && [ "$OUT" = 'specs/003-x' ] && ok || bad "feature show: RC=$RC OUT=$OUT"
 
 # 8. template resolves bundled references/ byte-exact; unsafe/missing names fail.
-CONSTITUTION_REFS="$REPO_ROOT/skills/ncw-speckit-constitution/references"
+CONSTITUTION_REFS="$REPO_ROOT/skills/che-compound-constitution/references"
 run "$CHE_BIN" template constitution-template --json --references-dir "$CONSTITUTION_REFS"
 [ "$RC" -eq 0 ] && ok || bad "template: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 node -e '
@@ -145,7 +145,7 @@ run "$CHE_BIN" template constitution-template --json
 [ "$RC" -eq 2 ] && ok || bad "template 缺 --references-dir: 退出码 ${RC}，预期 2"
 
 # 9. setup-plan copies plan-template byte-exact; rerun skips without touching it.
-PLAN_REFS="$REPO_ROOT/skills/ncw-speckit-plan/references"
+PLAN_REFS="$REPO_ROOT/skills/che-compound-plan/references"
 rm "$PROJECT/specs/001-demo/plan.md"
 printf '%s\n' '{"feature_directory":"specs/001-demo"}' > "$PROJECT/.che/feature.json"
 run "$CHE_BIN" setup-plan --json --references-dir "$PLAN_REFS"
@@ -164,7 +164,7 @@ byte_equal "$PROJECT/specs/001-demo/plan.md" "$PLAN_REFS/plan-template.md" \
   && ok || bad "setup-plan 重跑: plan.md 被改动"
 
 # 10. setup-tasks requires plan.md; otherwise resolves tasks-template byte-exact.
-TASKS_REFS="$REPO_ROOT/skills/ncw-speckit-tasks/references"
+TASKS_REFS="$REPO_ROOT/skills/che-compound-tasks/references"
 rm "$PROJECT/specs/001-demo/plan.md"
 run "$CHE_BIN" setup-tasks --json --references-dir "$TASKS_REFS"
 [ "$RC" -eq 1 ] && ok || bad "setup-tasks 无 plan: 退出码 ${RC}，预期 1"
