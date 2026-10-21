@@ -35,3 +35,18 @@ Checksums confirm exact copies of:
 - `adrkit-lib.sh`: **3 copies**
 
 This matches the pack's self-contained-per-skill script distribution model. It is nevertheless the main maintenance hotspot: fixes to these helpers must be propagated to every copy.
+
+## adrkit-lib.sh
+
+`adrkit-lib.sh` (77 lines, POSIX `sh`, three verbatim copies under `skills/ncw-adrkit-{check,context,draft}/scripts/`) is the shared helper library for the adrkit command scripts. It is sourced, never executed directly.
+
+| Item | Purpose |
+|---|---|
+| `ADRKIT_EXIT_MISSING=1` / `ADRKIT_EXIT_USAGE=2` | Exit-code constants; 2 deliberately matches `adr`'s usage-error code |
+| `adrkit_fail` | Fail-fast printer — every resolver either yields a usable value or exits non-zero naming exactly what is missing (no silent success, no fabricated payload) |
+| `adrkit_cli` | Locates `adrkit` on `PATH`, errors with the `npm install -g @adrkit/cli@0.20.0` hint if absent; propagates the CLI's exit code verbatim so 1 ("found something wrong") vs 2 ("invoked wrong") stays distinguishable |
+| `adrkit_corpus_dir` | Resolves the ADR corpus (`$ADRKIT_DIR` or default `docs/adr`); a missing directory is an error, not an empty corpus — a governance check silently reporting "0 decisions" was the ADR-0016 failure it guards against |
+| `adrkit_feature_dir` | Resolves the current feature directory: `$ADRKIT_FEATURE_DIR` override first, else delegates to the pack-bundled `ncw-speckit-analyze/scripts/check_prerequisites.py --paths-only` (needs `python3`), extracting `FEATURE_DIR:` from its output |
+| `adrkit_plan_path` | `<feature_dir>/plan.md`, required by anything claiming to act "on the plan" |
+
+Design contract per the header: every resolver either yields a usable value or exits non-zero with a message naming exactly what is missing; nothing reaches the network or reads a credential.

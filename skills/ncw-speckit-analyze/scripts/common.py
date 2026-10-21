@@ -80,7 +80,7 @@ def get_current_branch() -> str:
 
 
 def read_feature_json_feature_directory(repo_root: Path) -> str:
-    feature_json = repo_root / "docs" / "memory" / "feature.json"
+    feature_json = repo_root / ".che" / "feature.json"
     if not feature_json.is_file():
         return ""
     try:
@@ -112,7 +112,7 @@ def persist_feature_json(repo_root: Path, feature_dir_value: str) -> None:
     if current == value:
         return
 
-    memory_dir = repo_root / "docs" / "memory"
+    memory_dir = repo_root / ".che"
     memory_dir.mkdir(parents=True, exist_ok=True)
     (memory_dir / "feature.json").write_bytes(
         _json_dump({"feature_directory": value}).encode("utf-8")
@@ -141,7 +141,7 @@ def get_feature_paths(
 
     # SPECIFY_FEATURE_NO_PERSIST is the environment-level equivalent of no_persist=True,
     # letting an orchestrator (multi-agent runner, CI matrix) guarantee that no
-    # script invocation in the process tree writes docs/memory/feature.json, even
+    # script invocation in the process tree writes .che/feature.json, even
     # scripts that don't pass no_persist themselves (#4128).
     no_persist = no_persist or os.environ.get("SPECIFY_FEATURE_NO_PERSIST", "") in ("1", "true")
 
@@ -152,12 +152,12 @@ def get_feature_paths(
             feature_dir = repo_root / feature_dir
         if not no_persist:
             persist_feature_json(repo_root, feature_dir_raw)
-    elif (repo_root / "docs" / "memory" / "feature.json").is_file():
+    elif (repo_root / ".che" / "feature.json").is_file():
         stored = read_feature_json_feature_directory(repo_root)
         if not stored:
             print(
                 "ERROR: Feature directory not found. Set SPECIFY_FEATURE_DIRECTORY "
-                "or ensure docs/memory/feature.json contains feature_directory.",
+                "or ensure .che/feature.json contains feature_directory.",
                 file=sys.stderr,
             )
             raise SystemExit(1)
@@ -167,7 +167,7 @@ def get_feature_paths(
     else:
         print(
             "ERROR: Feature directory not found. Set SPECIFY_FEATURE_DIRECTORY "
-            "or run the specify command to create docs/memory/feature.json.",
+            "or run the specify command to create .che/feature.json.",
             file=sys.stderr,
         )
         raise SystemExit(1)

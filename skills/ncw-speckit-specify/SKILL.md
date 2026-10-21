@@ -50,7 +50,7 @@ Given that feature description, do this:
    - Use this skill's own `references/spec-template.md` as the spec template — no project scaffolding and no override/preset/extension resolution stack
    - Copy the resolved `spec-template` file to `SPECIFY_FEATURE_DIRECTORY/spec.md` as the starting point
    - Set `SPEC_FILE` to `SPECIFY_FEATURE_DIRECTORY/spec.md`
-   - Persist the resolved path to `docs/memory/feature.json`:
+   - Persist the resolved path to `.che/feature.json`:
      ```json
      {
        "feature_directory": "<resolved feature dir>"
@@ -68,7 +68,7 @@ Given that feature description, do this:
 
 5. **IF EXISTS**: Load `docs/constitution/constitution.md` for project principles and governance constraints.
 
-6. **Ensure the unified-language glossary exists**: The spec template's mandatory 统一语言 section references the central glossary `docs/memory/glossary.md`. If that file is missing, scaffold it before writing the spec: create `docs/memory/` if needed and write a minimal glossary there — one section per project domain (域节) plus a 「使用规则」 section stating that spec terms must be registered in the matching 域节 and that definitions live in the glossary, not in individual specs. Never overwrite an existing glossary. When writing the spec (step 8), register any new domain concepts introduced by this feature into the matching 域节, as the template requires.
+6. **Ensure the unified-language glossary exists**: The spec template's mandatory 统一语言 section references the central glossary `.che/glossary.md`. If that file is missing, scaffold it before writing the spec: create `.che/` if needed and write a minimal glossary there — one section per project domain (域节) plus a 「使用规则」 section stating that spec terms must be registered in the matching 域节 and that definitions live in the glossary, not in individual specs. Never overwrite an existing glossary. When writing the spec (step 8), register any new domain concepts introduced by this feature into the matching 域节, as the template requires.
 
 7. Follow this execution flow:
     1. Parse user description from arguments

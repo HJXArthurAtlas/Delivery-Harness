@@ -11,7 +11,7 @@ Current-state audit of the skills under `skills/`, including their `SKILL.md`, `
 | Skills | Implementation | Requirement |
 |---|---|---|
 | `ncw-adrkit-{check,context,draft}` | POSIX wrappers execute only `adrkit` from `PATH`; no override variable or plugin `node_modules` lookup. | **External `@adrkit/cli` 0.20.0 required on `PATH`.** If unavailable, run `npm install -g @adrkit/cli@0.20.0`. Node ≥22 is required by the CLI. |
-| `ncw-adrkit-{check,draft}` feature resolution | `ncw-speckit-analyze/scripts/check_prerequisites.py` + `common.py`, invoked by each `adrkit-lib.sh`. | The feature pointer lives at `docs/memory/feature.json`. `python3` is required unless `ADRKIT_FEATURE_DIR` is set. |
+| `ncw-adrkit-{check,draft}` feature resolution | `ncw-speckit-analyze/scripts/check_prerequisites.py` + `common.py`, invoked by each `adrkit-lib.sh`. | The feature pointer lives at `.che/feature.json`. `python3` is required unless `ADRKIT_FEATURE_DIR` is set. |
 | `ncw-speckit-grill-{me,with-docs}` | The same bundled `check_prerequisites.py --json --paths-only` from `ncw-speckit-analyze`. | **No external prerequisite script required.** `python3` and the active feature context remain required. |
 | `ncw-speckit-grill-with-docs`, `ncw-compound-writeback` | `ncw-adrkit-draft/scripts/scaffold.sh` allocates records; `ncw-adrkit-draft/scripts/adr.sh lint` validates them. | Pack-local entry points; the same external `@adrkit/cli` requirement applies. |
 | `ncw-compound-load` legacy ADR migration | Delegates to `ncw-adrkit-draft`; its migration runbook uses `adr.sh migrate` and `adr.sh lint`. | **Only during legacy migration; the same external `@adrkit/cli` requirement applies.** |
