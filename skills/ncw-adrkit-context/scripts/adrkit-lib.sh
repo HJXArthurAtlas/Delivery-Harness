@@ -38,8 +38,8 @@ adrkit_corpus_dir() {
 	printf '%s' "$_adrkit_corpus"
 }
 
-# The current feature directory. Resolve through the pack's bundled speckit
-# helper.
+# The current feature directory. Resolve through the external `che` CLI on
+# PATH (published as @newchiwan/che; same consumption model as `adrkit` above).
 adrkit_feature_dir() {
 	if [ -n "${ADRKIT_FEATURE_DIR:-}" ]; then
 		[ -d "$ADRKIT_FEATURE_DIR" ] ||
@@ -48,15 +48,11 @@ adrkit_feature_dir() {
 		return 0
 	fi
 
-	_adrkit_scripts_dir="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
-	_adrkit_prereq="$_adrkit_scripts_dir/../../ncw-speckit-analyze/scripts/check_prerequisites.py"
-	[ -f "$_adrkit_prereq" ] ||
-		adrkit_fail "pack feature resolver is missing at '$_adrkit_prereq' — reinstall the pack, or set ADRKIT_FEATURE_DIR"
-	command -v python3 >/dev/null 2>&1 ||
-		adrkit_fail "pack feature resolver needs python3 on PATH, or set ADRKIT_FEATURE_DIR"
+	command -v che >/dev/null 2>&1 ||
+		adrkit_fail "che CLI not found on PATH; install it with 'npm install -g @newchiwan/che@0.1.0', or set ADRKIT_FEATURE_DIR"
 
-	_adrkit_paths="$(python3 "$_adrkit_prereq" --paths-only)" ||
-		adrkit_fail "pack feature resolver failed — run /ncw-speckit-specify first, or set ADRKIT_FEATURE_DIR"
+	_adrkit_paths="$(che paths)" ||
+		adrkit_fail "che feature resolution failed — run /ncw-speckit-specify first, or set ADRKIT_FEATURE_DIR"
 	_adrkit_feature="$(printf '%s\n' "$_adrkit_paths" | sed -n 's/^FEATURE_DIR: *//p' | head -n 1)"
 
 	[ -n "$_adrkit_feature" ] ||

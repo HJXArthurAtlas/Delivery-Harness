@@ -1,0 +1,9 @@
+{
+  "name": "@newchiwan/che",
+  "version": "0.1.0",
+  "description": "newchiwan delivery harness CLI: feature pointer, feature paths, template and setup resolution.",
+  "type": "module",
+  "bin": { "che": "./src/index.ts" },
+  "engines": { "node": ">=22.18" },
+  "files": ["src"]
+}

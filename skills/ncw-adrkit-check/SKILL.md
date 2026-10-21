@@ -45,9 +45,9 @@ $ARGUMENTS
 
 ## Notes
 
-- Feature resolution uses the pack-bundled
-  `.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py`.
-  `ADRKIT_FEATURE_DIR` overrides feature-dir resolution.
+- Feature resolution uses the external `che` CLI on `PATH` (`@newchiwan/che`;
+  if unavailable, `npm install -g @newchiwan/che@0.1.0`). `ADRKIT_FEATURE_DIR`
+  overrides feature-dir resolution.
 - Requires `@adrkit/cli` 0.20.0 with `adrkit` on `PATH`. If unavailable,
   install it with `npm install -g @adrkit/cli@0.20.0` and retry.
 - Read-only, and that is load-bearing rather than incidental: this command is

@@ -20,7 +20,7 @@ Note: This clarification workflow is expected to run (and be completed) BEFORE i
 
 Execution steps:
 
-1. Run `python3` on this skill's bundled prerequisite checker `scripts/check_prerequisites.py` (verbatim v1.1.3 helper) with arguments `--json --paths-only` from repo root **once** (combined `--json --paths-only` mode / `-Json -PathsOnly`). Parse minimal JSON payload fields:
+1. Run `che paths --json` from repo root **once** (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@0.1.0`). Parse minimal JSON payload fields:
    - `FEATURE_DIR`
    - `FEATURE_SPEC`
    - (Optionally capture `IMPL_PLAN`, `TASKS` for future chained flows.)

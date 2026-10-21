@@ -36,27 +36,21 @@ Given that feature description, do this:
 
 3. **Create the spec feature directory**:
 
-   Specs live under the default `specs/` directory unless the user explicitly provides `SPECIFY_FEATURE_DIRECTORY`.
+   Specs live under the default `specs/` directory unless the user explicitly provides `CHE_FEATURE_DIRECTORY`.
 
-   **Resolution order for `SPECIFY_FEATURE_DIRECTORY`**:
-   1. If the user explicitly provided `SPECIFY_FEATURE_DIRECTORY` (e.g., via environment variable, argument, or configuration), use it as-is
+   **Resolution order for `CHE_FEATURE_DIRECTORY`**:
+   1. If the user explicitly provided `CHE_FEATURE_DIRECTORY` (e.g., via environment variable, argument, or configuration), use it as-is
    2. Otherwise, auto-generate it under `specs/`:
       - Prefix is `YYYYMMDD-HHMMSS` (current timestamp)
       - Construct the directory name: `<prefix>-<short-name>` (e.g., `20260319-143022-user-auth`)
-      - Set `SPECIFY_FEATURE_DIRECTORY` to `specs/<directory-name>`
+      - Set `CHE_FEATURE_DIRECTORY` to `specs/<directory-name>`
 
    **Create the directory and spec file**:
-   - `mkdir -p SPECIFY_FEATURE_DIRECTORY`
+   - `mkdir -p CHE_FEATURE_DIRECTORY`
    - Use this skill's own `references/spec-template.md` as the spec template — no project scaffolding and no override/preset/extension resolution stack
-   - Copy the resolved `spec-template` file to `SPECIFY_FEATURE_DIRECTORY/spec.md` as the starting point
-   - Set `SPEC_FILE` to `SPECIFY_FEATURE_DIRECTORY/spec.md`
-   - Persist the resolved path to `.che/feature.json`:
-     ```json
-     {
-       "feature_directory": "<resolved feature dir>"
-     }
-     ```
-     Write the actual resolved directory path value (for example, `specs/20260319-143022-user-auth`), not the literal string `SPECIFY_FEATURE_DIRECTORY`.
+   - Copy the resolved `spec-template` file to `CHE_FEATURE_DIRECTORY/spec.md` as the starting point
+   - Set `SPEC_FILE` to `CHE_FEATURE_DIRECTORY/spec.md`
+   - Persist the resolved path to `.che/feature.json` by running `che feature set <resolved feature dir>` from the repository root (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@0.1.0`).
      This allows downstream commands (`/ncw-speckit-plan`, `/ncw-speckit-tasks`, etc.) to locate the feature directory without relying on git branch name conventions.
 
    **IMPORTANT**:
@@ -99,7 +93,7 @@ Given that feature description, do this:
 
 9. **Specification Quality Validation**: After writing the initial spec, validate it against quality criteria:
 
-   a. **Create Spec Quality Checklist**: Generate a checklist file at `SPECIFY_FEATURE_DIRECTORY/checklists/requirements.md` using the checklist template structure with these validation items:
+   a. **Create Spec Quality Checklist**: Generate a checklist file at `CHE_FEATURE_DIRECTORY/checklists/requirements.md` using the checklist template structure with these validation items:
 
       ```markdown
       # Specification Quality Checklist: [FEATURE NAME]
@@ -192,7 +186,7 @@ Given that feature description, do this:
 ## Completion Report
 
 Report completion to the user with:
-- `SPECIFY_FEATURE_DIRECTORY` — the feature directory path
+- `CHE_FEATURE_DIRECTORY` — the feature directory path
 - `SPEC_FILE` — the spec file path
 - Checklist results summary
 - Readiness for the next phase (`/ncw-speckit-clarify` or `/ncw-speckit-plan`)

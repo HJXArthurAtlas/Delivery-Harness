@@ -3,16 +3,17 @@
   "version": "0.2.0",
   "description": "newchiwan 团队跨端 agent skill pack：规格驱动开发流程 + adrkit/grill/compound 扩展技能组",
   "scripts": {
-    "test": "bash tests/skills/test-skill-structure.sh && bash tests/skills/test-speckit-constitution.sh && bash tests/skills/test-pack-runtime.sh"
+    "test": "bash tests/skills/test-skill-structure.sh && bash tests/skills/test-che-cli.sh && bash tests/skills/test-pack-runtime.sh"
   },
   "files": [
     "skills"
   ],
   "engines": {
-    "node": ">=22"
+    "node": ">=22.18"
   },
   "dependencies": {
-    "@adrkit/cli": "0.20.0"
+    "@adrkit/cli": "0.20.0",
+    "@newchiwan/che": "file:packages/cli"
   },
   "omp": {}
 }

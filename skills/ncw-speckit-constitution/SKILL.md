@@ -38,7 +38,7 @@ constitution scaffold is resolved at command time from this skill's `references/
 
 Follow this execution flow:
 
-1. Run `python3` on this skill's bundled template resolver `scripts/resolve_template.py` (verbatim v1.1.3 helper) with arguments `constitution-template --json`, from the repository root, and parse `TEMPLATE_CONTENT` as the active template. The resolver reads directly from this skill's `references/` directory.
+1. Run `che template constitution-template --json --references-dir .agents/skills/ncw-speckit-constitution/references` (global install: `~/.agents/skills/ncw-speckit-constitution/references`), from the repository root, and parse `TEMPLATE_CONTENT` as the active template (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@0.1.0`).
    - If resolution fails (the template is missing from this skill's `references/`), stop and report the resolution error; do not continue.
    - If `docs/constitution/constitution.md` exists, load it as the source of current project-specific
      values and amendments. Preserve information that is still applicable when applying the newly

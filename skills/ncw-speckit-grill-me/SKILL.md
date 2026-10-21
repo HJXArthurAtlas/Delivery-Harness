@@ -31,8 +31,8 @@ If non-empty, treat it as a request to prioritize the specified area for deeper 
 
 ## Prerequisites
 
-1. Confirm that the environment is macOS / Linux and that `bash`, `python3`, and the pack-bundled `.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py` are available (global install: `~/.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py`). If not, state that the environment is unsupported and stop. Do not substitute a project-local prerequisite script.
-2. From the repository root, run `python3 .agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py --json --paths-only` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC` (use the global path above for a global install). If it does not return JSON, stop and recommend rerunning the agent-specific invocation of `ncw-speckit-specify` or checking the active feature environment.
+1. Confirm that the environment is macOS / Linux and that `bash` and the external `che` CLI are available on PATH (`@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@0.1.0` if missing). If not, state that the environment is unsupported and stop. Do not substitute a project-local prerequisite script.
+2. From the repository root, run `che paths --json` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC`. If it does not return JSON, stop and recommend rerunning the agent-specific invocation of `ncw-speckit-specify` or checking the active feature environment.
 3. If spec.md does not exist, stop and recommend running the agent-specific invocation of `ncw-speckit-specify` first. Do not create a new specification here.
 4. Read `docs/constitution/constitution.md` (project principles) if it exists. In addition, inspect **only the existing materials relevant to the work at hand** using ordinary file search, file reading, and symbol search:
    - `README*` / `CONTEXT.md` / `CLAUDE.md` / `AGENTS.md` / `documents/**` / `docs/**` — domain terminology, stakeholders, business flows, and design decisions

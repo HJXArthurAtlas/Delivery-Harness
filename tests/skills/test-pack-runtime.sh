@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Pack runtime contract: @adrkit/cli resolution and pack-local helpers.
-# Runs against an installed .agents/skills layout with a minimal PATH.
+# Pack runtime contract: @adrkit/cli and @newchiwan/che resolution.
+# Both CLIs are external PATH deps driven like a user install, against an
+# installed .agents/skills layout with a minimal PATH.
 set -u
 
 pass=0
@@ -8,10 +9,6 @@ fail=0
 ok()  { pass=$((pass + 1)); }
 bad() { fail=$((fail + 1)); printf '[FAIL] %s\n' "$1"; }
 
-if ! command -v python3 >/dev/null 2>&1; then
-  printf 'pack-runtime: SKIP（无 python3；它是技能运行时前提，不是本仓测试前提）\n'
-  exit 0
-fi
 if ! command -v node >/dev/null 2>&1; then
   printf 'pack-runtime: 1 passed, 0 failed\n'
   printf '[FAIL] pack-runtime: node 是本仓测试前提\n' >&2
@@ -21,22 +18,27 @@ fi
 ORIG_PATH=$PATH
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ADRKIT_BIN="$REPO_ROOT/node_modules/.bin/adrkit"
+CHE_BIN="$REPO_ROOT/node_modules/.bin/che"
 if [ ! -x "$ADRKIT_BIN" ]; then
   printf '[FAIL] pack-runtime: @adrkit/cli 未安装；先运行 npm ci\n' >&2
+  exit 1
+fi
+if [ ! -x "$CHE_BIN" ]; then
+  printf '[FAIL] pack-runtime: @newchiwan/che 未安装；先运行 npm ci\n' >&2
   exit 1
 fi
 TMP="$(mktemp -d)"
 TMP="$(cd "$TMP" && pwd -P)"
 trap 'PATH=$ORIG_PATH; rm -rf "$TMP"' EXIT
-export PYTHONDONTWRITEBYTECODE=1
 unset ADRKIT_FEATURE_DIR ADRKIT_SNAPSHOT ADRKIT_AS_OF
+unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_FEATURE_NO_PERSIST
 unset SPECIFY_INIT_DIR SPECIFY_FEATURE SPECIFY_FEATURE_DIRECTORY SPECIFY_FEATURE_NO_PERSIST
 
 INSTALL="$TMP/install"
 SKILLS="$INSTALL/.agents/skills"
 PROJECT="$TMP/project"
-mkdir -p "$SKILLS" "$PROJECT/.git" "$PROJECT/.che" "$PROJECT/specs/001-demo"
-for skill in ncw-adrkit-check ncw-adrkit-context ncw-adrkit-draft ncw-speckit-analyze; do
+mkdir -p "$SKILLS" "$PROJECT/.git" "$PROJECT/.che" "$PROJECT/specs/001-demo" "$PROJECT/docs/adr"
+for skill in ncw-adrkit-check ncw-adrkit-context ncw-adrkit-draft; do
   cp -R "$REPO_ROOT/skills/$skill" "$SKILLS/$skill"
 done
 
@@ -59,7 +61,7 @@ printf '%s' '{"schemaVersion":"adrkit.pass0.snapshot/v1"}' > "$TMP/snapshot.json
 # @adrkit/cli is added after exercising the missing-CLI contract; jq and git
 # remain absent.
 mkdir -p "$TMP/bin"
-for tool in node python3 dirname mkdir sed head date cat ln; do
+for tool in node dirname mkdir sed head date cat ln; do
   source="$(command -v "$tool")"
   ln -s "$source" "$TMP/bin/$tool"
 done
@@ -109,11 +111,23 @@ esac
 ln -s "$ADRKIT_BIN" "$TMP/bin/adrkit"
 command -v adrkit >/dev/null 2>&1 && ok || bad "fixture: 无法把真实 @adrkit/cli 加入 PATH"
 
-# Bundled speckit resolution.
-run python3 "$SKILLS/ncw-speckit-analyze/scripts/check_prerequisites.py" --json --paths-only
-[ "$RC" -eq 0 ] && ok || bad "speckit paths: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+# Missing-che contract: draft.sh checks corpus → plan → feature dir, so the
+# missing `che` failure surfaces here before any write.
+command -v che >/dev/null 2>&1 && bad "fixture: 外部 che 意外进入最小 PATH" || ok
+run "$SKILLS/ncw-adrkit-draft/scripts/draft.sh" Probe
+[ "$RC" -eq 1 ] && ok || bad "missing che: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"npm install -g @newchiwan/che@0.1.0"*) ok ;;
+  *) bad "missing che: 未提示 npm 安装：$(<"$TMP/stderr")" ;;
+esac
+ln -s "$CHE_BIN" "$TMP/bin/che"
+command -v che >/dev/null 2>&1 && ok || bad "fixture: 无法把真实 @newchiwan/che 加入 PATH"
+
+# Feature resolution through the external che CLI.
+run che paths --json
+[ "$RC" -eq 0 ] && ok || bad "che paths: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"FEATURE_DIR\":\"$PROJECT/specs/001-demo\",\"FEATURE_SPEC\":\"$PROJECT/specs/001-demo/spec.md\"}" \
-  && ok || bad "speckit paths: JSON 未返回活动 feature 路径：$OUT"
+  && ok || bad "che paths: JSON 未返回活动 feature 路径：$OUT"
 
 # The real @adrkit/cli and all three wrappers work through PATH resolution.
 EXPECTED_VERSION="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).dependencies["@adrkit/cli"]' "$REPO_ROOT/package.json")"
