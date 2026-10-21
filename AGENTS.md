@@ -104,6 +104,7 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 - **正文**：中文写作；规则以「必须 / 绝不」句式为主；按引用委托外部流程，不复述其规则。
 - **安全边界**：同名不覆盖（跳过 + 列出 + 问用户，技能写盘通用）；版本号不凭记忆报，以仓内登记文件为准。
 - **提交信息格式**（`.githooks/commit-msg` 强制）：`<type>(<scope>): #<工作项ID> <主题>`，如 `refactor(skills): #TECH-1234 技能更名`；无工作项用默认 `#TECH-000`；type ∈ `feat / fix / refactor / docs / test / chore`；`Merge` / `Revert` / `fixup!` / `squash!` 放行。
+- **小步提交**：一个逻辑改动一个提交——完成一个可独立验证的单元（通过 `npm test`）即提交，绝不把多个无关改动攒进同一提交；提交只含该单元涉及的文件。
 
 ## Important Files
 
