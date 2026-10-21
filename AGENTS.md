@@ -23,7 +23,7 @@ newchiwan 团队跨端 **agent skill pack**（`ncw-delivery-harness`）：承载
 
 ## Architecture & Data Flow（分发模型）
 
-无消费端构建步骤——「分发物」即 `skills/` 下的 Markdown 规则 + 技能携带的 Python / shell / Node 运行时，端侧按目录约定直接扫描发现。`adr.mjs` 是预先 bundle 并随仓提交的单文件运行时，安装与执行都不需要 npm 依赖。
+无消费端构建步骤——「分发物」即 `skills/` 下的 Markdown 规则 + 技能携带的 Python / shell 运行时，端侧按目录约定直接扫描发现。adrkit 技能依赖外部 `@adrkit/cli`，不随 pack 内置 CLI bundle。
 
 ```
 skills/<name>/SKILL.md (+ references/ scripts/)
@@ -35,7 +35,7 @@ skills/<name>/SKILL.md (+ references/ scripts/)
    agent 运行时加载 skill
 ```
 
-omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 是 catalog（插件 `ncw-delivery`，`source: "./"` 即仓根），用户 `omp plugin marketplace add <仓 URL>` + `omp plugin install ncw-delivery@ncw-delivery-harness` 后由 omp 从插件树 `skills/<name>/SKILL.md` 发现。**插件只含 skills**——绝不加 `.omp-plugin/plugin.json` manifest（remap 会把 `.agents/` 带进安装面）；`.agents/commands/` 斜杠命令是本仓维护者工具（`/readme-refresh`），不经插件分发。catalog `version` 与 `package.json` 版本同步维护。marketplace 安装不解析 npm 依赖；另一条 omp 路径 `omp plugin install git+<仓 URL>` 经 bun 安装 `package.json#dependencies` 的 `@adrkit/cli`（版本钉 = `adrkit-bundle.json`，`npm test` 校验一致），`adrkit` bin 落 plugins `node_modules/.bin/`，`adrkit-lib.sh` 解析顺序 `ADRKIT_CLI` > 该 bin > bundled `adr.mjs`。根 `package.json` 的 `"omp": {}` manifest 是 git/npm 安装路径运行时技能发现的前提。
+omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 是 catalog（插件 `ncw-delivery`，`source: "./"` 即仓根），用户 `omp plugin marketplace add <仓 URL>` + `omp plugin install ncw-delivery@ncw-delivery-harness` 后由 omp 从插件树 `skills/<name>/SKILL.md` 发现。**插件只含 skills**——绝不加 `.omp-plugin/plugin.json` manifest（remap 会把 `.agents/` 带进安装面）；`.agents/commands/` 斜杠命令是本仓维护者工具（`/readme-refresh`），不经插件分发。catalog `version` 与 `package.json` 版本同步维护。marketplace 安装不解析 npm 依赖；另一条 omp 路径 `omp plugin install git+<仓 URL>` 经 bun 安装 `package.json#dependencies` 的 `@adrkit/cli`（精确版本钉，`npm test` 校验）。无论走哪条安装路径，adrkit 技能都只执行 PATH 上的 `adrkit`，不读取插件 `node_modules` 或其他覆盖变量；若没有可用 CLI，按技能提示运行 `npm install -g @adrkit/cli@0.20.0`。根 `package.json` 的 `"omp": {}` manifest 是 git/npm 安装路径运行时技能发现的前提。
 
 职责分层与外部委托：
 
@@ -45,7 +45,7 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 
 | 路径 | 用途 |
 |---|---|
-| `skills/ncw-adrkit-{check,context,draft}/` | adrkit 上游扩展（adrkit.* 命令）的 pack 分发：SKILL.md（正文英文原文）+ `scripts/`（`adrkit-lib.sh` 三份逐字副本 + 各自入口脚本；draft 另含 pack 新增的 `scaffold.sh` 与单文件 `adr.mjs`——上游 CLI 及依赖的零安装 bundle，`adr.sh` 是跨技能 lint/migrate 入口，`adrkit-bundle.json` + `licenses/` 记录来源与许可）。check/draft 的特性解析委托 `ncw-speckit-analyze` 的 bundled helper；check 在 plan 后手动跑（hook 机制已清除，统一走 SKILL.md 末尾 Handoff 块交接）|
+| `skills/ncw-adrkit-{check,context,draft}/` | adrkit 上游扩展（adrkit.* 命令）的 pack 分发：SKILL.md（正文英文原文）+ `scripts/`（`adrkit-lib.sh` 三份逐字副本 + 各自入口脚本；draft 另含 pack 新增的 `scaffold.sh`，`adr.sh` 是跨技能 lint/migrate 入口）。运行时依赖外部 `@adrkit/cli`，只执行 PATH 上的 `adrkit`，缺失时引导 `npm install -g @adrkit/cli@0.20.0`。check/draft 的特性解析委托 `ncw-speckit-analyze` 的 bundled helper；check 在 plan 后手动跑（hook 机制已清除，统一走 SKILL.md 末尾 Handoff 块交接）|
 | `skills/ncw-compound-*/` | compound 技能组（9 个）：intent/expectations/gapfill/planverify/intentguard/writeback/load/require-intent/planverify-gate。运行期数据落项目 `docs/intents/`、`docs/expectations/`、`docs/adr/`、`docs/corrections/`、`docs/patterns/`，README/config/_drafts 等元数据留在 `docs/compound/`；**ADR 归口 adrkit 语料 `docs/adr/`**（writeback 升格、load 读取、intent 引用均指向语料，load/intent/writeback 正文含 pack fork 段，上游升级需 port）。交接统一走各 SKILL.md 末尾的中文 `## Handoff` 块（目标/条件/回退，详见 `docs/skill-handoff-and-gates.md`）；require-intent / planverify-gate 是手动调用的 shell 门禁脚本，hook 机制已清除|
 | `skills/ncw-speckit-grill-{me,with-docs}/` | grill 上游扩展（grill.* 命令）的 pack 分发：单文件 SKILL.md（正文英文原文）。特性解析统一委托 `ncw-speckit-analyze/scripts/check_prerequisites.py`；两技能均删除上游 extension-hook 段并含此 resolver fork。`ncw-speckit-grill-me` 其余正文保持上游；**grill-with-docs 另为 pack fork**——ADR 经 `ncw-adrkit-draft/scripts/scaffold.sh` 归口 `docs/adr/`，lint 走 `adr.sh`；上游 grill 升级时需 port 这些 fork 段|
 | `skills/ncw-speckit-analyze/` | SKILL.md + `scripts/`（bundled `check_prerequisites.py` + `common.py`，v1.1.3 逐字副本）：analyze 命令（spec/plan/tasks 一致性只读分析），正文英文原文；该 helper 同时是 grill、adrkit check/draft 与 speckit-design 的 pack-local 特性解析入口 |
@@ -91,7 +91,8 @@ omp 原生插件路径（不经拷贝，见上文分发模型）：`omp plugin m
 ## Development Commands
 
 ```bash
-npm test                                                  # 结构校验（唯一测试门，改技能内容后必须跑）
+npm ci                                                    # 安装钉版本的 @adrkit/cli（运行时契约测试前提）
+npm test                                                  # 结构 + 运行时校验（唯一测试门，改技能内容后必须跑）
 git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验（一次性）
 ```
 
@@ -108,20 +109,20 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 
 | 文件 | 作用 |
 |---|---|
-| `package.json` | `scripts.test`、`files: ["skills"]`（npm 只发 skills/）、`dependencies.@adrkit/cli`（omp git/npm 插件安装路径用，版本钉与 `adrkit-bundle.json` 一致）、`engines.node >=22` |
+| `package.json` | `scripts.test`、`files: ["skills"]`（npm 只发 skills/）、`dependencies.@adrkit/cli`（adrkit 技能外部运行时，精确版本钉；omp git/npm 插件安装路径由 bun 安装，仓内运行时测试经 `npm ci` 使用）、`engines.node >=22` |
 | `.githooks/commit-msg` | 提交格式校验（`core.hooksPath` 已在本仓激活） |
 | `.omp-plugin/marketplace.json` | omp marketplace catalog（omp 插件分发唯一入口；`version` 必须与 `package.json` 一致，`npm test` 强制） |
 | `README.md` | 面向用户的安装/开发文档；改动分发模型时同步 |
 
 ## Runtime/Tooling Preferences
 
-- **Node ≥ 22**，ESM（`.mjs`）；bash + POSIX coreutils（`awk/grep/sort`…）。
-- **仓内代码零 npm 依赖（刻意）**：测试只用 bash + node 内联脚本（JSON 校验，node ≥22 是运行前提）——不要为仓内工具引入 npm 依赖。唯一例外：`package.json#dependencies` 的 `@adrkit/cli`（随 lockfile 钉版本）仅供 omp git/npm 插件安装路径由 bun 安装，仓内代码与测试不消费它（bundle `adr.mjs` 仍是兜底），版本钉必须与 `adrkit-bundle.json` 一致。
+- **Node ≥ 22**；bash + POSIX coreutils（`awk/grep/sort`…）。
+- **仓内工具不新增 npm 依赖（刻意）**：结构与模板测试只用 bash + node/python 内联脚本。唯一 npm 依赖是 `package.json#dependencies` 的 `@adrkit/cli`（随 lockfile 钉版本）：它既是 adrkit 技能的外部运行时，也由 `npm ci` 安装后供 `test-pack-runtime.sh` 驱动真实 CLI；omp git/npm 插件安装路径则由 bun 安装。
 - 无 CI、无构建、无格式化工具链；不要新增这类配置，除非明确要建立。
 
 ## Testing & QA
 
-`npm test` = `bash tests/skills/test-skill-structure.sh`（结构校验）+ `bash tests/skills/test-speckit-constitution.sh`（模板运行时契约）+ `bash tests/skills/test-pack-runtime.sh`（自包含运行时契约），零 npm 依赖、可从任意 CWD 运行（路径自定位），退出码 0/1。
+`npm test` = `bash tests/skills/test-skill-structure.sh`（结构校验）+ `bash tests/skills/test-speckit-constitution.sh`（模板运行时契约）+ `bash tests/skills/test-pack-runtime.sh`（adrkit CLI 与 pack-local 运行时契约）。先运行 `npm ci` 安装钉版本的 `@adrkit/cli`；测试可从任意 CWD 运行（路径自定位），退出码 0/1。
 
 强制规则（改技能内容后必须跑）：
 
@@ -134,6 +135,6 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 7. `.omp-plugin/marketplace.json` 为合法 JSON，marketplace/plugin 名合规（小写开头结尾、可含 `-`/`.`、≤64），plugin `source` 恰为 `"./"`，`version` 与 `package.json` 一致且符合 omp 缓存路径字符集。JSON 校验用 node 内联脚本完成（node 是运行前提，非新增依赖）；
 8. `.omp-plugin/plugin.json` 绝不许存在（manifest remap 会把 `.agents/` 带进 omp 插件安装面，插件只分发 skills）。
 9. `tests/skills/test-speckit-constitution.sh` 驱动 `ncw-speckit-constitution` 的 bundled `resolve_template.py`，钉模板自包含契约：`--json` 输出与 `references/constitution-template.md` 字节级 round-trip、不安全模板名与不存在的模板名均非零退出并报 `Could not resolve required`；python3 是技能运行时前提而非本仓测试前提，缺失则 SKIP（退出 0，不计 pass/fail）。
-10. `tests/skills/test-pack-runtime.sh` 把 adrkit 三个技能与 analyze 复制到临时 `.agents/skills/` 安装位，以不含 `adr` / `jq` / `git` 的最小 PATH 驱动 feature paths、scaffold、draft、lint、check、evaluate、context/queue、MADR migrate；项目根判定用 `.git`，特性指针在 `docs/memory/feature.json`，以此钉住默认路径不依赖外部 CLI 的契约。python3 缺失时同样 SKIP。
+10. `tests/skills/test-pack-runtime.sh` 把 adrkit 三个技能与 analyze 复制到临时 `.agents/skills/` 安装位，先以不含 `adrkit` 的最小 PATH 验证缺失 CLI 的非零退出与 npm 安装提示，再把 `npm ci` 安装的真实 `@adrkit/cli` 加入 PATH，驱动 feature paths、scaffold、draft、lint、check、evaluate、context/queue、MADR migrate；`jq` / `git` 仍不在最小 PATH。项目根判定用 `.git`，特性指针在 `docs/memory/feature.json`。python3 缺失时同样 SKIP。
 
 新增检查：在 `for skill_dir in …` 循环内加 per-skill 规则（用 `ok` / `bad "<msg>"` 助手计数），循环后加全局规则；保持 `set -u` 与结尾的 `printf` + `[ "$fail" -eq 0 ]` 不变。

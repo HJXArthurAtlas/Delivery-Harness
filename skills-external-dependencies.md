@@ -6,15 +6,15 @@ Current-state audit of the skills under `skills/`, including their `SKILL.md`, `
 
 “External” means outside this pack. Pack-local cross-skill scripts are identified separately. Host runtimes and the target project's own toolchain are not rewritten.
 
-## Formerly external, now bundled
+## Pack-local scripts and CLI requirements
 
-| Skills | Pack-local implementation | Requirement |
+| Skills | Implementation | Requirement |
 |---|---|---|
-| `ncw-adrkit-{check,context,draft}` | `ncw-adrkit-draft/scripts/adr.mjs` is a single-file bundle of `@adrkit/cli` and its runtime dependencies. `adrkit-lib.sh` resolves `ADRKIT_CLI` only as an explicit override, then this bundled file; it no longer probes `node_modules` or `PATH` for `adr`. | **No external adrkit CLI required.** Node ≥22 runs the bundle. Source/dependency pins are in `adrkit-bundle.json`; redistribution notices are in `scripts/licenses/`. |
+| `ncw-adrkit-{check,context,draft}` | POSIX wrappers execute only `adrkit` from `PATH`; no override variable or plugin `node_modules` lookup. | **External `@adrkit/cli` 0.20.0 required on `PATH`.** If unavailable, run `npm install -g @adrkit/cli@0.20.0`. Node ≥22 is required by the CLI. |
 | `ncw-adrkit-{check,draft}` feature resolution | `ncw-speckit-analyze/scripts/check_prerequisites.py` + `common.py`, invoked by each `adrkit-lib.sh`. | The feature pointer lives at `docs/memory/feature.json`. `python3` is required unless `ADRKIT_FEATURE_DIR` is set. |
 | `ncw-speckit-grill-{me,with-docs}` | The same bundled `check_prerequisites.py --json --paths-only` from `ncw-speckit-analyze`. | **No external prerequisite script required.** `python3` and the active feature context remain required. |
-| `ncw-speckit-grill-with-docs`, `ncw-compound-writeback` | `ncw-adrkit-draft/scripts/scaffold.sh` allocates records; `ncw-adrkit-draft/scripts/adr.sh lint` validates them. | **Pack-local cross-skill only.** No external `adr` command. |
-| `ncw-compound-load` legacy ADR migration | Delegates to `ncw-adrkit-draft`; its migration runbook uses the bundled `adr.sh migrate` and `adr.sh lint`. | **Only during legacy migration; no external adrkit CLI.** |
+| `ncw-speckit-grill-with-docs`, `ncw-compound-writeback` | `ncw-adrkit-draft/scripts/scaffold.sh` allocates records; `ncw-adrkit-draft/scripts/adr.sh lint` validates them. | Pack-local entry points; the same external `@adrkit/cli` requirement applies. |
+| `ncw-compound-load` legacy ADR migration | Delegates to `ncw-adrkit-draft`; its migration runbook uses `adr.sh migrate` and `adr.sh lint`. | **Only during legacy migration; the same external `@adrkit/cli` requirement applies.** |
 
 ## Excluded or conditional external integrations
 
@@ -27,15 +27,15 @@ Current-state audit of the skills under `skills/`, including their `SKILL.md`, `
 ## Bundled scripts with host runtime dependencies
 
 - Seven speckit skills—`analyze`, `clarify`, `constitution`, `converge`, `implement`, `plan`, and `tasks`—run their own bundled Python helpers through `python3`; grill and adrkit feature resolution reuse the `analyze` copy.
-- `ncw-adrkit-{check,context,draft}` run POSIX shell wrappers and the bundled `adr.mjs` through `node`; no npm install or dependency directory is needed at runtime.
+- `ncw-adrkit-{check,context,draft}` run POSIX shell wrappers that invoke external `@adrkit/cli` exclusively through `adrkit` on `PATH`; install it with `npm install -g @adrkit/cli@0.20.0` when unavailable.
 - `ncw-compound-require-intent` and `ncw-compound-planverify-gate` run their own bundled Bash scripts.
 
 ## Verification
 
-`npm test` passed:
+`npm test` passed after the `@adrkit/cli` cutover:
 
-- Structure checks: **270 passed, 0 failed**
+- Structure checks: **267 passed, 0 failed**
 - Constitution runtime contract checks: **6 passed, 0 failed**
-- Pack runtime contract checks: **25 passed, 0 failed**
+- Pack runtime contract checks: **28 passed, 0 failed**
 
-The pack runtime suite copies the affected skills into a temporary `.agents/skills/` installation and runs feature resolution, scaffold, draft, lint, check, evaluate, context/queue, and MADR migration with a minimal `PATH` containing **no `adr`, `jq`, or `git`**. This verifies the new default runtime paths rather than merely checking file references.
+The pack runtime suite copies the affected skills into a temporary `.agents/skills/` installation. It first uses a minimal `PATH` without `adrkit` to verify the nonzero exit and npm installation guidance, then adds the real `@adrkit/cli` installed by `npm ci` and runs feature resolution, scaffold, draft, lint, check, evaluate, context/queue, and MADR migration. `jq` and `git` remain absent from the minimal `PATH`.

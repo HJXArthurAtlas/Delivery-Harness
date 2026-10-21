@@ -40,20 +40,20 @@ newchiwan 团队的跨端 agent skill pack：把团队标准 monorepo 的初始�
 | `ncw-pingcode-sync-status` | 本地任务全勾后把任务卡/story/spec 卡单向流转完成态（只收尾不回退），写 `pingcode-sync-log.json` 并回写登记（同上 pack 分发） | 「收尾卡片」「同步完成状态」 |
 | `ncw-mturtle-troubleshooting` | 线上问题排查：口头名称（"中台财务"、"网运通"、"调度"…）→ 环境/Loki namespace·app/数据库对号，业务单号/trace_id 追日志 + 数据库核事实互相印证，跨服务调用与推送链逐级定位，收口给时间线与证据边界（自 monorepo-template 吸纳，正文中文；纯知识无 scripts，证据全部来自线上 MCP 数据源，不依赖工作目录） | 「中台财务这笔流水到哪了」「这个报错是哪个服务的」 |
 
-## 自包含运行时（排除 init / flow）
+## 运行时与外部 CLI（排除 init / flow）
 
-`ncw-adrkit-*`、grill 与相关 compound 写入路径默认不需要安装项目外 CLI 或脚本：
+`ncw-adrkit-*` 依赖外部 `@adrkit/cli`；grill 与特性路径解析仍使用 pack 内脚本：
 
-| 能力 | Pack 内实现 | 运行时前提 |
+| 能力 | 实现 / 入口 | 运行时前提 |
 |---|---|---|
-| adrkit `new/check/queue/lint/migrate/evaluate` | `skills/ncw-adrkit-draft/scripts/adr.mjs`（上游 CLI 与依赖的单文件 bundle）；`adr.sh` 是跨技能入口 | Node ≥22；无需 `@adrkit/cli`、`node_modules` 或 PATH 上的 `adr` |
+| adrkit `new/check/queue/lint/migrate/evaluate` | 外部 `@adrkit/cli`；`adr.sh` 是跨技能入口 | Node ≥22；`adrkit` 不可用时运行 `npm install -g @adrkit/cli@0.20.0` |
 | grill、adrkit check/draft 与 ncw-speckit-design 的特性路径解析 | `skills/ncw-speckit-analyze/scripts/check_prerequisites.py` | python3；特性指针在 `docs/memory/feature.json` |
-| ADR scaffold / lint / legacy migration | `ncw-adrkit-draft/scripts/{scaffold.sh,adr.sh}` | 同上；全部走 pack-local 跨技能调用 |
+| ADR scaffold / lint / legacy migration | `ncw-adrkit-draft/scripts/{scaffold.sh,adr.sh}` | 同 adrkit；全部走 pack-local 跨技能调用 |
 | PingCode 卡操作（ncw-pingcode-* 五技能） | 无 bundle——依赖外部 `pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`） | `pingcode auth login` 认证 + 网络可达 PingCode；pack 不内置（认证凭据与 API 演进留在上游 CLI） |
 
-CLI 解析顺序（`adrkit-lib.sh`）：`ADRKIT_CLI` 显式覆盖 > omp 插件依赖安装的 `@adrkit/cli`（`<项目>/.omp/plugins/node_modules/.bin/adrkit`，然后 `~/.omp/plugins/node_modules/.bin/adrkit`）> pack-bundled `adr.mjs` 兜底。PATH 上的 `adr`/`adrkit` 永远不被拾取。
+CLI 解析（`adrkit-lib.sh`）：只执行 PATH 上的 `adrkit`，不使用其他二进制路径或回退。不可用时退出并提示上述 npm 安装命令。
 
-`ADRKIT_CLI` 仅是显式覆盖入口，不是默认依赖。`planverify` / `intentguard` 的默认 `auto` 策略在没有跨模型 CLI 时使用原生 Tier 2/3 subagent；只有用户强制 `cross-model` 或 `cli:model` 才需要对应外部模型 CLI。
+`planverify` / `intentguard` 的默认 `auto` 策略在没有跨模型 CLI 时使用原生 Tier 2/3 subagent；只有用户强制 `cross-model` 或 `cli:model` 才需要对应外部模型 CLI。
 
 **范围边界**：`ncw-speckit-flow` 不属于自包含改造范围（保留 PingCode 卡流程依赖）。目标项目自身的 git / build / test / lint 工具链也不随 pack 内置。
 
@@ -92,22 +92,24 @@ omp plugin install ncw-delivery@ncw-delivery-harness
 - 更新：`omp plugin upgrade ncw-delivery@ncw-delivery-harness`；装完 `/reload-plugins` 或开新会话生效。
 - 注意 `marketplace.autoUpdate` 默认 `notify` 只写 debug log 不提示；要自动更新执行 `omp config set marketplace.autoUpdate auto`。
 - catalog `version` 与 `package.json` 版本同步维护，`npm test` 校验二者一致。
-- **marketplace 安装不解析 npm 依赖**（只缓存插件树并符号链接），上述路径下 adrkit 技能继续走 pack-bundled `adr.mjs`。
+- **marketplace 安装不解析 npm 依赖**（只缓存插件树并符号链接）。该路径下若 `adrkit` 不可用，手动运行 `npm install -g @adrkit/cli@0.20.0`。
 
 #### omp git 插件安装（带 `@adrkit/cli` 依赖）
 
-想让 adrkit 技能使用真实 `@adrkit/cli`（版本钉在 `package.json#dependencies`，与 bundled `adr.mjs` 同为 0.20.0）时，走 git 插件安装——omp 会用 bun 安装依赖，`adrkit` 二进制落 `~/.omp/plugins/node_modules/.bin/`，技能脚本按上述解析顺序自动优先它：
+git 插件安装会让 omp 用 bun 安装 `package.json#dependencies` 中钉版本的 `@adrkit/cli`。技能不会直接读取插件 `node_modules`；无论采用哪种插件安装方式，都必须确保 `adrkit` 在 PATH 上，最简单的做法是另行运行 `npm install -g @adrkit/cli@0.20.0`：
 
 ```bash
 omp plugin install git+https://git.newchiwan.com/council/ncw-delivery-harness.git
+npm install -g @adrkit/cli@0.20.0
 ```
 
-`package.json` 的 `"omp": {}` manifest 是这条路径下运行时技能发现的前提（omp 跳过无 manifest 的包）；`npm test` 钉住依赖版本与 `adrkit-bundle.json` 一致。
+`package.json` 的 `"omp": {}` manifest 是这条路径下运行时技能发现的前提（omp 跳过无 manifest 的包）；`npm test` 校验 `@adrkit/cli` 使用精确版本钉。
 
 ## 开发
 
 ```bash
-npm test   # ① test-skill-structure.sh：结构与分发面；② test-speckit-constitution.sh：模板分辨栈契约；③ test-pack-runtime.sh：临时 .agents/skills 安装 + 无 adr/git 等外部 CLI 的最小 PATH，驱动特性解析、ADR scaffold/draft/lint/check/evaluate/context/queue/migrate（无 python3 时 SKIP）
+npm ci     # 安装钉版本的 @adrkit/cli，供运行时契约测试使用
+npm test   # ① test-skill-structure.sh：结构与分发面；② test-speckit-constitution.sh：模板分辨栈契约；③ test-pack-runtime.sh：临时 .agents/skills 安装 + 最小 PATH，验证缺失 CLI 的 npm 安装提示，再用真实 @adrkit/cli 驱动特性解析、ADR scaffold/draft/lint/check/evaluate/context/queue/migrate（无 python3 时 SKIP）
 ```
 
 新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）；`npm test` 会把关。omp 插件按 `skills/` 目录自动发现，无需另行登记。命名格式 `ncw-{submodule}-action`（如 `ncw-pingcode-init`），全名 ≤32 字符。

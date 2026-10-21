@@ -37,16 +37,15 @@ $ARGUMENTS
    - `history` — superseded and rejected records. This is where "we tried that"
      lives, and it is the reason not to re-propose it.
 4. If the command exits non-zero, read the message on stderr. It names the
-   missing thing (the bundled runtime, a Node runtime, or the corpus at
+   missing thing (the adrkit CLI, a Node runtime, or the corpus at
    `ADRKIT_DIR`) rather than returning an empty result that reads as "nothing
    governs this."
 
 ## Notes
 
-- The adrkit 0.20.0 CLI is bundled at
-  `.agents/skills/ncw-adrkit-draft/scripts/adr.mjs`; no `@adrkit/cli` install or
-  feature resolver is required for this command. `ADRKIT_CLI` is an explicit
-  opt-in override.
+- Requires `@adrkit/cli` 0.20.0 with `adrkit` on `PATH`, but no feature
+  resolver. If unavailable, install it with `npm install -g @adrkit/cli@0.20.0`
+  and retry.
 - Read-only. This command never writes to `docs/adr/**` or anything else.
 - The corpus directory defaults to `docs/adr/` and is overridable with
   `ADRKIT_DIR`. Since the ADR-unification cutover this is the project's only

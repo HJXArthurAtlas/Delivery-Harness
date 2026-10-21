@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pack runtime contract: pack-bundled resolution, no external adr CLI.
+# Pack runtime contract: @adrkit/cli resolution and pack-local helpers.
 # Runs against an installed .agents/skills layout with a minimal PATH.
 set -u
 
@@ -20,11 +20,16 @@ fi
 
 ORIG_PATH=$PATH
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+ADRKIT_BIN="$REPO_ROOT/node_modules/.bin/adrkit"
+if [ ! -x "$ADRKIT_BIN" ]; then
+  printf '[FAIL] pack-runtime: @adrkit/cli 未安装；先运行 npm ci\n' >&2
+  exit 1
+fi
 TMP="$(mktemp -d)"
 TMP="$(cd "$TMP" && pwd -P)"
 trap 'PATH=$ORIG_PATH; rm -rf "$TMP"' EXIT
 export PYTHONDONTWRITEBYTECODE=1
-unset ADRKIT_CLI ADRKIT_FEATURE_DIR ADRKIT_SNAPSHOT ADRKIT_AS_OF
+unset ADRKIT_FEATURE_DIR ADRKIT_SNAPSHOT ADRKIT_AS_OF
 unset SPECIFY_INIT_DIR SPECIFY_FEATURE SPECIFY_FEATURE_DIRECTORY SPECIFY_FEATURE_NO_PERSIST
 
 INSTALL="$TMP/install"
@@ -50,17 +55,17 @@ status: proposed
 EOF
 printf '%s' '{"schemaVersion":"adrkit.pass0.snapshot/v1"}' > "$TMP/snapshot.json"
 
-# Keep only the host runtimes and POSIX tools used by the wrappers. In
-# particular, this directory never contains adr, jq, or git.
+# Keep only the host runtimes and POSIX tools used by the wrappers. The real
+# @adrkit/cli is added after exercising the missing-CLI contract; jq and git
+# remain absent.
 mkdir -p "$TMP/bin"
-for tool in node python3 dirname mkdir sed head date cat; do
+for tool in node python3 dirname mkdir sed head date cat ln; do
   source="$(command -v "$tool")"
   ln -s "$source" "$TMP/bin/$tool"
 done
 PATH="$TMP/bin"
 export PATH
-# Keep the CLI resolution hermetic: an omp-installed adrkit bin under the real
-# $HOME must not leak into the bundled-runtime contract.
+# Keep user-level state hermetic during CLI operations.
 HOME="$TMP/home"
 mkdir -p "$HOME"
 export HOME
@@ -94,7 +99,15 @@ json_matches() { # json_matches <payload> <partial-json>
   ' "$2" <<<"$1"
 }
 
-command -v adr >/dev/null 2>&1 && bad "fixture: 外部 adr 意外进入最小 PATH" || ok
+command -v adrkit >/dev/null 2>&1 && bad "fixture: 外部 adrkit 意外进入最小 PATH" || ok
+run "$SKILLS/ncw-adrkit-draft/scripts/adr.sh" --version
+[ "$RC" -eq 1 ] && ok || bad "missing CLI: 退出码 $RC，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"npm install -g @adrkit/cli@0.20.0"*) ok ;;
+  *) bad "missing CLI: 未提示 npm 安装：$(<"$TMP/stderr")" ;;
+esac
+ln -s "$ADRKIT_BIN" "$TMP/bin/adrkit"
+command -v adrkit >/dev/null 2>&1 && ok || bad "fixture: 无法把真实 @adrkit/cli 加入 PATH"
 
 # Bundled speckit resolution.
 run python3 "$SKILLS/ncw-speckit-analyze/scripts/check_prerequisites.py" --json --paths-only
@@ -102,16 +115,16 @@ run python3 "$SKILLS/ncw-speckit-analyze/scripts/check_prerequisites.py" --json 
 json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"FEATURE_DIR\":\"$PROJECT/specs/001-demo\",\"FEATURE_SPEC\":\"$PROJECT/specs/001-demo/spec.md\"}" \
   && ok || bad "speckit paths: JSON 未返回活动 feature 路径：$OUT"
 
-# The bundled CLI and all three adrkit wrappers work without adr on PATH.
-EXPECTED_VERSION="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).version' "$SKILLS/ncw-adrkit-draft/scripts/adrkit-bundle.json")"
+# The real @adrkit/cli and all three wrappers work through PATH resolution.
+EXPECTED_VERSION="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).dependencies["@adrkit/cli"]' "$REPO_ROOT/package.json")"
 run "$SKILLS/ncw-adrkit-draft/scripts/adr.sh" --version
 [ "$RC" -eq 0 ] && [ "$OUT" = "$EXPECTED_VERSION" ] && ok || bad "adr version: RC=$RC output=$OUT expected=$EXPECTED_VERSION"
 
-run "$SKILLS/ncw-adrkit-draft/scripts/scaffold.sh" Adopt bundled ADR runtime
+run "$SKILLS/ncw-adrkit-draft/scripts/scaffold.sh" Adopt npm ADR runtime
 [ "$RC" -eq 0 ] && ok || bad "scaffold: 退出码 $RC，stderr: $(<"$TMP/stderr")"
-json_matches "$OUT" '{"id":"0001","path":"docs/adr/0001-adopt-bundled-adr-runtime.md"}' \
+json_matches "$OUT" '{"id":"0001","path":"docs/adr/0001-adopt-npm-adr-runtime.md"}' \
   && ok || bad "scaffold: 未分配预期 id/path：$OUT"
-[ -f "$PROJECT/docs/adr/0001-adopt-bundled-adr-runtime.md" ] && ok || bad "scaffold: 未创建 ADR 文件"
+[ -f "$PROJECT/docs/adr/0001-adopt-npm-adr-runtime.md" ] && ok || bad "scaffold: 未创建 ADR 文件"
 
 run "$SKILLS/ncw-adrkit-draft/scripts/draft.sh" Record plan decision
 [ "$RC" -eq 0 ] && ok || bad "draft: 退出码 $RC，stderr: $(<"$TMP/stderr")"

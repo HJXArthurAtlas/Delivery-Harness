@@ -50,9 +50,9 @@ $ARGUMENTS
 - Feature resolution uses the pack-bundled
   `.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py`.
   `ADRKIT_FEATURE_DIR` overrides feature-dir resolution.
-- The adrkit 0.20.0 CLI is bundled as `scripts/adr.mjs`, with `scripts/adr.sh`
-  as the cross-skill lint/migration entry point; no `@adrkit/cli` install is
-  required. `ADRKIT_CLI` is an explicit opt-in override.
+- Requires `@adrkit/cli` 0.20.0 with `adrkit` on `PATH`; `scripts/adr.sh` is the
+  cross-skill lint/migration entry point. If unavailable, install it with
+  `npm install -g @adrkit/cli@0.20.0` and retry.
 - This is the only command in the extension that writes, and it is deliberately
   not reachable from any hook. A plan-phase hook that created records
   unprompted would manufacture decision memory instead of recording it.
@@ -66,7 +66,7 @@ $ARGUMENTS
   writers share one numbering sequence; never hand-number.
 - Migrating legacy corpus locations (records still under
   `docs/compound/adr/` or `docs/domain_knowledge/adr/`): records already in
-  `docs/adr/` are canonical and need no relocation. The bundled CLI owns the
+  `docs/adr/` are canonical and need no relocation. The adrkit CLI owns the
   conversion. In the commands below, `<adrkit>` means
   `.agents/skills/ncw-adrkit-draft/scripts/adr.sh` (global install:
   `~/.agents/skills/ncw-adrkit-draft/scripts/adr.sh`). Dry-run
@@ -75,7 +75,7 @@ $ARGUMENTS
   renumber incoming legacy records by renaming their files so that every
   `NNNN-slug.md` id is unique across the existing canonical records and all
   incoming legacy sets (the filename drives the record id, and `<adrkit> lint`
-  does not report duplicate ids, verified against the bundled CLI, so this
+  does not report duplicate ids, verified against the adrkit CLI, so this
   renumber step is the merge's only collision guard); move only the legacy
   records into `docs/adr/`; run
   `<adrkit> migrate --from madr --rename --dir docs/adr` once over the merged

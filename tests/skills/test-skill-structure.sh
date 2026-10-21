@@ -157,23 +157,22 @@ else
   ok
 fi
 
-# 9. omp git/npm 插件安装路径的 @adrkit/cli 依赖：版本钉与 bundled runtime 一致，且 omp manifest 存在（无 manifest 时运行时跳过技能扫描）
+# 9. @adrkit/cli 运行时依赖：必须钉精确版本，且 omp manifest 存在（无 manifest 时运行时跳过技能扫描）
 if command -v node >/dev/null 2>&1; then
   while IFS= read -r line; do
     case "$line" in OK) ok ;; FAIL\ *) bad "${line#FAIL }" ;; esac
   done < <(node -e '
 const fs = require("node:fs");
 const pkg = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
-const bundle = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
 const dep = pkg.dependencies && pkg.dependencies["@adrkit/cli"];
-if (dep !== bundle.version) {
-  console.log(`FAIL package.json 依赖 @adrkit/cli（${dep}）与 adrkit-bundle.json 版本（${bundle.version}）不一致`);
+if (!dep || !/^\d+\.\d+\.\d+$/.test(dep)) {
+  console.log(`FAIL package.json 依赖 @adrkit/cli 必须钉精确版本，当前为 ${dep || "缺失"}`);
 } else if (!pkg.omp || typeof pkg.omp !== "object") {
   console.log("FAIL package.json 缺少 omp manifest（git/npm 插件安装路径的运行时技能发现依赖它）");
 } else {
   console.log("OK");
 }
-' "$REPO_ROOT/package.json" "$REPO_ROOT/skills/ncw-adrkit-draft/scripts/adrkit-bundle.json")
+' "$REPO_ROOT/package.json")
 else
   bad "adrkit 依赖版本钉校验需要 node（engines 要求 >=22）"
 fi

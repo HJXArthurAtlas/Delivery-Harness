@@ -48,16 +48,15 @@ $ARGUMENTS
 - Feature resolution uses the pack-bundled
   `.agents/skills/ncw-speckit-analyze/scripts/check_prerequisites.py`.
   `ADRKIT_FEATURE_DIR` overrides feature-dir resolution.
-- The adrkit 0.20.0 CLI is bundled at
-  `.agents/skills/ncw-adrkit-draft/scripts/adr.mjs`; no `@adrkit/cli` install is
-  required. `ADRKIT_CLI` is an explicit opt-in override.
+- Requires `@adrkit/cli` 0.20.0 with `adrkit` on `PATH`. If unavailable,
+  install it with `npm install -g @adrkit/cli@0.20.0` and retry.
 - Read-only, and that is load-bearing rather than incidental: this command is
   part of the plan-review chain, so it must never write.
 - Exit code 1 means findings exist (corpus errors, or the evaluator returned the
   proposal). The report is still complete. Exit code 2 is a usage error.
 - Configuration: `ADRKIT_DIR` (corpus, default `docs/adr/`), `ADRKIT_SNAPSHOT`
   (evaluator snapshot bundle), `ADRKIT_AS_OF` (evaluation date, default today
-  UTC), `ADRKIT_CLI` (explicit path to the `adr` entry point).
+  UTC).
 
 ---
 

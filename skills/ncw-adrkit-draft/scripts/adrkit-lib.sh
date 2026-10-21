@@ -19,54 +19,13 @@ adrkit_fail() {
 	exit "${2:-$ADRKIT_EXIT_MISSING}"
 }
 
-# Resolve the CLI once. ADRKIT_CLI is an explicit opt-in override. Next comes
-# an @adrkit/cli installed as an omp plugin dependency (git/npm plugin install
-# puts its `adrkit` bin in the scope's plugins node_modules/.bin; the
-# project-scoped root is cwd-relative because the corpus itself is). The
-# fallback is the pack-bundled adrkit 0.20.0 runtime, never a PATH install.
-_adrkit_cli_resolved=''
-
-adrkit_resolve_cli() {
-	if [ -n "$_adrkit_cli_resolved" ]; then
-		return 0
-	fi
-
-	if [ -n "${ADRKIT_CLI:-}" ]; then
-		[ -e "$ADRKIT_CLI" ] ||
-			adrkit_fail "ADRKIT_CLI is set to '$ADRKIT_CLI', but nothing exists at that path"
-		_adrkit_cli_resolved="$ADRKIT_CLI"
-		return 0
-	fi
-
-	if [ -x ".omp/plugins/node_modules/.bin/adrkit" ]; then
-		_adrkit_cli_resolved=".omp/plugins/node_modules/.bin/adrkit"
-		return 0
-	fi
-	if [ -n "${HOME:-}" ] && [ -x "$HOME/.omp/plugins/node_modules/.bin/adrkit" ]; then
-		_adrkit_cli_resolved="$HOME/.omp/plugins/node_modules/.bin/adrkit"
-		return 0
-	fi
-
-	_adrkit_cli_resolved="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)/../../ncw-adrkit-draft/scripts/adr.mjs"
-	[ -f "$_adrkit_cli_resolved" ] ||
-		adrkit_fail "pack-bundled adrkit runtime is missing at '$_adrkit_cli_resolved' — reinstall the complete pack"
-}
-
-# Run the resolved CLI, propagating its exit code verbatim. `adr` uses 1 for
+# Run adrkit from PATH, propagating its exit code verbatim. `adrkit` uses 1 for
 # "found something wrong" and 2 for "you invoked me wrong"; collapsing those
 # would throw away the distinction the caller needs.
 adrkit_cli() {
-	adrkit_resolve_cli
-	case "$_adrkit_cli_resolved" in
-	*.js | *.mjs | *.cjs)
-		command -v node >/dev/null 2>&1 ||
-			adrkit_fail "'$_adrkit_cli_resolved' needs node to run, but node is not on PATH"
-		node "$_adrkit_cli_resolved" "$@"
-		;;
-	*)
-		"$_adrkit_cli_resolved" "$@"
-		;;
-	esac
+	command -v adrkit >/dev/null 2>&1 ||
+		adrkit_fail "adrkit CLI not found on PATH; install it with 'npm install -g @adrkit/cli@0.20.0'"
+	adrkit "$@"
 }
 
 # The ADR corpus. Absent is an error, not an empty corpus: a governance check
