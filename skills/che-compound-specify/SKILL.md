@@ -18,17 +18,20 @@ The text the user typed after `/che-compound-specify` in the triggering message 
 
 Given that feature description, do this:
 
-1. **Generate a concise short name** (2-4 words) for the feature:
-   - Analyze the feature description and extract the most meaningful keywords
-   - Create a 2-4 word short name that captures the essence of the feature
-   - Use action-noun format when possible (e.g., "add-user-auth", "fix-payment-bug")
-   - Preserve technical terms and acronyms (OAuth2, API, JWT, etc.)
-   - Keep it concise but descriptive enough to understand the feature at a glance
-   - Examples:
-     - "I want to add user authentication" → "user-auth"
-     - "Implement OAuth2 integration for the API" → "oauth2-api-integration"
-     - "Create a dashboard for analytics" → "analytics-dashboard"
-     - "Fix payment processing timeout bug" → "fix-payment-timeout"
+1. **Resolve the short name from the single source of truth** — the feature slug, never invent an independent one:
+
+   > Pack fork (ncw), port on upstream upgrade: upstream generates this short name from the feature description; the pack aligns it with the intent slug / `.che/feature.json` so one slug flows through the whole chain.
+
+   - Run `che feature show` from the repository root (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@0.1.0`):
+     - **Registered feature** (the command prints a directory): the short name is that directory's slug — basename with a leading `YYYYMMDD-HHMMSS-` prefix stripped (e.g. `specs/20261022-084501-user-auth` → `user-auth`). Reuse it verbatim; do NOT regenerate a different name. (`che paths --json` reports the same value as `SLUG`.)
+     - **No registered feature** (exit non-zero / empty): derive the short name from the intent doc so intent and spec stay aligned — list `docs/intents/*.intent.md`:
+       - Exactly one → use its slug (`<slug>` from `<slug>.intent.md`) as the short name.
+       - Several → ask the user which intent doc this feature corresponds to, and use that slug.
+       - None → the require-intent gate should have blocked before specify; as a defensive fallback only, generate a 2-4 word short name from the feature description (action-noun format when possible, e.g. "add-user-auth", "fix-payment-bug"; preserve technical terms and acronyms; concise but descriptive):
+         - "I want to add user authentication" → "user-auth"
+         - "Implement OAuth2 integration for the API" → "oauth2-api-integration"
+         - "Create a dashboard for analytics" → "analytics-dashboard"
+         - "Fix payment processing timeout bug" → "fix-payment-timeout"
 
 2. **Branch creation**:
 
@@ -276,5 +279,5 @@ Success criteria must be:
   - 回退：无 config 或用户拒绝 → 跳过；不建卡由交接门禁兜底（交接前必须补跑）
 - **条件**：
   - spec.md 已写入且质量清单通过
-  - 前置门禁 `/che-compound-require-intent` 必须已放行（`docs/intents/` 存在 intent doc）
+  - 前置门禁 `/che-compound-require-intent` 必须已放行（`che require-intent` 退 0；已登记特性时还要求 `docs/intents/{slug}.intent.md` 与 `.che/feature.json` 当前 slug 一致）
   - 涉 UI 特性澄清后进 `/che-compound-design`，无 UI 可跳过 design

@@ -1,13 +1,13 @@
 ---
 name: che-compound-require-intent
-description: 'Gate before specify: refuses to let /che-compound-specify proceed if no intent doc exists in docs/intents/. Run as a manual check before specify; forces /che-compound-intent first. User-toggleable: CHE_REQUIRE_INTENT env or require_intent: in .che/config.yml (default on).'
+description: 'Gate before specify: refuses to let /che-compound-specify proceed if no intent doc exists in docs/intents/, and — once .che/feature.json registers a feature — requires docs/intents/{slug}.intent.md to match the registered slug. Run as a manual check before specify; forces /che-compound-intent first. User-toggleable: CHE_REQUIRE_INTENT env or require_intent: in .che/config.yml (default on).'
 ---
 
 # Require Intent Before Specify
 
 This gate runs manually — invoked by the user or the agent before `/che-compound-specify`. The gate logic is **inlined in the `che` CLI** (`che require-intent`) — not an interactive prompt — so it runs deterministically.
 
-Its job: gate `/che-compound-specify` on the existence of at least one intent doc.
+Its job: gate `/che-compound-specify` on the existence of an intent doc, and keep the intent slug aligned with the feature registered in `.che/feature.json` (the single source of truth for the slug).
 
 ---
 
@@ -24,13 +24,22 @@ The gate:
 1. Walks up from cwd to find the project root (the directory containing `.git`)
 2. Resolves the gate toggle (see below)
 3. Toggle **off** → exits 0 silently — `/che-compound-specify` proceeds normally
-4. Toggle **on** (the default) → checks `docs/intents/` for any `*.intent.md` file:
-   - At least one exists → exits 0, `/che-compound-specify` proceeds
-   - None exist → exits 1 with a clear message, `/che-compound-specify` does not proceed
+4. Toggle **on** (the default) → checks `docs/intents/`:
+   - No `*.intent.md` at all → exits 1, `/che-compound-specify` does not proceed
+   - At least one exists, **and** `.che/feature.json` registers a feature (a spec run happened before): the current feature slug is the registered directory basename with a leading `YYYYMMDD-HHMMSS-` prefix stripped (e.g. `specs/20261022-084501-user-auth` → `user-auth`), and `docs/intents/{slug}.intent.md` must exist:
+     - It exists → exits 0, `/che-compound-specify` proceeds
+     - It does not → exits 1 with a message naming the expected path — intent and feature have drifted apart
+   - At least one exists and no feature is registered yet (first specify) → exits 0 (legacy any-intent check)
 
 If the gate exits non-zero, **do not continue with `/che-compound-specify`**. Tell the user:
 
 > *"No intent doc exists in `docs/intents/`. Run `/che-compound-intent` first to capture goal, constraints, and failure conditions. Then re-run `/che-compound-specify`."*
+
+When the failure message names a feature slug (`.che/feature.json` is registered), tell the user instead:
+
+> *"No intent doc matches the current feature slug `{slug}`. Run `/che-compound-intent` and keep the slug identical to `{slug}` (accept the proposed slug, or `override` with the same one), then re-run `/che-compound-specify`."*
+
+`/che-compound-specify` resolves its short name from the same source of truth, so a pass here guarantees intent slug and spec directory name stay identical.
 
 ---
 
@@ -52,7 +61,7 @@ CHE_REQUIRE_INTENT=off che require-intent
 require_intent: off
 ```
 
-`che require-intent --json` reports the resolved state as `{"REPO_ROOT": ..., "GATE": "on"|"off", "INTENT_DIR": ..., "INTENT_COUNT": N}` for scripting.
+`che require-intent --json` reports the resolved state as `{"REPO_ROOT": ..., "GATE": "on"|"off", "INTENT_DIR": ..., "INTENT_COUNT": N, "SLUG": "<current feature slug or ''>", "INTENT_DOC": "<expected docs/intents/{slug}.intent.md or ''>"}` for scripting. The slug comes from `.che/feature.json` (`che paths --json` reports the same value as `SLUG`).
 
 ---
 
@@ -72,4 +81,4 @@ A gate must execute deterministically; a CLI command does. The actual intent cap
 ## Handoff
 
 - **目标**：`/che-compound-specify` —— 在 intent 已捕获的前提下生成特性规格
-- **条件**：门禁开关开启（默认）时 `docs/intents/` 存在至少一个 `*.intent.md`（退出 0）才放行 specify；开关关闭（`CHE_REQUIRE_INTENT` 或 `.che/config.yml` 的 `require_intent:`）时静默放行；否则拒绝并要求先跑 `/che-compound-intent`
+- **条件**：门禁开关开启（默认）时 `docs/intents/` 存在至少一个 `*.intent.md`（`che require-intent` 退 0）才放行；`.che/feature.json` 已登记特性时还要求 `docs/intents/{slug}.intent.md` 与登记 slug 一致，缺失即拒绝并指回 `/che-compound-intent`；开关关闭（`CHE_REQUIRE_INTENT` 或 `.che/config.yml` 的 `require_intent:`）时静默放行；否则拒绝并要求先跑 `/che-compound-intent`
