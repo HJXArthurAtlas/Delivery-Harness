@@ -17,7 +17,7 @@ newchiwan 团队的跨端 agent skill pack：把 PingCode 规格驱动的 AI nat
 | `che-compound-planverify` | 实现前由独立 checker（跨模型优先）判定 plan + 任务是否偏离锁定 intent | 「验证 plan」「planverify」 |
 | `che-compound-planverify-gate` | before_implement 门禁脚本包装器：`SKC_PLANVERIFY_GATE=block` 时拦截未验证/BLOCKED_DRIFT 的实现 | （hook 触发） |
 | `che-compound-intentguard` | 实现后 L3 校验：密封 briefing + 独立 checker 判 diff 是否越出 intent/期望 | 「intentguard 校验本次实现」 |
-| `che-compound-require-intent` | before_specify 门禁脚本包装器：`docs/intents/` 无 intent 文档时拦截 specify | （hook 触发） |
+| `che-compound-require-intent` | before_specify 门禁：`docs/intents/` 无 intent 文档时拦截 specify（判定逻辑内联在 che CLI `che require-intent`，技能脚本仅薄封装委托）；开关经 `CHE_REQUIRE_INTENT` 环境变量或 `.che/config.yml` 的 `require_intent:` 配置，默认开 | （hook 触发） |
 | `che-compound-grill-me` | 无上限轮次澄清访谈（clarify 的深化替代）：前沿/轮次/设计树把 spec.md 决策点推进到 Clear/Resolved/Outstanding/Deferred（grill me 命令的 pack 分发，正文英文原文） | 「深度澄清这份 spec」「grill me」 |
 | `che-compound-grill-with-docs` | 同 grill-me 澄清流程 + settled 跨特性术语/领域知识即时落盘 docs/domain_knowledge/（CONTEXT.md + 主题文档）；过三条件记录门的决策经 adrkit scaffold 归口为 ADR（`docs/adr/`，pack fork 段）（grill with-docs 命令的 pack 分发） | 「澄清并沉淀领域知识」 |
 | `che-compound-analyze` | 跨工件一致性只读分析（analyze 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「分析 spec/plan/tasks 一致性」 |

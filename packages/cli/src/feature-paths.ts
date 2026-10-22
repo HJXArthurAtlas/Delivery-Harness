@@ -31,7 +31,7 @@ function trimTrailingSeparators(value: string): string {
   return text;
 }
 
-function findSpecifyRoot(startDir: string): string | null {
+export function findSpecifyRoot(startDir: string): string | null {
   // Project-root marker is currently the .git directory; revisit when a
   // dedicated SDD marker is introduced.
   let current = realpathSync(startDir);

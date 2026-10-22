@@ -29,7 +29,7 @@ fi
 TMP="$(mktemp -d)"
 TMP="$(cd "$TMP" && pwd -P)"
 trap 'rm -rf "$TMP"' EXIT
-unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_FEATURE_NO_PERSIST
+unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_FEATURE_NO_PERSIST CHE_REQUIRE_INTENT
 unset SPECIFY_INIT_DIR SPECIFY_FEATURE SPECIFY_FEATURE_DIRECTORY SPECIFY_FEATURE_NO_PERSIST
 unset ADRKIT_FEATURE_DIR ADRKIT_DIR ADRKIT_SNAPSHOT ADRKIT_AS_OF
 
@@ -183,7 +183,75 @@ node -e '
 ' "$TASKS_REFS/tasks-template.md" <<<"$OUT" \
   && ok || bad "setup-tasks: TASKS_TEMPLATE_CONTENT 与 references/tasks-template.md 非字节一致"
 
-# 11. version parity, help, unknown command.
+# 11. require-intent gate: default on; toggle via env / .che/config.yml.
+# PROJECT has no docs/intents yet → gate closed by default.
+run "$CHE_BIN" require-intent
+[ "$RC" -eq 1 ] && ok || bad "require-intent 默认拦截: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"No intent docs found"*) ok ;;
+  *) bad "require-intent 默认拦截: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+
+run "$CHE_BIN" require-intent --json
+[ "$RC" -eq 1 ] && ok || bad "require-intent --json 拦截: 退出码 ${RC}，预期 1"
+json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"GATE\":\"on\",\"INTENT_DIR\":\"$PROJECT/docs/intents\",\"INTENT_COUNT\":0}" \
+  && ok || bad "require-intent --json: 状态不符：$OUT"
+
+mkdir -p "$PROJECT/docs/intents"
+run "$CHE_BIN" require-intent
+[ "$RC" -eq 1 ] && ok || bad "require-intent 空目录: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"no *.intent.md files"*) ok ;;
+  *) bad "require-intent 空目录: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+
+printf '# Intent\n' > "$PROJECT/docs/intents/demo.intent.md"
+run "$CHE_BIN" require-intent --json
+[ "$RC" -eq 0 ] && ok || bad "require-intent 放行: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+json_matches "$OUT" '{"GATE":"on","INTENT_COUNT":1}' \
+  && ok || bad "require-intent 放行: 状态不符：$OUT"
+
+# Toggle off via env: silent pass, even with the intent doc removed.
+rm "$PROJECT/docs/intents/demo.intent.md"
+run env CHE_REQUIRE_INTENT=off "$CHE_BIN" require-intent
+[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "require-intent env off: RC=$RC OUT=$OUT，预期静默退 0"
+run env CHE_REQUIRE_INTENT=off "$CHE_BIN" require-intent --json
+[ "$RC" -eq 0 ] && json_matches "$OUT" '{"GATE":"off","INTENT_COUNT":0}' \
+  && ok || bad "require-intent env off --json: RC=$RC OUT=$OUT"
+
+# Toggle via .che/config.yml; env beats config.
+printf 'require_intent: off\n' > "$PROJECT/.che/config.yml"
+run "$CHE_BIN" require-intent
+[ "$RC" -eq 0 ] && ok || bad "require-intent config off: 退出码 ${RC}，预期 0"
+run env CHE_REQUIRE_INTENT=on "$CHE_BIN" require-intent
+[ "$RC" -eq 1 ] && ok || bad "require-intent env 优先于 config: 退出码 ${RC}，预期 1"
+printf 'require_intent: on\n' > "$PROJECT/.che/config.yml"
+run env CHE_REQUIRE_INTENT=off "$CHE_BIN" require-intent
+[ "$RC" -eq 0 ] && ok || bad "require-intent env off 优先于 config on: 退出码 ${RC}，预期 0"
+printf 'require_intent: maybe\n' > "$PROJECT/.che/config.yml"
+run "$CHE_BIN" require-intent
+[ "$RC" -eq 1 ] && ok || bad "require-intent 非法值: 退出码 ${RC}，预期 fail-closed 1"
+case "$(<"$TMP/stderr")" in
+  *'invalid require_intent toggle "maybe"'*) ok ;;
+  *) bad "require-intent 非法值: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+rm "$PROJECT/.che/config.yml"
+
+# Outside a project: hard error.
+OUT="$(cd "$TMP" && "$CHE_BIN" require-intent 2>"$TMP/stderr")"
+RC=$?
+[ "$RC" -eq 1 ] && ok || bad "require-intent 非项目目录: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"not in an SDD project"*) ok ;;
+  *) bad "require-intent 非项目目录: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+
+run "$CHE_BIN" require-intent --help
+[ "$RC" -eq 0 ] && ok || bad "require-intent --help: 退出码 ${RC}"
+run "$CHE_BIN" require-intent --bogus
+[ "$RC" -eq 2 ] && ok || bad "require-intent 未知参数: 退出码 ${RC}，预期 2"
+
+# 12. version parity, help, unknown command.
 EXPECTED_VERSION="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).version' "$REPO_ROOT/packages/cli/package.json")"
 run "$CHE_BIN" --version
 [ "$RC" -eq 0 ] && [ "$OUT" = "$EXPECTED_VERSION" ] \

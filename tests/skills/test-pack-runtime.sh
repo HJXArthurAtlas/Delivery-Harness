@@ -31,7 +31,7 @@ TMP="$(mktemp -d)"
 TMP="$(cd "$TMP" && pwd -P)"
 trap 'PATH=$ORIG_PATH; rm -rf "$TMP"' EXIT
 unset ADRKIT_FEATURE_DIR ADRKIT_SNAPSHOT ADRKIT_AS_OF
-unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_FEATURE_NO_PERSIST
+unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_FEATURE_NO_PERSIST CHE_REQUIRE_INTENT
 unset SPECIFY_INIT_DIR SPECIFY_FEATURE SPECIFY_FEATURE_DIRECTORY SPECIFY_FEATURE_NO_PERSIST
 
 INSTALL="$TMP/install"
@@ -41,6 +41,8 @@ mkdir -p "$SKILLS" "$PROJECT/.git" "$PROJECT/.che" "$PROJECT/specs/001-demo" "$P
 for skill in che-adr-check che-adr-context che-adr-draft; do
   cp -R "$REPO_ROOT/skills/$skill" "$SKILLS/$skill"
 done
+cp -R "$REPO_ROOT/skills/che-compound-require-intent" "$SKILLS/che-compound-require-intent"
+GATE_WRAPPER="$SKILLS/che-compound-require-intent/scripts/bash/require-intent.sh"
 
 printf '%s\n' '{"feature_directory":"specs/001-demo"}' > "$PROJECT/.che/feature.json"
 printf '# Demo\n' > "$PROJECT/specs/001-demo/spec.md"
@@ -120,6 +122,14 @@ case "$(<"$TMP/stderr")" in
   *"npm install -g @newchiwan/che@0.1.0"*) ok ;;
   *) bad "missing che: 未提示 npm 安装：$(<"$TMP/stderr")" ;;
 esac
+# Missing-che contract: the require-intent wrapper delegates to the che CLI
+# and must surface the install hint when che is absent.
+run "$GATE_WRAPPER"
+[ "$RC" -eq 1 ] && ok || bad "require-intent missing che: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"npm install -g @newchiwan/che@0.1.0"*) ok ;;
+  *) bad "require-intent missing che: 未提示 npm 安装：$(<"$TMP/stderr")" ;;
+esac
 ln -s "$CHE_BIN" "$TMP/bin/che"
 command -v che >/dev/null 2>&1 && ok || bad "fixture: 无法把真实 @newchiwan/che 加入 PATH"
 
@@ -128,6 +138,22 @@ run che paths --json
 [ "$RC" -eq 0 ] && ok || bad "che paths: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"FEATURE_DIR\":\"$PROJECT/specs/001-demo\",\"FEATURE_SPEC\":\"$PROJECT/specs/001-demo/spec.md\"}" \
   && ok || bad "che paths: JSON 未返回活动 feature 路径：$OUT"
+
+# The require-intent wrapper delegates to `che require-intent`: gate on by
+# default (PROJECT has no docs/intents yet), env toggle passes silently, and
+# an intent doc lets specify proceed.
+run "$GATE_WRAPPER"
+[ "$RC" -eq 1 ] && ok || bad "require-intent 默认拦截: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"No intent docs found"*) ok ;;
+  *) bad "require-intent 默认拦截: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+OUT="$(cd "$PROJECT" && CHE_REQUIRE_INTENT=off "$GATE_WRAPPER" 2>"$TMP/stderr")"
+RC=$?
+[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "require-intent env off: RC=$RC OUT=$OUT，预期静默退 0"
+mkdir -p "$PROJECT/docs/intents" && printf '# Intent\n' > "$PROJECT/docs/intents/demo.intent.md"
+run "$GATE_WRAPPER"
+[ "$RC" -eq 0 ] && ok || bad "require-intent 有 intent 放行: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 
 # The real @adrkit/cli and all three wrappers work through PATH resolution.
 EXPECTED_VERSION="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).dependencies["@adrkit/cli"]' "$REPO_ROOT/package.json")"

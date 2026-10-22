@@ -2,6 +2,7 @@
 import { parseArgs } from 'node:util';
 import { isMainModule } from './main-module.ts';
 import { CHECK_USAGE, PATHS_USAGE, runCheck, runPaths } from './check.ts';
+import { REQUIRE_INTENT_USAGE, runRequireIntent } from './require-intent.ts';
 import { FEATURE_USAGE, runFeature } from './feature.ts';
 import { SETUP_PLAN_USAGE, SETUP_TASKS_USAGE, runSetupPlan, runSetupTasks } from './setup.ts';
 import { TemplateResolutionError, resolveTemplateContent } from './template.ts';
@@ -15,6 +16,7 @@ Usage: che <command> [options]
 Commands:
   paths [--json]                                   Resolve feature paths (never persists)
   check [--json] [--require-spec] [--require-tasks] [--include-tasks]
+  require-intent [--json]                          Gate /che-compound-specify on docs/intents/
   feature set <dir> | feature show [--json]        Manage the .che/feature.json pointer
   template <name> --references-dir <dir> [--json]  Resolve a bundled references/ template
   setup-plan --references-dir <dir> [--json]       Create plan.md from plan-template
@@ -35,6 +37,7 @@ const TEMPLATE_USAGE =
 const COMMAND_USAGE: Record<string, string> = {
   paths: PATHS_USAGE,
   check: CHECK_USAGE,
+  'require-intent': REQUIRE_INTENT_USAGE,
   feature: FEATURE_USAGE,
   template: TEMPLATE_USAGE,
   'setup-plan': SETUP_PLAN_USAGE,
@@ -78,6 +81,8 @@ export function main(argv: string[]): number {
       return runPaths(rest);
     case 'check':
       return runCheck(rest);
+    case 'require-intent':
+      return runRequireIntent(rest);
     case 'feature':
       return runFeature(rest);
     case 'template':
