@@ -2,6 +2,7 @@ import { readdirSync, statSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import {
   FeatureResolutionError,
+  deriveFeatureSlug,
   formatPackCommand,
   getFeaturePaths,
   type FeaturePaths,
@@ -103,6 +104,7 @@ export function runPaths(argv: string[]): number {
       JSON.stringify({
         REPO_ROOT: paths.repoRoot,
         BRANCH: paths.currentBranch,
+        SLUG: deriveFeatureSlug(paths.featureDir),
         FEATURE_DIR: paths.featureDir,
         FEATURE_SPEC: paths.featureSpec,
         IMPL_PLAN: paths.implPlan,
@@ -114,6 +116,7 @@ export function runPaths(argv: string[]): number {
 
   process.stdout.write(`REPO_ROOT: ${paths.repoRoot}\n`);
   process.stdout.write(`BRANCH: ${paths.currentBranch}\n`);
+  process.stdout.write(`SLUG: ${deriveFeatureSlug(paths.featureDir)}\n`);
   process.stdout.write(`FEATURE_DIR: ${paths.featureDir}\n`);
   process.stdout.write(`FEATURE_SPEC: ${paths.featureSpec}\n`);
   process.stdout.write(`IMPL_PLAN: ${paths.implPlan}\n`);

@@ -6,11 +6,17 @@
 //   2. require_intent: in <repoRoot>/.che/config.yml (same value set)
 //   3. default on
 // An invalid value is an error (exit 1): the gate fails closed.
+//
+// When .che/feature.json registers a feature, the gate additionally checks
+// the intent doc for THAT feature's slug (basename of the registered feature
+// directory, timestamp prefix stripped): docs/intents/{slug}.intent.md must
+// exist. This is the single-source-of-truth check that keeps the intent slug
+// and the spec directory name aligned (see `deriveFeatureSlug`).
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
-import { FeatureResolutionError, findSpecifyRoot } from './feature-paths.ts';
+import { FeatureResolutionError, findSpecifyRoot, readFeatureSlug } from './feature-paths.ts';
 import { isFile } from './check.ts';
 
 export const REQUIRE_INTENT_USAGE = `Usage: che require-intent [--json]
@@ -121,6 +127,21 @@ function blockedMessage(intentDirExists: boolean): string {
   );
 }
 
+function blockedSlugMessage(slug: string, intentDoc: string, intentCount: number): string {
+  return (
+    '\n' +
+    `  ⚠  No intent doc matches the current feature slug "${slug}".\n` +
+    '\n' +
+    `  .che/feature.json registers this feature as slug "${slug}", so the intent\n` +
+    `  doc must live at ${intentDoc}.\n` +
+    `  Found ${intentCount} intent doc(s) in docs/intents/, none matching.\n` +
+    '\n' +
+    '  Run /che-compound-intent BEFORE /che-compound-specify and keep the slug\n' +
+    '  identical (accept the proposed slug, or reply `override` with the same one).\n' +
+    '\n'
+  );
+}
+
 export function runRequireIntent(argv: string[]): number {
   if (argv.includes('--help') || argv.includes('-h')) {
     process.stdout.write(REQUIRE_INTENT_USAGE);
@@ -163,6 +184,9 @@ export function runRequireIntent(argv: string[]): number {
     intentDirExists = false;
   }
   const intentCount = countIntentDocs(repoRoot);
+  const featureSlug = readFeatureSlug(repoRoot);
+  const intentDoc = featureSlug === '' ? '' : join(intentDir, `${featureSlug}.intent.md`);
+  const intentDocFound = intentDoc !== '' && isFile(intentDoc);
 
   if (values.json) {
     process.stdout.write(
@@ -171,6 +195,8 @@ export function runRequireIntent(argv: string[]): number {
         GATE: gateOn ? 'on' : 'off',
         INTENT_DIR: intentDir,
         INTENT_COUNT: intentCount,
+        SLUG: featureSlug,
+        INTENT_DOC: intentDoc,
       }) + '\n',
     );
   }
@@ -183,9 +209,16 @@ export function runRequireIntent(argv: string[]): number {
     return 1;
   }
 
+  if (intentDoc !== '' && !intentDocFound) {
+    process.stderr.write(blockedSlugMessage(featureSlug, intentDoc, intentCount));
+    return 1;
+  }
+
   if (!values.json) {
+    const slugNote =
+      intentDoc === '' ? '' : ` — slug "${featureSlug}" matches ${intentDoc.replace(`${repoRoot}/`, '')}`;
     process.stdout.write(
-      `✓ Found ${intentCount} intent doc(s) in docs/intents/ — /che-compound-specify may proceed.\n`,
+      `✓ Found ${intentCount} intent doc(s) in docs/intents/${slugNote} — /che-compound-specify may proceed.\n`,
     );
   }
   return 0;

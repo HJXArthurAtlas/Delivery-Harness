@@ -69,7 +69,7 @@ byte_equal() { # byte_equal <file> <file>
 # 1. paths --json resolves the stored pointer to absolute paths.
 run "$CHE_BIN" paths --json
 [ "$RC" -eq 0 ] && ok || bad "paths --json: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"BRANCH\":\"001-demo\",\"FEATURE_DIR\":\"$PROJECT/specs/001-demo\",\"FEATURE_SPEC\":\"$PROJECT/specs/001-demo/spec.md\",\"IMPL_PLAN\":\"$PROJECT/specs/001-demo/plan.md\",\"TASKS\":\"$PROJECT/specs/001-demo/tasks.md\"}" \
+json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"BRANCH\":\"001-demo\",\"SLUG\":\"001-demo\",\"FEATURE_DIR\":\"$PROJECT/specs/001-demo\",\"FEATURE_SPEC\":\"$PROJECT/specs/001-demo/spec.md\",\"IMPL_PLAN\":\"$PROJECT/specs/001-demo/plan.md\",\"TASKS\":\"$PROJECT/specs/001-demo/tasks.md\"}" \
   && ok || bad "paths --json: 未返回活动 feature 路径：$OUT"
 
 # 2. paths text keeps the `FEATURE_DIR: <value>` line (adrkit-lib.sh parses it).
@@ -77,6 +77,18 @@ run "$CHE_BIN" paths
 [ "$RC" -eq 0 ] && ok || bad "paths text: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 printf '%s\n' "$OUT" | grep -qx "FEATURE_DIR: $PROJECT/specs/001-demo" \
   && ok || bad "paths text: 缺少 FEATURE_DIR 行：$OUT"
+printf '%s\n' "$OUT" | grep -qx "SLUG: 001-demo" \
+  && ok || bad "paths text: 缺少 SLUG 行：$OUT"
+
+# 2b. SLUG strips the YYYYMMDD-HHMMSS- directory prefix (specify convention).
+run "$CHE_BIN" feature set specs/20261022-084501-user-auth
+[ "$RC" -eq 0 ] && ok || bad "feature set timestamped: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+run "$CHE_BIN" paths --json
+[ "$RC" -eq 0 ] && ok || bad "paths timestamped: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+json_matches "$OUT" '{"BRANCH":"20261022-084501-user-auth","SLUG":"user-auth"}' \
+  && ok || bad "paths timestamped: SLUG 未去时间戳前缀：$OUT"
+run "$CHE_BIN" feature set specs/001-demo
+[ "$RC" -eq 0 ] && ok || bad "feature set 还原: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 
 # 3. Pointer absent + no env → resolution error naming the specify command.
 rm "$PROJECT/.che/feature.json"
@@ -183,8 +195,10 @@ node -e '
 ' "$TASKS_REFS/tasks-template.md" <<<"$OUT" \
   && ok || bad "setup-tasks: TASKS_TEMPLATE_CONTENT 与 references/tasks-template.md 非字节一致"
 
-# 11. require-intent gate: default on; toggle via env / .che/config.yml.
+# 11. require-intent gate: default on; toggle via env / .che/config.yml; slug check.
 # PROJECT has no docs/intents yet → gate closed by default.
+# .che/feature.json registers specs/001-demo → current feature slug "001-demo".
+
 run "$CHE_BIN" require-intent
 [ "$RC" -eq 1 ] && ok || bad "require-intent 默认拦截: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
@@ -194,7 +208,7 @@ esac
 
 run "$CHE_BIN" require-intent --json
 [ "$RC" -eq 1 ] && ok || bad "require-intent --json 拦截: 退出码 ${RC}，预期 1"
-json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"GATE\":\"on\",\"INTENT_DIR\":\"$PROJECT/docs/intents\",\"INTENT_COUNT\":0}" \
+json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"GATE\":\"on\",\"INTENT_DIR\":\"$PROJECT/docs/intents\",\"INTENT_COUNT\":0,\"SLUG\":\"001-demo\",\"INTENT_DOC\":\"$PROJECT/docs/intents/001-demo.intent.md\"}" \
   && ok || bad "require-intent --json: 状态不符：$OUT"
 
 mkdir -p "$PROJECT/docs/intents"
@@ -205,14 +219,40 @@ case "$(<"$TMP/stderr")" in
   *) bad "require-intent 空目录: 错误信息不符：$(<"$TMP/stderr")" ;;
 esac
 
-printf '# Intent\n' > "$PROJECT/docs/intents/demo.intent.md"
+# Slug mismatch: an intent doc under a different slug does NOT satisfy the gate.
+printf '# Intent\n' > "$PROJECT/docs/intents/mismatch.intent.md"
+run "$CHE_BIN" require-intent
+[ "$RC" -eq 1 ] && ok || bad "require-intent slug 错位: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *'No intent doc matches the current feature slug "001-demo"'*) ok ;;
+  *) bad "require-intent slug 错位: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+run "$CHE_BIN" require-intent --json
+[ "$RC" -eq 1 ] && ok || bad "require-intent slug 错位 --json: 退出码 ${RC}，预期 1"
+json_matches "$OUT" '{"GATE":"on","INTENT_COUNT":1,"SLUG":"001-demo"}' \
+  && ok || bad "require-intent slug 错位 --json: 状态不符：$OUT"
+rm "$PROJECT/docs/intents/mismatch.intent.md"
+
+# Matching slug passes; JSON reports SLUG / INTENT_DOC.
+printf '# Intent\n' > "$PROJECT/docs/intents/001-demo.intent.md"
 run "$CHE_BIN" require-intent --json
 [ "$RC" -eq 0 ] && ok || bad "require-intent 放行: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-json_matches "$OUT" '{"GATE":"on","INTENT_COUNT":1}' \
+json_matches "$OUT" "{\"GATE\":\"on\",\"INTENT_COUNT\":1,\"SLUG\":\"001-demo\",\"INTENT_DOC\":\"$PROJECT/docs/intents/001-demo.intent.md\"}" \
   && ok || bad "require-intent 放行: 状态不符：$OUT"
 
+# No registered feature (.che/feature.json absent) → legacy any-intent behavior.
+rm "$PROJECT/.che/feature.json"
+printf '# Intent\n' > "$PROJECT/docs/intents/legacy.intent.md"
+run "$CHE_BIN" require-intent
+[ "$RC" -eq 0 ] && ok || bad "require-intent 无指针放行: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+run "$CHE_BIN" require-intent --json
+[ "$RC" -eq 0 ] && json_matches "$OUT" '{"GATE":"on","INTENT_COUNT":2,"SLUG":"","INTENT_DOC":""}' \
+  && ok || bad "require-intent 无指针 --json: RC=$RC OUT=$OUT"
+rm "$PROJECT/docs/intents/legacy.intent.md"
+printf '%s\n' '{"feature_directory":"specs/001-demo"}' > "$PROJECT/.che/feature.json"
+
 # Toggle off via env: silent pass, even with the intent doc removed.
-rm "$PROJECT/docs/intents/demo.intent.md"
+rm "$PROJECT/docs/intents/001-demo.intent.md"
 run env CHE_REQUIRE_INTENT=off "$CHE_BIN" require-intent
 [ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "require-intent env off: RC=$RC OUT=$OUT，预期静默退 0"
 run env CHE_REQUIRE_INTENT=off "$CHE_BIN" require-intent --json

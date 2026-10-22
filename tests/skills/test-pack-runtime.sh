@@ -151,7 +151,7 @@ esac
 OUT="$(cd "$PROJECT" && CHE_REQUIRE_INTENT=off "$GATE_WRAPPER" 2>"$TMP/stderr")"
 RC=$?
 [ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "require-intent env off: RC=$RC OUT=$OUT，预期静默退 0"
-mkdir -p "$PROJECT/docs/intents" && printf '# Intent\n' > "$PROJECT/docs/intents/demo.intent.md"
+mkdir -p "$PROJECT/docs/intents" && printf '# Intent\n' > "$PROJECT/docs/intents/001-demo.intent.md"
 run "$GATE_WRAPPER"
 [ "$RC" -eq 0 ] && ok || bad "require-intent 有 intent 放行: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 

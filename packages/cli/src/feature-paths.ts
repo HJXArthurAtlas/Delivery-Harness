@@ -175,3 +175,25 @@ export function formatPackCommand(commandName: string): string {
   }
   return `/che-compound-${name}`;
 }
+
+/**
+ * The feature slug is the single source of truth for the whole flow: the
+ * basename of the registered feature directory with a leading
+ * `YYYYMMDD-HHMMSS-` directory prefix stripped (specify convention).
+ * `specs/20261022-084501-user-auth` → `user-auth`; `specs/001-demo` →
+ * `001-demo` (no timestamp prefix → basename as-is).
+ */
+export function deriveFeatureSlug(featureDir: string): string {
+  const base = basename(trimTrailingSeparators(featureDir));
+  return base.replace(/^\d{8}-\d{6}-/, '');
+}
+
+/**
+ * Slug of the feature registered in `.che/feature.json`, or '' when no
+ * feature is registered (or the pointer cannot yield a slug).
+ */
+export function readFeatureSlug(repoRoot: string): string {
+  const stored = readFeatureJsonFeatureDirectory(repoRoot);
+  if (stored === '' || stored === '.') return '';
+  return deriveFeatureSlug(stored);
+}
