@@ -74,7 +74,7 @@ omp plugin install ncw-delivery@ncw-delivery-harness
 # DSH 插件（根包兼作 dsh bundle；默认跟踪 main 最新，升级走 update）
 dsh plugin --profile <name> add git+https://git.newchiwan.com/council/ncw-delivery-harness.git
 
-# 其他端（DSH / OpenCode）：把 skills/<name>/ 拷入对应发现目录即可
+# 其他端（OpenCode 等）：把 skills/<name>/ 拷入对应发现目录即可
 npm test   # 结构校验（唯一质量门）
 ```
 

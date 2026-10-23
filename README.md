@@ -59,7 +59,7 @@ CLI 解析（`adrkit-lib.sh`）：只执行 PATH 上的 `adrkit` 与 `che`，不
 
 ## 安装
 
-各端全靠文件落位；项目级同名覆盖全局级（DSH rank 100/200 > 400/500）。
+omp 与 DSH 走各自的原生插件安装（见下），手动拷贝全靠文件落位；项目级同名覆盖全局级（DSH：项目级 100/200 > bundle 250 > 用户级 400/500）。
 
 ```bash
 # omp 插件（推荐）
@@ -71,7 +71,7 @@ dsh plugin --profile <name> add git+https://git.newchiwan.com/council/ncw-delive
 dsh plugin --profile <name> update ncw-delivery-harness   # 升级到 main 最新
 dsh plugin --profile <name> remove ncw-delivery-harness
 
-# 其他端（DSH / OpenCode）：把 skills/<name>/ 拷入对应 skill 发现目录即可
+# 其他端（OpenCode 等）：把 skills/<name>/ 拷入对应 skill 发现目录即可
 git clone https://git.newchiwan.com/council/ncw-delivery-harness.git
 cp -R ncw-delivery-harness/skills/<name> <发现目录>/skills/
 ```
@@ -80,7 +80,7 @@ cp -R ncw-delivery-harness/skills/<name> <发现目录>/skills/
 |---|---|
 | `.agents/skills/`（项目）或 `~/.agents/skills/`（全局） | DSH / OpenCode / omp |
 
-omp 实测同时读项目级与全局级；DSH / OpenCode 官方支持同两个路径；DSH 无需 plugin——skill 是「被扫描的文件」，拷贝即安装，免重启热加载。
+omp 实测同时读项目级与全局级；OpenCode 官方支持同两个路径；DSH 同样官方支持手动拷贝（skill 是「被扫描的文件」，拷贝即安装、免重启热加载），原生插件安装见下文「DSH 插件」小节。
 
 ### omp marketplace 插件（可选）
 
