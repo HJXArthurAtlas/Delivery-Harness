@@ -30,9 +30,9 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated artifacts. **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
   主流程:
+  - /che-adr-check: 对照 ADR 语料校验 plan 是否越决策边界（必经；无未处置 departure 才进 tasks）
   - /che-compound-tasks: 按 spec 用户故事生成依赖有序任务清单
   可选:
-  - /che-adr-check: [可选] 对照 ADR 语料校验 plan 是否越决策边界
   - /che-compound-analyze: [可选] spec/plan 工件一致性只读分析
   - /che-pingcode-specstoissues: [可选] 配了 mapping.task_artifact 时 tasks 后补建任务卡（implement 前 spec 有改动先跑 /che-pingcode-sync-cards 对账）
 
@@ -106,4 +106,4 @@ Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated 
   - 前置装载（入向，plan 开始时）：会话上下文无 `COMPOUND STORE LOADED` 摘要 → 先跑 `/che-compound-load` 再 Setup；已有摘要（本会话已装载）→ 跳过
   - plan 工件齐备
   - 存在 `design-tasks.md` 时已按其 UX 约束对齐
-  - 可选先跑 `/che-adr-check` 对照 ADR 语料校验越界
+  - 必经 `/che-adr-check`：对照 ADR 语料校验越界，无未处置 departure 才交接 tasks

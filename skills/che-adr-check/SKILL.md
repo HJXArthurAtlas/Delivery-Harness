@@ -65,4 +65,4 @@ $ARGUMENTS
 > Pack fork (ncw), port on upstream upgrade.
 
 - **目标**：`/che-compound-tasks` —— 在 plan 通过检查后拆解为可执行任务
-- **条件**：plan 已产出；本检查只读，发现 plan 越界（departure）时先回 plan 修正或记录为正式 ADR 变更，再进 tasks
+- **条件**：plan 已产出即必跑（plan→tasks 的必经步，不再是可选项）；本检查只读；无未处置 departure 才交接 tasks，回退：departure → 回 plan 修正或走 `/che-adr-draft` 记录为正式 ADR 变更后重跑本检查

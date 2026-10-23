@@ -11,7 +11,7 @@
 | 3 | 建卡 | 产品 | `/che-pingcode-specstoissues`（optional；specify Handoff 可选目标） | 需求树 idea→epic→feature→story；登记 `specs/pingcode-mapping.json` |
 | 4 | **交接门禁** | 产品→开发 | 逐项核对（见 §2） | — |
 | 5 | plan | 开发 | `/che-compound-plan`；有 `design-tasks.md` 必读，冲突回产品/设计裁决 | 计划产物 |
-| 6 | tasks | 开发 | `/che-compound-tasks`；配了 `mapping.task_artifact` 才补建任务卡 | `tasks.md`（+任务卡） |
+| 6 | tasks | 开发 | 必跑 `/che-adr-check` 校验越界后 `/che-compound-tasks`；配了 `mapping.task_artifact` 才补建任务卡 | `tasks.md`（+任务卡） |
 | 7 | implement 前 | 开发 | implement 开始 Handoff 前置对账（`/che-pingcode-sync-cards`，已建卡才提示） | spec 改动与卡片对齐 |
 | 8 | implement | 开发 | `/che-compound-implement`；提交走 `mturtle-commit`，消息带故事卡 ID | 代码 + 测试 |
 | 9 | 收尾 | 开发 | 本地全 `[x]` → `/che-pingcode-sync-status` | 卡片流转完成（单向，不回退） |
@@ -34,7 +34,7 @@
 | `che-compound-specify` | `/che-compound-clarify`、`/che-compound-design`（涉 UI 必跑） | `/che-pingcode-specstoissues` 建卡 |
 | `che-compound-clarify` | `/che-compound-design`、`/che-compound-plan`（交接门禁通过后） | `/che-compound-grill-me`、`/che-pingcode-specstoissues` 建卡 |
 | `che-compound-design` | `/che-compound-plan`（交接门禁通过后） | `/che-pingcode-specstoissues` 建卡（不建则交接前必须补跑） |
-| `che-compound-plan` | `/che-compound-tasks` | `/che-adr-check`（对照 ADR 语料校验 plan 越界） |
+| `che-compound-plan` | `/che-adr-check`（必跑，无未处置 departure 才进 tasks）→ `/che-compound-tasks` | `/che-compound-analyze`、`/che-pingcode-specstoissues` 建卡 |
 | `che-compound-tasks` | `/che-compound-implement`（涉 UI 按设计明细核验；spec 有改动先 `/che-pingcode-sync-cards`） | `/che-pingcode-specstoissues` 补建任务卡（配了 `mapping.task_artifact` 时） |
 | `che-compound-implement` | `/che-pingcode-sync-status` 收尾故事卡（单向，重开新建工作项） | `/che-compound-converge`（实现与工件有差距时追加收敛任务） |
 
@@ -47,11 +47,11 @@
 
 hook 机制已**全部清除**（原 `before_*` / `after_*` 挂点与 `extension.yml` 接线表述一并移除）；交接统一改为 SKILL.md 末尾的中文 `## Handoff` 块，显式声明**目标**与**条件**（有回退则加**回退**行）。上游原文技能带 `> Pack fork (ncw), port on upstream upgrade.` 引用行，上游升级需 port；pack 原生技能（design / require-intent / planverify-gate）省略该行。
 
-主线全链（planverify 必须在 gapfill 后、implement 前，审判完整义务集）：
+主线全链（plan→tasks 间必经 adr-check；planverify 必须在 gapfill 后、implement 前，审判完整义务集）：
 
 ```
 load → intent → expectations → specify → clarify|grill-me → design(涉UI) → plan
-     → tasks → gapfill → planverify → implement → intentguard → writeback
+     → adr-check → tasks → gapfill → planverify → implement → intentguard → writeback
 ```
 
 `load` 同时是 `intent` / `design` / `plan` 的**入向前置**（三者 Handoff 声明）：执行前会话上下文无 `COMPOUND STORE LOADED` 摘要即先跑 `/che-compound-load`，已有摘要（本会话已装载）隐式跳过——每会话只装载一次，context 压缩后由用户手动重跑。
@@ -66,9 +66,9 @@ load → intent → expectations → specify → clarify|grill-me → design(涉
 | `che-compound-clarify` | design（涉 UI）/ plan | 结论回写 spec；交接门禁（§2）通过才进 plan |
 | `che-compound-grill-{me,with-docs}` | design（涉 UI）/ plan | grill-me 不回写 spec（需回写先 clarify）；with-docs 结论落 `docs/adr/` |
 | `che-compound-design` | `/che-compound-plan` | 入向前置 load（无 `COMPOUND STORE LOADED` 摘要先跑 load，有摘要跳过）；`design-tasks.md` 已产出；非门禁项；与 spec 冲突回产品/设计裁决 |
-| `che-compound-plan` | `/che-compound-tasks` | 入向前置 load（无 `COMPOUND STORE LOADED` 摘要先跑 load，有摘要跳过）；工件齐备；有 design-tasks.md 已对齐；可选先 `/che-adr-check` |
-| `che-adr-check` | `/che-compound-tasks` | plan 后手动跑，只读；发现越界先回 plan 修正或立正式 ADR 变更 |
-| `che-compound-tasks` | `/che-compound-gapfill` | tasks.md 依赖有序；配 `mapping.task_artifact` 时任务卡已补建 |
+| `che-compound-plan` | `/che-compound-tasks` | 入向前置 load（无 `COMPOUND STORE LOADED` 摘要先跑 load，有摘要跳过）；工件齐备；有 design-tasks.md 已对齐；**必经 `/che-adr-check`**（无未处置 departure 才交接） |
+| `che-adr-check` | `/che-compound-tasks` | plan 后必跑（必经步，不再可选），只读；无未处置 departure 才交接；回退：departure → 回 plan 修正或 `/che-adr-draft` 立正式 ADR 变更后重跑 |
+| `che-compound-tasks` | `/che-compound-gapfill` | 入向前置 `/che-adr-check`（本会话无该 plan 的 check 报告先跑，含未处置 departure 拒绝进 tasks）；tasks.md 依赖有序；配 `mapping.task_artifact` 时任务卡已补建 |
 | `che-compound-gapfill` | `/che-compound-planverify` | 四类缺口任务已追加进 tasks.md |
 | `che-compound-planverify` | `/che-compound-implement` | PASS 放行；回退：REPLAN_ALLOWED 改 plan 后重跑、BLOCKED_DRIFT 回 plan |
 | `che-compound-planverify-gate`（门禁） | `/che-compound-implement` | 非 block 直接放行；block 模式需 PASS/REPLAN_ALLOWED，缺失或 BLOCKED_DRIFT 拒绝。**手动/agent 调用的 shell 门禁** |

@@ -155,5 +155,6 @@ Every task MUST strictly follow this format:
   - 条件：`pingcode-config.yml` 在位且 `mapping.task_artifact` 已设置
   - 回退：未配置或用户拒绝 → 跳过，任务留本地 checklist
 - **条件**：
+  - 前置校验（入向，tasks 开始时）：本会话无该 plan 的 `/che-adr-check` 报告 → 先跑；报告含未处置 departure → 回 plan 修正或走 `/che-adr-draft` 立正式 ADR 变更后重跑，绝不带越界进 tasks
   - tasks.md 已按用户故事生成且依赖有序
   - 配了 `mapping.task_artifact` 时任务卡已补建
