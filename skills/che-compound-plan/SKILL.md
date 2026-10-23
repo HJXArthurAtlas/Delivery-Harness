@@ -103,6 +103,7 @@ Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated 
 
 - **目标**：`/che-compound-tasks` —— 生成依赖有序任务清单
 - **条件**：
+  - 前置装载（入向，plan 开始时）：会话上下文无 `COMPOUND STORE LOADED` 摘要 → 先跑 `/che-compound-load` 再 Setup；已有摘要（本会话已装载）→ 跳过
   - plan 工件齐备
   - 存在 `design-tasks.md` 时已按其 UX 约束对齐
   - 可选先跑 `/che-adr-check` 对照 ADR 语料校验越界

@@ -257,4 +257,6 @@ created: {YYYY-MM-DD}
 > Pack fork (ncw), port on upstream upgrade.
 
 - **目标**：`/che-compound-expectations` —— 起草正/边界场景期望
-- **条件**：`docs/intents/{slug}.intent.md` 已写入且用户确认；AskUserQuestion 选 continue 直接链式调用，stop/quit 由用户稍后手动跑
+- **条件**：
+  - 前置装载（入向，intent 开始时）：会话上下文无 `COMPOUND STORE LOADED` 摘要 → 先跑 `/che-compound-load` 再开访谈；已有摘要（本会话已装载）→ 跳过
+  - `docs/intents/{slug}.intent.md` 已写入且用户确认；AskUserQuestion 选 continue 直接链式调用，stop/quit 由用户稍后手动跑

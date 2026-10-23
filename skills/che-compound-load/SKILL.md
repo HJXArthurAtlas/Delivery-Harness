@@ -98,4 +98,4 @@ If the session's context is compacted by the harness, the compound store summary
 > Pack fork (ncw), port on upstream upgrade.
 
 - **目标**：`/che-compound-intent` —— 锁定目标/约束/失败条件
-- **条件**：每个特性开始时装载一次后进入 intent；本次会话已装载过则 intent 隐式跳过本步；context 被压缩后可由用户手动重跑 load，绝不 unsolicited 重载
+- **条件**：intent / plan / design 三个技能以 Handoff 前置方式 hook 本技能——执行前会话上下文无 `COMPOUND STORE LOADED` 摘要即先装载再继续；每个特性开始时装载一次，本次会话已装载过则隐式跳过；context 被压缩后可由用户手动重跑 load，绝不 unsolicited 重载

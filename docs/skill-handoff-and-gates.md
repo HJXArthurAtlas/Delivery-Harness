@@ -1,6 +1,6 @@
 # Skill 交接流程与门禁清单
 
-> 来源：`skills/` 各 SKILL.md 正文（2026-10-19 盘点，hook 机制已清除、统一 Handoff 块）。分发面技能共 23 个，本文覆盖全部交接（handoff）与门禁（gate）机制。
+> 来源：`skills/` 各 SKILL.md 正文（2026-10-23 盘点，hook 机制已清除、统一 Handoff 块）。分发面技能共 23 个，本文覆盖全部交接（handoff）与门禁（gate）机制。
 
 ## 1. 流程主线（`che-compound-flow`，9 阶段）
 
@@ -54,17 +54,19 @@ load → intent → expectations → specify → clarify|grill-me → design(涉
      → tasks → gapfill → planverify → implement → intentguard → writeback
 ```
 
+`load` 同时是 `intent` / `design` / `plan` 的**入向前置**（三者 Handoff 声明）：执行前会话上下文无 `COMPOUND STORE LOADED` 摘要即先跑 `/che-compound-load`，已有摘要（本会话已装载）隐式跳过——每会话只装载一次，context 压缩后由用户手动重跑。
+
 | 技能 | Handoff 目标 | 条件 / 回退 |
 |---|---|---|
-| `che-compound-load` | `/che-compound-intent` | 每特性开始装载一次；会话已装载则 intent 隐式跳过；context 压缩后用户手动重跑，绝不 unsolicited 重载 |
-| `che-compound-intent` | `/che-compound-expectations` | intent doc 已写入且用户确认；AskUserQuestion continue 链式调用，stop/quit 手动续 |
+| `che-compound-load` | `/che-compound-intent` | 每特性开始装载一次；被 intent / design / plan 以 Handoff 前置 hook（入向）：上下文无 `COMPOUND STORE LOADED` 摘要即先跑，有则隐式跳过；context 压缩后用户手动重跑，绝不 unsolicited 重载 |
+| `che-compound-intent` | `/che-compound-expectations` | 入向前置 load（无摘要先跑 `/che-compound-load`，有摘要跳过）；intent doc 已写入且用户确认；AskUserQuestion continue 链式调用，stop/quit 手动续 |
 | `che-compound-expectations` | `/che-compound-specify` | 期望文档已写入；continue 时以 intent 的 goal+in-scope 预填 |
 | `che-compound-require-intent`（门禁） | `/che-compound-specify` | 开关开启（默认）时 `docs/intents/` 有 `*.intent.md`（`che require-intent` 退 0）才放行；`.che/feature.json` 已登记特性时还要求 `docs/intents/{slug}.intent.md` 与登记 slug 一致，缺失即拒绝并指回 intent；否则拒绝，先跑 intent。**逻辑内联在 che CLI，技能脚本仅薄封装委托**；开关经 `CHE_REQUIRE_INTENT` 环境变量或 `.che/config.yml` 的 `require_intent:` 关闭 |
 | `che-compound-specify` | `/che-compound-clarify`（或 grill-me） | spec 质量清单通过；require-intent 已放行；涉 UI 澄清后接 design |
 | `che-compound-clarify` | design（涉 UI）/ plan | 结论回写 spec；交接门禁（§2）通过才进 plan |
 | `che-compound-grill-{me,with-docs}` | design（涉 UI）/ plan | grill-me 不回写 spec（需回写先 clarify）；with-docs 结论落 `docs/adr/` |
-| `che-compound-design` | `/che-compound-plan` | `design-tasks.md` 已产出；非门禁项；与 spec 冲突回产品/设计裁决 |
-| `che-compound-plan` | `/che-compound-tasks` | 工件齐备；有 design-tasks.md 已对齐；可选先 `/che-adr-check` |
+| `che-compound-design` | `/che-compound-plan` | 入向前置 load（无 `COMPOUND STORE LOADED` 摘要先跑 load，有摘要跳过）；`design-tasks.md` 已产出；非门禁项；与 spec 冲突回产品/设计裁决 |
+| `che-compound-plan` | `/che-compound-tasks` | 入向前置 load（无 `COMPOUND STORE LOADED` 摘要先跑 load，有摘要跳过）；工件齐备；有 design-tasks.md 已对齐；可选先 `/che-adr-check` |
 | `che-adr-check` | `/che-compound-tasks` | plan 后手动跑，只读；发现越界先回 plan 修正或立正式 ADR 变更 |
 | `che-compound-tasks` | `/che-compound-gapfill` | tasks.md 依赖有序；配 `mapping.task_artifact` 时任务卡已补建 |
 | `che-compound-gapfill` | `/che-compound-planverify` | 四类缺口任务已追加进 tasks.md |

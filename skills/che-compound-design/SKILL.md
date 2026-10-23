@@ -81,6 +81,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 - **目标**：`/che-compound-plan`（交接门禁通过后）
 - **条件**：
+  - 前置装载（入向，design 开始时）：会话上下文无 `COMPOUND STORE LOADED` 摘要 → 先跑 `/che-compound-load` 再进执行步骤；已有摘要（本会话已装载）→ 跳过
   - `design-tasks.md` 已产出
   - 它不是交接门禁项，不阻塞交接
   - 与 spec 冲突回产品/设计裁决，绝不自行解决
