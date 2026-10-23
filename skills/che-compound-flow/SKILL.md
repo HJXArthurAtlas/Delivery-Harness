@@ -7,7 +7,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 
 团队 AI native 开发流程的**衔接与门禁层**：不替代 `/che-compound-*` 命令与 `/che-pingcode-*` 命令（它们各自的规则以自身为准），也不复述 `pingcode` skill 的 ID 安全规则与 `mturtle-commit` 的提交格式——本 skill 只定义角色怎么交接、什么才算交接完成、卡片与产物怎么对得上账。
 
-**前提**：规格驱动开发流程就绪（`pingcode-config.yml` 由 `/che-pingcode-init` 生成，`pingcode` CLI ≥ 0.14.0 已安装并认证）。本 pack 无 hook 执行器——pingcode 卡流程经 specify/tasks/implement 的 Handoff 块可选目标/前置对账交接（条件不满足或拒绝即跳过），其余场景按各阶段要求手动跑命令即可。阶段间交接以各技能 SKILL.md 末尾的 `## Handoff` 块为准（目标 + 条件 + 回退；全链清单见 `docs/skill-handoff-and-gates.md`，仓外消费者以技能内块为准）。
+**前提**：规格驱动开发流程就绪（`.che/pingcode-config.yml` 由 `/che-pingcode-init` 生成，`pingcode` CLI ≥ 0.14.0 已安装并认证）。本 pack 无 hook 执行器——pingcode 卡流程经 specify/tasks/implement 的 Handoff 块可选目标/前置对账交接（条件不满足或拒绝即跳过），其余场景按各阶段要求手动跑命令即可。阶段间交接以各技能 SKILL.md 末尾的 `## Handoff` 块为准（目标 + 条件 + 回退；全链清单见 `docs/skill-handoff-and-gates.md`，仓外消费者以技能内块为准）。
 
 ## 流程主线
 
@@ -36,7 +36,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 1. `### User Story N` 章节齐备，每章标题行内标注优先级 `(Priority: P1/P2/P3)`（bundled spec 模板的既有格式）——这是卡片优先级映射的来源，缺了卡片优先级落不下来。
 2. `specs/pingcode-mapping.json` 已登记：每张卡的 id 与状态可追溯。没有登记 = 建卡没完成，不能交接。
 3. 建卡是 **optional** 步骤：specify 后选择不建卡的，交接前手动补跑 `/che-pingcode-specstoissues`。
-4. `pingcode-config.yml` 在位（没有就先跑 `/che-pingcode-init` 生成，`pingcode` CLI ≥ 0.14.0 已装并认证）。
+4. `.che/pingcode-config.yml` 在位（没有就先跑 `/che-pingcode-init` 生成，`pingcode` CLI ≥ 0.14.0 已装并认证）。
 
 任何一项不过 → 留在产品侧处理完再交接，不要把半成品 spec 推给开发。
 

@@ -5,14 +5,14 @@ description: 探查 PingCode 项目的类型/状态/优先级/迭代/产品字�
 
 # 发现 PingCode 项目上下文
 
-> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.discover-context` 的 pack 改编。相对上游：配置与探查产物落项目根（`pingcode-config.yml`、`pingcode-discovered-context.json`）；hook 接线移除（pack 无 hook 执行机制，手动调用）；命令名改为 `/che-pingcode-*`。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
+> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.discover-context` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根），探查产物 `pingcode-discovered-context.json` 仍落项目根；hook 接线移除（pack 无 hook 执行机制，手动调用）；命令名改为 `/che-pingcode-*`。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
 
-本命令探查当前 PingCode 项目的实际字典（工作项类型、状态、优先级、迭代），并生成可直接粘贴进 `pingcode-config.yml` 的配置片段。PingCode 没有自定义字段发现的概念，这里发现的是**类型与状态字典**。
+本命令探查当前 PingCode 项目的实际字典（工作项类型、状态、优先级、迭代），并生成可直接粘贴进 `.che/pingcode-config.yml` 的配置片段。PingCode 没有自定义字段发现的概念，这里发现的是**类型与状态字典**。
 
 ## 前置条件
 
 1. `pingcode` CLI 已安装且已认证
-2. 配置文件 `pingcode-config.yml`（项目根）存在，且 `project` 已填写（或通过环境变量 `SPECKIT_PINGCODE_PROJECT` 提供）
+2. 配置文件 `.che/pingcode-config.yml` 存在，且 `project` 已填写（或通过环境变量 `SPECKIT_PINGCODE_PROJECT` 提供）
 
 ## 用户输入
 
@@ -84,7 +84,7 @@ pingcode product list --compact
 基于发现的真实名称，输出推荐配置（状态取每个 state_type 的第一个，并提示可替换）：
 
 ```yaml
-# 建议粘贴到项目根 pingcode-config.yml
+# 建议粘贴到 .che/pingcode-config.yml
 project: "<项目名>"
 product: "<产品名,可选;specstoissues 关联需求用>"
 
@@ -121,4 +121,4 @@ priority_mapping:
 }
 ```
 
-结尾提示：把片段合入 `pingcode-config.yml`（或改用 `/che-pingcode-init` 交互生成）后，即可运行 `/che-pingcode-specstoissues`。
+结尾提示：把片段合入 `.che/pingcode-config.yml`（或改用 `/che-pingcode-init` 交互生成）后，即可运行 `/che-pingcode-specstoissues`。

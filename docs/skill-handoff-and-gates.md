@@ -21,7 +21,7 @@
 1. `### User Story N` 章节齐备，标题行标注 `(Priority: P1/P2/P3)` —— 卡片优先级映射来源。
 2. `specs/pingcode-mapping.json` 已登记，每卡 id/状态可追溯 —— 没有 = 建卡没完成，不能交接。
 3. 建卡是 optional：没建卡的交接前手动补跑 `/che-pingcode-specstoissues`。
-4. `pingcode-config.yml` 在位（没有先跑 `/che-pingcode-init` 生成，`pingcode` CLI ≥ 0.14.0 已装并认证）。
+4. `.che/pingcode-config.yml` 在位（没有先跑 `/che-pingcode-init` 生成，`pingcode` CLI ≥ 0.14.0 已装并认证）。
 
 任一不过 → 留在产品侧，不推半成品给开发。`design-tasks.md` 明确**不在**门禁内。
 

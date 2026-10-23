@@ -5,9 +5,9 @@ description: 交互式初始化 PingCode 集成配置：选择项目/产品/迭�
 
 # 初始化 PingCode 集成配置
 
-> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.init` 的 pack 改编。相对上游：配置落项目根 `pingcode-config.yml`；specify extension 的 hook 接线全部移除（pack 无 hook 执行机制，命令按流程节点手动调用）；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`。配置模板见本技能 `references/pingcode-config.template.yml`。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
+> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.init` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；specify extension 的 hook 接线全部移除（pack 无 hook 执行机制，命令按流程节点手动调用）；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`。配置模板见本技能 `references/pingcode-config.template.yml`。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
 
-交互式完成 PingCode 集成配置并直接生成项目根 `pingcode-config.yml`。所有类型/状态/优先级名都从项目实际字典探查后写入，不猜测；产品与迭代可固定到配置，也可留空走运行时解析链。
+交互式完成 PingCode 集成配置并直接生成 `.che/pingcode-config.yml`。所有类型/状态/优先级名都从项目实际字典探查后写入，不猜测；产品与迭代可固定到配置，也可留空走运行时解析链。
 
 ## 前置条件
 
@@ -159,14 +159,14 @@ sync:
   complete_story_when_tasks_done: true
 ```
 
-已存在配置文件：逐键展示新旧差异，未提供 `--force` 时询问覆盖或中止；覆盖前把旧文件复制为 `pingcode-config.yml.bak`。
+已存在配置文件：逐键展示新旧差异，未提供 `--force` 时询问覆盖或中止；覆盖前把旧文件复制为 `.che/pingcode-config.yml.bak`。
 
 `--dry-run`：输出配置内容后结束，不写文件。
 
-写入项目根 `pingcode-config.yml` 并回显：
+写入 `.che/pingcode-config.yml`（`.che/` 目录不存在时先创建）并回显：
 
 ```
-✅ 配置已生成: pingcode-config.yml
+✅ 配置已生成: .che/pingcode-config.yml
    项目: <名称>(<id>)
    产品: <名称 或 运行时选择>
    spec 卡: <spec_artifact>   story 卡: <story_artifact 或 不建>

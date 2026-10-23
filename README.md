@@ -33,7 +33,7 @@ newchiwan 团队的跨端 agent skill pack：把 PingCode 规格驱动的 AI nat
 | `che-compound-plan` | 实现规划与设计工件生成（plan 命令的 pack 分发，正文英文原文；不含 extension hook 机制；含 pack fork：存在 `design-tasks.md` 时必读并对齐 UX，冲突回用户裁决） | 「做这个需求的实现计划」「出 plan」 |
 | `che-compound-specify` | 特性规格创建/更新（specify 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「出 spec」「写特性需求」 |
 | `che-compound-tasks` | 任务清单生成（tasks 命令的 pack 分发，正文英文原文；不含 extension hook 机制，Handoff 块含 pingcode 补建任务卡可选目标） | 「出任务清单」「拆任务」 |
-| `che-pingcode-init` | 交互式初始化 PingCode 集成：选项目/产品/迭代/映射类型（含需求树不跳级校验），生成项目根 `pingcode-config.yml` 并初始化 CLI 运行时上下文（Spec-Kit-PingCode v2.9.0 的 pack 分发，正文中文） | 「配置 PingCode」「重置建卡映射」 |
+| `che-pingcode-init` | 交互式初始化 PingCode 集成：选项目/产品/迭代/映射类型（含需求树不跳级校验），生成 `.che/pingcode-config.yml` 并初始化 CLI 运行时上下文（Spec-Kit-PingCode v2.9.0 的 pack 分发，正文中文） | 「配置 PingCode」「重置建卡映射」 |
 | `che-pingcode-discover-context` | 探查 PingCode 项目字典（工作项类型/状态/优先级/迭代/产品），生成可粘贴配置片段与 `pingcode-discovered-context.json`（同上 pack 分发） | 「看看 PingCode 有哪些类型/迭代」 |
 | `che-pingcode-specstoissues` | spec → PingCode 需求树卡片：spec 卡/`### User Story N` 章节卡/任务行卡三级相邻映射，动态祖先关联（需求必问、中间层只选已有不代建），登记 `specs/pingcode-mapping.json`（同上 pack 分发；extension hook 改接为 specify/tasks Handoff 块可选目标，任务卡按提示或手动重跑补建） | 「把这个 spec 建成卡」「补建/重建卡片」 |
 | `che-pingcode-sync-cards` | 实现前核对 specs/ 制品与卡片一致性，按差异增删改（删除逐项确认），祖先关联沿用登记不重问（同上 pack 分发；implement 开始时前置对账，已建卡才提示） | 「对账卡片」「spec 改了同步卡片」 |

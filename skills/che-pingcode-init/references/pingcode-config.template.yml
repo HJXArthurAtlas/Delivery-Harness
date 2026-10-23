@@ -1,7 +1,7 @@
 # PingCode Integration Configuration
-# 复制为项目根 pingcode-config.yml 并按你的项目定制:
-#   cp .agents/skills/che-pingcode-init/references/pingcode-config.template.yml \
-#      pingcode-config.yml
+# 复制为 .che/pingcode-config.yml 并按你的项目定制:
+#   mkdir -p .che && cp .agents/skills/che-pingcode-init/references/pingcode-config.template.yml \
+#      .che/pingcode-config.yml
 # 或直接运行 /che-pingcode-init 交互生成
 
 # PingCode 项目(必填)

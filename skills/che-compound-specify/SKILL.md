@@ -275,7 +275,7 @@ Success criteria must be:
 
 - **目标**：`/che-compound-clarify`（或 `/che-compound-grill-me`）—— 澄清 spec 歧义
 - **可选目标**：`/che-pingcode-specstoissues` —— 建需求树卡片并登记 `specs/pingcode-mapping.json`
-  - 条件：项目根 `pingcode-config.yml` 在位（`pingcode` CLI ≥ 0.14.0 已装并认证）
+  - 条件：`.che/pingcode-config.yml` 在位（`pingcode` CLI ≥ 0.14.0 已装并认证）
   - 回退：无 config 或用户拒绝 → 跳过；不建卡由交接门禁兜底（交接前必须补跑）
 - **条件**：
   - spec.md 已写入且质量清单通过
