@@ -15,7 +15,7 @@ newchiwan 团队的跨端 agent skill pack：把 PingCode 规格驱动的 AI nat
 | `che-compound-writeback` | intentguard PASS 后把本次纠偏/模式写回 `docs/corrections/` + `docs/patterns/`，耐久纠偏升格为 ADR 进 adrkit 语料 `docs/adr/` | 「writeback 本次经验」 |
 | `che-compound-gapfill` | intent + expectations 对照 tasks.md 找覆盖缺口并追加任务（带来源注释） | 「补任务缺口」「gapfill」 |
 | `che-compound-planverify` | 实现前由独立 checker（跨模型优先）判定 plan + 任务是否偏离锁定 intent | 「验证 plan」「planverify」 |
-| `che-compound-planverify-gate` | before_implement 门禁（判定逻辑内联在 che CLI `che planverify-gate`）：`SKC_PLANVERIFY_GATE=block`（或 `.che/config.yml` 的 `planverify_gate:`）时拦截未验证/BLOCKED_DRIFT 的实现，默认 off | （手动/agent 调用） |
+| `che-compound-planverify-gate` | before_implement 门禁：`SKC_PLANVERIFY_GATE=block`（或 `.che/config.yml` 的 `planverify_gate:`）时拦截未验证/BLOCKED_DRIFT 的实现，默认 off（判定逻辑内联在 che CLI `che planverify-gate`，技能脚本仅薄封装委托） | （手动/agent 调用） |
 | `che-compound-intentguard` | 实现后 L3 校验：密封 briefing + 独立 checker 判 diff 是否越出 intent/期望 | 「intentguard 校验本次实现」 |
 | `che-compound-require-intent` | before_specify 门禁：`docs/intents/` 无 intent 文档时拦截 specify（判定逻辑内联在 che CLI `che require-intent`，技能脚本仅薄封装委托）；开关经 `CHE_REQUIRE_INTENT` 环境变量或 `.che/config.yml` 的 `require_intent:` 配置，默认开 | （手动/agent 调用） |
 | `che-compound-grill-me` | 无上限轮次澄清访谈（clarify 的深化替代）：前沿/轮次/设计树把 spec.md 决策点推进到 Clear/Resolved/Outstanding/Deferred（grill me 命令的 pack 分发，正文英文原文） | 「深度澄清这份 spec」「grill me」 |
@@ -66,8 +66,9 @@ CLI 解析（`adrkit-lib.sh`）：只执行 PATH 上的 `adrkit` 与 `che`，不
 omp plugin marketplace add git+https://git.newchiwan.com/council/ncw-delivery-harness.git
 omp plugin install ncw-delivery@ncw-delivery-harness
 
-# DSH 插件（根包兼作 DSH bundle；git 安装钉 commit，升级换 sha 重跑 add）
-dsh plugin --profile <name> add git+https://git.newchiwan.com/council/ncw-delivery-harness.git#<commit>
+# DSH 插件（根包兼作 DSH bundle；默认跟踪 main 最新，升级走 update）
+dsh plugin --profile <name> add git+https://git.newchiwan.com/council/ncw-delivery-harness.git
+dsh plugin --profile <name> update ncw-delivery-harness   # 升级到 main 最新
 dsh plugin --profile <name> remove ncw-delivery-harness
 
 # 其他端（DSH / OpenCode）：把 skills/<name>/ 拷入对应 skill 发现目录即可
@@ -88,7 +89,7 @@ omp 实测同时读项目级与全局级；DSH / OpenCode 官方支持同两个�
 - `cordis.patch.yml`：bundle patch 层，insert 插件行 `ncw-delivery-skills`。
 - `dsh-entry.js`：SkillProvider 入口（纯 node:fs，零依赖），把每个 `skills/<name>/SKILL.md` 挂成 DSH 一等技能（provider `ncw-delivery`，source `bundled`）。
 - 冲突策略：rank 250——项目级发现（`.dsh/skills`=100、`.agents/skills`=200）按名覆盖本 pack，本 pack 压过用户级目录（400/500）；与手动拷贝二选一即可，同装时插件版胜出。
-- `engines.dsh` 钉 `>=0.2.0-rc.2 <0.3.0`，DSH 安装/启动按范围 fail-closed；升级 = 换 commit sha 重跑 `add`，重启 profile 生效（bundle 技能不热加载）。
+- `engines.dsh` 钉 `>=0.2.0-rc.2 <0.3.0`，DSH 安装/启动按范围 fail-closed；默认安装跟踪 main 最新（profile lockfile 记录解析到的 commit，单 profile 可复现），升级走 `update` + 重启 profile 生效（bundle 技能不热加载）；需要防篡改可在 `add` 时钉 `#<commit>`。
 - 技能运行时仍只执行 PATH 上的 `adrkit` / `che`（全局安装指引不变）；`dsh plugin add` 随包安装的 `@adrkit/cli` 等依赖不进 PATH 解析。
 - 想走 DSH「发现」市场：按 [官方 plugin-market 文档](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/guide/plugin-market.zh.md)自托管索引（git source + `vX.Y.Z` tag），本仓不再另建市场服务。
 

@@ -27,7 +27,7 @@ newchiwan 团队跨端 **agent skill pack**（`ncw-delivery-harness`）：承载
 
 ```
 skills/<name>/SKILL.md (+ references/ scripts/)
-        │  omp 插件安装（marketplace catalog，source: "./" 即仓根）；DSH 插件安装（根包兼作 dsh bundle，git+commit）；OpenCode 手动拷入发现目录
+        │  omp 插件安装（marketplace catalog，source: "./" 即仓根）；DSH 插件安装（根包兼作 dsh bundle，git 安装跟踪 main，升级走 update）；OpenCode 手动拷入发现目录
         ▼
 各端 skill 发现目录（项目级同名覆盖全局级）
         │  DSH / OpenCode / omp 按目录约定发现
@@ -47,7 +47,7 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 |---|---|
 | `cordis.patch.yml` + `dsh-entry.js`（仓根） | DSH bundle 分发面（根包兼作 dsh 组合包）：patch 层 insert 插件行 `ncw-delivery-skills`；入口把 `skills/<name>/SKILL.md` 挂成 DSH 一等 SkillProvider（provider `ncw-delivery`，source `bundled`，rank 250），纯 node:fs 零依赖、无构建；`package.json` 的 `dsh.bundle`/`engines.dsh`/`main`/`files` 一致性由 `npm test` 结构规则 10 校验 |
 | `skills/che-adr-{check,context,draft}/` | adrkit 上游扩展（adrkit.* 命令）的 pack 分发：SKILL.md（正文英文原文）+ `scripts/`（`adrkit-lib.sh` 三份逐字副本 + 各自入口脚本；draft 另含 pack 新增的 `scaffold.sh`，`adr.sh` 是跨技能 lint/migrate 入口）。运行时依赖外部 `@adrkit/cli`，只执行 PATH 上的 `adrkit`，缺失时引导 `npm install -g @adrkit/cli@0.20.0`。check/draft 的特性解析委托外部 `che` CLI（`che paths`，经 `adrkit-lib.sh`，缺失时引导 `npm install -g @newchiwan/che@0.1.0`）；check 在 plan 后必跑、作为 tasks 入向前置（hook 机制已清除，统一走 SKILL.md 末尾 Handoff 块交接）|
-| `skills/che-compound-*/` | compound 技能组（9 个）：intent/expectations/gapfill/planverify/intentguard/writeback/load/require-intent/planverify-gate。运行期数据落项目 `docs/intents/`、`docs/expectations/`、`docs/adr/`、`docs/corrections/`、`docs/patterns/`，README/config/_drafts 等元数据留在 `docs/compound/`；**ADR 归口 adrkit 语料 `docs/adr/`**（writeback 升格、load 读取、intent 引用均指向语料，load/intent/writeback 正文含 pack fork 段，上游升级需 port）。交接统一走各 SKILL.md 末尾的中文 `## Handoff` 块（目标/条件/回退，详见 `docs/skill-handoff-and-gates.md`）；require-intent / planverify-gate 是手动调用的门禁。require-intent 判定逻辑内联进 che CLI（`che require-intent`，技能脚本仅薄封装委托），开关经 `CHE_REQUIRE_INTENT` 环境变量或项目根 `.che/config.yml` 的 `require_intent:` 读取（默认开，非法值 fail-closed）；开关开启且 `.che/feature.json` 已登记特性时，门禁按登记 slug（目录 basename 去 `YYYYMMDD-HHMMSS-` 前缀，即 `che paths --json` 的 `SLUG` 字段）校验 `docs/intents/{slug}.intent.md` 存在，未登记维持"任意 intent.md"校验；planverify-gate 判定逻辑同样内联进 che CLI（`che planverify-gate <slug>`，技能单文件委托，shell 脚本已删），开关经 `SKC_PLANVERIFY_GATE` 环境变量或项目根 `.che/config.yml` 的 `planverify_gate:` 读取（默认 off，非法值 fail-closed），hook 机制已清除|
+| `skills/che-compound-*/` | compound 技能组（9 个）：intent/expectations/gapfill/planverify/intentguard/writeback/load/require-intent/planverify-gate。运行期数据落项目 `docs/intents/`、`docs/expectations/`、`docs/adr/`、`docs/corrections/`、`docs/patterns/`，README/config/_drafts 等元数据留在 `docs/compound/`；**ADR 归口 adrkit 语料 `docs/adr/`**（writeback 升格、load 读取、intent 引用均指向语料，load/intent/writeback 正文含 pack fork 段，上游升级需 port）。交接统一走各 SKILL.md 末尾的中文 `## Handoff` 块（目标/条件/回退，详见 `docs/skill-handoff-and-gates.md`）；require-intent / planverify-gate 是手动调用的门禁。require-intent 判定逻辑内联进 che CLI（`che require-intent`，技能脚本仅薄封装委托），开关经 `CHE_REQUIRE_INTENT` 环境变量或项目根 `.che/config.yml` 的 `require_intent:` 读取（默认开，非法值 fail-closed）；开关开启且 `.che/feature.json` 已登记特性时，门禁按登记 slug（目录 basename 去 `YYYYMMDD-HHMMSS-` 前缀，即 `che paths --json` 的 `SLUG` 字段）校验 `docs/intents/{slug}.intent.md` 存在，未登记维持"任意 intent.md"校验；planverify-gate 判定逻辑同样内联进 che CLI（`che planverify-gate <slug>`，技能脚本仅薄封装委托），开关经 `SKC_PLANVERIFY_GATE` 环境变量或项目根 `.che/config.yml` 的 `planverify_gate:` 读取（默认 off，非法值 fail-closed），hook 机制已清除|
 | `skills/che-compound-grill-{me,with-docs}/` | grill 上游扩展（grill.* 命令）的 pack 分发：单文件 SKILL.md（正文英文原文）。特性解析统一委托外部 `che` CLI（`che paths`）；两技能均删除上游 extension-hook 段并含此 PATH 解析 fork。`che-compound-grill-me` 其余正文保持上游；**grill-with-docs 另为 pack fork**——ADR 经 `che-adr-draft/scripts/scaffold.sh` 归口 `docs/adr/`，lint 走 `adr.sh`；上游 grill 升级时需 port 这些 fork 段|
 | `skills/che-compound-analyze/` | SKILL.md：analyze 命令（spec/plan/tasks 一致性只读分析），正文英文原文；特性解析入口为外部 `che` CLI（`che check`） |
 |`skills/che-bug-{assess,fix,test}/`|bug 工作流三技能（spec-kit extension:bug 的 pack 分发，正文英文原文）：assess 对 bug 报告（粘贴文本/URL）三角定位产出 `docs/bugs/<slug>/assessment.md` → fix 按评估实施并记 `fix.md` → test 验证并记 `test.md`；slug 解析三级回退（显式参数 → 会话上下文 → 磁盘唯一候选），URL 抓取带信任策略|
@@ -71,8 +71,8 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 omp plugin marketplace add git+https://git.newchiwan.com/council/ncw-delivery-harness.git
 omp plugin install ncw-delivery@ncw-delivery-harness
 
-# DSH 插件（根包兼作 dsh bundle；git 安装钉 commit，升级换 sha 重跑 add）
-dsh plugin --profile <name> add git+https://git.newchiwan.com/council/ncw-delivery-harness.git#<commit>
+# DSH 插件（根包兼作 dsh bundle；默认跟踪 main 最新，升级走 update）
+dsh plugin --profile <name> add git+https://git.newchiwan.com/council/ncw-delivery-harness.git
 
 # 其他端（DSH / OpenCode）：把 skills/<name>/ 拷入对应发现目录即可
 npm test   # 结构校验（唯一质量门）
@@ -141,6 +141,6 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 8. `.omp-plugin/plugin.json` 绝不许存在（manifest remap 会把 `.agents/` 带进 omp 插件安装面，插件只分发 skills）。
 9. DSH bundle 分发面（根包兼作 dsh 组合包）：`package.json` 的 `dsh.bundle.patch` 恰为 `"./cordis.patch.yml"`、`main` 指向存在的 `dsh-entry.js`、`files` 含 `skills`/`dsh-entry.js`/`cordis.patch.yml` 三件、`engines.dsh` 非空（安装时 fail-closed）；`cordis.patch.yml` 存在且 `insert` 一行 `name` 指向 `package.json` 包名；`dsh-entry.js` 导出 `apply` 并调用 `ctx.skills.registerProvider`；两个 DSH 文件同做绝对路径泄漏扫描。
 10. `tests/skills/test-che-cli.sh` 驱动 `npm ci` 链接进 `node_modules/.bin` 的 `@newchiwan/che`，钉 CLI 契约：`paths`/`check` 的 JSON 与文本输出（含 `FEATURE_DIR:` 无空格行与 `FEATURE_DIR: ` 空格行的不对称）、`feature set|show` 指针字节契约、`template`/`setup-plan`/`setup-tasks` 与 skill `references/` 模板的字节级 round-trip、不安全/缺失模板名非零退出并报 `Could not resolve required`、usage 错误退出 2、`--version` 与 `packages/cli/package.json#version` 一致；`paths` 输出 `SLUG` 字段（目录 basename 去 `YYYYMMDD-HHMMSS-` 前缀的 slug 契约）；`require-intent` 门禁契约（默认开拦截、`CHE_REQUIRE_INTENT` 环境变量优先于 `.che/config.yml` 的 `require_intent:`、非法值 fail-closed、非项目目录报错、已登记特性时按 slug 校验 `docs/intents/{slug}.intent.md` 存在而任意 intent.md 不满足、未登记特性维持任意 intent.md 校验）；`planverify-gate` 门禁契约（默认 off 静默放行且不读报告、`SKC_PLANVERIFY_GATE` 环境变量优先于 `.che/config.yml` 的 `planverify_gate:`、非法值 fail-closed、非项目目录报错、block 下报告缺失/无 `verdict:` 行/`BLOCKED_DRIFT` 退 1、`PASS`/`REPLAN_ALLOWED` 退 0、缺或多 slug 与未知参数退 2、`--json` 输出 `MODE`/`VERDICT`/`PROCEED`）。Node 缺失硬 FAIL；Node 无原生 type stripping 时 SKIP（退出 0，不计 pass/fail）。
-11. `tests/skills/test-pack-runtime.sh` 把 adrkit 三个技能复制到临时 `.agents/skills/` 安装位，先以不含 `adrkit`/`che` 的最小 PATH 分别验证两个缺失 CLI 的非零退出与 npm 安装提示，再把 `npm ci` 安装的真实 `@adrkit/cli` 与仓内 `@newchiwan/che` 加入 PATH，驱动 feature paths（经 `adrkit-lib.sh` 的 `che paths` 解析）、scaffold、draft、lint、check、evaluate、context/queue、MADR migrate；require-intent 薄封装同测缺失 che 提示与委托后的门禁行为；`jq` / `git` 仍不在最小 PATH。项目根判定用 `.git`，特性指针在 `.che/feature.json`。
+11. `tests/skills/test-pack-runtime.sh` 把 adrkit 三个技能复制到临时 `.agents/skills/` 安装位，先以不含 `adrkit`/`che` 的最小 PATH 分别验证两个缺失 CLI 的非零退出与 npm 安装提示，再把 `npm ci` 安装的真实 `@adrkit/cli` 与仓内 `@newchiwan/che` 加入 PATH，驱动 feature paths（经 `adrkit-lib.sh` 的 `che paths` 解析）、scaffold、draft、lint、check、evaluate、context/queue、MADR migrate；require-intent / planverify-gate 薄封装同测缺失 che 提示与委托后的门禁行为；`jq` / `git` 仍不在最小 PATH。项目根判定用 `.git`，特性指针在 `.che/feature.json`。
 
 新增检查：在 `for skill_dir in …` 循环内加 per-skill 规则（用 `ok` / `bad "<msg>"` 助手计数），循环后加全局规则；保持 `set -u` 与结尾的 `printf` + `[ "$fail" -eq 0 ]` 不变。
