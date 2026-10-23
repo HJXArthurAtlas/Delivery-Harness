@@ -6,6 +6,7 @@ newchiwan 团队的跨端 agent skill pack：把 PingCode 规格驱动的 AI nat
 
 | skill | 用途 | 触发语示例 |
 |---|---|---|
+| `che-config-init` | 项目接入第一步：交互式逐项讲解并配置 `.che/config.yml`（require_intent / planverify_gate / checker / pingcode_integration 四键），选接 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 `/che-pingcode-init`（pack 新增，正文中文） | 「初始化 .che 配置」「配置项目门禁」「接入 harness」 |
 | `che-adr-context` | 规划前取治理决策进上下文：带路径给 governedBy/activeProposals/history，无路径列 ARB 待评审队列（adrkit context 命令的 pack 分发，正文英文原文；只读） | 「这个改动受哪些决策约束」「列出待评审决策」 |
 | `che-adr-check` | plan 产出后对照 ADR 语料只读校验是否越界，配 ADRKIT_SNAPSHOT 时追加确定性路由报告（adrkit check 命令的 pack 分发；plan 后必跑、tasks 入向前置） | 「check 这个 plan 越没越决策」 |
 | `che-adr-draft` | 从当前 plan 工件 scaffold 一条新 ADR 草稿（不经 hook；其 `scripts/scaffold.sh` 还是 grill-with-docs / compound-writeback 的免 plan 分配入口——ADR 统一归口语料 `docs/adr/`；落稿后接 `scripts/adr.sh lint` 校验） | 「把这个决策落成 ADR」 |
