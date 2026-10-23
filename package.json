@@ -1,7 +1,7 @@
 {
   "name": "ncw-delivery-harness",
   "version": "0.2.0",
-  "description": "newchiwan 团队跨端 agent skill pack：规格驱动开发流程 + adrkit/grill/compound 扩展技能组",
+  "description": "newchiwan 团队跨端 agent skill pack：PingCode 规格驱动开发流程 + adrkit/grill/compound/bug 扩展技能组 + 线上排障",
   "scripts": {
     "test": "bash tests/skills/test-skill-structure.sh && bash tests/skills/test-che-cli.sh && bash tests/skills/test-pack-runtime.sh"
   },

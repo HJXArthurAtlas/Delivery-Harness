@@ -1,6 +1,6 @@
 # Script Language Analysis
 
-Date: 2026-10-22
+Date: 2026-10-23
 
 ## Summary
 
@@ -8,16 +8,16 @@ Shell and TypeScript form the standalone scripting core. The adrkit JavaScript b
 
 | Language | Files | Physical lines | Primary role |
 |---|---:|---:|---|
-| TypeScript (Node ≥22.18, type stripping) | 7 | 852 | `che` CLI under `packages/cli`: feature-pointer state, feature-path resolution, template/setup resolution |
+| TypeScript (Node ≥22.18, type stripping) | 8 | 1,107 | `che` CLI under `packages/cli`: feature-pointer state, feature-path resolution, template/setup resolution, require-intent gate |
 | POSIX `sh` | 8 | 348 | adrkit command wrappers and shared CLI/feature resolvers |
-| Bash | 6 | 766 | Compound gates, test runners, Git commit hook |
-| **Total** | **21** | **1,966** | |
+| Bash | 6 | 862 | Compound gates, test runners, Git commit hook |
+| **Total** | **22** | **2,317** | |
 
 Scope: standalone runtime scripts, tests, the `che` CLI source, and the Git hook. Markdown examples, JSON configuration, and external packages under `node_modules` are excluded. Physical lines include code, comments, and blank lines. **Python: 0 files** — the fourteen bundled helpers (`common.py` ×7, `check_prerequisites.py` ×4, `setup_plan.py`, `setup_tasks.py`, `resolve_template.py`) were removed in the `che` cutover (2026-10-22).
 
 ## Key observations
 
-- **TypeScript accounts for 43.3%** of standalone script lines (the `che` CLI is the largest single runtime); Bash accounts for 39.0%, and POSIX `sh` for 17.7%.
+- **TypeScript accounts for 47.8%** of standalone script lines (the `che` CLI is the largest single runtime); Bash accounts for 37.2%, and POSIX `sh` for 15.0%.
 - **`che` is published as `@newchiwan/che`** from `packages/cli` — raw TS `src/`, no build step, run by Node's native type stripping (unflagged since Node 22.18.0). Consumption model mirrors `@adrkit/cli`: PATH only, no plugin-tree or override fallback.
 - **No standalone Python file remains.** Bash test runners still embed small Node.js programs for JSON assertions.
 - **Two shell dialects are intentional:**
@@ -51,7 +51,7 @@ Design contract per the header: every resolver either yields a usable value or e
 
 ## che CLI (`packages/cli`)
 
-Seven TS modules, dispatched from `src/index.ts` (adrkit `packages/cli` layout: manual argv pre-parse + `node:util` `parseArgs`, `CLI_VERSION` literal pinned to `package.json#version`, `isMainModule` guard, exit codes 0/1/2).
+Eight TS modules, dispatched from `src/index.ts` (adrkit `packages/cli` layout: manual argv pre-parse + `node:util` `parseArgs`, `CLI_VERSION` literal pinned to `package.json#version`, `isMainModule` guard, exit codes 0/1/2).
 
 | Module | Responsibility |
 |---|---|
@@ -60,6 +60,7 @@ Seven TS modules, dispatched from `src/index.ts` (adrkit `packages/cli` layout: 
 | `feature.ts` | `che feature set <dir>` / `che feature show` — the pointer write/read behind `/che-compound-specify` |
 | `template.ts` | Safe-name (`[a-z0-9-]+`) template resolution from a caller-supplied `references/` dir |
 | `setup.ts` | `che setup-plan` / `che setup-tasks` — template copy and tasks-template resolution |
+| `require-intent.ts` | `che require-intent` — specify gate: toggle resolution (env → config → default on, fail-closed) + intent-doc/slug check |
 | `main-module.ts` | `isMainModule`, verbatim from adrkit |
 | `index.ts` | Dispatch, usage, `--version` |
 

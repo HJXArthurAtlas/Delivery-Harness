@@ -1,13 +1,13 @@
 # NCW Delivery Harness
 
-newchiwan 团队的跨端 agent skill pack：把 PingCode 规格驱动的 AI native 开发流程（speckit 全流程与建卡收尾）、adrkit / compound 治理与线上排障做成可安装的 agent skill，DSH / OpenCode / omp 等等。GitLab 项目：[Tech Council / ncw-delivery-harness](https://git.newchiwan.com/council/ncw-delivery-harness)（内部仓，默认分支 `main`）。
+newchiwan 团队的跨端 agent skill pack：把 PingCode 规格驱动的 AI native 开发流程（speckit 全流程与建卡收尾）、adrkit / grill / compound / bug 治理与线上排障做成可安装的 agent skill，DSH / OpenCode / omp 等等。GitLab 项目：[Tech Council / ncw-delivery-harness](https://git.newchiwan.com/council/ncw-delivery-harness)（内部仓，默认分支 `main`）。
 
 ## Pack 内容
 
 | skill | 用途 | 触发语示例 |
 |---|---|---|
 | `che-adr-context` | 规划前取治理决策进上下文：带路径给 governedBy/activeProposals/history，无路径列 ARB 待评审队列（adrkit context 命令的 pack 分发，正文英文原文；只读） | 「这个改动受哪些决策约束」「列出待评审决策」 |
-| `che-adr-check` | plan 产出后对照 ADR 语料只读校验是否越界，配 ADRKIT_SNAPSHOT 时追加确定性路由报告（adrkit check 命令的 pack 分发；after_plan 可选 hook 目标） | 「check 这个 plan 越没越决策」 |
+| `che-adr-check` | plan 产出后对照 ADR 语料只读校验是否越界，配 ADRKIT_SNAPSHOT 时追加确定性路由报告（adrkit check 命令的 pack 分发；plan 后必跑、tasks 入向前置） | 「check 这个 plan 越没越决策」 |
 | `che-adr-draft` | 从当前 plan 工件 scaffold 一条新 ADR 草稿（不经 hook；其 `scripts/scaffold.sh` 还是 grill-with-docs / compound-writeback 的免 plan 分配入口——ADR 统一归口语料 `docs/adr/`；落稿后接 `scripts/adr.sh lint` 校验） | 「把这个决策落成 ADR」 |
 | `che-compound-intent` | intent 访谈：目标 + 约束 + 失败条件（compound v0.7.0 的 pack 分发，正文英文原文；运行期数据落在项目 `docs/intents/` 等，不经扩展安装） | 「先做 intent 访谈」「锁定目标与约束」 |
 | `che-compound-expectations` | 期望访谈：正/边缘场景与 intent 分文件存放（builder 不可见，防 reward-hack） | 「补期望场景」「写 expectations」 |
@@ -15,9 +15,9 @@ newchiwan 团队的跨端 agent skill pack：把 PingCode 规格驱动的 AI nat
 | `che-compound-writeback` | intentguard PASS 后把本次纠偏/模式写回 `docs/corrections/` + `docs/patterns/`，耐久纠偏升格为 ADR 进 adrkit 语料 `docs/adr/` | 「writeback 本次经验」 |
 | `che-compound-gapfill` | intent + expectations 对照 tasks.md 找覆盖缺口并追加任务（带来源注释） | 「补任务缺口」「gapfill」 |
 | `che-compound-planverify` | 实现前由独立 checker（跨模型优先）判定 plan + 任务是否偏离锁定 intent | 「验证 plan」「planverify」 |
-| `che-compound-planverify-gate` | before_implement 门禁脚本包装器：`SKC_PLANVERIFY_GATE=block` 时拦截未验证/BLOCKED_DRIFT 的实现 | （hook 触发） |
+| `che-compound-planverify-gate` | before_implement 门禁脚本包装器：`SKC_PLANVERIFY_GATE=block` 时拦截未验证/BLOCKED_DRIFT 的实现 | （手动/agent 调用） |
 | `che-compound-intentguard` | 实现后 L3 校验：密封 briefing + 独立 checker 判 diff 是否越出 intent/期望 | 「intentguard 校验本次实现」 |
-| `che-compound-require-intent` | before_specify 门禁：`docs/intents/` 无 intent 文档时拦截 specify（判定逻辑内联在 che CLI `che require-intent`，技能脚本仅薄封装委托）；开关经 `CHE_REQUIRE_INTENT` 环境变量或 `.che/config.yml` 的 `require_intent:` 配置，默认开 | （hook 触发） |
+| `che-compound-require-intent` | before_specify 门禁：`docs/intents/` 无 intent 文档时拦截 specify（判定逻辑内联在 che CLI `che require-intent`，技能脚本仅薄封装委托）；开关经 `CHE_REQUIRE_INTENT` 环境变量或 `.che/config.yml` 的 `require_intent:` 配置，默认开 | （手动/agent 调用） |
 | `che-compound-grill-me` | 无上限轮次澄清访谈（clarify 的深化替代）：前沿/轮次/设计树把 spec.md 决策点推进到 Clear/Resolved/Outstanding/Deferred（grill me 命令的 pack 分发，正文英文原文） | 「深度澄清这份 spec」「grill me」 |
 | `che-compound-grill-with-docs` | 同 grill-me 澄清流程 + settled 跨特性术语/领域知识即时落盘 docs/domain_knowledge/（CONTEXT.md + 主题文档）；过三条件记录门的决策经 adrkit scaffold 归口为 ADR（`docs/adr/`，pack fork 段）（grill with-docs 命令的 pack 分发） | 「澄清并沉淀领域知识」 |
 | `che-compound-analyze` | 跨工件一致性只读分析（analyze 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「分析 spec/plan/tasks 一致性」 |
@@ -109,7 +109,7 @@ npm install -g @adrkit/cli@0.20.0
 
 ```bash
 npm ci     # 安装钉版本的 @adrkit/cli，并把仓内 @newchiwan/che（file:packages/cli）链接进 node_modules/.bin，供运行时契约测试使用
-npm test   # ① test-skill-structure.sh：结构与分发面；② test-che-cli.sh：che CLI 契约（paths/check/feature/template/setup-plan/setup-tasks 字节级 parity）；③ test-pack-runtime.sh：临时 .agents/skills 安装 + 最小 PATH，验证缺失 CLI 的 npm 安装提示，再用真实 @adrkit/cli 与 che 驱动特性解析、ADR scaffold/draft/lint/check/evaluate/context/queue/migrate
+npm test   # ① test-skill-structure.sh：结构与分发面；② test-che-cli.sh：che CLI 契约（paths/check/feature/require-intent/template/setup-plan/setup-tasks，模板字节级 round-trip）；③ test-pack-runtime.sh：临时 .agents/skills 安装 + 最小 PATH，验证缺失 CLI 的 npm 安装提示，再用真实 @adrkit/cli 与 che 驱动特性解析、ADR scaffold/draft/lint/check/evaluate/context/queue/migrate
 ```
 
 新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）；`npm test` 会把关。omp 插件按 `skills/` 目录自动发现，无需另行登记。命名格式 `che-{submodule}-action`（如 `che-pingcode-init`），全名 ≤32 字符。

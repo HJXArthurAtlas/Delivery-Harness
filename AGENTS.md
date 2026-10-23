@@ -6,7 +6,7 @@
 
 ## Project Overview
 
-newchiwan 团队跨端 **agent skill pack**（`ncw-delivery-harness`）：承载 PingCode 规格驱动开发流程，以及 adrkit / grill / compound 三组上游扩展技能，做成可安装的 agent skill，部署到 DSH / OpenCode / omp 等端。GitLab 项目：`council/ncw-delivery-harness`（内部仓，默认分支 `main`，无 CI——本地 `npm test` 是唯一质量门）。
+newchiwan 团队跨端 **agent skill pack**（`ncw-delivery-harness`）：承载 PingCode 规格驱动开发流程，以及 adrkit / grill / compound / bug 四组上游扩展技能，做成可安装的 agent skill，部署到 DSH / OpenCode / omp 等端。GitLab 项目：`council/ncw-delivery-harness`（内部仓，默认分支 `main`，无 CI——本地 `npm test` 是唯一质量门）。
 
 初始化与 monorepo 骨架职责在模板仓 `council/monorepo-template`；本仓只承载技能（流程规则 + 自包含运行时），两者独立发版。
 

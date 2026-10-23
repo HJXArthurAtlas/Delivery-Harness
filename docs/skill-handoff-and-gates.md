@@ -1,6 +1,6 @@
 # Skill 交接流程与门禁清单
 
-> 来源：`skills/` 各 SKILL.md 正文（2026-10-23 盘点，hook 机制已清除、统一 Handoff 块）。分发面技能共 23 个，本文覆盖全部交接（handoff）与门禁（gate）机制。
+> 来源：`skills/` 各 SKILL.md 正文（2026-10-23 盘点，hook 机制已清除、统一 Handoff 块）。分发面技能共 33 个（其中 23 个带统一 Handoff 块），本文覆盖全部交接（handoff）与门禁（gate）机制。
 
 ## 1. 流程主线（`che-compound-flow`，9 阶段）
 
