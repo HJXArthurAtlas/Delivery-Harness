@@ -23,7 +23,7 @@ Scope: standalone runtime scripts, tests, the `che` CLI source, and the Git hook
 - **Two shell dialects are intentional:**
   - adrkit wrappers use `#!/bin/sh`; preserve POSIX compatibility.
   - Tests, compound gates, and the commit hook require Bash, including Bash-specific features such as process substitution and `BASH_SOURCE`.
-- **External runtimes:** adrkit skills require `@adrkit/cli` 0.20.0 with `adrkit` on `PATH`; speckit/grill/adrkit feature resolution requires `@newchiwan/che` with `che` on `PATH` (`npm install -g @newchiwan/che@0.1.0` when unavailable). No override or plugin-binary fallback is used for either.
+- **External runtimes:** adrkit skills require `@adrkit/cli` 0.20.0 with `adrkit` on `PATH`; speckit/grill/adrkit feature resolution requires `@newchiwan/che` with `che` on `PATH` (`npm install -g @newchiwan/che@latest` when unavailable). No override or plugin-binary fallback is used for either.
 - **Other runtime requirements:** Node.js **>=22.18**, Bash, POSIX shell/core utilities. Node and the npm-installed CLIs are mandatory for the full repository test suite (the `che` suite SKIPs only when the local Node lacks native type stripping).
 
 ## Duplication profile

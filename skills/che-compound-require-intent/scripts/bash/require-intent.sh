@@ -15,7 +15,7 @@
 set -u
 
 command -v che >/dev/null 2>&1 || {
-  echo "ERROR: che CLI not found on PATH; install it with 'npm install -g @newchiwan/che@0.1.0'" >&2
+  echo "ERROR: che CLI not found on PATH; install it with 'npm install -g @newchiwan/che@latest'" >&2
   exit 1
 }
 

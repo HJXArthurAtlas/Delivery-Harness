@@ -38,7 +38,7 @@ constitution scaffold is resolved at command time from this skill's `references/
 
 Follow this execution flow:
 
-1. Run `che template constitution-template --json --references-dir .agents/skills/che-compound-constitution/references` (global install: `~/.agents/skills/che-compound-constitution/references`), from the repository root, and parse `TEMPLATE_CONTENT` as the active template (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@0.1.0`).
+1. Run `che template constitution-template --json --references-dir .agents/skills/che-compound-constitution/references` (global install: `~/.agents/skills/che-compound-constitution/references`), from the repository root, and parse `TEMPLATE_CONTENT` as the active template (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`).
    - If resolution fails (the template is missing from this skill's `references/`), stop and report the resolution error; do not continue.
    - If `docs/constitution/constitution.md` exists, load it as the source of current project-specific
      values and amendments. Preserve information that is still applicable when applying the newly

@@ -26,7 +26,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ### 段二：解析当前特性（硬性前置，与其他 speckit 命令同惯例）
 
-1. 确认环境是 macOS / Linux 且外部 `che` CLI 在 PATH 上可用（`@newchiwan/che`，要求 Node ≥ 22.18；缺失则 `npm install -g @newchiwan/che@0.1.0`）。不可用则声明环境不受支持并停止。绝不退回项目内其他脚本——pack 契约是只经由 PATH 上的 `che` 解析。
+1. 确认环境是 macOS / Linux 且外部 `che` CLI 在 PATH 上可用（`@newchiwan/che`，要求 Node ≥ 22.18；缺失则 `npm install -g @newchiwan/che@latest`）。不可用则声明环境不受支持并停止。绝不退回项目内其他脚本——pack 契约是只经由 PATH 上的 `che` 解析。
 2. 从仓库根运行 `che paths --json` **恰好一次**，解析 JSON 取 `FEATURE_DIR` / `FEATURE_SPEC`。
 3. 校验 `$FEATURE_DIR/spec.md` 存在：脚本失败或 spec 缺失时停止，提示先运行 `/che-compound-specify`，绝不凭空继续。
 4. 本 skill 依赖一个具体的 spec 才能执行：后续澄清以该 spec 为需求材料，设计明细最终落到 `$FEATURE_DIR/design-tasks.md`（特性目录本身即唯一标识）。

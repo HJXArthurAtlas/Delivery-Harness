@@ -49,7 +49,7 @@ adrkit_feature_dir() {
 	fi
 
 	command -v che >/dev/null 2>&1 ||
-		adrkit_fail "che CLI not found on PATH; install it with 'npm install -g @newchiwan/che@0.1.0', or set ADRKIT_FEATURE_DIR"
+		adrkit_fail "che CLI not found on PATH; install it with 'npm install -g @newchiwan/che@latest', or set ADRKIT_FEATURE_DIR"
 
 	_adrkit_paths="$(che paths)" ||
 		adrkit_fail "che feature resolution failed — run /che-compound-specify first, or set ADRKIT_FEATURE_DIR"

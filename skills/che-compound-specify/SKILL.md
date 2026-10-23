@@ -22,7 +22,7 @@ Given that feature description, do this:
 
    > Pack fork (ncw), port on upstream upgrade: upstream generates this short name from the feature description; the pack aligns it with the intent slug / `.che/feature.json` so one slug flows through the whole chain.
 
-   - Run `che feature show` from the repository root (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@0.1.0`):
+   - Run `che feature show` from the repository root (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`):
      - **Registered feature** (the command prints a directory): the short name is that directory's slug — basename with a leading `YYYYMMDD-HHMMSS-` prefix stripped (e.g. `specs/20261022-084501-user-auth` → `user-auth`). Reuse it verbatim; do NOT regenerate a different name. (`che paths --json` reports the same value as `SLUG`.)
      - **No registered feature** (exit non-zero / empty): derive the short name from the intent doc so intent and spec stay aligned — list `docs/intents/*.intent.md`:
        - Exactly one → use its slug (`<slug>` from `<slug>.intent.md`) as the short name.
@@ -53,7 +53,7 @@ Given that feature description, do this:
    - Use this skill's own `references/spec-template.md` as the spec template — no project scaffolding and no override/preset/extension resolution stack
    - Copy the resolved `spec-template` file to `CHE_FEATURE_DIRECTORY/spec.md` as the starting point
    - Set `SPEC_FILE` to `CHE_FEATURE_DIRECTORY/spec.md`
-   - Persist the resolved path to `.che/feature.json` by running `che feature set <resolved feature dir>` from the repository root (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@0.1.0`).
+   - Persist the resolved path to `.che/feature.json` by running `che feature set <resolved feature dir>` from the repository root (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`).
      This allows downstream commands (`/che-compound-plan`, `/che-compound-tasks`, etc.) to locate the feature directory without relying on git branch name conventions.
 
    **IMPORTANT**:

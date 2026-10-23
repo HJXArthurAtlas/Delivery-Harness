@@ -32,7 +32,7 @@ If non-empty, treat it as a request to prioritize the specified area for deeper 
 
 ## Prerequisites
 
-1. Confirm that the environment is macOS / Linux and that `bash` and the external `che` CLI are available on PATH (`@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@0.1.0` if missing). If not, state that the environment is unsupported and stop. Do not substitute a project-local prerequisite script.
+1. Confirm that the environment is macOS / Linux and that `bash` and the external `che` CLI are available on PATH (`@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest` if missing). If not, state that the environment is unsupported and stop. Do not substitute a project-local prerequisite script.
 2. From the repository root, run `che paths --json` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC`. If it does not return JSON, stop and recommend rerunning the agent-specific invocation of `che-compound-specify` or checking the active feature environment.
 3. If spec.md does not exist, stop and recommend running the agent-specific invocation of `che-compound-specify` first. Do not create a new specification here.
 4. Read `docs/constitution/constitution.md` (project principles) if it exists. In addition, inspect **only the existing materials relevant to the work at hand** using ordinary file search, file reading, and symbol search:

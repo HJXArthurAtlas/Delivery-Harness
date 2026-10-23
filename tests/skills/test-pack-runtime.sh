@@ -121,7 +121,7 @@ command -v che >/dev/null 2>&1 && bad "fixture: 外部 che 意外进入最小 PA
 run "$SKILLS/che-adr-draft/scripts/draft.sh" Probe
 [ "$RC" -eq 1 ] && ok || bad "missing che: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
-  *"npm install -g @newchiwan/che@0.1.0"*) ok ;;
+  *"npm install -g @newchiwan/che@latest"*) ok ;;
   *) bad "missing che: 未提示 npm 安装：$(<"$TMP/stderr")" ;;
 esac
 # Missing-che contract: the require-intent wrapper delegates to the che CLI
@@ -129,13 +129,13 @@ esac
 run "$GATE_WRAPPER"
 [ "$RC" -eq 1 ] && ok || bad "require-intent missing che: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
-  *"npm install -g @newchiwan/che@0.1.0"*) ok ;;
+  *"npm install -g @newchiwan/che@latest"*) ok ;;
   *) bad "require-intent missing che: 未提示 npm 安装：$(<"$TMP/stderr")" ;;
 esac
 run "$PV_GATE_WRAPPER" demo
 [ "$RC" -eq 1 ] && ok || bad "planverify-gate missing che: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
-  *"npm install -g @newchiwan/che@0.1.0"*) ok ;;
+  *"npm install -g @newchiwan/che@latest"*) ok ;;
   *) bad "planverify-gate missing che: 未提示 npm 安装：$(<"$TMP/stderr")" ;;
 esac
 ln -s "$CHE_BIN" "$TMP/bin/che"

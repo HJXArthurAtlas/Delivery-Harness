@@ -23,7 +23,7 @@ newchiwan 团队跨端 **agent skill pack**（`ncw-delivery-harness`）：承载
 
 ## Architecture & Data Flow（分发模型）
 
-无消费端构建步骤——「分发物」即 `skills/` 下的 Markdown 规则 + 技能携带的 shell 运行时，端侧按目录约定直接扫描发现。adrkit 技能依赖外部 `@adrkit/cli`，不随 pack 内置 CLI bundle；speckit/grill 系与 adrkit check/draft 的特性路径解析依赖外部 `@newchiwan/che`（源与发布单元在 `packages/cli`，npm 发布，不经插件分发），同样只执行 PATH 上的 `che`，缺失时引导 `npm install -g @newchiwan/che@0.1.0`。
+无消费端构建步骤——「分发物」即 `skills/` 下的 Markdown 规则 + 技能携带的 shell 运行时，端侧按目录约定直接扫描发现。adrkit 技能依赖外部 `@adrkit/cli`，不随 pack 内置 CLI bundle；speckit/grill 系与 adrkit check/draft 的特性路径解析依赖外部 `@newchiwan/che`（源与发布单元在 `packages/cli`，npm 发布，不经插件分发），同样只执行 PATH 上的 `che`，缺失时引导 `npm install -g @newchiwan/che@latest`。
 
 ```
 skills/<name>/SKILL.md (+ references/ scripts/)
@@ -46,7 +46,7 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 | 路径 | 用途 |
 |---|---|
 | `cordis.patch.yml` + `dsh-entry.js`（仓根） | DSH bundle 分发面（根包兼作 dsh 组合包）：patch 层 insert 插件行 `ncw-delivery-skills`；入口把 `skills/<name>/SKILL.md` 挂成 DSH 一等 SkillProvider（provider `ncw-delivery`，source `bundled`，rank 250），纯 node:fs 零依赖、无构建；`package.json` 的 `dsh.bundle`/`engines.dsh`/`main`/`files` 一致性由 `npm test` 结构规则 10 校验 |
-| `skills/che-adr-{check,context,draft}/` | adrkit 上游扩展（adrkit.* 命令）的 pack 分发：SKILL.md（正文英文原文）+ `scripts/`（`adrkit-lib.sh` 三份逐字副本 + 各自入口脚本；draft 另含 pack 新增的 `scaffold.sh`，`adr.sh` 是跨技能 lint/migrate 入口）。运行时依赖外部 `@adrkit/cli`，只执行 PATH 上的 `adrkit`，缺失时引导 `npm install -g @adrkit/cli@0.20.0`。check/draft 的特性解析委托外部 `che` CLI（`che paths`，经 `adrkit-lib.sh`，缺失时引导 `npm install -g @newchiwan/che@0.1.0`）；check 在 plan 后必跑、作为 tasks 入向前置（hook 机制已清除，统一走 SKILL.md 末尾 Handoff 块交接）|
+| `skills/che-adr-{check,context,draft}/` | adrkit 上游扩展（adrkit.* 命令）的 pack 分发：SKILL.md（正文英文原文）+ `scripts/`（`adrkit-lib.sh` 三份逐字副本 + 各自入口脚本；draft 另含 pack 新增的 `scaffold.sh`，`adr.sh` 是跨技能 lint/migrate 入口）。运行时依赖外部 `@adrkit/cli`，只执行 PATH 上的 `adrkit`，缺失时引导 `npm install -g @adrkit/cli@0.20.0`。check/draft 的特性解析委托外部 `che` CLI（`che paths`，经 `adrkit-lib.sh`，缺失时引导 `npm install -g @newchiwan/che@latest`）；check 在 plan 后必跑、作为 tasks 入向前置（hook 机制已清除，统一走 SKILL.md 末尾 Handoff 块交接）|
 | `skills/che-compound-*/` | compound 技能组（9 个）：intent/expectations/gapfill/planverify/intentguard/writeback/load/require-intent/planverify-gate。运行期数据落项目 `docs/intents/`、`docs/expectations/`、`docs/adr/`、`docs/corrections/`、`docs/patterns/`，README/config/_drafts 等元数据留在 `docs/compound/`；**ADR 归口 adrkit 语料 `docs/adr/`**（writeback 升格、load 读取、intent 引用均指向语料，load/intent/writeback 正文含 pack fork 段，上游升级需 port）。交接统一走各 SKILL.md 末尾的中文 `## Handoff` 块（目标/条件/回退，详见 `docs/skill-handoff-and-gates.md`）；require-intent / planverify-gate 是手动调用的门禁。require-intent 判定逻辑内联进 che CLI（`che require-intent`，技能脚本仅薄封装委托），开关经 `CHE_REQUIRE_INTENT` 环境变量或项目根 `.che/config.yml` 的 `require_intent:` 读取（默认开，非法值 fail-closed）；开关开启且 `.che/feature.json` 已登记特性时，门禁按登记 slug（目录 basename 去 `YYYYMMDD-HHMMSS-` 前缀，即 `che paths --json` 的 `SLUG` 字段）校验 `docs/intents/{slug}.intent.md` 存在，未登记维持"任意 intent.md"校验；planverify-gate 判定逻辑同样内联进 che CLI（`che planverify-gate <slug>`，技能脚本仅薄封装委托），开关经 `SKC_PLANVERIFY_GATE` 环境变量或项目根 `.che/config.yml` 的 `planverify_gate:` 读取（默认 off，非法值 fail-closed），hook 机制已清除|
 | `skills/che-compound-grill-{me,with-docs}/` | grill 上游扩展（grill.* 命令）的 pack 分发：单文件 SKILL.md（正文英文原文）。特性解析统一委托外部 `che` CLI（`che paths`）；两技能均删除上游 extension-hook 段并含此 PATH 解析 fork。`che-compound-grill-me` 其余正文保持上游；**grill-with-docs 另为 pack fork**——ADR 经 `che-adr-draft/scripts/scaffold.sh` 归口 `docs/adr/`，lint 走 `adr.sh`；上游 grill 升级时需 port 这些 fork 段|
 | `skills/che-compound-analyze/` | SKILL.md：analyze 命令（spec/plan/tasks 一致性只读分析），正文英文原文；特性解析入口为外部 `che` CLI（`che check`） |
@@ -114,7 +114,7 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 
 | 文件 | 作用 |
 |---|---|
-| `package.json` | `scripts.test`、`files: ["skills", "dsh-entry.js", "cordis.patch.yml"]`（npm 只发 skills/ 与 DSH bundle 两文件）、`dependencies.@adrkit/cli`（adrkit 技能外部运行时，精确版本钉；omp git/npm 插件安装路径由 bun 安装，仓内运行时测试经 `npm ci` 使用）与 `dependencies.@newchiwan/che`（`file:packages/cli` 本仓链接；首次 registry 发布后改精确钉 `"0.1.0"`）、`engines.node >=22.18` + `engines.dsh`（DSH 兼容范围，钉 `>=0.2.0-rc.2 <0.3.0`）、`main: dsh-entry.js` + `"type": "module"`、`dsh.bundle`（根包兼作 dsh 组合包 manifest，指向 `./cordis.patch.yml`） |
+| `package.json` | `scripts.test`、`files: ["skills", "dsh-entry.js", "cordis.patch.yml"]`（npm 只发 skills/ 与 DSH bundle 两文件）、`dependencies.@adrkit/cli`（adrkit 技能外部运行时，精确版本钉；omp git/npm 插件安装路径由 bun 安装，仓内运行时测试经 `npm ci` 使用）与 `dependencies.@newchiwan/che`（`file:packages/cli` 本仓链接，不经 registry；安装提示统一 `@latest`——技能文本与 CLI 同仓同步演进，latest 恒与技能行为对齐）、`engines.node >=22.18` + `engines.dsh`（DSH 兼容范围，钉 `>=0.2.0-rc.2 <0.3.0`）、`main: dsh-entry.js` + `"type": "module"`、`dsh.bundle`（根包兼作 dsh 组合包 manifest，指向 `./cordis.patch.yml`） |
 | `.githooks/commit-msg` | 提交格式校验（`core.hooksPath` 已在本仓激活） |
 | `.omp-plugin/marketplace.json` | omp marketplace catalog（omp 插件分发唯一入口；`version` 必须与 `package.json` 一致，`npm test` 强制） |
 | `README.md` | 面向用户的安装/开发文档；改动分发模型时同步 |

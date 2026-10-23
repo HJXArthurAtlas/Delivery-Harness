@@ -38,7 +38,7 @@ The command:
    - That report's verdict is `PASS` or `REPLAN_ALLOWED` → exits 0 (proceed)
 
 Exit code 2 means a usage error (missing or duplicate `<slug>`); a missing
-`che` CLI exits 1 with the install hint (`npm install -g @newchiwan/che@0.1.0`).
+`che` CLI exits 1 with the install hint (`npm install -g @newchiwan/che@latest`).
 
 If the command exits non-zero, **do not continue with `/che-compound-implement`**. Relay
 the message to the user:
