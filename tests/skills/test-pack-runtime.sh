@@ -31,7 +31,7 @@ TMP="$(mktemp -d)"
 TMP="$(cd "$TMP" && pwd -P)"
 trap 'PATH=$ORIG_PATH; rm -rf "$TMP"' EXIT
 unset ADRKIT_FEATURE_DIR ADRKIT_SNAPSHOT ADRKIT_AS_OF
-unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_FEATURE_NO_PERSIST CHE_REQUIRE_INTENT
+unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_FEATURE_NO_PERSIST CHE_REQUIRE_INTENT SKC_PLANVERIFY_GATE
 unset SPECIFY_INIT_DIR SPECIFY_FEATURE SPECIFY_FEATURE_DIRECTORY SPECIFY_FEATURE_NO_PERSIST
 
 INSTALL="$TMP/install"
@@ -43,6 +43,8 @@ for skill in che-adr-check che-adr-context che-adr-draft; do
 done
 cp -R "$REPO_ROOT/skills/che-compound-require-intent" "$SKILLS/che-compound-require-intent"
 GATE_WRAPPER="$SKILLS/che-compound-require-intent/scripts/bash/require-intent.sh"
+cp -R "$REPO_ROOT/skills/che-compound-planverify-gate" "$SKILLS/che-compound-planverify-gate"
+PV_GATE_WRAPPER="$SKILLS/che-compound-planverify-gate/scripts/bash/planverify-gate.sh"
 
 printf '%s\n' '{"feature_directory":"specs/001-demo"}' > "$PROJECT/.che/feature.json"
 printf '# Demo\n' > "$PROJECT/specs/001-demo/spec.md"
@@ -130,6 +132,12 @@ case "$(<"$TMP/stderr")" in
   *"npm install -g @newchiwan/che@0.1.0"*) ok ;;
   *) bad "require-intent missing che: 未提示 npm 安装：$(<"$TMP/stderr")" ;;
 esac
+run "$PV_GATE_WRAPPER" demo
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate missing che: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"npm install -g @newchiwan/che@0.1.0"*) ok ;;
+  *) bad "planverify-gate missing che: 未提示 npm 安装：$(<"$TMP/stderr")" ;;
+esac
 ln -s "$CHE_BIN" "$TMP/bin/che"
 command -v che >/dev/null 2>&1 && ok || bad "fixture: 无法把真实 @newchiwan/che 加入 PATH"
 
@@ -154,6 +162,22 @@ RC=$?
 mkdir -p "$PROJECT/docs/intents" && printf '# Intent\n' > "$PROJECT/docs/intents/001-demo.intent.md"
 run "$GATE_WRAPPER"
 [ "$RC" -eq 0 ] && ok || bad "require-intent 有 intent 放行: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+
+# The planverify-gate wrapper delegates to `che planverify-gate`: default off
+# is a silent no-op; block mode gates on docs/intents/<slug>.planverify.md.
+run "$PV_GATE_WRAPPER" demo
+[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate 默认 off: RC=$RC OUT=$OUT，预期静默退 0"
+OUT="$(cd "$PROJECT" && SKC_PLANVERIFY_GATE=block "$PV_GATE_WRAPPER" demo 2>"$TMP/stderr")"
+RC=$?
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate block 无报告: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"no planverify report exists for 'demo'"*) ok ;;
+  *) bad "planverify-gate block 无报告: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+printf 'verdict: PASS\n' > "$PROJECT/docs/intents/demo.planverify.md"
+OUT="$(cd "$PROJECT" && SKC_PLANVERIFY_GATE=block "$PV_GATE_WRAPPER" demo 2>"$TMP/stderr")"
+RC=$?
+[ "$RC" -eq 0 ] && ok || bad "planverify-gate block+PASS 放行: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 
 # The real @adrkit/cli and all three wrappers work through PATH resolution.
 EXPECTED_VERSION="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).dependencies["@adrkit/cli"]' "$REPO_ROOT/package.json")"

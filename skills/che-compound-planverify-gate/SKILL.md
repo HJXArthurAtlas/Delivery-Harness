@@ -6,9 +6,9 @@ description: 'Gate before implement: when the gate mode is block (SKC_PLANVERIFY
 # Planverify Gate (before_implement)
 
 This gate runs manually — invoked by the user or the agent via Bash before
-`/che-compound-implement` of the given feature. The gate logic is inlined in
-the che CLI (`che planverify-gate`), so it executes deterministically — no
-interactive prompt.
+`/che-compound-implement` of the given feature. The gate logic is **inlined in
+the `che` CLI** (`che planverify-gate`) — the bundled script is a thin wrapper
+over it — so it executes deterministically, not as an interactive prompt.
 
 Its job: optionally gate `/che-compound-implement` on the planverify verdict of
 the feature about to be implemented.
@@ -17,12 +17,15 @@ the feature about to be implemented.
 
 ## What you must do
 
-Run the gate via Bash before implementing the feature, passing that feature's
-slug (run before `/che-compound-implement` of that feature):
+Run the gate via Bash (the bundled script is a thin wrapper over the CLI),
+passing that feature's slug (run before `/che-compound-implement` of that
+feature):
 
 ```bash
-che planverify-gate <slug>
+.agents/skills/che-compound-planverify-gate/scripts/bash/planverify-gate.sh <slug>
 ```
+
+(Global install: `~/.agents/skills/che-compound-planverify-gate/scripts/bash/planverify-gate.sh <slug>`.)
 
 The command:
 
@@ -34,12 +37,20 @@ The command:
    - That report's verdict is `BLOCKED_DRIFT` → exits 1 (replan first)
    - That report's verdict is `PASS` or `REPLAN_ALLOWED` → exits 0 (proceed)
 
-Exit code 2 means a usage error (missing or duplicate `<slug>`).
+Exit code 2 means a usage error (missing or duplicate `<slug>`); a missing
+`che` CLI exits 1 with the install hint (`npm install -g @newchiwan/che@0.1.0`).
 
 If the command exits non-zero, **do not continue with `/che-compound-implement`**. Relay
 the message to the user:
 
 > *"planverify gate is ON and the plan is not cleared. Run `/che-compound-planverify` (and replan if it returned BLOCKED_DRIFT) before `/che-compound-implement`."*
+
+---
+
+## Tool choices
+
+- **Bash** to invoke the gate script (or `che planverify-gate <slug>` directly)
+- No Read, Write, Edit, or other tools needed
 
 ---
 
