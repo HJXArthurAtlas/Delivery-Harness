@@ -71,8 +71,6 @@ git clone https://git.newchiwan.com/council/ncw-delivery-harness.git
 cp -R ncw-delivery-harness/skills/<name> <发现目录>/skills/
 ```
 
-支持 `--dry-run` 预览、`--force` 覆盖同名；默认同名不覆盖。
-
 | 目标目录 | 生效端 |
 |---|---|
 | `.agents/skills/`（项目）或 `~/.agents/skills/`（全局） | DSH / OpenCode / omp |
@@ -88,11 +86,13 @@ omp plugin marketplace add https://git.newchiwan.com/council/ncw-delivery-harnes
 omp plugin install ncw-delivery@ncw-delivery-harness
 ```
 
-- 插件**只含 skills**，不含斜杠命令；`.agents/commands/`（`/readme-refresh`）是本仓维护者工具，不经插件也不经 sync 分发——sync 只装 `skills/`。
+- 插件**只含 skills**，不含斜杠命令；`.agents/commands/`（`/readme-refresh`）是本仓维护者工具，不经插件分发——pack 没有额外的同步/安装脚本，插件树即 `skills/`。
 - 更新：`omp plugin upgrade ncw-delivery@ncw-delivery-harness`；装完 `/reload-plugins` 或开新会话生效。
 - 注意 `marketplace.autoUpdate` 默认 `notify` 只写 debug log 不提示；要自动更新执行 `omp config set marketplace.autoUpdate auto`。
 - catalog `version` 与 `package.json` 版本同步维护，`npm test` 校验二者一致。
 - **marketplace 安装不解析 npm 依赖**（只缓存插件树并符号链接）。该路径下若 `adrkit` 或 `che` 不可用，手动运行 `npm install -g @adrkit/cli@0.20.0` 与 `npm install -g @newchiwan/che@0.1.0`。
+- **缓存是整仓快照**：`marketplace add` 克隆整仓，`plugin install` 把 `source` 目录整树拷入 `~/.omp/plugins/cache/plugins/<marketplace>___<plugin>___<version>/`（catalog 无文件过滤字段）。agent 运行时只从缓存发现 `skills/<name>/SKILL.md`，tests/packages/docs 等其余文件是惰性缓存，不进发现面。
+- **开发机勿用本地路径验证分发**：`marketplace add <本地目录>` 按 omp 语义整目录拷贝（不读 .gitignore），会把未跟踪的 `node_modules`/`.idea` 一并带进缓存；分发验证一律走 git URL。
 
 #### omp git 插件安装（带 `@adrkit/cli` 依赖）
 
