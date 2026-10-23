@@ -82,17 +82,6 @@ cp -R ncw-delivery-harness/skills/<name> <发现目录>/skills/
 
 omp 实测同时读项目级与全局级；DSH / OpenCode 官方支持同两个路径；DSH 无需 plugin——skill 是「被扫描的文件」，拷贝即安装，免重启热加载。
 
-### DSH 插件（根包兼作 DSH bundle，可选）
-
-本仓 `package.json` 同时声明 omp 与 DSH 两个分发面（`"omp": {}` + `"dsh": {"bundle": ...}`），无构建、无拷贝——bundle 插件运行时直接扫描包内 `skills/`：
-
-- `cordis.patch.yml`：bundle patch 层，insert 插件行 `ncw-delivery-skills`。
-- `dsh-entry.js`：SkillProvider 入口（纯 node:fs，零依赖），把每个 `skills/<name>/SKILL.md` 挂成 DSH 一等技能（provider `ncw-delivery`，source `bundled`）。
-- 冲突策略：rank 250——项目级发现（`.dsh/skills`=100、`.agents/skills`=200）按名覆盖本 pack，本 pack 压过用户级目录（400/500）；与手动拷贝二选一即可，同装时插件版胜出。
-- `engines.dsh` 钉 `>=0.2.0-rc.2 <0.3.0`，DSH 安装/启动按范围 fail-closed；默认安装跟踪 main 最新（profile lockfile 记录解析到的 commit，单 profile 可复现），升级走 `update` + 重启 profile 生效（bundle 技能不热加载）；需要防篡改可在 `add` 时钉 `#<commit>`。
-- 技能运行时仍只执行 PATH 上的 `adrkit` / `che`（全局安装指引不变）；`dsh plugin add` 随包安装的 `@adrkit/cli` 等依赖不进 PATH 解析。
-- 想走 DSH「发现」市场：按 [官方 plugin-market 文档](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/guide/plugin-market.zh.md)自托管索引（git source + `vX.Y.Z` tag），本仓不再另建市场服务。
-
 ### omp marketplace 插件（可选）
 
 omp 侧还可以走原生插件分发（catalog：`.omp-plugin/marketplace.json`，插件名 `ncw-delivery`）：
@@ -120,6 +109,17 @@ npm install -g @adrkit/cli@0.20.0
 ```
 
 `package.json` 的 `"omp": {}` manifest 是这条路径下运行时技能发现的前提（omp 跳过无 manifest 的包）；`npm test` 校验 `@adrkit/cli` 使用精确版本钉。
+
+### DSH 插件（根包兼作 DSH bundle，可选）
+
+本仓 `package.json` 同时声明 omp 与 DSH 两个分发面（`"omp": {}` + `"dsh": {"bundle": ...}`），无构建、无拷贝——bundle 插件运行时直接扫描包内 `skills/`：
+
+- `cordis.patch.yml`：bundle patch 层，insert 插件行 `ncw-delivery-skills`。
+- `dsh-entry.js`：SkillProvider 入口（纯 node:fs，零依赖），把每个 `skills/<name>/SKILL.md` 挂成 DSH 一等技能（provider `ncw-delivery`，source `bundled`）。
+- 冲突策略：rank 250——项目级发现（`.dsh/skills`=100、`.agents/skills`=200）按名覆盖本 pack，本 pack 压过用户级目录（400/500）；与手动拷贝二选一即可，同装时插件版胜出。
+- `engines.dsh` 钉 `>=0.2.0-rc.2 <0.3.0`，DSH 安装/启动按范围 fail-closed；默认安装跟踪 main 最新（profile lockfile 记录解析到的 commit，单 profile 可复现），升级走 `update` + 重启 profile 生效（bundle 技能不热加载）；需要防篡改可在 `add` 时钉 `#<commit>`。
+- 技能运行时仍只执行 PATH 上的 `adrkit` / `che`（全局安装指引不变）；`dsh plugin add` 随包安装的 `@adrkit/cli` 等依赖不进 PATH 解析。
+- 想走 DSH「发现」市场：按 [官方 plugin-market 文档](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/guide/plugin-market.zh.md)自托管索引（git source + `vX.Y.Z` tag），本仓不再另建市场服务。
 
 ## 开发
 
