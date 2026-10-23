@@ -2,18 +2,28 @@
   "name": "ncw-delivery-harness",
   "version": "0.2.0",
   "description": "newchiwan 团队跨端 agent skill pack：PingCode 规格驱动开发流程 + adrkit/grill/compound/bug 扩展技能组 + 线上排障",
+  "type": "module",
+  "main": "dsh-entry.js",
   "scripts": {
     "test": "bash tests/skills/test-skill-structure.sh && bash tests/skills/test-che-cli.sh && bash tests/skills/test-pack-runtime.sh"
   },
   "files": [
-    "skills"
+    "skills",
+    "dsh-entry.js",
+    "cordis.patch.yml"
   ],
   "engines": {
-    "node": ">=22.18"
+    "node": ">=22.18",
+    "dsh": ">=0.2.0-rc.2 <0.3.0"
   },
   "dependencies": {
     "@adrkit/cli": "0.20.0",
     "@newchiwan/che": "file:packages/cli"
   },
-  "omp": {}
+  "omp": {},
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
 }

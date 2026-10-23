@@ -6,6 +6,8 @@
 #   - 新增：.agents/commands/ 斜杠命令 frontmatter 校验，禁止工具专属 .omp/commands/
 #   - 新增：.omp-plugin/marketplace.json 目录校验（JSON 合法、命名合规、source 恰为 "./"、
 #     version 与 package.json 同步），并禁止 .omp-plugin/plugin.json（防 remap 把 .agents/ 带进 omp 插件安装面）
+#   - 新增：DSH bundle 分发面校验（dsh.bundle.patch 指向 cordis.patch.yml、main 入口、
+#     files 三件套、engines.dsh 兼容范围、patch 行引用包名、入口导出 apply、无路径泄漏）
 set -u
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -175,6 +177,59 @@ if (!dep || !/^\d+\.\d+\.\d+$/.test(dep)) {
 ' "$REPO_ROOT/package.json")
 else
   bad "adrkit 依赖版本钉校验需要 node（engines 要求 >=22）"
+fi
+
+# 10. DSH bundle 分发面：根包兼作 DSH 组合包（cordis.patch.yml + dsh-entry.js + package.json 三处一致）
+if command -v node >/dev/null 2>&1; then
+  while IFS= read -r line; do
+    case "$line" in OK) ok ;; FAIL\ *) bad "${line#FAIL }" ;; esac
+  done < <(node -e '
+const fs = require("node:fs");
+const pkg = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+const entryPath = process.argv[2];
+const patchPath = process.argv[3];
+const msgs = [];
+const patch = pkg.dsh && pkg.dsh.bundle && pkg.dsh.bundle.patch;
+if (patch !== "./cordis.patch.yml") {
+  msgs.push(`FAIL package.json dsh.bundle.patch 必须为 "./cordis.patch.yml"，当前为 ${JSON.stringify(patch ?? null)}`);
+}
+const hasEntry = fs.existsSync(entryPath);
+if (pkg.main !== "dsh-entry.js" || !hasEntry) {
+  msgs.push("FAIL package.json main 必须指向存在的 dsh-entry.js（DSH bundle 插件入口）");
+}
+if (!fs.existsSync(patchPath)) {
+  msgs.push("FAIL cordis.patch.yml 不存在（dsh.bundle.patch 指向的组合包层）");
+} else {
+  const patchText = fs.readFileSync(patchPath, "utf8");
+  if (!/^\s*- insert:/m.test(patchText) || !patchText.includes(`name: ${pkg.name}`)) {
+    msgs.push("FAIL cordis.patch.yml 必须 insert 一行 name 指向 package.json 的包名");
+  }
+}
+for (const f of ["skills", "dsh-entry.js", "cordis.patch.yml"]) {
+  if (!Array.isArray(pkg.files) || !pkg.files.includes(f)) {
+    msgs.push(`FAIL package.json files 必须包含 ${f}（npm tarball 分发面）`);
+  }
+}
+const engines = pkg.engines || {};
+if (typeof engines.dsh !== "string" || !engines.dsh.trim()) {
+  msgs.push("FAIL package.json engines.dsh 必须声明 DSH 兼容范围（安装时 fail-closed）");
+}
+if (hasEntry) {
+  const entry = fs.readFileSync(entryPath, "utf8");
+  if (!entry.includes("registerProvider") || !/export function apply/.test(entry)) {
+    msgs.push("FAIL dsh-entry.js 必须导出 apply 并调用 ctx.skills.registerProvider");
+  }
+}
+for (const f of [entryPath, patchPath]) {
+  if (fs.existsSync(f) && /\/Users\/|\/home\//.test(fs.readFileSync(f, "utf8"))) {
+    msgs.push(`FAIL ${f} 含本机绝对路径（泄漏）`);
+  }
+}
+if (msgs.length === 0) console.log("OK");
+for (const m of msgs) console.log(m);
+' "$REPO_ROOT/package.json" "$REPO_ROOT/dsh-entry.js" "$REPO_ROOT/cordis.patch.yml")
+else
+  bad "DSH bundle 校验需要 node（engines 要求 >=22）"
 fi
 
 printf 'skill-structure: %d passed, %d failed\n' "$pass" "$fail"

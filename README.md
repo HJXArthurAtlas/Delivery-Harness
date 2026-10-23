@@ -66,6 +66,10 @@ CLI 解析（`adrkit-lib.sh`）：只执行 PATH 上的 `adrkit` 与 `che`，不
 omp plugin marketplace add git+https://git.newchiwan.com/council/ncw-delivery-harness.git
 omp plugin install ncw-delivery@ncw-delivery-harness
 
+# DSH 插件（根包兼作 DSH bundle；git 安装钉 commit，升级换 sha 重跑 add）
+dsh plugin --profile <name> add git+https://git.newchiwan.com/council/ncw-delivery-harness.git#<commit>
+dsh plugin --profile <name> remove ncw-delivery-harness
+
 # 其他端（DSH / OpenCode）：把 skills/<name>/ 拷入对应 skill 发现目录即可
 git clone https://git.newchiwan.com/council/ncw-delivery-harness.git
 cp -R ncw-delivery-harness/skills/<name> <发现目录>/skills/
@@ -76,6 +80,17 @@ cp -R ncw-delivery-harness/skills/<name> <发现目录>/skills/
 | `.agents/skills/`（项目）或 `~/.agents/skills/`（全局） | DSH / OpenCode / omp |
 
 omp 实测同时读项目级与全局级；DSH / OpenCode 官方支持同两个路径；DSH 无需 plugin——skill 是「被扫描的文件」，拷贝即安装，免重启热加载。
+
+### DSH 插件（根包兼作 DSH bundle，可选）
+
+本仓 `package.json` 同时声明 omp 与 DSH 两个分发面（`"omp": {}` + `"dsh": {"bundle": ...}`），无构建、无拷贝——bundle 插件运行时直接扫描包内 `skills/`：
+
+- `cordis.patch.yml`：bundle patch 层，insert 插件行 `ncw-delivery-skills`。
+- `dsh-entry.js`：SkillProvider 入口（纯 node:fs，零依赖），把每个 `skills/<name>/SKILL.md` 挂成 DSH 一等技能（provider `ncw-delivery`，source `bundled`）。
+- 冲突策略：rank 250——项目级发现（`.dsh/skills`=100、`.agents/skills`=200）按名覆盖本 pack，本 pack 压过用户级目录（400/500）；与手动拷贝二选一即可，同装时插件版胜出。
+- `engines.dsh` 钉 `>=0.2.0-rc.2 <0.3.0`，DSH 安装/启动按范围 fail-closed；升级 = 换 commit sha 重跑 `add`，重启 profile 生效（bundle 技能不热加载）。
+- 技能运行时仍只执行 PATH 上的 `adrkit` / `che`（全局安装指引不变）；`dsh plugin add` 随包安装的 `@adrkit/cli` 等依赖不进 PATH 解析。
+- 想走 DSH「发现」市场：按 [官方 plugin-market 文档](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/guide/plugin-market.zh.md)自托管索引（git source + `vX.Y.Z` tag），本仓不再另建市场服务。
 
 ### omp marketplace 插件（可选）
 
@@ -109,7 +124,7 @@ npm install -g @adrkit/cli@0.20.0
 
 ```bash
 npm ci     # 安装钉版本的 @adrkit/cli，并把仓内 @newchiwan/che（file:packages/cli）链接进 node_modules/.bin，供运行时契约测试使用
-npm test   # ① test-skill-structure.sh：结构与分发面；② test-che-cli.sh：che CLI 契约（paths/check/feature/require-intent/template/setup-plan/setup-tasks，模板字节级 round-trip）；③ test-pack-runtime.sh：临时 .agents/skills 安装 + 最小 PATH，验证缺失 CLI 的 npm 安装提示，再用真实 @adrkit/cli 与 che 驱动特性解析、ADR scaffold/draft/lint/check/evaluate/context/queue/migrate
+npm test   # ① test-skill-structure.sh：结构与分发面（skills frontmatter/引用/泄漏、.omp-plugin catalog、.agents/commands、DSH bundle 分发面）；② test-che-cli.sh：che CLI 契约（paths/check/feature/require-intent/template/setup-plan/setup-tasks，模板字节级 round-trip）；③ test-pack-runtime.sh：临时 .agents/skills 安装 + 最小 PATH，验证缺失 CLI 的 npm 安装提示，再用真实 @adrkit/cli 与 che 驱动特性解析、ADR scaffold/draft/lint/check/evaluate/context/queue/migrate
 ```
 
 新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）；`npm test` 会把关。omp 插件按 `skills/` 目录自动发现，无需另行登记。命名格式 `che-{submodule}-action`（如 `che-pingcode-init`），全名 ≤32 字符。

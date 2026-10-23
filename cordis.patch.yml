@@ -1,0 +1,6 @@
+# ncw-delivery-harness — DSH 组合包 patch 层。
+# 插件行按包名引用本包（Node 模块解析），config 缺省即用 dsh-entry.js 内置默认：
+# provider 名 ncw-delivery，rank 250（项目级 .dsh/.agents 目录可按名覆盖，本包压过用户级）。
+- insert:
+    - id: ncw-delivery-skills
+      name: ncw-delivery-harness
