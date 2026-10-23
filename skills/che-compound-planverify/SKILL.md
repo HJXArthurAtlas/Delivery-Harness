@@ -29,7 +29,8 @@ Run **after `gapfill`, before `implement`**. It must run after gapfill so it jud
 the **complete obligation set** (constraints + failure conditions + OOS regressions
 + edge cases), not the incomplete generated task list.
 
-When the gate is enabled (`SKC_PLANVERIFY_GATE=block`, default `off`), run
+When the gate is enabled (`SKC_PLANVERIFY_GATE=block` or `planverify_gate: block`
+in `.che/config.yml`, default `off`), run
 `/che-compound-planverify-gate` before `/che-compound-implement`. It rejects a
 missing verdict or `BLOCKED_DRIFT` for the feature about to be implemented.
 
@@ -48,7 +49,7 @@ Identical to intentguard. Climb to the highest available tier; always record the
 **Config (`SKC_CHECKER`, default `auto`):** `auto` climbs to highest; `cross-model`
 requires Tier 1 or fails loudly; `same-family` forces Tier 2; `same-model` forces
 Tier 3; `cli:model` is explicit. Read from `SKC_CHECKER` env, else a `checker:` line
-in `docs/compound/compound-config.yml`.
+in `.che/config.yml`.
 
 Tier 1 is optional. Without a cross-model CLI, `auto` continues through native
 Tier 2 / Tier 3; a fresh default-model subagent is the pack-local baseline. Only
@@ -162,7 +163,7 @@ If you disagree, add a one-line meta-note — the checker's verdict stands. Writ
 ### Phase 6 — Communicate verdict
 
 Read the gate mode (`SKC_PLANVERIFY_GATE` env, else `planverify_gate:` in
-compound-config.yml, default `off`) and record it in the report frontmatter.
+`.che/config.yml`, default `off`) and record it in the report frontmatter.
 
 - **PASS**: *"Verdict: PASS (checked by {checker}, Tier {N}). Plan is in scope and complete. Safe to run `/che-compound-implement`."*
 - **REPLAN_ALLOWED**: *"Verdict: REPLAN_ALLOWED (checked by {checker}). {N} items to address (see `docs/intents/{slug}.planverify.md`). Re-run `/che-compound-plan` or edit the plan, then re-run `/che-compound-planverify`."* (planverify does not patch the plan for you.)

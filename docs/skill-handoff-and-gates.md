@@ -90,7 +90,7 @@ bug-assess → bug-fix → bug-test
 
 ### 门禁边界（hook 清除后的保留约束）
 
-- 两个门禁（require-intent / planverify-gate）仍是手动或 agent 在边界前调用的确定性判定，不依赖任何 hook 分发机制。require-intent 的判定逻辑**内联在 che CLI**（`che require-intent`，技能脚本仅薄封装委托），用户可经 `CHE_REQUIRE_INTENT` 环境变量或 `.che/config.yml` 的 `require_intent:` 关闭（默认开，非法值 fail-closed）；开关开启且 `.che/feature.json` 已登记特性时，门禁按登记 slug（目录 basename 去 `YYYYMMDD-HHMMSS-` 前缀）校验 `docs/intents/{slug}.intent.md` 存在，未登记特性维持"任意 intent.md"的 legacy 校验；planverify-gate 仍是 **shell 脚本 wrapper**（`SKC_PLANVERIFY_GATE` / `docs/compound/compound-config.yml`，默认 off）。
+- 两个门禁（require-intent / planverify-gate）仍是手动或 agent 在边界前调用的确定性判定，不依赖任何 hook 分发机制。require-intent 的判定逻辑**内联在 che CLI**（`che require-intent`，技能脚本仅薄封装委托），用户可经 `CHE_REQUIRE_INTENT` 环境变量或 `.che/config.yml` 的 `require_intent:` 关闭（默认开，非法值 fail-closed）；开关开启且 `.che/feature.json` 已登记特性时，门禁按登记 slug（目录 basename 去 `YYYYMMDD-HHMMSS-` 前缀）校验 `docs/intents/{slug}.intent.md` 存在，未登记特性维持"任意 intent.md"的 legacy 校验；planverify-gate 判定逻辑同样内联 che CLI（`che planverify-gate <slug>`；开关 `SKC_PLANVERIFY_GATE` / `.che/config.yml` 的 `planverify_gate:`，默认 off，非法值 fail-closed）。
 - **slug 单一事实源**：全流程共用 `.che/feature.json` 登记特性目录派生的同一个 slug（`che paths --json` 的 `SLUG` 字段）。intent 落盘 `docs/intents/{slug}.intent.md`；specify 的 short name 取同一 slug（已登记取登记值，未登记取 intent doc slug），不再独立生成；下游技能一律从 `SLUG` 读，不各自拼猜。
 - `che-adr-draft` 反向约束不变：唯一写命令，**刻意不进任何交接链自动触发**（plan 阶段自动建记录会制造虚假决策记忆）。
 - `che-compound-intent` / `-expectations` 的 AskUserQuestion 三段链（continue / stop / quit）是链内**显式**交接，与末尾 Handoff 块互补：块声明目标与条件，AskUserQuestion 执行当次选择。

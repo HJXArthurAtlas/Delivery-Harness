@@ -38,7 +38,7 @@ The checker is selected at runtime by climbing to the **highest available** tier
 - `same-model` — force Tier 3 (e.g. offline, or no second model installed).
 - `cli:model` — explicit, e.g. `codex` or `claude:haiku`.
 
-Read it from the `SKC_CHECKER` env var, or a `checker:` line in `docs/compound/compound-config.yml` if present. Default `auto`.
+Read it from the `SKC_CHECKER` env var, or a `checker:` line in `.che/config.yml` if present. Default `auto`.
 
 Tier 1 is optional. Without a cross-model CLI, `auto` continues through native
 Tier 2 / Tier 3; a fresh default-model subagent is the pack-local baseline. Only

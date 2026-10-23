@@ -29,7 +29,7 @@ fi
 TMP="$(mktemp -d)"
 TMP="$(cd "$TMP" && pwd -P)"
 trap 'rm -rf "$TMP"' EXIT
-unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_FEATURE_NO_PERSIST CHE_REQUIRE_INTENT
+unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_FEATURE_NO_PERSIST CHE_REQUIRE_INTENT SKC_PLANVERIFY_GATE
 unset SPECIFY_INIT_DIR SPECIFY_FEATURE SPECIFY_FEATURE_DIRECTORY SPECIFY_FEATURE_NO_PERSIST
 unset ADRKIT_FEATURE_DIR ADRKIT_DIR ADRKIT_SNAPSHOT ADRKIT_AS_OF
 
@@ -290,6 +290,70 @@ run "$CHE_BIN" require-intent --help
 [ "$RC" -eq 0 ] && ok || bad "require-intent --help: 退出码 ${RC}"
 run "$CHE_BIN" require-intent --bogus
 [ "$RC" -eq 2 ] && ok || bad "require-intent 未知参数: 退出码 ${RC}，预期 2"
+
+# 11b. planverify-gate 门禁：默认 off 静默放行；block 按 verdict 裁决；
+# 开关 env > .che/config.yml，非法值 fail-closed。
+run "$CHE_BIN" planverify-gate 001-demo
+[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate 默认 off: RC=$RC OUT=$OUT，预期静默退 0"
+run "$CHE_BIN" planverify-gate 001-demo --json
+json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"SLUG\":\"001-demo\",\"MODE\":\"off\",\"VERDICT\":null,\"PROCEED\":true}" \
+  && ok || bad "planverify-gate off --json: RC=$RC OUT=$OUT"
+
+printf 'verdict: PASS\n' > "$PROJECT/docs/intents/001-demo.planverify.md"
+run env SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate 001-demo
+case "$OUT" in
+  *"✓ planverify verdict for '001-demo': PASS"*) ok ;;
+  *) bad "planverify-gate block+PASS: RC=$RC OUT=$OUT，stderr: $(<"$TMP/stderr")" ;;
+esac
+printf 'verdict: REPLAN_ALLOWED\n' > "$PROJECT/docs/intents/001-demo.planverify.md"
+run env SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate 001-demo
+[ "$RC" -eq 0 ] && ok || bad "planverify-gate block+REPLAN_ALLOWED: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+printf 'verdict: BLOCKED_DRIFT\n' > "$PROJECT/docs/intents/001-demo.planverify.md"
+run env SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate 001-demo
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate block+BLOCKED_DRIFT: 退出码 ${RC}，预期 1"
+run env SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate 001-demo --json
+json_matches "$OUT" "{\"SLUG\":\"001-demo\",\"MODE\":\"block\",\"VERDICT\":\"BLOCKED_DRIFT\",\"PROCEED\":false}" \
+  && ok || bad "planverify-gate DRIFT --json: RC=$RC OUT=$OUT"
+printf 'frontmatter without verdict\n' > "$PROJECT/docs/intents/001-demo.planverify.md"
+run env SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate 001-demo
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate 无 verdict 行: 退出码 ${RC}，预期 1"
+run env SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate other-slug
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate 报告缺失: 退出码 ${RC}，预期 1"
+rm "$PROJECT/docs/intents/001-demo.planverify.md"
+
+# 开关经 .che/config.yml；env 优先；非法值 fail-closed。
+printf 'planverify_gate: block\n' > "$PROJECT/.che/config.yml"
+run "$CHE_BIN" planverify-gate 001-demo
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate config block: 退出码 ${RC}，预期 1"
+run env SKC_PLANVERIFY_GATE=off "$CHE_BIN" planverify-gate 001-demo
+[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate env off 优先于 config block: RC=$RC OUT=$OUT"
+printf 'planverify_gate: maybe\n' > "$PROJECT/.che/config.yml"
+run "$CHE_BIN" planverify-gate 001-demo
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate config 非法值: 退出码 ${RC}，预期 fail-closed 1"
+case "$(<"$TMP/stderr")" in
+  *'invalid planverify_gate mode "maybe"'*) ok ;;
+  *) bad "planverify-gate config 非法值: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+run env SKC_PLANVERIFY_GATE=bogus "$CHE_BIN" planverify-gate 001-demo
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate env 非法值: 退出码 ${RC}，预期 1"
+rm "$PROJECT/.che/config.yml"
+
+# 用法错误与非项目目录。
+run "$CHE_BIN" planverify-gate
+[ "$RC" -eq 2 ] && ok || bad "planverify-gate 缺 slug: 退出码 ${RC}，预期 2"
+run "$CHE_BIN" planverify-gate a b
+[ "$RC" -eq 2 ] && ok || bad "planverify-gate 多 slug: 退出码 ${RC}，预期 2"
+OUT="$(cd "$TMP" && "$CHE_BIN" planverify-gate demo 2>"$TMP/stderr")"
+RC=$?
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate 非项目目录: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"not in an SDD project"*) ok ;;
+  *) bad "planverify-gate 非项目目录: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+run "$CHE_BIN" planverify-gate --help
+[ "$RC" -eq 0 ] && ok || bad "planverify-gate --help: 退出码 ${RC}"
+run "$CHE_BIN" planverify-gate --bogus
+[ "$RC" -eq 2 ] && ok || bad "planverify-gate 未知参数: 退出码 ${RC}，预期 2"
 
 # 12. version parity, help, unknown command.
 EXPECTED_VERSION="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).version' "$REPO_ROOT/packages/cli/package.json")"

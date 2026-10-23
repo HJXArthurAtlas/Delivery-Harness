@@ -18,6 +18,7 @@ import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { FeatureResolutionError, findSpecifyRoot, readFeatureSlug } from './feature-paths.ts';
 import { isFile } from './check.ts';
+import { readCheConfigValue } from './config.ts';
 
 export const REQUIRE_INTENT_USAGE = `Usage: che require-intent [--json]
   --json    Output results in JSON format
@@ -58,27 +59,12 @@ function parseToggle(raw: string): boolean | null {
   return TOGGLE_VALUES[value] ?? null;
 }
 
-/** First `require_intent:` value in .che/config.yml, or '' when absent. */
-function readConfigToggleRaw(repoRoot: string): string {
-  let raw: string;
-  try {
-    raw = readFileSync(join(repoRoot, '.che', 'config.yml'), 'utf-8');
-  } catch {
-    return '';
-  }
-  for (const line of raw.split('\n')) {
-    const match = /^[ \t]*require_intent[ \t]*:(.*)$/.exec(line);
-    if (match !== null) return match[1];
-  }
-  return '';
-}
-
 /** Env wins over .che/config.yml; default on. Invalid values throw. */
 export function resolveRequireIntentGate(repoRoot: string): boolean {
   let raw = (process.env.CHE_REQUIRE_INTENT ?? '').trim();
   let source = 'CHE_REQUIRE_INTENT';
   if (raw === '') {
-    raw = readConfigToggleRaw(repoRoot).trim();
+    raw = readCheConfigValue(repoRoot, 'require_intent').trim();
     source = '.che/config.yml require_intent';
   }
   if (raw === '') return true;
