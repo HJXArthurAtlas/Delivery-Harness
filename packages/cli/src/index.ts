@@ -5,6 +5,7 @@ import { CHECK_USAGE, PATHS_USAGE, runCheck, runPaths } from './check.ts';
 import { REQUIRE_INTENT_USAGE, runRequireIntent } from './require-intent.ts';
 import { PLANVERIFY_GATE_USAGE, runPlanVerifyGate } from './planverify-gate.ts';
 import { FEATURE_USAGE, runFeature } from './feature.ts';
+import { TASK_USAGE, runTask } from './tasks.ts';
 import { SETUP_PLAN_USAGE, SETUP_TASKS_USAGE, runSetupPlan, runSetupTasks } from './setup.ts';
 import { TemplateResolutionError, resolveTemplateContent } from './template.ts';
 
@@ -15,14 +16,18 @@ const USAGE = `che — newchiwan delivery harness CLI
 Usage: che <command> [options]
 
 Commands:
-  paths [--json]                                   Resolve feature paths (never persists)
+  task create <slug> [--session <id>] [--json]     Create the task directory + metadata, bind the session
+  paths [--json] [--feature <slug>] [--session <id>]  Resolve task paths
   check [--json] [--require-spec] [--require-tasks] [--include-tasks]
-  require-intent [--json]                          Gate /che-compound-specify on docs/intents/
-  planverify-gate <slug> [--json]                  Gate /che-compound-implement on the planverify verdict
-  feature set <dir> | feature show [--json]        Manage the .che/feature.json pointer
+  require-intent [--json] [--feature <slug>] [--session <id>]  Gate /che-compound-specify on the task's intent doc
+  planverify-gate [<slug>] [--json]                Gate /che-compound-implement on the planverify verdict
+  feature bind <slug> --session <id> | show [--json]  Manage session→task bindings (.che/feature.json, local)
   template <name> --references-dir <dir> [--json]  Resolve a bundled references/ template
   setup-plan --references-dir <dir> [--json]       Create plan.md from plan-template
   setup-tasks --references-dir <dir> [--json]      Resolve the tasks template + docs
+
+Resolution: --feature <slug> > CHE_FEATURE_DIRECTORY env > session binding > auto (single task).
+Without a binding and multiple tasks in flight, commands list candidates and fail.
 
 Global:
   che --version        Print the CLI version
@@ -37,6 +42,7 @@ const TEMPLATE_USAGE =
   '  --help                  Show this help message\n';
 
 const COMMAND_USAGE: Record<string, string> = {
+  task: TASK_USAGE,
   paths: PATHS_USAGE,
   check: CHECK_USAGE,
   'require-intent': REQUIRE_INTENT_USAGE,
@@ -80,6 +86,8 @@ export function main(argv: string[]): number {
   }
 
   switch (command) {
+    case 'task':
+      return runTask(rest);
     case 'paths':
       return runPaths(rest);
     case 'check':

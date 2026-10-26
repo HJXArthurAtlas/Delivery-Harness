@@ -17,16 +17,22 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
-import { FeatureResolutionError, findSpecifyRoot } from './feature-paths.ts';
+import {
+  FeatureResolutionError,
+  findSpecifyRoot,
+  resolveTask,
+  type TaskDir,
+} from './feature-paths.ts';
 import { isFile } from './check.ts';
 import { readCheConfigValue } from './config.ts';
 
-export const PLANVERIFY_GATE_USAGE = `Usage: che planverify-gate <slug> [--json]
+export const PLANVERIFY_GATE_USAGE = `Usage: che planverify-gate [<slug>] [--json] [--feature <slug>] [--session <id>]
 
-  <slug>   Feature slug whose docs/intents/<slug>.planverify.md report gates
-           this implement run
-  --json   Output results in JSON format
-  --help   Show this help message
+  <slug>            Task slug; optional when --feature/--session resolves one
+  --feature <slug>  Resolve this task explicitly (overrides session binding)
+  --session <id>    Resolve via the session's task binding
+  --json            Output results in JSON format
+  --help            Show this help message
 `;
 
 const GATE_MODES: Record<string, boolean> = { block: true, off: true };
@@ -117,7 +123,11 @@ export function runPlanVerifyGate(argv: string[]): number {
   try {
     const parsed = parseArgs({
       args: argv,
-      options: { json: { type: 'boolean' } },
+      options: {
+        json: { type: 'boolean' },
+        feature: { type: 'string' },
+        session: { type: 'string' },
+      },
       allowPositionals: true,
       strict: true,
     });
@@ -130,12 +140,12 @@ export function runPlanVerifyGate(argv: string[]): number {
     return 2;
   }
 
-  if (positionals.length === 0 || positionals.length > 1) {
-    process.stderr.write('ERROR: expected exactly one <slug> positional\n');
+  if (positionals.length > 1) {
+    process.stderr.write('ERROR: expected at most one <slug> positional\n');
     process.stderr.write(PLANVERIFY_GATE_USAGE);
     return 2;
   }
-  const slug = positionals[0];
+  const positionalSlug = positionals[0];
 
   let repoRoot: string;
   let mode: 'block' | 'off';
@@ -150,7 +160,38 @@ export function runPlanVerifyGate(argv: string[]): number {
     throw err;
   }
 
-  const report = join(repoRoot, 'docs', 'intents', `${slug}.planverify.md`);
+  // Resolve the task: explicit positional wins; otherwise the standard
+  // chain (--feature > env > session binding > auto). Resolution runs even
+  // in off mode only for the JSON report; off mode itself never blocks.
+  let task: TaskDir;
+  try {
+    task = resolveTask(repoRoot, {
+      feature: positionalSlug ?? (typeof values.feature === 'string' ? values.feature : ''),
+      session: typeof values.session === 'string' ? values.session : '',
+    });
+  } catch (err) {
+    if (err instanceof FeatureResolutionError) {
+      if (values.json) {
+        process.stdout.write(
+          JSON.stringify({
+            REPO_ROOT: repoRoot,
+            SLUG: positionalSlug ?? '',
+            MODE: mode,
+            REPORT: null,
+            VERDICT: null,
+            PROCEED: mode !== 'block',
+          }) + '\n',
+        );
+      }
+      process.stderr.write(err.message + '\n');
+      return 1;
+    }
+    throw err;
+  }
+  const slug = task.slug;
+
+  // Report lives inside the task directory (rename-safe: resolved per run).
+  const report = join(task.path, 'planverify.md');
   let reportExists = false;
   let verdict = '';
   if (mode === 'block') {

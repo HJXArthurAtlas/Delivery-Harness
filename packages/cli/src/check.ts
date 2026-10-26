@@ -1,23 +1,28 @@
 import { readdirSync, statSync } from 'node:fs';
+import { basename } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
   FeatureResolutionError,
-  deriveFeatureSlug,
   formatPackCommand,
   getFeaturePaths,
+  slugFromDirBasename,
   type FeaturePaths,
 } from './feature-paths.ts';
 
-export const PATHS_USAGE = `Usage: che paths [--json]
-  --json    Output results in JSON format
-  --help    Show this help message
+export const PATHS_USAGE = `Usage: che paths [--json] [--feature <slug>] [--session <id>]
+  --json            Output results in JSON format
+  --feature <slug>  Resolve this task explicitly (overrides session binding)
+  --session <id>    Resolve via the session's task binding
+  --help            Show this help message
 `;
 
-export const CHECK_USAGE = `Usage: che check [--json] [--require-spec] [--require-tasks] [--include-tasks]
+export const CHECK_USAGE = `Usage: che check [--json] [--require-spec] [--require-tasks] [--include-tasks] [--feature <slug>] [--session <id>]
   --json           Output results in JSON format
-  --require-spec   Fail when spec.md is missing in the feature directory
-  --require-tasks  Fail when tasks.md is missing in the feature directory
+  --require-spec   Fail when spec.md is missing in the task directory
+  --require-tasks  Fail when tasks.md is missing in the task directory
   --include-tasks  Include tasks.md in AVAILABLE_DOCS
+  --feature <slug> Resolve this task explicitly (overrides session binding)
+  --session <id>   Resolve via the session's task binding
   --help           Show this help message
 `;
 
@@ -64,9 +69,9 @@ export function printDocsBlock(paths: FeaturePaths, includeTasks: boolean): stri
 }
 
 /** Resolve feature paths; on failure print the specific error + summary line. */
-function resolveOrReport(noPersist: boolean): FeaturePaths | null {
+function resolveOrReport(feature: string, session: string): FeaturePaths | null {
   try {
-    return getFeaturePaths({ noPersist });
+    return getFeaturePaths({ feature, session });
   } catch (err) {
     if (err instanceof FeatureResolutionError) {
       process.stderr.write(err.message + '\n');
@@ -93,18 +98,23 @@ export function runPaths(argv: string[]): number {
     process.stdout.write(PATHS_USAGE);
     return 0;
   }
-  const values = parseCommandArgs(argv, PATHS_USAGE, { json: { type: 'boolean' } });
+  const values = parseCommandArgs(argv, PATHS_USAGE, {
+    json: { type: 'boolean' },
+    feature: { type: 'string' },
+    session: { type: 'string' },
+  });
   if (values === null) return 2;
 
-  const paths = resolveOrReport(true);
+  const paths = resolveOrReport(String(values.feature ?? ''), String(values.session ?? ''));
   if (paths === null) return 1;
 
+  const slug = slugFromDirBasename(basename(paths.featureDir));
   if (values.json) {
     process.stdout.write(
       JSON.stringify({
         REPO_ROOT: paths.repoRoot,
         BRANCH: paths.currentBranch,
-        SLUG: deriveFeatureSlug(paths.featureDir),
+        SLUG: slug,
         FEATURE_DIR: paths.featureDir,
         FEATURE_SPEC: paths.featureSpec,
         IMPL_PLAN: paths.implPlan,
@@ -116,7 +126,7 @@ export function runPaths(argv: string[]): number {
 
   process.stdout.write(`REPO_ROOT: ${paths.repoRoot}\n`);
   process.stdout.write(`BRANCH: ${paths.currentBranch}\n`);
-  process.stdout.write(`SLUG: ${deriveFeatureSlug(paths.featureDir)}\n`);
+  process.stdout.write(`SLUG: ${slug}\n`);
   process.stdout.write(`FEATURE_DIR: ${paths.featureDir}\n`);
   process.stdout.write(`FEATURE_SPEC: ${paths.featureSpec}\n`);
   process.stdout.write(`IMPL_PLAN: ${paths.implPlan}\n`);
@@ -134,10 +144,12 @@ export function runCheck(argv: string[]): number {
     'require-spec': { type: 'boolean' },
     'require-tasks': { type: 'boolean' },
     'include-tasks': { type: 'boolean' },
+    feature: { type: 'string' },
+    session: { type: 'string' },
   });
   if (values === null) return 2;
 
-  const paths = resolveOrReport(false);
+  const paths = resolveOrReport(String(values.feature ?? ''), String(values.session ?? ''));
   if (paths === null) return 1;
 
   const featureDirStat = (() => {

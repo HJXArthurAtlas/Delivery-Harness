@@ -1,10 +1,21 @@
-// Port of the bundled common.py resolver semantics (byte-exact contract).
+// Task/session model.
 //
-// Env contract: CHE_INIT_DIR, CHE_FEATURE, CHE_FEATURE_DIRECTORY,
-// CHE_FEATURE_NO_PERSIST — renamed from the SPECIFY_* contract that died with
-// the Python helpers.
+// .che/feature.json holds per-session task bindings (machine-local,
+// gitignored); the task directory under specs/ is the single source of truth
+// for artifacts. Resolution order (resolveTask):
+//   1. explicit --feature <slug|dir> argument
+//   2. CHE_FEATURE_DIRECTORY environment variable (no longer persisted)
+//   3. session binding from .che/feature.json (--session / CHE_SESSION_ID)
+//   4. auto: exactly one task dir in specs/ → it; none → error; multiple →
+//      ambiguity error listing slug + dir + derived stage
+//
+// Task directories: specs/<prefix>-<slug>/ where prefix is a 3+ digit
+// zero-padded number (pre-PingCode) or a PingCode identifier like NCW-4921
+// (post-push rename). Legacy timestamp dirs (YYYYMMDD-HHMMSS-*) are not task
+// dirs. The slug is the stable handle: bindings store the slug, never the
+// path, so the push-time rename is transparent.
 
-import { existsSync, mkdirSync, realpathSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, realpathSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, isAbsolute, join, resolve as resolvePath } from 'node:path';
 
 export interface FeaturePaths {
@@ -26,7 +37,7 @@ export class FeatureResolutionError extends Error {}
 function trimTrailingSeparators(value: string): string {
   let text = value;
   while (text.length > 1 && text.endsWith('/')) {
-    text = text.slice(0, -1);
+    text = text.slice(1, -1);
   }
   return text;
 }
@@ -77,83 +88,241 @@ export function getRepoRoot(scriptDir?: string): string {
   return realpathSync(process.cwd());
 }
 
-export function readFeatureJsonFeatureDirectory(repoRoot: string): string {
-  const featureJson = join(repoRoot, '.che', 'feature.json');
-  let raw: string;
-  try {
-    raw = readFileSync(featureJson, 'utf-8');
-  } catch {
-    return '';
-  }
-  let data: unknown;
-  try {
-    data = JSON.parse(raw);
-  } catch {
-    return '';
-  }
-  if (typeof data !== 'object' || data === null) return '';
-  const value = (data as Record<string, unknown>).feature_directory;
-  return typeof value === 'string' ? value : '';
+// ---------------------------------------------------------------------------
+// Task directories
+// ---------------------------------------------------------------------------
+
+const IDENTIFIER_PREFIX = /^[A-Za-z][A-Za-z0-9]*-\d+-/;
+const NUMBER_PREFIX = /^\d+-/;
+const TIMESTAMP_PREFIX = /^\d{8}-\d{6}-/;
+const SLUG_BODY = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/** Valid task slug (also the slug a freshly created dir must satisfy). */
+export function isValidSlug(slug: string): boolean {
+  return SLUG_BODY.test(slug);
 }
 
-export function persistFeatureJson(repoRoot: string, featureDirValue: string): void {
-  // Strip the repo root prefix lexically (no realpath) to mirror the
-  // Bash/PowerShell helpers: with a symlinked <repo>/specs, resolving would
-  // escape the repo and persist a machine-specific absolute path instead of
-  // the relative "specs/NNN-name" the other variants store.
-  let value = featureDirValue;
-  if (isAbsolute(value)) {
-    if (value === repoRoot) {
-      value = '.';
-    } else if (value.startsWith(repoRoot + '/')) {
-      value = value.slice(repoRoot.length + 1);
-    }
+/** True when the specs/ entry is a task directory under the current naming rule. */
+export function isTaskDirName(name: string): boolean {
+  if (TIMESTAMP_PREFIX.test(name)) return false;
+  let rest: string;
+  if (IDENTIFIER_PREFIX.test(name)) {
+    rest = name.replace(IDENTIFIER_PREFIX, '');
+  } else if (NUMBER_PREFIX.test(name)) {
+    rest = name.replace(NUMBER_PREFIX, '');
+  } else {
+    return false;
   }
+  return rest !== '' && SLUG_BODY.test(rest);
+}
 
-  if (readFeatureJsonFeatureDirectory(repoRoot) === value) return;
+/**
+ * Stable slug of a task dir: basename with the leading PingCode identifier
+ * (`NCW-4921-`) or numeric (`001-`) prefix stripped. `NCW-4921-user-auth` →
+ * `user-auth`; `001-user-auth` → `user-auth`. The identifier pattern is tried
+ * first so its inner hyphen can never be mistaken for the slug separator.
+ */
+export function slugFromDirBasename(name: string): string {
+  return name.replace(IDENTIFIER_PREFIX, '').replace(NUMBER_PREFIX, '');
+}
 
-  const memoryDir = join(repoRoot, '.che');
-  mkdirSync(memoryDir, { recursive: true });
-  writeFileSync(
-    join(memoryDir, 'feature.json'),
-    JSON.stringify({ feature_directory: value }) + '\n',
-    'utf-8',
+export interface TaskDir {
+  /** Directory basename, e.g. `001-user-auth` or `NCW-4921-user-auth`. */
+  name: string;
+  slug: string;
+  /** Absolute path. */
+  path: string;
+}
+
+export function listTaskDirs(repoRoot: string): TaskDir[] {
+  const specsDir = join(repoRoot, 'specs');
+  let entries: string[];
+  try {
+    if (!statSync(specsDir).isDirectory()) return [];
+    entries = readdirSync(specsDir);
+  } catch {
+    return [];
+  }
+  const out: TaskDir[] = [];
+  for (const name of entries.sort()) {
+    const path = join(specsDir, name);
+    try {
+      if (!statSync(path).isDirectory()) continue;
+    } catch {
+      continue;
+    }
+    if (!isTaskDirName(name)) continue;
+    out.push({ name, slug: slugFromDirBasename(name), path });
+  }
+  return out;
+}
+
+/** Coarse flow stage derived from which artifacts exist (never stored). */
+export function deriveStage(taskDir: string): string {
+  if (isFileIn(taskDir, 'tasks.md')) return 'tasks';
+  if (isFileIn(taskDir, 'plan.md')) return 'plan';
+  if (isFileIn(taskDir, 'spec.md')) return 'specify';
+  if (isFileIn(taskDir, 'intent.md')) return 'intent';
+  return 'created';
+}
+
+function isFileIn(dir: string, name: string): boolean {
+  try {
+    return statSync(join(dir, name)).isFile();
+  } catch {
+    return false;
+  }
+}
+
+function taskListing(tasks: TaskDir[]): string {
+  return tasks.map((t) => `  - ${t.slug}  (${t.name}, stage: ${deriveStage(t.path)})`).join('\n');
+}
+
+// ---------------------------------------------------------------------------
+// Session bindings (.che/feature.json, machine-local, gitignored)
+// ---------------------------------------------------------------------------
+
+export interface Binding {
+  slug: string;
+  bound_at: string;
+}
+
+function featureJsonPath(repoRoot: string): string {
+  return join(repoRoot, '.che', 'feature.json');
+}
+
+export function readBindings(repoRoot: string): Record<string, Binding> {
+  let raw: string;
+  try {
+    raw = readFileSync(featureJsonPath(repoRoot), 'utf-8');
+  } catch {
+    return {};
+  }
+  try {
+    const data: unknown = JSON.parse(raw);
+    if (typeof data !== 'object' || data === null) return {};
+    const bindings = (data as Record<string, unknown>).bindings;
+    if (typeof bindings !== 'object' || bindings === null) return {};
+    return bindings as Record<string, Binding>;
+  } catch {
+    return {};
+  }
+}
+
+function writeBindingsFile(repoRoot: string, bindings: Record<string, Binding>): void {
+  const sorted: Record<string, Binding> = {};
+  for (const key of Object.keys(bindings).sort()) sorted[key] = bindings[key];
+  mkdirSync(join(repoRoot, '.che'), { recursive: true });
+  writeFileSync(featureJsonPath(repoRoot), JSON.stringify({ bindings: sorted }) + '\n', 'utf-8');
+}
+
+/** Bind session → slug. Idempotent: same value leaves the file untouched. Returns true when rewritten. */
+export function bindSession(repoRoot: string, session: string, slug: string): boolean {
+  const bindings = readBindings(repoRoot);
+  const existing = bindings[session];
+  if (existing && existing.slug === slug) return false;
+  bindings[session] = { slug, bound_at: new Date().toISOString() };
+  writeBindingsFile(repoRoot, bindings);
+  return true;
+}
+
+/** Remove a session binding. Returns true when an entry was removed. */
+export function clearSession(repoRoot: string, session: string): boolean {
+  const bindings = readBindings(repoRoot);
+  if (!bindings[session]) return false;
+  delete bindings[session];
+  writeBindingsFile(repoRoot, bindings);
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// Task resolution
+// ---------------------------------------------------------------------------
+
+function resolveFeatureArg(featureRaw: string, tasks: TaskDir[]): TaskDir {
+  if (featureRaw.includes('/')) {
+    const abs = isAbsolute(featureRaw) ? featureRaw : join(process.cwd(), featureRaw);
+    const name = basename(trimTrailingSeparators(abs));
+    const byName = tasks.filter((t) => t.name === name);
+    if (byName.length === 1) return byName[0];
+    throw new FeatureResolutionError(
+      `ERROR: --feature '${featureRaw}' does not name a task directory under specs/.\nExisting tasks:\n${taskListing(tasks)}\n`,
+    );
+  }
+  const matches = tasks.filter((t) => t.name === featureRaw || t.slug === featureRaw);
+  if (matches.length === 1) return matches[0];
+  if (matches.length > 1) {
+    throw new FeatureResolutionError(
+      `ERROR: --feature '${featureRaw}' is ambiguous (duplicate slug):\n${taskListing(matches)}\n`,
+    );
+  }
+  throw new FeatureResolutionError(
+    `ERROR: no task matches '${featureRaw}'.\nExisting tasks:\n${taskListing(tasks) || '  (none)'}\n`,
   );
 }
 
-function featureNoPersistFromEnv(): boolean {
-  const raw = process.env.CHE_FEATURE_NO_PERSIST ?? '';
-  return raw === '1' || raw === 'true';
-}
+export function resolveTask(
+  repoRoot: string,
+  opts: { feature?: string; session?: string } = {},
+): TaskDir {
+  const tasks = listTaskDirs(repoRoot);
 
-export function getFeaturePaths(opts: { noPersist?: boolean; scriptDir?: string } = {}): FeaturePaths {
-  const repoRoot = getRepoRoot(opts.scriptDir);
-  let currentBranch = process.env.CHE_FEATURE ?? '';
-  const noPersist = Boolean(opts.noPersist) || featureNoPersistFromEnv();
+  const featureOpt = opts.feature ?? '';
+  const featureRaw = (featureOpt.trim() !== '' ? featureOpt : (process.env.CHE_FEATURE_DIRECTORY ?? '')).trim();
+  if (featureRaw !== '') return resolveFeatureArg(featureRaw, tasks);
 
-  const featureDirRaw = process.env.CHE_FEATURE_DIRECTORY ?? '';
-  let featureDir: string;
-  if (featureDirRaw) {
-    featureDir = isAbsolute(featureDirRaw) ? featureDirRaw : join(repoRoot, featureDirRaw);
-    if (!noPersist) persistFeatureJson(repoRoot, featureDirRaw);
-  } else if (existsSync(join(repoRoot, '.che', 'feature.json'))) {
-    const stored = readFeatureJsonFeatureDirectory(repoRoot);
-    if (!stored) {
+  const sessionOpt = opts.session ?? '';
+  const session = (sessionOpt.trim() !== '' ? sessionOpt : (process.env.CHE_SESSION_ID ?? '')).trim();
+  if (session !== '') {
+    const binding = readBindings(repoRoot)[session];
+    if (!binding) {
       throw new FeatureResolutionError(
-        'ERROR: Feature directory not found. Set CHE_FEATURE_DIRECTORY or ensure .che/feature.json contains feature_directory.',
+        `ERROR: session '${session}' is not bound to any task.\n` +
+          'Run `che task create <slug> --session <id>` (new task) or `che feature bind <slug> --session <id>`.\n' +
+          `Existing tasks:\n${taskListing(tasks) || '  (none)'}\n`,
       );
     }
-    featureDir = isAbsolute(stored) ? stored : join(repoRoot, stored);
-  } else {
+    const bySlug = tasks.filter((t) => t.slug === binding.slug);
+    if (bySlug.length === 1) return bySlug[0];
+    if (bySlug.length === 0) {
+      throw new FeatureResolutionError(
+        `ERROR: session '${session}' is bound to slug '${binding.slug}' but no task directory matches.\n` +
+          `Existing tasks:\n${taskListing(tasks) || '  (none)'}\n`,
+      );
+    }
     throw new FeatureResolutionError(
-      'ERROR: Feature directory not found. Set CHE_FEATURE_DIRECTORY or run the specify command to create .che/feature.json.',
+      `ERROR: slug '${binding.slug}' matches multiple directories:\n${taskListing(bySlug)}\n`,
     );
   }
 
+  if (tasks.length === 1) return tasks[0];
+  if (tasks.length === 0) {
+    throw new FeatureResolutionError(
+      'ERROR: No task directories found under specs/. Run /che-compound-intent or `che task create <slug>` first.',
+    );
+  }
+  throw new FeatureResolutionError(
+    `ERROR: Multiple tasks in flight and no session binding. Pass --feature <slug> or --session <id>.\n` +
+      `Tasks:\n${taskListing(tasks)}\n`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Feature paths
+// ---------------------------------------------------------------------------
+
+export function getFeaturePaths(
+  opts: { feature?: string; session?: string; scriptDir?: string } = {},
+): FeaturePaths {
+  const repoRoot = getRepoRoot(opts.scriptDir);
+  const task = resolveTask(repoRoot, opts);
+
+  let currentBranch = process.env.CHE_FEATURE ?? '';
   if (!currentBranch) {
-    currentBranch = basename(trimTrailingSeparators(featureDir));
+    currentBranch = basename(trimTrailingSeparators(task.path));
   }
 
+  const featureDir = task.path;
   return {
     repoRoot,
     currentBranch,
@@ -174,26 +343,4 @@ export function formatPackCommand(commandName: string): string {
     name = name.slice('che-compound-'.length);
   }
   return `/che-compound-${name}`;
-}
-
-/**
- * The feature slug is the single source of truth for the whole flow: the
- * basename of the registered feature directory with a leading
- * `YYYYMMDD-HHMMSS-` directory prefix stripped (specify convention).
- * `specs/20261022-084501-user-auth` → `user-auth`; `specs/001-demo` →
- * `001-demo` (no timestamp prefix → basename as-is).
- */
-export function deriveFeatureSlug(featureDir: string): string {
-  const base = basename(trimTrailingSeparators(featureDir));
-  return base.replace(/^\d{8}-\d{6}-/, '');
-}
-
-/**
- * Slug of the feature registered in `.che/feature.json`, or '' when no
- * feature is registered (or the pointer cannot yield a slug).
- */
-export function readFeatureSlug(repoRoot: string): string {
-  const stored = readFeatureJsonFeatureDirectory(repoRoot);
-  if (stored === '' || stored === '.') return '';
-  return deriveFeatureSlug(stored);
 }

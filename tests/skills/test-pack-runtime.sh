@@ -31,13 +31,13 @@ TMP="$(mktemp -d)"
 TMP="$(cd "$TMP" && pwd -P)"
 trap 'PATH=$ORIG_PATH; rm -rf "$TMP"' EXIT
 unset ADRKIT_FEATURE_DIR ADRKIT_SNAPSHOT ADRKIT_AS_OF
-unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_FEATURE_NO_PERSIST CHE_REQUIRE_INTENT SKC_PLANVERIFY_GATE
+unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_SESSION_ID CHE_REQUIRE_INTENT SKC_PLANVERIFY_GATE
 unset SPECIFY_INIT_DIR SPECIFY_FEATURE SPECIFY_FEATURE_DIRECTORY SPECIFY_FEATURE_NO_PERSIST
 
 INSTALL="$TMP/install"
 SKILLS="$INSTALL/.agents/skills"
 PROJECT="$TMP/project"
-mkdir -p "$SKILLS" "$PROJECT/.git" "$PROJECT/.che" "$PROJECT/specs/001-demo" "$PROJECT/docs/adr"
+mkdir -p "$SKILLS" "$PROJECT/.git" "$PROJECT/docs/adr"
 for skill in che-adr-check che-adr-context che-adr-draft; do
   cp -R "$REPO_ROOT/skills/$skill" "$SKILLS/$skill"
 done
@@ -46,19 +46,6 @@ GATE_WRAPPER="$SKILLS/che-compound-require-intent/scripts/bash/require-intent.sh
 cp -R "$REPO_ROOT/skills/che-compound-planverify-gate" "$SKILLS/che-compound-planverify-gate"
 PV_GATE_WRAPPER="$SKILLS/che-compound-planverify-gate/scripts/bash/planverify-gate.sh"
 
-printf '%s\n' '{"feature_directory":"specs/001-demo"}' > "$PROJECT/.che/feature.json"
-printf '# Demo\n' > "$PROJECT/specs/001-demo/spec.md"
-cat > "$PROJECT/specs/001-demo/plan.md" <<'EOF'
----
-schemaVersion: 0.1.0
-id: "0042"
-title: A decision titled clearly
-date: 2026-07-19
-status: proposed
----
-
-# ADR-0042
-EOF
 printf '%s' '{"schemaVersion":"adrkit.pass0.snapshot/v1"}' > "$TMP/snapshot.json"
 
 # Keep only the host runtimes and POSIX tools used by the wrappers. The real
@@ -141,6 +128,24 @@ esac
 ln -s "$CHE_BIN" "$TMP/bin/che"
 command -v che >/dev/null 2>&1 && ok || bad "fixture: 无法把真实 @newchiwan/che 加入 PATH"
 
+# Task fixture: create via the real CLI (single task → wrappers auto-resolve
+# without a session binding).
+run che task create demo
+[ "$RC" -eq 0 ] && ok || bad "task create fixture: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+[ -f "$PROJECT/specs/001-demo/metadata.json" ] && ok || bad "task create fixture: metadata.json 未创建"
+printf '# Demo\n' > "$PROJECT/specs/001-demo/spec.md"
+cat > "$PROJECT/specs/001-demo/plan.md" <<'EOF'
+---
+schemaVersion: 0.1.0
+id: "0042"
+title: A decision titled clearly
+date: 2026-07-19
+status: proposed
+---
+
+# ADR-0042
+EOF
+
 # Feature resolution through the external che CLI.
 run che paths --json
 [ "$RC" -eq 0 ] && ok || bad "che paths: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
@@ -148,23 +153,23 @@ json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"FEATURE_DIR\":\"$PROJECT/spec
   && ok || bad "che paths: JSON 未返回活动 feature 路径：$OUT"
 
 # The require-intent wrapper delegates to `che require-intent`: gate on by
-# default (PROJECT has no docs/intents yet), env toggle passes silently, and
+# default (task dir has no intent.md yet), env toggle passes silently, and
 # an intent doc lets specify proceed.
 run "$GATE_WRAPPER"
 [ "$RC" -eq 1 ] && ok || bad "require-intent 默认拦截: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
-  *"No intent docs found"*) ok ;;
+  *"Task directory has no intent doc (001-demo)"*) ok ;;
   *) bad "require-intent 默认拦截: 错误信息不符：$(<"$TMP/stderr")" ;;
 esac
 OUT="$(cd "$PROJECT" && CHE_REQUIRE_INTENT=off "$GATE_WRAPPER" 2>"$TMP/stderr")"
 RC=$?
 [ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "require-intent env off: RC=$RC OUT=$OUT，预期静默退 0"
-mkdir -p "$PROJECT/docs/intents" && printf '# Intent\n' > "$PROJECT/docs/intents/001-demo.intent.md"
+printf '# Intent\n' > "$PROJECT/specs/001-demo/intent.md"
 run "$GATE_WRAPPER"
 [ "$RC" -eq 0 ] && ok || bad "require-intent 有 intent 放行: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 
 # The planverify-gate wrapper delegates to `che planverify-gate`: default off
-# is a silent no-op; block mode gates on docs/intents/<slug>.planverify.md.
+# is a silent no-op; block mode gates on the task dir's planverify.md report.
 run "$PV_GATE_WRAPPER" demo
 [ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate 默认 off: RC=$RC OUT=$OUT，预期静默退 0"
 OUT="$(cd "$PROJECT" && SKC_PLANVERIFY_GATE=block "$PV_GATE_WRAPPER" demo 2>"$TMP/stderr")"
@@ -174,7 +179,7 @@ case "$(<"$TMP/stderr")" in
   *"no planverify report exists for 'demo'"*) ok ;;
   *) bad "planverify-gate block 无报告: 错误信息不符：$(<"$TMP/stderr")" ;;
 esac
-printf 'verdict: PASS\n' > "$PROJECT/docs/intents/demo.planverify.md"
+printf 'verdict: PASS\n' > "$PROJECT/specs/001-demo/planverify.md"
 OUT="$(cd "$PROJECT" && SKC_PLANVERIFY_GATE=block "$PV_GATE_WRAPPER" demo 2>"$TMP/stderr")"
 RC=$?
 [ "$RC" -eq 0 ] && ok || bad "planverify-gate block+PASS 放行: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"

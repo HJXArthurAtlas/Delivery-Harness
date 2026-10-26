@@ -13,14 +13,18 @@ import {
 } from './template.ts';
 import { availableDocs, isFile, printDocsBlock } from './check.ts';
 
-export const SETUP_PLAN_USAGE = `Usage: che setup-plan --references-dir <dir> [--json]
+export const SETUP_PLAN_USAGE = `Usage: che setup-plan --references-dir <dir> [--feature <slug>] [--session <id>] [--json]
   --references-dir <dir>  Directory holding the skill's bundled plan-template.md
+  --feature <slug>        Resolve this task explicitly (overrides session binding)
+  --session <id>          Resolve via the session's task binding
   --json                  Output results in JSON format
   --help                  Show this help message
 `;
 
-export const SETUP_TASKS_USAGE = `Usage: che setup-tasks --references-dir <dir> [--json]
+export const SETUP_TASKS_USAGE = `Usage: che setup-tasks --references-dir <dir> [--feature <slug>] [--session <id>] [--json]
   --references-dir <dir>  Directory holding the skill's bundled tasks-template.md
+  --feature <slug>        Resolve this task explicitly (overrides session binding)
+  --session <id>          Resolve via the session's task binding
   --json                  Output results in JSON format
   --help                  Show this help message
 `;
@@ -35,7 +39,12 @@ function parseSetupArgs(argv: string[], usage: string): ParsedSetupArgs | null {
   try {
     values = parseArgs({
       args: argv,
-      options: { json: { type: 'boolean' }, 'references-dir': { type: 'string' } },
+      options: {
+        json: { type: 'boolean' },
+        'references-dir': { type: 'string' },
+        feature: { type: 'string' },
+        session: { type: 'string' },
+      },
       allowPositionals: false,
       strict: true,
     }).values;
@@ -51,12 +60,17 @@ function parseSetupArgs(argv: string[], usage: string): ParsedSetupArgs | null {
     process.stderr.write(usage);
     return null;
   }
-  return { json: Boolean(values.json), referencesDir };
+  return {
+    json: Boolean(values.json),
+    referencesDir,
+    feature: typeof values.feature === 'string' ? values.feature : '',
+    session: typeof values.session === 'string' ? values.session : '',
+  };
 }
 
-function resolveOrReport(): FeaturePaths | null {
+function resolveOrReport(feature: string, session: string): FeaturePaths | null {
   try {
-    return getFeaturePaths();
+    return getFeaturePaths({ feature, session });
   } catch (err) {
     if (err instanceof FeatureResolutionError) {
       process.stderr.write(err.message + '\n');
@@ -75,7 +89,7 @@ export function runSetupPlan(argv: string[]): number {
   const args = parseSetupArgs(argv, SETUP_PLAN_USAGE);
   if (args === null) return 2;
 
-  const paths = resolveOrReport();
+  const paths = resolveOrReport(args.feature, args.session);
   if (paths === null) return 1;
 
   mkdirSync(paths.featureDir, { recursive: true });
@@ -134,7 +148,7 @@ export function runSetupTasks(argv: string[]): number {
   const args = parseSetupArgs(argv, SETUP_TASKS_USAGE);
   if (args === null) return 2;
 
-  const paths = resolveOrReport();
+  const paths = resolveOrReport(args.feature, args.session);
   if (paths === null) return 1;
 
   if (!isFile(paths.implPlan)) {

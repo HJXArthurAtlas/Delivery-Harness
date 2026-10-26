@@ -1,28 +1,34 @@
 // Inlined require-intent gate (was scripts/bash/require-intent.sh).
 //
-// Gate: refuses to let /che-compound-specify proceed if no intent doc exists
-// in docs/intents/. The toggle is user-configurable, read in this order:
+// Gate before /che-compound-specify: the CURRENT task (session binding or
+// explicit --feature, per resolveTask's order) must already have an intent
+// doc at <taskDir>/intent.md. The intent step (/che-compound-intent) creates
+// the task directory and binds the session, so a missing intent doc means
+// intent never ran — specify must not proceed.
+//
+// The toggle is user-configurable, read in this order:
 //   1. CHE_REQUIRE_INTENT env (on/true/1/yes, off/false/0/no)
 //   2. require_intent: in <repoRoot>/.che/config.yml (same value set)
 //   3. default on
 // An invalid value is an error (exit 1): the gate fails closed.
-//
-// When .che/feature.json registers a feature, the gate additionally checks
-// the intent doc for THAT feature's slug (basename of the registered feature
-// directory, timestamp prefix stripped): docs/intents/{slug}.intent.md must
-// exist. This is the single-source-of-truth check that keeps the intent slug
-// and the spec directory name aligned (see `deriveFeatureSlug`).
+// Gate off is a silent no-op (does not even resolve the task).
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
-import { FeatureResolutionError, findSpecifyRoot, readFeatureSlug } from './feature-paths.ts';
+import {
+  FeatureResolutionError,
+  findSpecifyRoot,
+  resolveTask,
+  type TaskDir,
+} from './feature-paths.ts';
 import { isFile } from './check.ts';
 import { readCheConfigValue } from './config.ts';
 
-export const REQUIRE_INTENT_USAGE = `Usage: che require-intent [--json]
-  --json    Output results in JSON format
-  --help    Show this help message
+export const REQUIRE_INTENT_USAGE = `Usage: che require-intent [--json] [--feature <slug>] [--session <id>]
+  --json            Output results in JSON format
+  --feature <slug>  Resolve this task explicitly (overrides session binding)
+  --session <id>    Resolve via the session's task binding
+  --help            Show this help message
 `;
 
 const TOGGLE_VALUES: Record<string, boolean> = {
@@ -77,53 +83,16 @@ export function resolveRequireIntentGate(repoRoot: string): boolean {
   return parsed;
 }
 
-export function countIntentDocs(repoRoot: string): number {
-  const intentDir = join(repoRoot, 'docs', 'intents');
-  let entries: string[];
-  try {
-    if (!statSync(intentDir).isDirectory()) return 0;
-    entries = readdirSync(intentDir);
-  } catch {
-    return 0;
-  }
-  return entries.filter((entry) => entry.endsWith('.intent.md') && isFile(join(intentDir, entry)))
-    .length;
-}
-
-function blockedMessage(intentDirExists: boolean): string {
-  if (!intentDirExists) {
-    return (
-      '\n' +
-      '  ⚠  No intent docs found (docs/intents/ does not exist).\n' +
-      '\n' +
-      '  Run /che-compound-intent BEFORE /che-compound-specify to capture\n' +
-      '  the goal, constraints, and failure conditions for this feature.\n' +
-      '\n' +
-      "  This is mandatory per the che-compound extension's discipline.\n" +
-      '  /che-compound-specify will not proceed until at least one intent doc exists.\n' +
-      '\n'
-    );
-  }
+function blockedMessage(taskDir: string, intentDoc: string): string {
   return (
     '\n' +
-    '  ⚠  docs/intents/ exists but contains no *.intent.md files.\n' +
+    `  ⚠  Task directory has no intent doc (${taskDir}).\n` +
     '\n' +
-    '  Run /che-compound-intent BEFORE /che-compound-specify.\n' +
-    '\n'
-  );
-}
-
-function blockedSlugMessage(slug: string, intentDoc: string, intentCount: number): string {
-  return (
+    '  Run /che-compound-intent BEFORE /che-compound-specify to capture\n' +
+    '  the goal, constraints, and failure conditions for this task.\n' +
     '\n' +
-    `  ⚠  No intent doc matches the current feature slug "${slug}".\n` +
-    '\n' +
-    `  .che/feature.json registers this feature as slug "${slug}", so the intent\n` +
-    `  doc must live at ${intentDoc}.\n` +
-    `  Found ${intentCount} intent doc(s) in docs/intents/, none matching.\n` +
-    '\n' +
-    '  Run /che-compound-intent BEFORE /che-compound-specify and keep the slug\n' +
-    '  identical (accept the proposed slug, or reply `override` with the same one).\n' +
+    "  This is mandatory per the che-compound extension's discipline:\n" +
+    `  the intent doc must exist at ${intentDoc}.\n` +
     '\n'
   );
 }
@@ -138,7 +107,11 @@ export function runRequireIntent(argv: string[]): number {
   try {
     values = parseArgs({
       args: argv,
-      options: { json: { type: 'boolean' } },
+      options: {
+        json: { type: 'boolean' },
+        feature: { type: 'string' },
+        session: { type: 'string' },
+      },
       allowPositionals: false,
       strict: true,
     }).values;
@@ -148,6 +121,8 @@ export function runRequireIntent(argv: string[]): number {
     process.stderr.write(REQUIRE_INTENT_USAGE);
     return 2;
   }
+  const feature = typeof values.feature === 'string' ? values.feature : '';
+  const session = typeof values.session === 'string' ? values.session : '';
 
   let repoRoot: string;
   let gateOn: boolean;
@@ -162,49 +137,68 @@ export function runRequireIntent(argv: string[]): number {
     throw err;
   }
 
-  const intentDir = join(repoRoot, 'docs', 'intents');
-  let intentDirExists = false;
-  try {
-    intentDirExists = statSync(intentDir).isDirectory();
-  } catch {
-    intentDirExists = false;
+  // Gate off: silent no-op (mirrors planverify-gate's off mode) — the task is
+  // not even resolved, matching planverify-gate not reading the report.
+  if (!gateOn) {
+    if (values.json) {
+      process.stdout.write(
+        JSON.stringify({
+          REPO_ROOT: repoRoot,
+          GATE: 'off',
+          TASK_DIR: null,
+          SLUG: '',
+          INTENT_DOC: '',
+        }) + '\n',
+      );
+    }
+    return 0;
   }
-  const intentCount = countIntentDocs(repoRoot);
-  const featureSlug = readFeatureSlug(repoRoot);
-  const intentDoc = featureSlug === '' ? '' : join(intentDir, `${featureSlug}.intent.md`);
-  const intentDocFound = intentDoc !== '' && isFile(intentDoc);
+
+  let task: TaskDir;
+  try {
+    task = resolveTask(repoRoot, { feature, session });
+  } catch (err) {
+    if (err instanceof FeatureResolutionError) {
+      if (values.json) {
+        process.stdout.write(
+          JSON.stringify({
+            REPO_ROOT: repoRoot,
+            GATE: 'on',
+            TASK_DIR: null,
+            SLUG: '',
+            INTENT_DOC: '',
+          }) + '\n',
+        );
+      }
+      process.stderr.write(err.message + '\n');
+      return 1;
+    }
+    throw err;
+  }
+
+  const intentDoc = join(task.path, 'intent.md');
+  const intentDocFound = isFile(intentDoc);
 
   if (values.json) {
     process.stdout.write(
       JSON.stringify({
         REPO_ROOT: repoRoot,
-        GATE: gateOn ? 'on' : 'off',
-        INTENT_DIR: intentDir,
-        INTENT_COUNT: intentCount,
-        SLUG: featureSlug,
+        GATE: 'on',
+        TASK_DIR: task.path,
+        SLUG: task.slug,
         INTENT_DOC: intentDoc,
       }) + '\n',
     );
   }
 
-  // Gate off: silent no-op (mirrors planverify-gate's off mode).
-  if (!gateOn) return 0;
-
-  if (intentCount === 0) {
-    process.stderr.write(blockedMessage(intentDirExists));
-    return 1;
-  }
-
-  if (intentDoc !== '' && !intentDocFound) {
-    process.stderr.write(blockedSlugMessage(featureSlug, intentDoc, intentCount));
+  if (!intentDocFound) {
+    process.stderr.write(blockedMessage(task.name, intentDoc));
     return 1;
   }
 
   if (!values.json) {
-    const slugNote =
-      intentDoc === '' ? '' : ` — slug "${featureSlug}" matches ${intentDoc.replace(`${repoRoot}/`, '')}`;
     process.stdout.write(
-      `✓ Found ${intentCount} intent doc(s) in docs/intents/${slugNote} — /che-compound-specify may proceed.\n`,
+      `✓ Intent doc found for '${task.slug}' — /che-compound-specify may proceed.\n`,
     );
   }
   return 0;
