@@ -75,45 +75,21 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 
 或直接运行 `/che-project-init`——它自检并代装这两个 CLI，che 安装 404 时会提示上面的 scope 配置。
 
-### omp marketplace 插件（可选）
+### omp 插件补充（更新与坑）
 
-omp 侧还可以走原生插件分发（catalog：`.omp-plugin/marketplace.json`，插件名 `ncw-delivery`）：
+- 更新：`omp plugin upgrade ncw-delivery@ncw-delivery-harness`，装完 `/reload-plugins` 或开新会话生效；`marketplace.autoUpdate` 默认 `notify` 只写 debug log，要自动更新执行 `omp config set marketplace.autoUpdate auto`。
+- 插件**只含 skills**（`.agents/commands/` 是本仓维护者工具，不经插件分发）。
+- **marketplace 安装不解析 npm 依赖**——`che` / `adrkit` 按上节装到全局 PATH。
+- `git+` 前缀只用于 `omp plugin install`（会剥掉并改用 bun 装 `package.json#dependencies`）；`marketplace add` 必须写裸 `https://…`。
+- `marketplace add` 缓存是整仓快照；开发机勿用本地路径验证分发（不读 .gitignore，会把未跟踪文件带进缓存），一律走 git URL。
 
-```bash
-omp plugin marketplace add https://git.newchiwan.com/council/ncw-delivery-harness.git
-omp plugin install ncw-delivery@ncw-delivery-harness
-```
+### DSH 插件补充（升级与坑）
 
-- 插件**只含 skills**，不含斜杠命令；`.agents/commands/`（`/readme-refresh`）是本仓维护者工具，不经插件分发——pack 没有额外的同步/安装脚本，插件树即 `skills/`。
-- 更新：`omp plugin upgrade ncw-delivery@ncw-delivery-harness`；装完 `/reload-plugins` 或开新会话生效。
-- 注意 `marketplace.autoUpdate` 默认 `notify` 只写 debug log 不提示；要自动更新执行 `omp config set marketplace.autoUpdate auto`。
-- catalog `version` 与 `package.json` 版本同步维护，`npm test` 校验二者一致。
-- **marketplace 安装不解析 npm 依赖**（只缓存插件树并符号链接）。该路径下若 `adrkit` 或 `che` 不可用，手动运行 `npm install -g @adrkit/cli@0.20.0` 与 `npm install -g @newchiwan/che@latest`。
-- **`git+` 前缀只用于 `omp plugin install`**（install 路径会剥掉它）；`omp plugin marketplace add` 不认这个前缀，必须写裸 `https://…`。
-- **缓存是整仓快照**：`marketplace add` 克隆整仓，`plugin install` 把 `source` 目录整树拷入 `~/.omp/plugins/cache/plugins/<marketplace>___<plugin>___<version>/`（catalog 无文件过滤字段）。agent 运行时只从缓存发现 `skills/<name>/SKILL.md`，tests/packages/docs 等其余文件是惰性缓存，不进发现面。
-- **开发机勿用本地路径验证分发**：`marketplace add <本地目录>` 按 omp 语义整目录拷贝（不读 .gitignore），会把未跟踪的 `node_modules`/`.idea` 一并带进缓存；分发验证一律走 git URL。
-
-#### omp git 插件安装（带 `@adrkit/cli` 依赖）
-
-git 插件安装会让 omp 用 bun 安装 `package.json#dependencies` 中钉版本的 `@adrkit/cli` 与 `@newchiwan/che`（`file:` 指向仓内 `packages/cli`，随包一并安装）。技能不会直接读取插件 `node_modules`；无论采用哪种插件安装方式，都必须确保 `adrkit` 在 PATH 上，最简单的做法是另行运行 `npm install -g @adrkit/cli@0.20.0`（特性路径解析同理需要 `che`：`npm install -g @newchiwan/che@latest`）：
-
-```bash
-omp plugin install git+https://git.newchiwan.com/council/ncw-delivery-harness.git
-npm install -g @adrkit/cli@0.20.0
-```
-
-`package.json` 的 `"omp": {}` manifest 是这条路径下运行时技能发现的前提（omp 跳过无 manifest 的包）；`npm test` 校验 `@adrkit/cli` 使用精确版本钉。
-
-### DSH 插件（根包兼作 DSH bundle，可选）
-
-本仓 `package.json` 同时声明 omp 与 DSH 两个分发面（`"omp": {}` + `"dsh": {"bundle": ...}`），无构建、无拷贝——bundle 插件运行时直接扫描包内 `skills/`：
-
-- `cordis.patch.yml`：bundle patch 层，insert 插件行 `ncw-delivery-skills`。
-- `dsh-entry.js`：SkillProvider 入口（纯 node:fs，零依赖），把每个 `skills/<name>/SKILL.md` 挂成 DSH 一等技能（provider `ncw-delivery`，source `bundled`）。
-- 冲突策略：rank 250——项目级发现（`.dsh/skills`=100、`.agents/skills`=200）按名覆盖本 pack，本 pack 压过用户级目录（400/500）；与手动拷贝二选一即可，同装时插件版胜出。
-- `engines.dsh` 钉 `>=0.2.0-rc.2 <0.3.0`，DSH 安装/启动按范围 fail-closed；默认安装跟踪 main 最新（profile lockfile 记录解析到的 commit，单 profile 可复现），升级走 `update` + 重启 profile 生效（bundle 技能不热加载）；需要防篡改可在 `add` 时钉 `#<commit>`。
-- 技能运行时仍只执行 PATH 上的 `adrkit` / `che`（全局安装指引不变）；`dsh plugin add` 随包安装的 `@adrkit/cli` 等依赖不进 PATH 解析。
-- 想走 DSH「发现」市场：按 [官方 plugin-market 文档](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/guide/plugin-market.zh.md)自托管索引（git source + `vX.Y.Z` tag），本仓不再另建市场服务。
+- 升级走 `dsh plugin --profile <name> update` + 重启 profile 生效（bundle 技能不热加载）；默认跟踪 main 最新（lockfile 记录解析到的 commit），要防篡改可在 `add` 时钉 `#<commit>`。
+- `engines.dsh` 钉 `>=0.2.0-rc.2 <0.3.0`，安装/启动 fail-closed。
+- 与手动拷贝二选一即可；同装时插件版（rank 250）胜出。
+- bundle 随包安装的 `@adrkit/cli` 等依赖不进 PATH，`che` / `adrkit` 仍按上节装到全局 PATH。
+- 想走 DSH「发现」市场：按[官方 plugin-market 文档](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/guide/plugin-market.zh.md)自托管索引（git source + `vX.Y.Z` tag）。
 
 ## 使用指南
 
