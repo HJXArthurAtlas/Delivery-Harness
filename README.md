@@ -2,6 +2,42 @@
 
 newchiwan 团队的跨端 agent skill pack：把 PingCode 规格驱动的 AI native 开发流程（speckit 全流程与建卡收尾）、adrkit / grill / compound / bug 治理与线上排障做成可安装的 agent skill，DSH / OpenCode / omp 等等。GitLab 项目：[Tech Council / ncw-delivery-harness](https://git.newchiwan.com/council/ncw-delivery-harness)（内部仓，默认分支 `main`）。
 
+## 一键安装（For Agent）
+
+把下面提示词整段复制给任意 agent（omp / DSH / OpenCode / Claude Code…），由 agent 自动完成安装：
+
+```text
+请在本机安装 ncw-delivery-harness agent skill pack（newchiwan 内部工具，仓库
+https://git.newchiwan.com/council/ncw-delivery-harness）。按步骤执行，任何一步失败
+就停下向我报告，绝不跳步继续：
+
+1. 技能包安装——检测本机环境，选择匹配的一种；检测不出就问我：
+   - 有 omp CLI：
+     omp plugin marketplace add https://git.newchiwan.com/council/ncw-delivery-harness.git
+     omp plugin install ncw-delivery@ncw-delivery-harness
+   - 有 dsh CLI：
+     dsh plugin --profile <当前 profile> add git+https://git.newchiwan.com/council/ncw-delivery-harness.git
+   - 都没有（OpenCode 等手动拷贝端）：
+     git clone https://git.newchiwan.com/council/ncw-delivery-harness.git /tmp/ncw-delivery-harness
+     然后把仓库 skills/ 下每个子目录拷入 ~/.agents/skills/；
+     目标已存在同名目录时停下来问我，绝不覆盖。
+
+2. 运行时 CLI——必须先做 scope 配置（@newchiwan/che 只在公司 Nexus，公网拉取 404）：
+   npm config set @newchiwan:registry https://nexus.newchiwan.cn/repository/registry-npm/
+   npm install -g @newchiwan/che@latest
+   npm install -g @adrkit/cli@0.20.0
+
+3. 验证并逐项汇报结果：
+   - che --version（应 ≥ 0.1.0）
+   - command -v adrkit 与 command -v che
+   - 技能发现：omp 用 omp plugin list；手动拷贝方式确认 ~/.agents/skills/ 下的技能目录已就位
+
+4. 最后询问我：是否要在当前 git 项目里运行 /che-config-init 做项目级配置
+   （.che/config.yml 四键 + 可选 PingCode 接入）。我不需要就到此为止。
+```
+
+手动安装步骤见下文「安装」。
+
 ## 安装
 
 omp 与 DSH 走各自的原生插件安装（见下），手动拷贝全靠文件落位；项目级同名覆盖全局级（DSH：项目级 100/200 > bundle 250 > 用户级 400/500）。
