@@ -216,7 +216,7 @@ flowchart TD
 | 计划工件 | `specs/<任务目录>/`（plan/research/data-model/contracts/quickstart） | plan |
 | 任务清单 | `specs/<任务目录>/tasks.md` | tasks |
 | 门禁报告 | `specs/<任务目录>/planverify.md`（含简报/checker 产物） | planverify / intentguard |
-| 运行时间线 | `specs/<任务目录>/metadata.json`（各阶段 runs；`che state show` 查看） | state（各主线技能自动记录） |
+| 运行时间线 | `specs/<任务目录>/metadata.json`（一句话总结 summary + 各阶段 runs；`che state show` 看单个、`che task list` 扫全部） | state（各主线技能自动记录） |
 | 卡片登记 | `specs/pingcode-mapping.json` | specstoissues |
 | session 绑定 | `.che/feature.json`（机器本地，gitignored；`che feature bind/show`） | intent / feature bind |
 | ADR 语料 | `docs/adr/` | adr-draft / grill-with-docs / writeback |

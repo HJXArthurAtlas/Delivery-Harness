@@ -114,9 +114,9 @@ When all phases pass:
 3. Create the task and write the intent doc (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`):
    ```bash
    che state start intent --session "$CHE_SESSION_ID"   # omit --session when no session id is available
-   che task create {slug} --session "$CHE_SESSION_ID"   # omit --session when no session id is available
+   che task create {slug} --summary "<locked goal in one plain sentence>" --session "$CHE_SESSION_ID"   # omit --session when no session id is available
    ```
-   The command allocates the next `NNN-` number, enforces slug uniqueness, creates `specs/NNN-{slug}/` with a `metadata.json` skeleton, and binds the session. Use the printed `TASK_DIR` for every subsequent file operation. If the slug already exists the command fails — go back to step 2 and pick another slug.
+   The command allocates the next `NNN-` number, enforces slug uniqueness, creates `specs/NNN-{slug}/` with a `metadata.json` skeleton, and binds the session. `--summary` is the one-line "what is this task about" (use the locked goal sentence) — it lands in `metadata.json` so `che task list` can show every task at a glance without reading artifacts. Use the printed `TASK_DIR` for every subsequent file operation. If the slug already exists the command fails — go back to step 2 and pick another slug.
 4. Write `{TASK_DIR}/intent.md` using the format at the bottom of this file
 5. Confirm the file path in chat
 
@@ -186,7 +186,7 @@ If the compound store was loaded:
 
 - **Plain chat** for free-form prose (goal sentence, why now, individual constraint text)
 - **AskUserQuestion** for discrete choices (accept/edit/reject a reword, yes/no/later for the chain handoff)
-- **Bash** for `che task create {slug} --session "$CHE_SESSION_ID"` (task directory + session binding) and date generation (`date -u +%Y-%m-%d`) when populating the `created` frontmatter
+- **Bash** for `che task create {slug} --summary "<locked goal>" --session "$CHE_SESSION_ID"` (task directory + one-line summary + session binding) and date generation (`date -u +%Y-%m-%d`) when populating the `created` frontmatter
 - **Write** for the final `{TASK_DIR}/intent.md` file
 
 ---

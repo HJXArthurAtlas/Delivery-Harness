@@ -239,8 +239,18 @@ run "$CHE_BIN" feature show --session ghost
 [ "$RC" -eq 1 ] && ok || bad "feature show 未绑定: 退出码 ${RC}，预期 1"
 
 # 14. Single task, no session → auto-resolve (project2).
-run2 "$CHE_BIN" task create solo
+run2 "$CHE_BIN" task create solo --summary "让后台支持用户名登录"
 [ "$RC" -eq 0 ] && ok || bad "project2 task create: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+[ -d "$PROJECT2/specs/001-solo" ] && ok || bad "project2 task create: 目录未创建"
+grep -q '"summary":"让后台支持用户名登录"' "$PROJECT2/specs/001-solo/metadata.json" \
+  && ok || bad "project2 task create: summary 未写入 metadata.json"
+run2 "$CHE_BIN" task list
+[ "$RC" -eq 0 ] && ok || bad "task list text: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+printf '%s\n' "$OUT" | grep -q "^solo  \[created\]  让后台支持用户名登录$" \
+  && ok || bad "task list text: 缺 summary/stage 行：$OUT"
+run2 "$CHE_BIN" task list --json
+[ "$RC" -eq 0 ] && json_matches "$OUT" '{"tasks":[{"SLUG":"solo","STAGE":"created","SUMMARY":"让后台支持用户名登录"}]}' \
+  && ok || bad "task list --json: 输出不符：$OUT"
 run2 "$CHE_BIN" paths --json
 [ "$RC" -eq 0 ] && json_matches "$OUT" '{"SLUG":"solo"}' \
   && ok || bad "project2 单任务自动解析: RC=$RC OUT=$OUT"

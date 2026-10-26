@@ -174,6 +174,18 @@ function isFileIn(dir: string, name: string): boolean {
   }
 }
 
+/** One-line task summary from metadata.json; '' when absent or unreadable. */
+export function readMetadataSummary(taskDir: string): string {
+  try {
+    const data: unknown = JSON.parse(readFileSync(join(taskDir, 'metadata.json'), 'utf-8'));
+    if (typeof data !== 'object' || data === null) return '';
+    const summary = (data as Record<string, unknown>).summary;
+    return typeof summary === 'string' ? summary : '';
+  } catch {
+    return '';
+  }
+}
+
 function taskListing(tasks: TaskDir[]): string {
   return tasks.map((t) => `  - ${t.slug}  (${t.name}, stage: ${deriveStage(t.path)})`).join('\n');
 }

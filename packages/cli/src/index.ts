@@ -17,7 +17,8 @@ const USAGE = `che — newchiwan delivery harness CLI
 Usage: che <command> [options]
 
 Commands:
-  task create <slug> [--session <id>] [--json]     Create the task directory + metadata, bind the session
+  task create <slug> [--summary <text>] [--session <id>] [--json]  Create the task directory + metadata, bind the session
+  task list [--json]                               Tasks at a glance: slug, stage, one-line summary
   state start|done <stage> / show [--json]         Task runs timeline (metadata.json; stage/next derived)
   paths [--json] [--feature <slug>] [--session <id>]  Resolve task paths
   check [--json] [--require-spec] [--require-tasks] [--include-tasks]
