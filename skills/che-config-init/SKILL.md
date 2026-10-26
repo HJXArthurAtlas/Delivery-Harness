@@ -9,7 +9,7 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 requir
 
 职责边界（必须遵守）：
 
-- 只写 `.che/config.yml`；**绝不**触碰 `.che/feature.json`（session→slug 绑定表，机器本地 gitignored，由 intent 阶段 `che task create` 写入）。
+- 写 `.che/config.yml` + 维护项目根 `.gitignore` 的 che 忽略规则（见步骤 6）；**绝不**读写 `.che/feature.json` 的内容（session→slug 绑定表，机器本地，由 intent 阶段 `che task create` 写入——本技能只负责让 git 忽略它）。
 - `.che/pingcode-config.yml` **绝不**由本技能直接生成——PingCode 接入链最后移交 `/che-pingcode-init` 完成。
 - 本技能无 scripts：写盘由 agent 按本文件的模板完成。
 
@@ -82,7 +82,22 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 4. **移交集成配置**：执行 `/che-pingcode-init` 交互生成 `.che/pingcode-config.yml`。用户在中途拒绝或中止 → 回来询问用户保持 `pingcode_integration: off` 还是稍后重跑。
 5. **记录**：接入链全部走通 → `pingcode_integration: on`；用户拒绝接入或链路未走通 → `off`。必须诚实记录实际状态，**绝不**写未经跑通的 on。
 
-### 6. 写 `.che/config.yml`
+### 6. 确保 `.gitignore` 忽略机器本地绑定文件
+
+`.che/feature.json`（session→slug 绑定表）是机器本地文件，入库无意义；`.che/*.bak` 是配置覆盖备份，同为本地噪声。`.che/config.yml` 与 `.che/pingcode-config.yml` 是项目共享配置，**保持提交**——所以忽略规则必须精确到文件，绝不整目录忽略 `.che/`。
+
+在项目根 `.gitignore` 中幂等追加（已有同名规则行则跳过该行；`.gitignore` 不存在则创建）：
+
+```gitignore
+# che: session bindings are machine-local (config.yml / pingcode-config.yml stay tracked)
+.che/feature.json
+.che/*.bak
+```
+
+- 检查方式：逐行比对 `.gitignore` 是否已含 `.che/feature.json` 与 `.che/*.bak` 两行（trim 后精确匹配即可），缺哪行补哪行，连同注释块一起追加。
+- 用户明确拒绝改 `.gitignore` → 跳过本步并在最终回显标注（绑定文件将来会出现在 `git status` 里，由用户自行处理）。
+
+### 7. 写 `.che/config.yml`
 
 格式纪律：扁平键值文件，每行一个 `键: 值`；che CLI 逐行正则读首个 `键:`，因此注释行**必须**以 `#` 开头，键值行**绝不**出现在其他语法位置。
 
@@ -109,13 +124,14 @@ pingcode_integration: off
   - 有变化 → 旧文件备份为 `.che/config.yml.bak` 后更新（同名不覆盖；用户拒绝 → 中止不写）。
   - 全部一致 → 回显「配置已是最新，无事可做」，不写盘。
 
-### 7. 回显与下一步
+### 8. 回显与下一步
 
 ```
 ✅ 配置已生成: .che/config.yml
    require_intent: <值>   planverify_gate: <值>
    checker: <值>   pingcode_integration: <值>
    che: <✓ 或 ✗ + 安装命令>   adrkit: <✓ 或 ✗ + 安装命令>
+   gitignore: <✓ 已忽略 .che/feature.json、.che/*.bak 或 +新增规则 或 用户拒绝跳过>
 ```
 
 - 开始第一个特性：`/che-compound-intent`（全流程总览见 `/che-compound-flow`）。
