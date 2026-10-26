@@ -48,7 +48,7 @@ newchiwan 团队的跨端 agent skill pack：把 PingCode 规格驱动的 AI nat
 | 能力 | 实现 / 入口 | 运行时前提 |
 |---|---|---|
 | adrkit `new/check/queue/lint/migrate/evaluate` | 外部 `@adrkit/cli`；`adr.sh` 是跨技能入口 | Node ≥22；`adrkit` 不可用时运行 `npm install -g @adrkit/cli@0.20.0` |
-| grill、adrkit check/draft、speckit 全流程（analyze/clarify/constitution/converge/design/implement/plan/tasks/specify）的特性路径与模板解析 | 外部 `che` CLI（源与发布单元在 `packages/cli`，npm 包 `@newchiwan/che`） | Node ≥22.18；`che` 不可用时运行 `npm install -g @newchiwan/che@latest`；特性指针在 `.che/feature.json` |
+| grill、adrkit check/draft、speckit 全流程（analyze/clarify/constitution/converge/design/implement/plan/tasks/specify）的特性路径与模板解析 | 外部 `che` CLI（源与发布单元在 `packages/cli`，npm 包 `@newchiwan/che`，发布在公司 Nexus） | Node ≥22.18；`che` 不可用时运行 `npm install -g @newchiwan/che@latest`（先按「安装 → npm 运行时 CLI」配置 scope，公网无此包）；特性指针在 `.che/feature.json` |
 | ADR scaffold / lint / legacy migration | `che-adr-draft/scripts/{scaffold.sh,adr.sh}` | 同 adrkit；全部走 pack-local 跨技能调用 |
 | PingCode 卡操作（che-pingcode-* 五技能） | 无 bundle——依赖外部 `pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`） | `pingcode auth login` 认证 + 网络可达 PingCode；pack 不内置（认证凭据与 API 演进留在上游 CLI） |
 
@@ -83,6 +83,18 @@ cp -R ncw-delivery-harness/skills/<name> <发现目录>/skills/
 
 omp 实测同时读项目级与全局级；OpenCode 官方支持同两个路径；DSH 同样官方支持手动拷贝（skill 是「被扫描的文件」，拷贝即安装、免重启热加载），原生插件安装见下文「DSH 插件」小节。
 
+### npm 运行时 CLI（`che` / `adrkit`，所有安装路径通用）
+
+两个外部 CLI 不随任何插件路径分发，必须装在全局 PATH 上。`@newchiwan/che` 发布在公司 Nexus（公网 npmjs 上没有这个包），内网机器先做一次性 scope 配置：
+
+```bash
+npm config set @newchiwan:registry https://nexus.newchiwan.cn/repository/registry-npm/   # Nexus group（internal + 公网代理）
+npm install -g @newchiwan/che@latest        # 特性路径解析（compound / grill / adrkit 系技能）
+npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
+```
+
+或直接运行 `/che-config-init`——它自检并代装这两个 CLI，che 安装 404 时会提示上面的 scope 配置。
+
 ### omp marketplace 插件（可选）
 
 omp 侧还可以走原生插件分发（catalog：`.omp-plugin/marketplace.json`，插件名 `ncw-delivery`）：
@@ -103,7 +115,7 @@ omp plugin install ncw-delivery@ncw-delivery-harness
 
 #### omp git 插件安装（带 `@adrkit/cli` 依赖）
 
-git 插件安装会让 omp 用 bun 安装 `package.json#dependencies` 中钉版本的 `@adrkit/cli`。技能不会直接读取插件 `node_modules`；无论采用哪种插件安装方式，都必须确保 `adrkit` 在 PATH 上，最简单的做法是另行运行 `npm install -g @adrkit/cli@0.20.0`（特性路径解析同理需要 `che`：`npm install -g @newchiwan/che@latest`）：
+git 插件安装会让 omp 用 bun 安装 `package.json#dependencies` 中钉版本的 `@adrkit/cli` 与 `@newchiwan/che`（`file:` 指向仓内 `packages/cli`，随包一并安装）。技能不会直接读取插件 `node_modules`；无论采用哪种插件安装方式，都必须确保 `adrkit` 在 PATH 上，最简单的做法是另行运行 `npm install -g @adrkit/cli@0.20.0`（特性路径解析同理需要 `che`：`npm install -g @newchiwan/che@latest`）：
 
 ```bash
 omp plugin install git+https://git.newchiwan.com/council/ncw-delivery-harness.git
@@ -148,4 +160,4 @@ bash packages/cli/scripts/publish.sh
 
 - npm 认证写**用户级** `~/.npmrc`（`//nexus.newchiwan.cn/repository/internal-npm/:_auth` = base64(user:pass)，npm 按 registry URI 精确匹配凭据；devops 账号），绝不入仓库。
 - 根包版本改动后同步 `.omp-plugin/marketplace.json` 的 plugin `version`（`npm test` 强制一致）；`@newchiwan/che` 版本须与 `src/index.ts` 的 `CLI_VERSION` 一致（`test-che-cli.sh` 校验）。
-- 消费端（内网机器）一次性配置后，技能里的 `npm install -g @newchiwan/che@latest` 直接可用：`npm config set @newchiwan:registry https://nexus.newchiwan.cn/repository/registry-npm/`
+- 消费端（内网机器）的一次性 scope 配置见「安装 → npm 运行时 CLI」。
