@@ -1,6 +1,6 @@
 ---
 name: che-compound-require-intent
-description: 'Gate before specify: refuses to let /che-compound-specify proceed if no intent doc exists in docs/intents/, and — once .che/feature.json registers a feature — requires docs/intents/{slug}.intent.md to match the registered slug. Run as a manual check before specify; forces /che-compound-intent first. User-toggleable: CHE_REQUIRE_INTENT env or require_intent: in .che/config.yml (default on).'
+description: specify 前门禁（默认开）：docs/intents/ 没有 intent 文档就拒绝 /che-compound-specify；.che/feature.json 已登记特性时还要求 docs/intents/{slug}.intent.md 与登记 slug 一致。可经 CHE_REQUIRE_INTENT 环境变量或 .che/config.yml 的 require_intent 键关闭。手动或 agent 在 specify 边界前调用。当用户说「过一遍 specify 门禁」「检查 intent 放行了没」时使用——即使用户没提命令名，只要是规格前的门禁检查也用本 skill。
 ---
 
 # Require Intent Before Specify

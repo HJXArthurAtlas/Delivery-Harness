@@ -1,6 +1,6 @@
 ---
 name: che-compound-constitution
-description: Create or update the project constitution from interactive or provided principle inputs. Use when the user runs or mentions /che-compound-constitution, or asks to create or amend the project constitution, governance principles, or project charter.
+description: 创建或更新项目章程 docs/constitution/constitution.md（交互收集或按给定原则输入），作为后续 spec/plan 的治理约束来源。当用户运行或提到 /che-compound-constitution，或说「立章程」「修订治理原则」「建项目宪章」时使用——即使用户没提命令名，只要是项目治理原则的建立或修订也用本 skill。
 ---
 
 

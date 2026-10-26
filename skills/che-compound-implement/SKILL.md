@@ -1,6 +1,6 @@
 ---
 name: che-compound-implement
-description: Execute the implementation plan by processing and executing all tasks defined in tasks.md. Use when the user runs or mentions /che-compound-implement, or asks to execute the task list, implement the feature per tasks.md, or start coding the planned work.
+description: 按 tasks.md 执行实现：逐任务处理并落实任务清单；涉 UI 时按 design-tasks.md 的交互规则实现并逐项核验 UI-xx 设计要求清单，全部核验通过才算完成。当用户运行或提到 /che-compound-implement，或说「开始实现」「按任务清单编码」「执行实现计划」时使用——即使用户没提命令名，只要是按 tasks.md 的实现执行也用本 skill。
 ---
 
 

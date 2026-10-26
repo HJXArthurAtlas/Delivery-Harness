@@ -1,6 +1,6 @@
 ---
 name: che-bug-test
-description: Validate that a previously fixed bug is resolved and record the verification report. Use when the user runs or mentions /che-bug-test, or asks to verify that a bug fix recorded by /che-bug-fix actually resolves the assessed bug.
+description: 验证 bug 修复是否真正解决：重跑复现步骤、补新测试与回归，产出验证报告 docs/bugs/<slug>/test.md；verdict 为 failed 时带新证据回退重跑评估。当用户运行或提到 /che-bug-test，或说「验证这个修复」「回归这个 bug」「确认 bug 修好了」时使用——即使用户没提命令名，只要是修复后的验证收口也用本 skill。
 ---
 
 # Bug Test Skill

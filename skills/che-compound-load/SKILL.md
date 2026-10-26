@@ -1,6 +1,6 @@
 ---
 name: che-compound-load
-description: Load settled ADRs (adrkit corpus, docs/adr/) plus corrections and patterns (docs/corrections/, docs/patterns/) into agent context at the start of a feature. Auto-scaffolds the store metadata and artifact directories if missing.
+description: 会话开场装载治理资产：把 adrkit ADR 语料（docs/adr/）与 compound store（docs/corrections/、docs/patterns/）加载进上下文；目录缺失时按 bundled 模板自动 scaffold。每个特性会话开始时跑一次。当用户说「加载 compound store」「加载 ADR 语料」时使用——即使用户没提命令名，只要是会话开场的治理资产装载也用本 skill。
 ---
 
 # Load Compound Store

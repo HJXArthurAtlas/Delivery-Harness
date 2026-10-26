@@ -1,6 +1,6 @@
 ---
 name: che-compound-analyze
-description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation. Use when the user runs or mentions /che-compound-analyze, or asks to analyze spec/plan/tasks consistency, find cross-artifact inconsistencies, or check requirement coverage before implementation.
+description: spec/plan/tasks 跨工件一致性只读分析（tasks 生成后、实现前）：交叉核对三份工件，找矛盾、缺失与需求覆盖缺口，只报告不修改任何文件。当用户运行或提到 /che-compound-analyze，或说「分析 spec/plan/tasks 一致性」「找工件之间的矛盾」「实现前查一遍覆盖」时使用——即使用户没提命令名，只要是跨工件一致性分析也用本 skill。
 ---
 
 

@@ -1,6 +1,6 @@
 ---
 name: che-compound-planverify-gate
-description: 'Gate before implement: when the gate mode is block (SKC_PLANVERIFY_GATE env or planverify_gate: in .che/config.yml), che planverify-gate refuses /che-compound-implement if the planverify verdict is missing or BLOCKED_DRIFT. Run as a manual check before implement; no-op by default.'
+description: implement 前门禁（默认 off 静默放行）：gate 模式为 block（SKC_PLANVERIFY_GATE 环境变量或 .che/config.yml 的 planverify_gate 键）时，planverify 裁决缺失或 BLOCKED_DRIFT 即拒绝 /che-compound-implement。手动或 agent 在 implement 边界前调用。当用户说「过一遍 implement 门禁」「检查 planverify 放行了没」时使用——即使用户没提命令名，只要是实现前的门禁检查也用本 skill。
 ---
 
 # Planverify Gate (before_implement)

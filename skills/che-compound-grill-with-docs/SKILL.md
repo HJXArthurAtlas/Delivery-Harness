@@ -1,7 +1,6 @@
 ---
 name: che-compound-grill-with-docs
-description: Exhaustively clarify a feature specification and persist canonical domain
-  knowledge before planning.
+description: 深度澄清 + 领域知识沉淀：与 grill-me 同样的穷尽澄清，另把敲定的跨特性术语/领域知识即时落盘 docs/domain_knowledge/（CONTEXT.md + 主题文档）；过三条件记录门的决策经 adrkit scaffold 归口为 ADR（docs/adr/）。当用户说「澄清并沉淀领域知识」「把这块业务规则沉淀下来」时使用——即使用户没提命令名，只要是澄清兼领域知识落盘也用本 skill。
 ---
 
 # Grill With Docs Skill

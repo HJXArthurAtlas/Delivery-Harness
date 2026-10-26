@@ -1,6 +1,6 @@
 ---
 name: che-compound-clarify
-description: Identify underspecified areas in the current feature spec by asking up to 5 highly targeted clarification questions and encoding answers back into the spec. Use when the user runs or mentions /che-compound-clarify, or asks to clarify the feature spec, resolve requirement ambiguities, or reduce underspecified areas before planning.
+description: 规格澄清问答：最多提 5 个高针对性的澄清问题，找出当前特性 spec 定义不足的区域，并把结论回写进 spec.md。在 specify 之后、plan 之前使用。当用户运行或提到 /che-compound-clarify，或说「澄清规格」「补全需求细节」「解决需求歧义」时使用——即使用户没提命令名，只要是对 spec 的澄清回写也用本 skill。
 ---
 
 

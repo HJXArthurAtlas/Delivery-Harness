@@ -1,6 +1,6 @@
 ---
 name: che-compound-intent
-description: 'Interview-driven intent capture: goal, constraints, and failure conditions. Refuses to terminate until every quality test (G1-G5, C1-C5, F1-F4) passes.'
+description: intent 访谈：问答式捕获目标、约束、失败条件，落 docs/intents/{slug}.intent.md；G/C/F 三族质量测试全部通过才允许结束，是规格驱动流程的第一步。当用户说「先做 intent 访谈」「锁定目标与约束」「捕获失败条件」「记录需求意图」时使用——即使用户没提命令名，只要是动工前的意图捕获也用本 skill。
 ---
 
 # Intent Interview

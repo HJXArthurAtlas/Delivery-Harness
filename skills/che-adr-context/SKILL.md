@@ -1,7 +1,6 @@
 ---
 name: che-adr-context
-description: Retrieve the decisions that govern this work into context, before planning
-  against them. Read-only.
+description: 规划前把治理决策装载进上下文（只读）：按给定路径读取 docs/adr/ 语料中约束本工作的 governed/active/history 决策，不给路径则列出待 ARB 评审队列。在 /che-compound-plan 之前或需要确认约束来源时使用。当用户说「这个改动受哪些决策约束」「列出待评审决策」「取治理决策」时使用——即使用户没提命令名，只要是规划前的治理决策装载也用本 skill。
 ---
 
 # Adrkit Context Skill

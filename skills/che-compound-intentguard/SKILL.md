@@ -1,6 +1,6 @@
 ---
 name: che-compound-intentguard
-description: L3 validation by an INDEPENDENT checker (cross-model when available). Seals a briefing of locked intent + expectations + diff + mechanical results — never the builder's context — and dispatches it to a separate model/context to judge scope, constraints, failure conditions, and expectations. Returns PASS / REVIEW NEEDED / BLOCKED.
+description: 实现后独立校验（L3）：密封 briefing（锁定 intent + 期望 + 完整 diff + 机械检查结果，绝不含实现者的上下文叙事）派给独立 checker（可跨模型），判定实现是否越出意图、约束与期望，返回 PASS / REVIEW NEEDED / BLOCKED。当用户说「intentguard 校验本次实现」「审一下这次改动有没有越界」时使用——即使用户没提命令名，只要是实现后的意图越界审查也用本 skill。
 ---
 
 # Intent Guard Validation

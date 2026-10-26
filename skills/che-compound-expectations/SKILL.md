@@ -1,6 +1,6 @@
 ---
 name: che-compound-expectations
-description: Compartmented success and edge scenario capture, validator-only. Writes to docs/expectations/ separately from the intent doc; reward-hack defense via file separation.
+description: 期望捕获（validator-only）：访谈式捕获成功场景与边界场景，单独落 docs/expectations/{slug}.expectations.md，与 intent 文档分文件存放——文件隔离是防 reward-hack 的设计。当用户说「补期望场景」「写 expectations」「捕获边界场景」时使用——即使用户没提命令名，只要是期望场景的捕获落盘也用本 skill。
 ---
 
 # Expectations Interview

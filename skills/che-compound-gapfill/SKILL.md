@@ -1,6 +1,6 @@
 ---
 name: che-compound-gapfill
-description: Cross-reference intent + expectations against the generated tasks.md; append missing constraint-violation, failure-condition, out-of-scope-regression, and edge tests with source comments.
+description: 任务缺口补全：把 intent + expectations 对照已生成的 tasks.md 交叉核对，追加缺失的四类测试任务（约束违反/失败条件/越界回归/边界场景）并带来源注释。当用户说「补任务缺口」「gapfill」「对照 intent 查任务覆盖」时使用——即使用户没提命令名，只要是 tasks 的覆盖缺口补全也用本 skill。
 ---
 
 # Gap-Fill Analysis

@@ -1,6 +1,6 @@
 ---
 name: che-bug-fix
-description: Apply the remediation from a bug assessment and record what was changed. Use when the user runs or mentions /che-bug-fix, or asks to implement the fix proposed by a previously produced bug assessment.
+description: 按既有 bug 评估实施修复并记录变更到 docs/bugs/<slug>/fix.md（仅 assessment 已存在时可用；实施中发现评估有误会停下回退而不是硬修）。当用户运行或提到 /che-bug-fix，或说「按评估修这个 bug」「实施这个修复方案」时使用——即使用户没提命令名，只要是落地 bug assessment 的修复也用本 skill。
 ---
 
 # Bug Fix Skill

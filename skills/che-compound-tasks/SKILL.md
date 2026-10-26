@@ -1,6 +1,6 @@
 ---
 name: che-compound-tasks
-description: Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts. Use when the user runs or mentions /che-compound-tasks, or asks to generate the task list, break the plan into actionable tasks, or produce tasks.md for implementation.
+description: 任务清单生成：按现有设计工件产出依赖有序、可执行的 tasks.md（按用户故事组织）；入向前置——本会话需已有该 plan 的 adr-check 报告。当用户运行或提到 /che-compound-tasks，或说「出任务清单」「拆任务」「把 plan 拆成可执行任务」时使用——即使用户没提命令名，只要是 plan 到 tasks 的拆解也用本 skill。
 ---
 
 

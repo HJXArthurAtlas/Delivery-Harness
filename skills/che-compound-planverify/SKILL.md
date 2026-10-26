@@ -1,6 +1,6 @@
 ---
 name: che-compound-planverify
-description: L3 PLAN validation by an INDEPENDENT checker (cross-model when available). Judges the proposed plan + gapfilled tasks against locked intent + expectations BEFORE implementation. Seals a briefing (locked criteria + plan + tasks + surface analysis — never the planner's context) and dispatches it to a separate model/context. Returns PASS / REPLAN_ALLOWED / BLOCKED_DRIFT.
+description: plan 独立校验（L3）：实现前由独立 checker（可跨模型）对照锁定 intent + 期望审查 plan 与补全后的 tasks；密封 briefing 派发（绝不含规划者的上下文），返回 PASS / REPLAN_ALLOWED / BLOCKED_DRIFT。当用户说「验证 plan」「planverify」「实现前审一遍计划」时使用——即使用户没提命令名，只要是实现前的计划独立校验也用本 skill。
 ---
 
 # Plan Verify

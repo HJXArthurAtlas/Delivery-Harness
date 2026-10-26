@@ -1,6 +1,6 @@
 ---
 name: che-bug-assess
-description: Assess a bug report (pasted text or URL) against the codebase and produce an assessment with possible remediation. Use when the user runs or mentions /che-bug-assess, pastes a bug report / stack trace / issue URL to triage, or asks to locate the root cause and severity of a bug before fixing it.
+description: bug 报告三角定位（评估，不动代码）：对照代码库分析粘贴的 bug 报告/堆栈/issue URL，产出症状、疑似代码路径、根因假设、严重度与修复方案到 docs/bugs/<slug>/assessment.md。当用户运行或提到 /che-bug-assess，或说「评估这个 bug」「看看这个报错是不是真问题」「定位这个 bug 的根因和严重度」时使用——即使用户没提命令名，只要是修复前的 bug 评估定位也用本 skill。
 ---
 
 # Bug Assess Skill

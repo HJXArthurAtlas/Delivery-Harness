@@ -1,6 +1,6 @@
 ---
 name: che-compound-specify
-description: Create or update the feature specification from a natural language feature description. Use when the user runs or mentions /che-compound-specify, or asks to create or update a feature spec, write requirements, or kick off feature specification.
+description: 特性规格生成：从自然语言需求创建/更新 spec.md（含 User Story 章节与优先级），特性指针登记 .che/feature.json，词汇表落 docs/GLOSSARY.md；前置门禁 require-intent 放行后执行。当用户运行或提到 /che-compound-specify，或说「出 spec」「写特性需求」「把这个需求转成规格」时使用——即使用户没提命令名，只要是特性规格的创建或更新也用本 skill。
 ---
 
 

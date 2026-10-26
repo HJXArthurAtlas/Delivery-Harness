@@ -1,6 +1,6 @@
 ---
 name: che-compound-writeback
-description: Persist new learnings (ADRs, corrections, patterns) from the just-completed feature back to the compound store. Requires intent guard PASS first.
+description: 经验沉淀：intentguard PASS 后把本次特性的新经验写回 compound store（docs/corrections/、docs/patterns/），耐久纠偏升格为 ADR 进 docs/adr/。当用户说「writeback 本次经验」「把这次的教训沉淀下来」时使用——即使用户没提命令名，只要是特性完成后的经验回写也用本 skill。
 ---
 
 # Writeback to Compound Store

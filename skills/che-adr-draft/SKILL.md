@@ -1,7 +1,6 @@
 ---
 name: che-adr-draft
-description: Draft one new ADR from the current plan artifact. Writes a single new
-  record.
+description: 从当前 plan 工件起草一条新 ADR（唯一写命令，写单条新记录到 docs/adr/，落稿后接 scripts/adr.sh lint 校验）。刻意不经任何 hook 自动触发——决策变更必须显式立档。当用户说「把这个决策落成 ADR」「立一条 ADR」「draft 一份决策记录」，或 plan 出现需正式化的决策变更时使用——即使用户没提命令名，只要是从 plan 工件起草新 ADR 也用本 skill。
 ---
 
 # Adrkit Draft Skill

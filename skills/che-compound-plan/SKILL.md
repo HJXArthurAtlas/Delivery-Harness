@@ -1,6 +1,6 @@
 ---
 name: che-compound-plan
-description: Execute the implementation planning workflow using the plan template to generate design artifacts. Use when the user runs or mentions /che-compound-plan, or asks to plan the implementation, produce the design artifacts, or turn a spec into an implementation plan.
+description: 实现规划：按 plan 模板产出设计工件（research/data-model/contracts/quickstart 与 plan.md）；存在 design-tasks.md 时必读并对齐 UX 约束，与 spec 冲突回用户裁决。当用户运行或提到 /che-compound-plan，或说「出 plan」「做实现计划」「把 spec 转成实现规划」时使用——即使用户没提命令名，只要是 spec 之后的实现规划也用本 skill。
 ---
 
 
