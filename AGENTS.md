@@ -101,6 +101,15 @@ npm test                                                  # 结构 + 运行时�
 git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验（一次性）
 ```
 
+发布（公司 Nexus，版本自 0.1.0 起步）：
+
+```bash
+npm publish --registry https://nexus.newchiwan.cn/repository/internal-npm/   # 根包 ncw-delivery-harness（skills + dsh-entry.js + cordis.patch.yml）
+bash packages/cli/scripts/publish.sh                                        # @newchiwan/che（bun 打包 dist 单文件，需 bun；产物不入 git）
+```
+
+根包版本改动后必须同步 `.omp-plugin/marketplace.json` 的 plugin `version`（`npm test` 强制一致）。npm 认证写用户级 `~/.npmrc`（`//nexus.newchiwan.cn/repository/internal-npm/:_auth`，按 registry URI 精确匹配，devops 账号），绝不入仓库。
+
 ## Code Conventions & Common Patterns
 
 - **SKILL.md frontmatter 严格两字段**，`---` 定界：`name`（必须等于目录名）+ `description`。
@@ -124,7 +133,7 @@ git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验�
 
 - **Node ≥ 22.18**；bash + POSIX coreutils（`awk/grep/sort`…）。
 - **仓内工具不新增 npm 依赖（刻意）**：结构与契约测试只用 bash + node 内联脚本。`package.json#dependencies` 只有两个运行时依赖：`@adrkit/cli`（随 lockfile 钉版本，adrkit 技能的外部运行时，供 `test-pack-runtime.sh` 驱动）与 `@newchiwan/che`（`file:packages/cli` 本仓链接，`npm ci` 后供 `test-che-cli.sh` 与 `test-pack-runtime.sh` 驱动；omp git/npm 插件安装路径则由 bun 安装）。
-- 无 CI、无构建、无格式化工具链；不要新增这类配置，除非明确要建立。
+- 无 CI；**仓内无日常构建**——唯一构建发生在 `@newchiwan/che` 发布时（`packages/cli/scripts/publish.sh` 用 bun 打包 `dist/cli.js` 单文件，产物不入 git；Node 不剥 node_modules 内文件的类型，纯 TS tarball 经 npm -g 安装不可执行）。无格式化工具链；不要新增这类配置，除非明确要建立。
 
 ## Testing & QA
 

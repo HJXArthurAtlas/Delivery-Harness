@@ -1,6 +1,6 @@
 {
   "name": "ncw-delivery-harness",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "description": "newchiwan 团队跨端 agent skill pack：PingCode 规格驱动开发流程 + adrkit/grill/compound/bug 扩展技能组 + 线上排障",
   "type": "module",
   "main": "dsh-entry.js",

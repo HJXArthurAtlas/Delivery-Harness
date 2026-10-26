@@ -133,3 +133,19 @@ npm test   # ① test-skill-structure.sh：结构与分发面（skills frontmatt
 新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）；`npm test` 会把关。omp 插件按 `skills/` 目录自动发现，无需另行登记。命名格式 `che-{submodule}-action`（如 `che-pingcode-init`），全名 ≤32 字符。
 
 提交信息格式：`<type>(<scope>): #<工作项ID> <主题>`，如 `refactor(skills): #TECH-1234 技能更名`；无对应工作项时 ID 用默认 `#TECH-000`。type 取值：`feat` / `fix` / `refactor` / `docs` / `test` / `chore`。提交时由 `.githooks/commit-msg` 强制校验；首次克隆后执行一次 `git config core.hooksPath .githooks` 激活。
+
+## 发布（公司 Nexus）
+
+两个 npm 包发布到 Nexus 的 `internal-npm`（hosted）；安装侧走 `registry-npm`（group，含 internal 与公网代理）。版本自 0.1.0 起步：
+
+```bash
+# 根包（skills + dsh-entry.js + cordis.patch.yml）
+npm publish --registry https://nexus.newchiwan.cn/repository/internal-npm/
+
+# @newchiwan/che（bun 打包 dist/cli.js 单文件——Node 不剥 node_modules 内类型，纯 TS tarball 经 npm -g 装出来跑不了；需本机有 bun）
+bash packages/cli/scripts/publish.sh
+```
+
+- npm 认证写**用户级** `~/.npmrc`（`//nexus.newchiwan.cn/repository/internal-npm/:_auth` = base64(user:pass)，npm 按 registry URI 精确匹配凭据；devops 账号），绝不入仓库。
+- 根包版本改动后同步 `.omp-plugin/marketplace.json` 的 plugin `version`（`npm test` 强制一致）；`@newchiwan/che` 版本须与 `src/index.ts` 的 `CLI_VERSION` 一致（`test-che-cli.sh` 校验）。
+- 消费端（内网机器）一次性配置后，技能里的 `npm install -g @newchiwan/che@latest` 直接可用：`npm config set @newchiwan:registry https://nexus.newchiwan.cn/repository/registry-npm/`
