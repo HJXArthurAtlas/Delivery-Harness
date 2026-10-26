@@ -1,9 +1,9 @@
 ---
-name: che-config-init
+name: che-project-init
 description: 交互式初始化项目 .che 配置：逐项讲解并确认 require_intent（before_specify 门禁）、planverify_gate（before_implement 门禁）、checker（独立校验者策略）、pingcode_integration（PingCode 集成开关）四个配置项，生成 .che/config.yml；顺带自检并按需安装 che / adrkit CLI；选择接入 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 /che-pingcode-init。当用户要初始化 .che 配置、开启或关闭规格流程门禁、配置校验者策略、接入或首次配置本 pack、检查 che/adrkit 有没有装时使用——即使用户没提命令名，意图匹配也用本 skill。
 ---
 
-# 初始化项目 .che 配置
+# 项目接入初始化（原 che-config-init）
 
 本技能是项目接入本 pack 的**第一步配置入口**：逐项向用户讲解并确认四个配置项，交互式生成项目根的 `.che/config.yml`。
 
@@ -104,7 +104,7 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 - 文件不存在 → `mkdir -p .che` 后按模板写入（值用用户所选）：
 
 ```yaml
-# .che/config.yml — ncw-delivery-harness 项目配置（/che-config-init 生成）
+# .che/config.yml — ncw-delivery-harness 项目配置（/che-project-init 生成）
 # 环境变量优先于本文件：CHE_REQUIRE_INTENT、SKC_PLANVERIFY_GATE、SKC_CHECKER。
 
 # before_specify 门禁：on 时 /che-compound-specify 前必须存在 intent 文档，无则拦截

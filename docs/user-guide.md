@@ -9,7 +9,7 @@
 
 | 命令 | 谁跑 | 做什么 |
 |---|---|---|
-| `/che-config-init` | 项目负责人 | 交互生成 `.che/config.yml`（require_intent 默认开 / planverify_gate 默认 off / checker / pingcode_integration 四键）；自检并按需安装 `che`（`npm i -g @newchiwan/che@latest`）与 `adrkit`（`npm i -g @adrkit/cli@0.20.0`）；选接 PingCode 时安装 `pingcode` CLI（≥ 0.14.0）并引导登录 |
+| `/che-project-init` | 项目负责人 | 交互生成 `.che/config.yml`（require_intent 默认开 / planverify_gate 默认 off / checker / pingcode_integration 四键）；自检并按需安装 `che`（`npm i -g @newchiwan/che@latest`）与 `adrkit`（`npm i -g @adrkit/cli@0.20.0`）；选接 PingCode 时安装 `pingcode` CLI（≥ 0.14.0）并引导登录 |
 | `/che-pingcode-init` | 项目负责人 / 产品 | 交互选择 PingCode 项目/产品/迭代/映射类型，生成 `.che/pingcode-config.yml` |
 | `/che-compound-constitution` | 项目负责人（可选） | 建立/修订项目治理原则 `docs/constitution/constitution.md`，作为后续 spec/plan 的约束来源 |
 
@@ -139,7 +139,7 @@ flowchart TD
 
 | 技能 | 角色 | 用途 |
 |---|---|---|
-| `che-config-init` | 负责人 | 交互写 `.che/config.yml` 四键，自检安装 che/adrkit/pingcode CLI |
+| `che-project-init` | 负责人 | 交互写 `.che/config.yml` 四键，自检安装 che/adrkit/pingcode CLI |
 | `che-pingcode-init` | 负责人/产品 | 交互选项目/产品/迭代/映射，生成 `.che/pingcode-config.yml` |
 | `che-pingcode-discover-context` | 产品/负责人 | 探查 PingCode 类型/状态/优先级/迭代字典，生成配置片段 |
 | `che-compound-constitution` | 负责人 | 建/改项目治理原则 `docs/constitution/constitution.md` |

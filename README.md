@@ -32,7 +32,7 @@ https://git.newchiwan.com/council/ncw-delivery-harness）。按步骤执行，�
    - command -v adrkit 与 command -v che
    - 技能发现：omp 用 omp plugin list；手动拷贝方式确认 ~/.agents/skills/ 下的技能目录已就位
 
-4. 最后询问我：是否要在当前 git 项目里运行 /che-config-init 做项目级配置
+4. 最后询问我：是否要在当前 git 项目里运行 /che-project-init 做项目级配置
    （.che/config.yml 四键 + 可选 PingCode 接入）。我不需要就到此为止。
 ```
 
@@ -73,7 +73,7 @@ npm install -g @newchiwan/che@latest        # 特性路径解析（compound / gr
 npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 ```
 
-或直接运行 `/che-config-init`——它自检并代装这两个 CLI，che 安装 404 时会提示上面的 scope 配置。
+或直接运行 `/che-project-init`——它自检并代装这两个 CLI，che 安装 404 时会提示上面的 scope 配置。
 
 ### omp marketplace 插件（可选）
 
@@ -123,7 +123,7 @@ npm install -g @adrkit/cli@0.20.0
 
 | skill | 用途 | 触发语示例 |
 |---|---|---|
-| `che-config-init` | 项目接入第一步：交互式逐项讲解并配置 `.che/config.yml`（require_intent / planverify_gate / checker / pingcode_integration 四键）；自检并按需安装 che（@latest）/ adrkit（0.20.0）；选接 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 `/che-pingcode-init`（pack 新增，正文中文） | 「初始化 .che 配置」「配置项目门禁」「接入 harness」「che 装了没」 |
+| `che-project-init` | 项目接入第一步：交互式逐项讲解并配置 `.che/config.yml`（require_intent / planverify_gate / checker / pingcode_integration 四键）；自检并按需安装 che（@latest）/ adrkit（0.20.0）；选接 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 `/che-pingcode-init`（pack 新增，正文中文） | 「初始化 .che 配置」「配置项目门禁」「接入 harness」「che 装了没」 |
 | `che-adr-context` | 规划前取治理决策进上下文：带路径给 governedBy/activeProposals/history，无路径列 ARB 待评审队列（adrkit context 命令的 pack 分发，正文英文原文；只读） | 「这个改动受哪些决策约束」「列出待评审决策」 |
 | `che-adr-check` | plan 产出后对照 ADR 语料只读校验是否越界，配 ADRKIT_SNAPSHOT 时追加确定性路由报告（adrkit check 命令的 pack 分发；plan 后必跑、tasks 入向前置） | 「check 这个 plan 越没越决策」 |
 | `che-adr-draft` | 从当前 plan 工件 scaffold 一条新 ADR 草稿（不经 hook；其 `scripts/scaffold.sh` 还是 grill-with-docs / compound-writeback 的免 plan 分配入口——ADR 统一归口语料 `docs/adr/`；落稿后接 `scripts/adr.sh lint` 校验） | 「把这个决策落成 ADR」 |
