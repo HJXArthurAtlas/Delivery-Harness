@@ -38,7 +38,7 @@ https://git.newchiwan.com/council/ncw-delivery-harness）。按步骤执行，�
 
 手动安装步骤见下文「安装」。
 
-## 安装
+## 安装 （For Human）
 
 omp 与 DSH 走各自的原生插件安装（见下），手动拷贝全靠文件落位；项目级同名覆盖全局级（DSH：项目级 100/200 > bundle 250 > 用户级 400/500）。
 
