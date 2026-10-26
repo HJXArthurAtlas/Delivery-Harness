@@ -1,6 +1,6 @@
 ---
 name: che-config-init
-description: 交互式初始化项目 .che 配置：逐项讲解并确认 require_intent（before_specify 门禁）、planverify_gate（before_implement 门禁）、checker（独立校验者策略）、pingcode_integration（PingCode 集成开关）四个配置项，生成 .che/config.yml；选择接入 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 /che-pingcode-init。当用户要初始化 .che 配置、开启或关闭规格流程门禁、配置校验者策略、接入或首次配置本 pack 时使用——即使用户没提命令名，意图匹配也用本 skill。
+description: 交互式初始化项目 .che 配置：逐项讲解并确认 require_intent（before_specify 门禁）、planverify_gate（before_implement 门禁）、checker（独立校验者策略）、pingcode_integration（PingCode 集成开关）四个配置项，生成 .che/config.yml；顺带自检并按需安装 che / adrkit CLI；选择接入 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 /che-pingcode-init。当用户要初始化 .che 配置、开启或关闭规格流程门禁、配置校验者策略、接入或首次配置本 pack、检查 che/adrkit 有没有装时使用——即使用户没提命令名，意图匹配也用本 skill。
 ---
 
 # 初始化项目 .che 配置
@@ -55,15 +55,24 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 1. `git rev-parse --show-toplevel` 失败 → 终止：本技能必须在 git 项目内运行。
 2. `.che/config.yml` 已存在 → 先读出全部现有键值备用（写盘阶段逐键对比）。
 
-### 2. 环境变量冲突预检
+### 2. CLI 运行时自检（che / adrkit）
+
+本技能是项目接入第一步，必须顺手把 pack 依赖的外部 CLI 备齐（技能运行时只执行 PATH 上的 CLI，任何插件安装路径都不会替你装）：
+
+1. `command -v che` 缺失 → `npm install -g @newchiwan/che@latest` 后复检（che 无版本下限，latest 恒与技能文本对齐）。
+2. `command -v adrkit` 缺失 → `npm install -g @adrkit/cli@0.20.0` 后复检（pack 按 0.20.0 钉）。
+3. 已在 PATH 的**绝不**擅自升降级；adrkit 与 0.20.0 漂移且技能报错时，建议用户重装并经其确认。
+4. 安装失败或用户拒绝 → **不阻塞**配置写入，在最终回显中标注缺失项与安装命令。
+
+### 3. 环境变量冲突预检
 
 `printenv CHE_REQUIRE_INTENT SKC_PLANVERIFY_GATE SKC_CHECKER` 有非空值 → 明确提醒用户：这些环境变量优先于 config.yml，本次写入的对应键在该 shell 不生效；经用户确认后继续。
 
-### 3. 逐项提问
+### 4. 逐项提问
 
 按上面四项的顺序讲解并问询，记录每项答案。`checker` 选 `cli:<model>` 时必须追问具体模型标识，写成完整值。
 
-### 4. PingCode 接入链（仅当用户选择接入）
+### 5. PingCode 接入链（仅当用户选择接入）
 
 依次执行；任何一步失败必须停下按「故障排除」处理，**绝不**跳过继续：
 
@@ -73,7 +82,7 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 4. **移交集成配置**：执行 `/che-pingcode-init` 交互生成 `.che/pingcode-config.yml`。用户在中途拒绝或中止 → 回来询问用户保持 `pingcode_integration: off` 还是稍后重跑。
 5. **记录**：接入链全部走通 → `pingcode_integration: on`；用户拒绝接入或链路未走通 → `off`。必须诚实记录实际状态，**绝不**写未经跑通的 on。
 
-### 5. 写 `.che/config.yml`
+### 6. 写 `.che/config.yml`
 
 格式纪律：扁平键值文件，每行一个 `键: 值`；che CLI 逐行正则读首个 `键:`，因此注释行**必须**以 `#` 开头，键值行**绝不**出现在其他语法位置。
 
@@ -100,12 +109,13 @@ pingcode_integration: off
   - 有变化 → 旧文件备份为 `.che/config.yml.bak` 后更新（同名不覆盖；用户拒绝 → 中止不写）。
   - 全部一致 → 回显「配置已是最新，无事可做」，不写盘。
 
-### 6. 回显与下一步
+### 7. 回显与下一步
 
 ```
 ✅ 配置已生成: .che/config.yml
    require_intent: <值>   planverify_gate: <值>
    checker: <值>   pingcode_integration: <值>
+   che: <✓ 或 ✗ + 安装命令>   adrkit: <✓ 或 ✗ + 安装命令>
 ```
 
 - 开始第一个特性：`/che-compound-intent`（全流程总览见 `/che-compound-flow`）。
@@ -115,6 +125,7 @@ pingcode_integration: off
 
 | 症状 | 处理 |
 |---|---|
+| `npm install -g` 失败 | 检查 npm registry 可达性与全局 bin 目录权限；企业内网确认内部 registry 镜像 |
 | 安装后仍 `command not found: pingcode` | 重开 shell 确认 npm 全局 bin 目录在 PATH 中 |
 | `pingcode --version` 低于 0.14.0 | `npm install -g @metaphorli/pingcode-cli@latest` |
 | `auth status` 始终未认证 | 检查登录命令输出；或改设 `PINGCODE_CLIENT_ID`/`PINGCODE_CLIENT_SECRET` |
