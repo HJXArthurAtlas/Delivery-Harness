@@ -128,6 +128,7 @@ bash packages/cli/scripts/publish.sh                                        # @n
 | `.githooks/commit-msg` | 提交格式校验（`core.hooksPath` 已在本仓激活） |
 | `.omp-plugin/marketplace.json` | omp marketplace catalog（omp 插件分发唯一入口；`version` 必须与 `package.json` 一致，`npm test` 强制） |
 | `README.md` | 面向用户的安装/开发文档；改动分发模型时同步 |
+| `docs/user-guide.md` | 面向使用者的流程使用指南（自 README「使用指南」迁出，README 留指针）；技能增删或流程变化时同步 |
 
 ## Runtime/Tooling Preferences
 
