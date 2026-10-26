@@ -10,7 +10,7 @@ import { STATE_USAGE, runState } from './state.ts';
 import { SETUP_PLAN_USAGE, SETUP_TASKS_USAGE, runSetupPlan, runSetupTasks } from './setup.ts';
 import { TemplateResolutionError, resolveTemplateContent } from './template.ts';
 
-export const CLI_VERSION = '0.1.0';
+export const CLI_VERSION = '0.2.0';
 
 const USAGE = `che — newchiwan delivery harness CLI
 
