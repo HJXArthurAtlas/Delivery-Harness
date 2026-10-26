@@ -120,7 +120,6 @@ npm install -g @adrkit/cli@0.20.0
 本仓技能包 `ncw-delivery-harness` 承载「规格驱动开发 + PingCode」的 AI native 流程：**产品出规格建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**。本节按角色说明每个环节用什么技能、按什么顺序、每步做什么。
 
 - 流程规范正文：`skills/che-compound-flow/SKILL.md`（衔接与门禁层）
-- 交接与门禁技术清单：`docs/skill-handoff-and-gates.md`
 - 技能全量字典：本节 §9（共 34 个）
 
 ### 1. 一次性准备（项目首次接入）
