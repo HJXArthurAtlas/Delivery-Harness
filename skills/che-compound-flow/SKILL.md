@@ -23,13 +23,13 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 | 8. implement | 开发 | `/che-compound-implement`；UI 任务按设计稿 + `design-tasks.md` 设计要求清单验收；提交走 `mturtle-commit`，消息带故事卡 ID | 代码 + 测试 |
 | 9. 收尾 | 开发 | 本地任务全部 `[x]` → `/che-pingcode-sync-status` | 卡片流转完成（单向，不回退） |
 
-## slug 单一事实源
+## 任务与 slug 单一事实源
 
-全流程（intent → expectations → specify → clarify/design → plan → tasks → gapfill → planverify → intentguard → writeback）共用同一个特性 slug，唯一事实源是项目根 `.che/feature.json` 登记的 feature directory：slug = 目录 basename 去 `YYYYMMDD-HHMMSS-` 前缀，`che paths --json` 的 `SLUG` 字段即该值。
+全流程（intent → expectations → specify → clarify/design → plan → tasks → gapfill → planverify → intentguard → writeback）围绕**任务目录**展开：`/che-compound-intent` 用 `che task create {slug} --session <id>` 创建 `specs/NNN-{slug}/`（任务自此诞生，session 绑定落 `.che/feature.json`，机器本地不入库），后续所有制品都落这个目录。slug 是任务的全流程稳定句柄：目录名剥 `NNN-` 数字前缀（推送 PingCode 后为 `NCW-x` identifier 前缀）即得，`che paths --json` 的 `SLUG` 字段即该值。
 
-- `/che-compound-intent` 落盘 `docs/intents/{slug}.intent.md`；`/che-compound-specify` 的 short name 必须取同一 slug（解析顺序见 specify 技能第 1 步：已登记取登记 slug，未登记取 intent doc slug），不再独立重新生成。
-- 下游各技能取 slug 一律从 `che paths --json` 的 `SLUG` 读，不各自拼猜；intent / expectations / planverify / intentguard 产物按 `docs/intents/{slug}.*`、`docs/expectations/{slug}.expectations.md` 拼路径。
-- 门禁 `/che-compound-require-intent` 在 `.che/feature.json` 已登记特性时按 slug 校验 `docs/intents/{slug}.intent.md` 存在，intent 与 spec 错位即拒绝并指回 `/che-compound-intent`。
+- 下游各技能取 slug/目录一律从 `che paths`（带 `--session` 或在单任务时裸跑）读，不各自拼猜；intent / expectations / planverify / intentguard 产物按 `{任务目录}/intent.md`、`{任务目录}/expectations.md` 等落盘。
+- spec 推送 PingCode 后 `/che-pingcode-specstoissues` 把目录改名为 `{pingcode-identifier}-{slug}`（如 `NCW-4921-demo`）——slug 不变，session 绑定与门禁解析不受影响。
+- 门禁 `/che-compound-require-intent` 校验当前任务目录里 `intent.md` 存在（session 绑定解析任务），缺失即拒绝并指回 `/che-compound-intent`。
 
 ## 交接门禁（阶段 4，spec 转开发前逐项核对）
 

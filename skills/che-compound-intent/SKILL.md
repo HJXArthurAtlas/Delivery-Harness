@@ -1,6 +1,6 @@
 ---
 name: che-compound-intent
-description: intent 访谈：问答式捕获目标、约束、失败条件，落 docs/intents/{slug}.intent.md；G/C/F 三族质量测试全部通过才允许结束，是规格驱动流程的第一步。当用户说「先做 intent 访谈」「锁定目标与约束」「捕获失败条件」「记录需求意图」时使用——即使用户没提命令名，只要是动工前的意图捕获也用本 skill。
+description: intent 访谈：问答式捕获目标、约束、失败条件，创建任务目录 specs/NNN-{slug}/ 并落 intent.md，是规格驱动流程的第一步（任务自此诞生）；G/C/F 三族质量测试全部通过才允许结束。当用户说「先做 intent 访谈」「锁定目标与约束」「捕获失败条件」「记录需求意图」时使用——即使用户没提命令名，只要是动工前的意图捕获也用本 skill。
 ---
 
 # Intent Interview
@@ -32,7 +32,7 @@ cd "$PROJECT_ROOT"
 echo "Anchored to project root: $PROJECT_ROOT"
 ```
 
-Then construct file paths as `$PROJECT_ROOT/docs/intents/{slug}.intent.md` (or just `docs/intents/{slug}.intent.md` since you're now in `$PROJECT_ROOT`). If any subsequent Bash command changes directory, re-anchor before the next file operation.
+Then construct file paths as `$TASK_DIR/intent.md`, where `$TASK_DIR` is the task directory `che task create` prints (`specs/NNN-{slug}/` under `$PROJECT_ROOT`). If any subsequent Bash command changes directory, re-anchor before the next file operation.
 
 ---
 
@@ -51,8 +51,8 @@ If the user tries to skip a phase, refuse politely and explain which specific te
 
 ## Output you produce
 
-- One file: `docs/intents/{kebab-case-slug}.intent.md`
-- Slug derived from the locked goal (3–5 words, lowercase, hyphenated)
+- One task directory (created by `che task create`, see Phase 7) containing one file: `intent.md`
+- Slug derived from the locked goal (3–5 words, lowercase, hyphenated) — it becomes part of the task directory name and the stable handle for the whole flow
 - Format: see "Output format" at the bottom of this file
 - Then offer to chain to `/che-compound-expectations`
 
@@ -111,8 +111,13 @@ Continue until **3–7 failure conditions** exist that all pass. If the user sta
 When all phases pass:
 1. Derive a slug from the goal (3–5 words, lowercase, hyphenated)
 2. Show the slug as a one-line confirmation: *"Slug: `{slug}` — reply `override` to change, anything else (including empty) accepts."* Default behavior is accept-on-any-non-override reply.
-3. Write `docs/intents/{slug}.intent.md` using the format at the bottom of this file
-4. Confirm the file path in chat
+3. Create the task and write the intent doc (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`):
+   ```bash
+   che task create {slug} --session "$CHE_SESSION_ID"   # omit --session when no session id is available
+   ```
+   The command allocates the next `NNN-` number, enforces slug uniqueness, creates `specs/NNN-{slug}/` with a `metadata.json` skeleton, and binds the session. Use the printed `TASK_DIR` for every subsequent file operation. If the slug already exists the command fails — go back to step 2 and pick another slug.
+4. Write `{TASK_DIR}/intent.md` using the format at the bottom of this file
+5. Confirm the file path in chat
 
 ### Phase 8 — Chain
 Ask the user (use AskUserQuestion with three options):
@@ -180,8 +185,8 @@ If the compound store was loaded:
 
 - **Plain chat** for free-form prose (goal sentence, why now, individual constraint text)
 - **AskUserQuestion** for discrete choices (accept/edit/reject a reword, yes/no/later for the chain handoff)
-- **Write** for the final `docs/intents/{slug}.intent.md` file
-- **Bash** for date generation (`date -u +%Y-%m-%d`) when populating the `created` frontmatter
+- **Bash** for `che task create {slug} --session "$CHE_SESSION_ID"` (task directory + session binding) and date generation (`date -u +%Y-%m-%d`) when populating the `created` frontmatter
+- **Write** for the final `{TASK_DIR}/intent.md` file
 
 ---
 
@@ -244,7 +249,7 @@ created: {YYYY-MM-DD}
 
 ## After writing the file
 
-1. Show the file path in chat: *"Wrote `docs/intents/{slug}.intent.md`."*
+1. Show the file path in chat: *"Wrote `{TASK_DIR}/intent.md` (task `{TASK_DIR_NAME}`)."*
 2. Show a one-line summary: *"Goal: {goal}. {N} constraints, {N} failure conditions, {N} ADR refs."*
 3. Use AskUserQuestion to offer the chain handoff (continue / stop here / quit).
 4. If "continue": invoke `/che-compound-expectations` next.
@@ -259,4 +264,4 @@ created: {YYYY-MM-DD}
 - **目标**：`/che-compound-expectations` —— 起草正/边界场景期望
 - **条件**：
   - 前置装载（入向，intent 开始时）：会话上下文无 `COMPOUND STORE LOADED` 摘要 → 先跑 `/che-compound-load` 再开访谈；已有摘要（本会话已装载）→ 跳过
-  - `docs/intents/{slug}.intent.md` 已写入且用户确认；AskUserQuestion 选 continue 直接链式调用，stop/quit 由用户稍后手动跑
+  - `{TASK_DIR}/intent.md` 已写入（任务目录已由 `che task create` 创建，session 已绑定）且用户确认；AskUserQuestion 选 continue 直接链式调用，stop/quit 由用户稍后手动跑

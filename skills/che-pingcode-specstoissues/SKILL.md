@@ -13,6 +13,7 @@ description: 把 specs/ 下的 spec 转换为 PingCode 需求树卡片（spec �
 - **动态祖先关联**：设 spec 卡位于需求树第 n 层（史诗=1/特性=2/用户故事=3），第 1..n-1 层为未映射祖先——需求（idea）必问；中间工作项层**只从已有项中选择**，不代建；第 n 层以下永不询问
 - **任务双形态**：`task_artifact` 为空（默认）时任务仅是本地 checklist，不建卡也不进卡描述；配置后每个任务行建一张任务卡挂所属 story/spec 卡下，`tasks.md` 未生成时本轮跳过、生成后手动重跑本命令补建，勾选状态由 `/che-pingcode-sync-status` 按 `sync` 配置流转
 - **统一映射登记**：所有 spec 的映射集中登记在 `specs/pingcode-mapping.json`（制品生成状态、卡片 id、卡片状态），不再按 spec 分散存文件
+- **建卡成功后目录改名**（pack 新增，上游无此步）：任务目录从 `NNN-{slug}` 改名为 `{spec 卡 identifier}-{slug}`，目录名即携带 PingCode 追溯标识（见步骤 12b）
 
 所有操作通过 bash 执行 `pingcode` CLI 完成。**严格遵守：禁止猜测任何 ID；所有名称先解析为 ID 再执行写操作。**
 
@@ -42,10 +43,11 @@ description: 把 specs/ 下的 spec 转换为 PingCode 需求树卡片（spec �
 
 按优先级确定 spec 目录：
 
-1. `--spec <name>` 参数
-2. git 分支名匹配 `specs/<分支名>/`（`git branch --show-current`，去掉 `feature/`、`spec/` 等前缀后尝试）
-3. 当前目录位于 `specs/<name>/` 内
-4. `specs/` 下只有一个目录时直接使用
+1. `--spec <name>` 参数（目录名或 slug 均可）
+2. session 绑定：`che paths --session "$CHE_SESSION_ID" --json` 解析出的 `FEATURE_DIR`（无 `$CHE_SESSION_ID` 时跳过）
+3. git 分支名匹配 `specs/<分支名>/`（`git branch --show-current`，去掉 `feature/`、`spec/` 等前缀后尝试）
+4. 当前目录位于 `specs/<name>/` 内
+5. `specs/` 下只有一个目录时直接使用
 
 验证目录内存在 `spec.md`，否则报错列出可用 spec。输出：`📂 使用 spec: <name>`。
 
@@ -408,6 +410,16 @@ pingcode workitem create \
 - 单卡模式 `stories` 为 `[]`，章节全文并入 spec 卡；`task_artifact` 未配置或 tasks.md 未生成时 `tasks` 为 `[]`
 - `tasks[]` 以 `task_id` 为键；sync-status 从 `tasks.md` 解析勾选与归属，流转任务卡并回写各卡 `state`/`state_type`
 
+### 12b. 任务目录改名（pack fork，port on upstream upgrade）
+
+建卡成功（`artifacts.spec.status == "created"`）后，把任务目录从数字前缀改名为 spec 卡 identifier 前缀，使目录名直接携带 PingCode 追溯标识：
+
+- 新目录名：`{spec 卡 identifier}-{slug}`（如 `001-demo` → `NCW-4921-demo`）；identifier 取 `artifacts.spec.card.identifier`
+- **slug 不变**（目录名剥前缀即得）——session 绑定、门禁、下游 `che paths` 解析均不受影响
+- 执行：目录已被 git 跟踪时用 `git mv specs/<旧名> specs/<新名>`，未跟踪（本轮刚创建未提交）用 `mv` 兜底；目标名已存在 → 跳过改名并记入 `errors[]`
+- 同步更新 `specs/pingcode-mapping.json`：本条目的键从旧目录名改为新目录名（其余条目原样保留）
+- spec 卡创建失败 → 跳过本步，目录保留数字前缀，后续补建成功时重试改名
+
 ### 13. 输出总结
 
 ```
@@ -423,7 +435,8 @@ Story 卡: <n> 张(spec-story 模式)
   • US1 <identifier> - <标题>
   • US2 <identifier> - <标题>
 任务卡: <n> 张(task_artifact 配置且 tasks.md 已生成时)
-登记: specs/pingcode-mapping.json(<spec-name> 条目)
+登记: specs/pingcode-mapping.json(<新目录名> 条目)
+目录: specs/<新目录名>(建卡成功时已从数字前缀改名为 identifier 前缀)
 
 后续:
   • 本地任务清单生成后逐项勾选;完成后运行 /che-pingcode-sync-status 收尾卡片
