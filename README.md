@@ -97,42 +97,7 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 
 ## Pack 内容
 
-| skill | 用途 | 触发语示例 |
-|---|---|---|
-| `che-project-init` | 项目接入第一步：交互式逐项讲解并配置 `.che/config.yml`（require_intent / planverify_gate / checker / pingcode_integration 四键）；自检并按需安装 che（@latest）/ adrkit（0.20.0）；选接 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 `/che-pingcode-init`（pack 新增，正文中文） | 「初始化 .che 配置」「配置项目门禁」「接入 harness」「che 装了没」 |
-| `che-adr-context` | 规划前取治理决策进上下文：带路径给 governedBy/activeProposals/history，无路径列 ARB 待评审队列（adrkit context 命令的 pack 分发，正文英文原文；只读） | 「这个改动受哪些决策约束」「列出待评审决策」 |
-| `che-adr-check` | plan 产出后对照 ADR 语料只读校验是否越界，配 ADRKIT_SNAPSHOT 时追加确定性路由报告（adrkit check 命令的 pack 分发；plan 后必跑、tasks 入向前置） | 「check 这个 plan 越没越决策」 |
-| `che-adr-draft` | 从当前 plan 工件 scaffold 一条新 ADR 草稿（不经 hook；其 `scripts/scaffold.sh` 还是 grill-with-docs / compound-writeback 的免 plan 分配入口——ADR 统一归口语料 `docs/adr/`；落稿后接 `scripts/adr.sh lint` 校验） | 「把这个决策落成 ADR」 |
-| `che-compound-intent` | intent 访谈：目标 + 约束 + 失败条件（compound v0.7.0 的 pack 分发，正文英文原文；运行期数据落在项目 `docs/intents/` 等，不经扩展安装） | 「先做 intent 访谈」「锁定目标与约束」 |
-| `che-compound-expectations` | 期望访谈：正/边缘场景与 intent 分文件存放（builder 不可见，防 reward-hack） | 「补期望场景」「写 expectations」 |
-| `che-compound-load` | 会话开始加载 adrkit ADR 语料（`docs/adr/`）+ compound store（`docs/corrections/` + `docs/patterns/`）进上下文，缺目录时按 bundled 模板 scaffold | 「加载 compound store」 |
-| `che-compound-writeback` | intentguard PASS 后把本次纠偏/模式写回 `docs/corrections/` + `docs/patterns/`，耐久纠偏升格为 ADR 进 adrkit 语料 `docs/adr/` | 「writeback 本次经验」 |
-| `che-compound-gapfill` | intent + expectations 对照 tasks.md 找覆盖缺口并追加任务（带来源注释） | 「补任务缺口」「gapfill」 |
-| `che-compound-planverify` | 实现前由独立 checker（跨模型优先）判定 plan + 任务是否偏离锁定 intent | 「验证 plan」「planverify」 |
-| `che-compound-planverify-gate` | before_implement 门禁：`SKC_PLANVERIFY_GATE=block`（或 `.che/config.yml` 的 `planverify_gate:`）时拦截未验证/BLOCKED_DRIFT 的实现，默认 off（判定逻辑内联在 che CLI `che planverify-gate`，技能脚本仅薄封装委托） | （手动/agent 调用） |
-| `che-compound-intentguard` | 实现后 L3 校验：密封 briefing + 独立 checker 判 diff 是否越出 intent/期望 | 「intentguard 校验本次实现」 |
-| `che-compound-require-intent` | before_specify 门禁：`docs/intents/` 无 intent 文档时拦截 specify（判定逻辑内联在 che CLI `che require-intent`，技能脚本仅薄封装委托）；开关经 `CHE_REQUIRE_INTENT` 环境变量或 `.che/config.yml` 的 `require_intent:` 配置，默认开 | （手动/agent 调用） |
-| `che-compound-grill-me` | 无上限轮次澄清访谈（clarify 的深化替代）：前沿/轮次/设计树把 spec.md 决策点推进到 Clear/Resolved/Outstanding/Deferred（grill me 命令的 pack 分发，正文英文原文） | 「深度澄清这份 spec」「grill me」 |
-| `che-compound-grill-with-docs` | 同 grill-me 澄清流程 + settled 跨特性术语/领域知识即时落盘 docs/domain_knowledge/（CONTEXT.md + 主题文档）；过三条件记录门的决策经 adrkit scaffold 归口为 ADR（`docs/adr/`，pack fork 段）（grill with-docs 命令的 pack 分发） | 「澄清并沉淀领域知识」 |
-| `che-compound-analyze` | 跨工件一致性只读分析（analyze 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「分析 spec/plan/tasks 一致性」 |
-| `che-bug-assess` | bug 报告三角定位：粘贴文本/URL → 症状、疑似代码路径、严重度与修复方案，产出 `docs/bugs/<slug>/assessment.md`（spec-kit extension:bug 的 pack 分发，正文英文原文） | 「评估这个 bug」「看看这个报错是不是真问题」 |
-| `che-bug-fix` | 按 assessment 的修复方案实施并记录变更到 `docs/bugs/<slug>/fix.md`（仅 assessment 存在后可用；assessment 有误停下回退） | 「按评估修这个 bug」 |
-| `che-bug-test` | 验证修复是否真正解决 bug：重跑复现 + 新增测试 + 回归，产出 `docs/bugs/<slug>/test.md`（failed 回退重跑 assess） | 「验证这个修复」「回归这个 bug」 |
-| `che-compound-clarify` | 规格澄清问答（clarify 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「澄清规格歧义」「补全需求细节」 |
-| `che-compound-constitution` | 创建/更新项目章程 `docs/constitution/constitution.md`（constitution 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「立章程」「修订治理原则」 |
-| `che-compound-converge` | 差距收敛（converge 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「收敛剩余工作」「补齐未实现需求」 |
-| `che-compound-design` | 需求澄清与设计明细产出（design 命令，pack 新增非上游）：四盲区问句库澄清 + 设计规约/自检七域走查，产出 `design-tasks.md` 设计明细（依赖活动特性 spec.md；澄清不回写 spec，产物不进交接门禁） | 「出设计明细」「把这份 spec 转成设计明细」 |
-| `che-compound-flow` | 规格驱动开发 + PingCode AI native 开发流程的衔接与门禁（出规格建卡 → 接规格规划实现 → 卡片收尾） | 「这个需求转开发了，开始 plan」「出 spec 并建卡」 |
-| `che-compound-implement` | 按 tasks.md 执行任务实现（implement 命令的 pack 分发，正文英文原文；不含 extension hook 机制；含 pack fork：涉 UI 按 `design-tasks.md` 交互规则实现并核验设计要求清单） | 「开始实现」「按任务清单编码」 |
-| `che-compound-plan` | 实现规划与设计工件生成（plan 命令的 pack 分发，正文英文原文；不含 extension hook 机制；含 pack fork：存在 `design-tasks.md` 时必读并对齐 UX，冲突回用户裁决） | 「做这个需求的实现计划」「出 plan」 |
-| `che-compound-specify` | 特性规格创建/更新（specify 命令的 pack 分发，正文英文原文；不含 extension hook 机制） | 「出 spec」「写特性需求」 |
-| `che-compound-tasks` | 任务清单生成（tasks 命令的 pack 分发，正文英文原文；不含 extension hook 机制，Handoff 块含 pingcode 补建任务卡可选目标） | 「出任务清单」「拆任务」 |
-| `che-pingcode-init` | 交互式初始化 PingCode 集成：选项目/产品/迭代/映射类型（含需求树不跳级校验），生成 `.che/pingcode-config.yml` 并初始化 CLI 运行时上下文（Spec-Kit-PingCode v2.9.0 的 pack 分发，正文中文） | 「配置 PingCode」「重置建卡映射」 |
-| `che-pingcode-discover-context` | 探查 PingCode 项目字典（工作项类型/状态/优先级/迭代/产品），生成可粘贴配置片段与 `pingcode-discovered-context.json`（同上 pack 分发） | 「看看 PingCode 有哪些类型/迭代」 |
-| `che-pingcode-specstoissues` | spec → PingCode 需求树卡片：spec 卡/`### User Story N` 章节卡/任务行卡三级相邻映射，动态祖先关联（需求必问、中间层只选已有不代建），登记 `specs/pingcode-mapping.json`（同上 pack 分发；extension hook 改接为 specify/tasks Handoff 块可选目标，任务卡按提示或手动重跑补建） | 「把这个 spec 建成卡」「补建/重建卡片」 |
-| `che-pingcode-sync-cards` | 实现前核对 specs/ 制品与卡片一致性，按差异增删改（删除逐项确认），祖先关联沿用登记不重问（同上 pack 分发；implement 开始时前置对账，已建卡才提示） | 「对账卡片」「spec 改了同步卡片」 |
-| `che-pingcode-sync-status` | 本地任务全勾后把任务卡/story/spec 卡单向流转完成态（只收尾不回退），写 `pingcode-sync-log.json` 并回写登记（同上 pack 分发） | 「收尾卡片」「同步完成状态」 |
-| `che-mturtle-troubleshooting` | 线上问题排查：口头名称（"中台财务"、"网运通"、"调度"…）→ 环境/Loki namespace·app/数据库对号，业务单号/trace_id 追日志 + 数据库核事实互相印证，跨服务调用与推送链逐级定位，收口给时间线与证据边界（自 monorepo-template 吸纳，正文中文；纯知识无 scripts，证据全部来自线上 MCP 数据源，不依赖工作目录） | 「中台财务这笔流水到哪了」「这个报错是哪个服务的」 |
+34 个技能按角色分组的清单与触发语见 **[docs/user-guide.md](docs/user-guide.md)**（§9 技能字典）；**权威触发描述以各 `skills/<name>/SKILL.md` frontmatter 的 `description` 为准**，本 README 不再维护副本。
 
 ## 运行时与外部 CLI（排除 init / flow）
 
