@@ -451,6 +451,41 @@ run "$CHE_BIN" planverify-gate --help
 run "$CHE_BIN" planverify-gate --bogus
 [ "$RC" -eq 2 ] && ok || bad "planverify-gate 未知参数: 退出码 ${RC}，预期 2"
 
+# 20b. state: runs timeline in metadata.json; stage/next derived, never stored.
+run "$CHE_BIN" state start intent --session s1
+[ "$RC" -eq 0 ] && ok || bad "state start: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+_before="$(md5 -q "$PROJECT/specs/NCW-4921-demo/metadata.json")"
+run "$CHE_BIN" state start intent --session s1
+[ "$RC" -eq 0 ] && [ "$(md5 -q "$PROJECT/specs/NCW-4921-demo/metadata.json")" = "$_before" ] \
+  && ok || bad "state start 幂等: 已开启的 run 被改写"
+run "$CHE_BIN" state done intent --session s1
+[ "$RC" -eq 0 ] && ok || bad "state done: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+run "$CHE_BIN" state done intent --session s1
+[ "$RC" -eq 1 ] && ok || bad "state done 双关: 退出码 ${RC}，预期 1"
+node -e '
+  const fs = require("node:fs");
+  const meta = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+  const runs = meta.runs.intent;
+  if (!Array.isArray(runs) || runs.length !== 1) process.exit(1);
+  if (Number.isNaN(Date.parse(runs[0].start)) || Number.isNaN(Date.parse(runs[0].end))) process.exit(1);
+  process.exit(0);
+' "$PROJECT/specs/NCW-4921-demo/metadata.json" \
+  && ok || bad "state done: metadata.json runs.intent 结构不符"
+run "$CHE_BIN" state show --session s1 --json
+[ "$RC" -eq 0 ] && ok || bad "state show --json: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+json_matches "$OUT" "{\"TASK_DIR\":\"$PROJECT/specs/NCW-4921-demo\",\"SLUG\":\"demo\",\"STAGE\":\"plan\",\"NEXT\":\"expectations\",\"DURATION_SECONDS\":{\"intent\":0}}" \
+  && ok || bad "state show --json: 输出不符：$OUT"
+run "$CHE_BIN" state show --session s1
+[ "$RC" -eq 0 ] && ok || bad "state show text: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+printf '%s\n' "$OUT" | grep -qx "NEXT: expectations" \
+  && ok || bad "state show text: 缺 NEXT 行：$OUT"
+run "$CHE_BIN" state start bogus --session s1
+[ "$RC" -eq 1 ] && ok || bad "state 未知阶段: 退出码 ${RC}，预期 1"
+run "$CHE_BIN" state show extra --session s1
+[ "$RC" -eq 2 ] && ok || bad "state show 带位置参数: 退出码 ${RC}，预期 2"
+run "$CHE_BIN" state --help
+[ "$RC" -eq 0 ] && ok || bad "state --help: 退出码 ${RC}"
+
 # 21. version parity, help, unknown command.
 EXPECTED_VERSION="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).version' "$REPO_ROOT/packages/cli/package.json")"
 run "$CHE_BIN" --version

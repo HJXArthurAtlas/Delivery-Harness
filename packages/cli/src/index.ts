@@ -6,6 +6,7 @@ import { REQUIRE_INTENT_USAGE, runRequireIntent } from './require-intent.ts';
 import { PLANVERIFY_GATE_USAGE, runPlanVerifyGate } from './planverify-gate.ts';
 import { FEATURE_USAGE, runFeature } from './feature.ts';
 import { TASK_USAGE, runTask } from './tasks.ts';
+import { STATE_USAGE, runState } from './state.ts';
 import { SETUP_PLAN_USAGE, SETUP_TASKS_USAGE, runSetupPlan, runSetupTasks } from './setup.ts';
 import { TemplateResolutionError, resolveTemplateContent } from './template.ts';
 
@@ -17,6 +18,7 @@ Usage: che <command> [options]
 
 Commands:
   task create <slug> [--session <id>] [--json]     Create the task directory + metadata, bind the session
+  state start|done <stage> / show [--json]         Task runs timeline (metadata.json; stage/next derived)
   paths [--json] [--feature <slug>] [--session <id>]  Resolve task paths
   check [--json] [--require-spec] [--require-tasks] [--include-tasks]
   require-intent [--json] [--feature <slug>] [--session <id>]  Gate /che-compound-specify on the task's intent doc
@@ -43,6 +45,7 @@ const TEMPLATE_USAGE =
 
 const COMMAND_USAGE: Record<string, string> = {
   task: TASK_USAGE,
+  state: STATE_USAGE,
   paths: PATHS_USAGE,
   check: CHECK_USAGE,
   'require-intent': REQUIRE_INTENT_USAGE,
@@ -88,6 +91,8 @@ export function main(argv: string[]): number {
   switch (command) {
     case 'task':
       return runTask(rest);
+    case 'state':
+      return runState(rest);
     case 'paths':
       return runPaths(rest);
     case 'check':
