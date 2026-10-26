@@ -13,7 +13,7 @@ You are running an **intent interview**. Your job is to extract a complete, high
 
 **Critical:** you must operate from the project root for all file I/O. The project root is the directory containing `.git`.
 
-v0.2.1 surfaced a bug where the agent's bash cwd could drift to a parent directory during inspection commands (e.g. `cd ..` to check siblings), and subsequent Write operations landed under the wrong root — intent.md was written to `~/TravvIdea/docs/intents/` instead of `~/TravvIdea/backend-springboot/docs/intents/`.
+v0.2.1 surfaced a bug where the agent's bash cwd could drift to a parent directory during inspection commands (e.g. `cd ..` to check siblings), and subsequent Write operations landed under the wrong root — intent.md was written to `~/TravvIdea/specs/001-dark-mode/` instead of `~/TravvIdea/backend-springboot/specs/001-dark-mode/`.
 
 Before any Read, Write, or Edit (and before any Bash that uses a relative path), run this once:
 
@@ -113,6 +113,7 @@ When all phases pass:
 2. Show the slug as a one-line confirmation: *"Slug: `{slug}` — reply `override` to change, anything else (including empty) accepts."* Default behavior is accept-on-any-non-override reply.
 3. Create the task and write the intent doc (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`):
    ```bash
+   che state start intent --session "$CHE_SESSION_ID"   # omit --session when no session id is available
    che task create {slug} --session "$CHE_SESSION_ID"   # omit --session when no session id is available
    ```
    The command allocates the next `NNN-` number, enforces slug uniqueness, creates `specs/NNN-{slug}/` with a `metadata.json` skeleton, and binds the session. Use the printed `TASK_DIR` for every subsequent file operation. If the slug already exists the command fails — go back to step 2 and pick another slug.
@@ -192,7 +193,7 @@ If the compound store was loaded:
 
 ## What you do NOT capture in this file
 
-- **Success scenarios** — these go to `docs/expectations/{slug}.expectations.md` via `/che-compound-expectations`. Compartmentation is the structural defense against the builder reward-hacking the validator's success criteria. If the user offers a success scenario during this interview, acknowledge it and say: *"That's an expectation, not part of intent. I'll park it for the expectations interview right after this."*
+- **Success scenarios** — these go to `{TASK_DIR}/expectations.md` via `/che-compound-expectations`. Compartmentation is the structural defense against the builder reward-hacking the validator's success criteria. If the user offers a success scenario during this interview, acknowledge it and say: *"That's an expectation, not part of intent. I'll park it for the expectations interview right after this."*
 - **Tech stack choices** — these go into `/che-compound-plan` later. If the user names a stack, ask whether it's a hard constraint (in which case it's a C-test-failing constraint that probably belongs in Context) or just a preference (defer to /che-compound-plan).
 - **Task breakdown** — that's `/che-compound-tasks`. Don't pre-decompose work here.
 
@@ -251,9 +252,10 @@ created: {YYYY-MM-DD}
 
 1. Show the file path in chat: *"Wrote `{TASK_DIR}/intent.md` (task `{TASK_DIR_NAME}`)."*
 2. Show a one-line summary: *"Goal: {goal}. {N} constraints, {N} failure conditions, {N} ADR refs."*
-3. Use AskUserQuestion to offer the chain handoff (continue / stop here / quit).
-4. If "continue": invoke `/che-compound-expectations` next.
-5. If "stop here" or "quit": end the session cleanly. The user can resume later by running `/che-compound-expectations` manually.
+3. Record the runs timeline completion: `che state done intent --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available).
+4. Use AskUserQuestion to offer the chain handoff (continue / stop here / quit).
+5. If "continue": invoke `/che-compound-expectations` next.
+6. If "stop here" or "quit": end the session cleanly. The user can resume later by running `/che-compound-expectations` manually.
 
 ---
 

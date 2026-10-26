@@ -1,6 +1,6 @@
 ---
 name: che-compound-expectations
-description: 期望捕获（validator-only）：访谈式捕获成功场景与边界场景，单独落 docs/expectations/{slug}.expectations.md，与 intent 文档分文件存放——文件隔离是防 reward-hack 的设计。当用户说「补期望场景」「写 expectations」「捕获边界场景」时使用——即使用户没提命令名，只要是期望场景的捕获落盘也用本 skill。
+description: 期望捕获（validator-only）：访谈式捕获成功场景与边界场景，单独落任务目录的 expectations.md（`{TASK_DIR}/expectations.md`，`che paths` 的 `FEATURE_DIR`），与同目录的 intent.md 分文件存放——文件隔离是防 reward-hack 的设计。当用户说「补期望场景」「写 expectations」「捕获边界场景」时使用——即使用户没提命令名，只要是期望场景的捕获落盘也用本 skill。
 ---
 
 # Expectations Interview
@@ -29,7 +29,7 @@ fi
 cd "$PROJECT_ROOT"
 ```
 
-All file paths in this prompt (`docs/intents/...`, `docs/expectations/...`) are relative to `$PROJECT_ROOT`. Re-anchor after any `cd` in a subsequent Bash command.
+All artifacts live in the task directory: resolve it once with `che paths --json` from `$PROJECT_ROOT` and use its `FEATURE_DIR` as `$TASK_DIR` (the `specs/NNN-{slug}/` directory created at intent time). Re-anchor after any `cd` in a subsequent Bash command.
 
 ---
 
@@ -41,8 +41,8 @@ Per IDSD's compartmentation rule, **success scenarios must not live in the same 
 - `/che-compound-expectations` captures success and edge scenarios (what the validator reads)
 
 In v0.2 (soft compartmentation), the same agent runs both interviews, but:
-- The two files live in **different folders** (`docs/intents/` vs `docs/expectations/`)
-- `/che-compound-implement` is instructed to load **only** `docs/intents/{slug}.intent.md`, NOT the expectations file
+- The two files are **different files** in the same task directory (`intent.md` vs `expectations.md`)
+- `/che-compound-implement` is instructed to load **only** `{TASK_DIR}/intent.md`, NOT the expectations file
 - `/che-compound-intentguard` is instructed to load **both**
 
 Hard compartmentation (separate agents, encrypted evals, builder structurally unable to read the expectations file) is deferred to v0.3+ if we see evidence of gaming.
@@ -59,12 +59,12 @@ If the user tries to skip, refuse politely and explain which specific test would
 
 ## Inputs you have
 
-- **Required**: the corresponding intent doc at `docs/intents/{slug}.intent.md`. If it does not exist, stop and instruct the user to run `/che-compound-intent` first.
+- **Required**: the corresponding intent doc at `{TASK_DIR}/intent.md`. If it does not exist, stop and instruct the user to run `/che-compound-intent` first.
 - Compound store artifacts at `docs/adr/`, `docs/corrections/`, and `docs/patterns/`, if loaded via `/che-compound-load`
 
 ## Output you produce
 
-- One file: `docs/expectations/{slug}.expectations.md` — same slug as the intent doc
+- One file: `{TASK_DIR}/expectations.md` — same slug as the intent doc, in the same task directory
 - Format: see "Output format" at the bottom
 
 ---
@@ -73,7 +73,7 @@ If the user tries to skip, refuse politely and explain which specific test would
 
 ### Phase 0 — Read the intent doc
 
-Read `docs/intents/{slug}.intent.md` in full. Extract:
+Read `{TASK_DIR}/intent.md` in full. Extract:
 - The goal sentence
 - The in-scope list
 - The out-of-scope list
@@ -136,7 +136,7 @@ Target: **2–4 edge scenarios.**
 
 Apply the user's choice before writing. Then, when scenarios are within cap and all pass:
 
-1. Write `docs/expectations/{slug}.expectations.md` using the format at the bottom of this file
+1. Write `{TASK_DIR}/expectations.md` using the format at the bottom of this file
 2. Confirm the file path in chat
 3. Show a one-line summary: *"Wrote {N} positive + {N} edge scenarios for `{slug}`."*
 
@@ -210,8 +210,8 @@ If the compound store was loaded:
 - **Plain chat** for free-form scenario prose
 - **AskUserQuestion** for discrete choices (accept all / edit / write your own; continue/stop/quit)
 - **Read** to ingest the intent doc at Phase 0
-- **Write** for the final `docs/expectations/{slug}.expectations.md` file
-- **Bash** for date generation (`date -u +%Y-%m-%d`)
+- **Write** for the final `{TASK_DIR}/expectations.md` file
+- **Bash** for the runs timeline — `che state start expectations --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available) before the first file write in Phase 3 — and date generation (`date -u +%Y-%m-%d`)
 
 ---
 
@@ -230,7 +230,7 @@ If the compound store was loaded:
 slug: {kebab-case-slug}
 status: active
 created: {YYYY-MM-DD}
-intent: ../intents/{slug}.intent.md
+intent: intent.md
 ---
 
 # Expectations: {goal sentence from intent doc}
@@ -259,9 +259,10 @@ intent: ../intents/{slug}.intent.md
 
 ## After writing the file
 
-1. Show the file path in chat: *"Wrote `docs/expectations/{slug}.expectations.md`."*
+1. Show the file path in chat: *"Wrote `{TASK_DIR}/expectations.md`."*
 2. Show a one-line summary: *"{N} positive scenarios, {N} edge scenarios, all E1–E4 ✓."*
-3. Use AskUserQuestion to offer the chain handoff (continue to /che-compound-specify / stop here / quit).
+3. Record the runs timeline completion: `che state done expectations --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available).
+4. Use AskUserQuestion to offer the chain handoff (continue to /che-compound-specify / stop here / quit).
 
 ---
 
@@ -270,4 +271,4 @@ intent: ../intents/{slug}.intent.md
 > Pack fork (ncw), port on upstream upgrade.
 
 - **目标**：`/che-compound-specify` —— 创建特性规格 spec.md
-- **条件**：期望文档已写入 `docs/expectations/`；chain continue 时以 intent 的 goal + in-scope 预填 specify
+- **条件**：期望文档已写入任务目录（`{TASK_DIR}/expectations.md`）；chain continue 时以 intent 的 goal + in-scope 预填 specify

@@ -26,6 +26,7 @@ Execution steps:
    - (Optionally capture `IMPL_PLAN`, `TASKS` for future chained flows.)
    - If JSON parsing fails, abort and instruct user to re-run `/che-compound-specify` or verify feature branch environment.
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+   - Record the runs timeline start: `che state start clarify --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available).
 
 2. **IF EXISTS**: Load `docs/constitution/constitution.md` for project principles and governance constraints.
 
@@ -199,7 +200,7 @@ Context for prioritization: $ARGUMENTS
 
 ## Completion Report
 
-Report completion (after questioning loop ends or early termination):
+Record the runs timeline completion: `che state done clarify --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available). Then report completion (after questioning loop ends or early termination):
 - Number of questions asked & answered.
 - Path to updated spec.
 - Sections touched (list names).

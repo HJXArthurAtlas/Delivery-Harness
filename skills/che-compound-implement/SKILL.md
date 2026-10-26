@@ -14,7 +14,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
-1. Run `che check --json --require-tasks --include-tasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`). All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+1. Run `che check --json --require-tasks --include-tasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`). All paths must be absolute. Record the runs timeline start before any file write: `che state start implement --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available). For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 2. **Check checklists status** (if FEATURE_DIR/checklists/ exists):
    - Treat checklist markers as a read-only gate: scan checkbox state, report status, and ask before proceeding when needed; do NOT modify checklist files or markers
@@ -142,7 +142,7 @@ Note: This command assumes a complete task breakdown exists in tasks.md. If task
 
 ## Completion Report
 
-Report final status with summary of completed work. **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
+Report final status with summary of completed work. Record the runs timeline completion once here in the final report — not inside the per-task loop: `che state done implement --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available). **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
   主流程:
   - /che-pingcode-sync-status: 全部任务 [x] 后收尾故事卡（单向流转，重开需新建工作项）
   可选:

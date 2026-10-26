@@ -13,7 +13,7 @@ After `/che-compound-intentguard` returns PASS (or REVIEW NEEDED that a human ha
 
 **1. Verify intent guard passed.**
 
-Read `docs/intents/{slug}.intentguard.md`. If verdict is:
+Read `{task_dir}/intentguard.md` (`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR`). If verdict is:
 - **BLOCKED**: refuse — *"Intent guard verdict is BLOCKED. Resolve violations before writeback."*
 - **REVIEW NEEDED**: ask the user — *"Verdict is REVIEW NEEDED. Has a human reviewed the {N} items? [yes / no]"* Refuse if no.
 - **PASS**: proceed.
@@ -89,7 +89,7 @@ context: "{one line of background: the past mistake and why the rule exists}"
 {one-line rationale, often references an ADR}
 
 ## Examples in this repo
-- `docs/intents/{slug}.intent.md` (feature {slug})
+- `{task_dir}/intent.md` (feature {slug})
 - ...
 ```
 
@@ -109,7 +109,7 @@ Show each draft and ask (use AskUserQuestion per draft):
 
 **6. Update intent doc status.**
 
-In the corresponding `docs/intents/{slug}.intent.md`, change the frontmatter:
+In the corresponding `{task_dir}/intent.md`, change the frontmatter:
 ```yaml
 status: active   →   status: completed
 completed: {YYYY-MM-DD}

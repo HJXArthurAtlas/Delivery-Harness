@@ -59,18 +59,20 @@ an explicit `cross-model` or `cli:model` policy requires an external model CLI.
 
 ## Inputs you must load
 
-1. **Intent** `docs/intents/{slug}.intent.md` — in-scope, out-of-scope, constraints, failure conditions
-2. **Expectations** `docs/expectations/{slug}.expectations.md` — positive + edge scenarios
-3. **Plan** `specs/{slug}/plan.md` — the proposed plan, including any `requested_surface` blocks
-4. **Tasks** `specs/{slug}/tasks.md` — the gapfilled task list
+(`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR` — run `che paths --session "$CHE_SESSION_ID"` once, bare when no session id is available.)
+
+1. **Intent** `{task_dir}/intent.md` — in-scope, out-of-scope, constraints, failure conditions
+2. **Expectations** `{task_dir}/expectations.md` — positive + edge scenarios
+3. **Plan** `{task_dir}/plan.md` — the proposed plan, including any `requested_surface` blocks
+4. **Tasks** `{task_dir}/tasks.md` — the gapfilled task list
 
 If intent or expectations is missing, stop and tell the user.
 
 ## Outputs you produce
 
-- `docs/intents/{slug}.planverify.md` — verdict report (records `checked_by`, `independence_tier`, `gate_mode`)
-- `docs/intents/{slug}.planverify.briefing.md` — the sealed briefing (auditable proof of the firewall)
-- `docs/intents/{slug}.planverify.checker.txt` — the checker's raw response
+- `{task_dir}/planverify.md` — verdict report (records `checked_by`, `independence_tier`, `gate_mode`)
+- `{task_dir}/planverify.briefing.md` — the sealed briefing (auditable proof of the firewall)
+- `{task_dir}/planverify.checker.txt` — the checker's raw response
 - A clear **PASS / REPLAN_ALLOWED / BLOCKED_DRIFT** verdict in the file and in chat
 
 ---
@@ -109,12 +111,12 @@ Announce: *"Independent checker: {name} (Tier {N} — {cross-model | cross-tier 
 
 ### Phase 3 — Seal the briefing *(the firewall)*
 
-Write `docs/intents/{slug}.planverify.briefing.md` containing **only**:
+Write `{task_dir}/planverify.briefing.md` containing **only**:
 - The goal sentence
 - **Locked intent**: full out-of-scope list, every constraint (with IDs), every failure condition — verbatim
 - **Locked expectations**: every scenario — verbatim
-- **The plan**: full `specs/{slug}/plan.md`
-- **The tasks**: full `specs/{slug}/tasks.md`
+- **The plan**: full `{task_dir}/plan.md`
+- **The tasks**: full `{task_dir}/tasks.md`
 - **Surface analysis**: the drift-candidate list from Phase 1 (path, classification, requested/unrequested) as plain facts
 - Relevant ADRs and `docs/corrections/` notes (so the checker can flag a plan that contradicts a recorded decision)
 - **The verdict contract** (below)
@@ -128,10 +130,10 @@ It must contain **NONE** of: your chat history, the planner's reasoning narratio
 capturing stdout to the checker file (keep stderr separate):
 
 ```bash
-codex exec - < docs/intents/{slug}.planverify.briefing.md \
-  >  docs/intents/{slug}.planverify.checker.txt \
-  2> docs/intents/{slug}.planverify.checker.log
-# gemini: gemini -p "$(cat docs/intents/{slug}.planverify.briefing.md)"
+codex exec - < {task_dir}/planverify.briefing.md \
+  >  {task_dir}/planverify.checker.txt \
+  2> {task_dir}/planverify.checker.log
+# gemini: gemini -p "$(cat {task_dir}/planverify.briefing.md)"
 # claude-as-checker: claude -p "$(cat …briefing.md)" --model <id>
 # Parse the LAST ```json block in checker.txt as the verdict.
 ```
@@ -158,7 +160,7 @@ Take the checker's P3a–P3d **as given**:
 - **BLOCKED_DRIFT** — any P3a BLOCKED_DRIFT, any P3b BLOCKED_DRIFT, or any P3d contradiction
 
 If you disagree, add a one-line meta-note — the checker's verdict stands. Write
-`docs/intents/{slug}.planverify.md` using the format below.
+`{task_dir}/planverify.md` using the format below.
 
 ### Phase 6 — Communicate verdict
 
@@ -166,7 +168,7 @@ Read the gate mode (`SKC_PLANVERIFY_GATE` env, else `planverify_gate:` in
 `.che/config.yml`, default `off`) and record it in the report frontmatter.
 
 - **PASS**: *"Verdict: PASS (checked by {checker}, Tier {N}). Plan is in scope and complete. Safe to run `/che-compound-implement`."*
-- **REPLAN_ALLOWED**: *"Verdict: REPLAN_ALLOWED (checked by {checker}). {N} items to address (see `docs/intents/{slug}.planverify.md`). Re-run `/che-compound-plan` or edit the plan, then re-run `/che-compound-planverify`."* (planverify does not patch the plan for you.)
+- **REPLAN_ALLOWED**: *"Verdict: REPLAN_ALLOWED (checked by {checker}). {N} items to address (see `{task_dir}/planverify.md`). Re-run `/che-compound-plan` or edit the plan, then re-run `/che-compound-planverify`."* (planverify does not patch the plan for you.)
 - **BLOCKED_DRIFT**: *"Verdict: BLOCKED_DRIFT (checked by {checker}). {N} unjustified expansions:"* — list each with the bounded alternative. If gate is `block`, `/che-compound-implement` and the first source-file write are now blocked until this resolves.
 
 ---
@@ -220,7 +222,7 @@ requested_surface:
 
 ---
 
-## Output format — `docs/intents/{slug}.planverify.md`
+## Output format — `{task_dir}/planverify.md`
 
 ```markdown
 ---
@@ -275,7 +277,7 @@ drift_candidates: {N}
 - **Read** for the four artifacts
 - **Bash** for CLI detection (`command -v`), Tier-1 dispatch, reading config
 - **Agent/Task** for Tier-2/Tier-3 native subagent dispatch (`model: haiku` for Tier 2)
-- **Write** for the briefing, captured checker response, and the `.planverify.md` report
+- **Write** for the briefing, captured checker response, and the `planverify.md` report
 
 ## What you do NOT do
 - **Judge the plan yourself.** P3a–P3d belong to the independent checker.

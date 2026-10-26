@@ -5,7 +5,7 @@ description: 任务缺口补全：把 intent + expectations 对照已生成的 t
 
 # Gap-Fill Analysis
 
-You are running a **gap-fill analysis**. Your job is to cross-reference the intent doc + expectations doc against the generated tasks list, identify coverage gaps, and append the missing tasks to `specs/{slug}/tasks.md`.
+You are running a **gap-fill analysis**. Your job is to cross-reference the intent doc + expectations doc against the generated tasks list, identify coverage gaps, and append the missing tasks to `{task_dir}/tasks.md`.
 
 This is **not an interview**. It is automated analysis + diff review. The user's role is to approve, reject, or edit your proposed additions.
 
@@ -13,15 +13,17 @@ This is **not an interview**. It is automated analysis + diff review. The user's
 
 ## Inputs you must load
 
-1. **Intent doc** at `docs/intents/{slug}.intent.md` — for constraints, failure conditions, in-scope items, out-of-scope items
-2. **Expectations doc** at `docs/expectations/{slug}.expectations.md` — for positive and edge scenarios
-3. **Tasks file** at `specs/{slug}/tasks.md` — the generated task list to augment
+(`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR` — run `che paths --session "$CHE_SESSION_ID"` once, bare when no session id is available.)
+
+1. **Intent doc** at `{task_dir}/intent.md` — for constraints, failure conditions, in-scope items, out-of-scope items
+2. **Expectations doc** at `{task_dir}/expectations.md` — for positive and edge scenarios
+3. **Tasks file** at `{task_dir}/tasks.md` — the generated task list to augment
 
 If any of these are missing, stop and tell the user which to generate first.
 
 ## Output you produce
 
-- **Append** (do not rewrite) new tasks to `specs/{slug}/tasks.md`
+- **Append** (do not rewrite) new tasks to `{task_dir}/tasks.md`
 - Each appended task carries a source comment indicating what it derives from (e.g., `<!-- gapfill: derived from C2 -->`)
 - Show the user a **diff preview** before writing
 
@@ -73,7 +75,7 @@ For each GAP, draft a candidate task entry matching the existing tasks.md format
 ### Phase 3 — Diff preview and review
 
 Show the user a single block containing:
-- A header: *"Proposed additions to `specs/{slug}/tasks.md` — {N} new tasks across {N} categories"*
+- A header: *"Proposed additions to `{task_dir}/tasks.md` — {N} new tasks across {N} categories"*
 - Proposed additions grouped by source category
 
 Then ask (use AskUserQuestion):
@@ -88,7 +90,7 @@ Append accepted entries. Preserve the existing formatting. Add a section header 
 
 ```markdown
 ## Gap-filling tasks (from /che-compound-gapfill)
-<!-- Generated: {YYYY-MM-DD}. Sources: docs/intents/{slug}.intent.md, docs/expectations/{slug}.expectations.md -->
+<!-- Generated: {YYYY-MM-DD}. Sources: {task_dir}/intent.md, {task_dir}/expectations.md -->
 
 - [ ] {task description} <!-- gapfill: derived from C1 -->
 - [ ] {task description} <!-- gapfill: derived from F2 -->
@@ -99,7 +101,7 @@ Append accepted entries. Preserve the existing formatting. Add a section header 
 
 ### Phase 5 — Confirm and offer chain
 
-Show summary: *"Appended {N} tasks to specs/{slug}/tasks.md across {N} categories."*
+Show summary: *"Appended {N} tasks to {task_dir}/tasks.md across {N} categories."*
 
 Ask: *"Continue to /che-compound-planverify? [yes / no]"*
 

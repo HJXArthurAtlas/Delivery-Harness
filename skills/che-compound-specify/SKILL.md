@@ -1,6 +1,6 @@
 ---
 name: che-compound-specify
-description: 特性规格生成：从自然语言需求创建/更新 spec.md（含 User Story 章节与优先级），特性指针登记 .che/feature.json，词汇表落 docs/GLOSSARY.md；前置门禁 require-intent 放行后执行。当用户运行或提到 /che-compound-specify，或说「出 spec」「写特性需求」「把这个需求转成规格」时使用——即使用户没提命令名，只要是特性规格的创建或更新也用本 skill。
+description: 特性规格生成：从自然语言需求创建/更新 spec.md（含 User Story 章节与优先级），spec 落 `che paths` 解析的任务目录（FEATURE_DIR），词汇表落 docs/GLOSSARY.md；前置门禁 require-intent 放行后执行。当用户运行或提到 /che-compound-specify，或说「出 spec」「写特性需求」「把这个需求转成规格」时使用——即使用户没提命令名，只要是特性规格的创建或更新也用本 skill。
 ---
 
 
@@ -20,14 +20,11 @@ Given that feature description, do this:
 
 1. **Resolve the short name from the single source of truth** — the feature slug, never invent an independent one:
 
-   > Pack fork (ncw), port on upstream upgrade: upstream generates this short name from the feature description; the pack aligns it with the intent slug / `.che/feature.json` so one slug flows through the whole chain.
+   > Pack fork (ncw), port on upstream upgrade: upstream generates this short name from the feature description; the pack aligns it with the task directory slug so one slug flows through the whole chain.
 
-   - Run `che feature show` from the repository root (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`):
-     - **Registered feature** (the command prints a directory): the short name is that directory's slug — basename with a leading `YYYYMMDD-HHMMSS-` prefix stripped (e.g. `specs/20261022-084501-user-auth` → `user-auth`). Reuse it verbatim; do NOT regenerate a different name. (`che paths --json` reports the same value as `SLUG`.)
-     - **No registered feature** (exit non-zero / empty): derive the short name from the intent doc so intent and spec stay aligned — list `docs/intents/*.intent.md`:
-       - Exactly one → use its slug (`<slug>` from `<slug>.intent.md`) as the short name.
-       - Several → ask the user which intent doc this feature corresponds to, and use that slug.
-       - None → the require-intent gate should have blocked before specify; as a defensive fallback only, generate a 2-4 word short name from the feature description (action-noun format when possible, e.g. "add-user-auth", "fix-payment-bug"; preserve technical terms and acronyms; concise but descriptive):
+   - Run `che paths --session "$CHE_SESSION_ID"` from the repository root (bare `che paths` when no session id is available; requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`):
+     - **Task resolved** (the command prints a directory): the short name is the `SLUG` it reports — the task directory's slug, basename with the leading prefix (`NNN-` number, or a PingCode card identifier after push) stripped (e.g. `specs/001-user-auth` → `user-auth`). Reuse it verbatim; do NOT regenerate a different name.
+     - **No task resolved** (exit non-zero, or it reports an ambiguous candidate list): ask the user which task this feature corresponds to, and use that task's slug. None → the require-intent gate should have blocked before specify; as a defensive fallback only, generate a 2-4 word short name from the feature description (action-noun format when possible, e.g. "add-user-auth", "fix-payment-bug"; preserve technical terms and acronyms; concise but descriptive):
          - "I want to add user authentication" → "user-auth"
          - "Implement OAuth2 integration for the API" → "oauth2-api-integration"
          - "Create a dashboard for analytics" → "analytics-dashboard"
@@ -37,24 +34,18 @@ Given that feature description, do this:
 
    This skill does not create or switch git branches. The spec directory name is independent of any git branch name; if the user asks for a branch, create or switch to it using their requested name before continuing.
 
-3. **Create the spec feature directory**:
+3. **Resolve the spec feature directory**:
 
-   Specs live under the default `specs/` directory unless the user explicitly provides `CHE_FEATURE_DIRECTORY`.
+   The feature directory is the task directory created at intent time — it already exists and holds every artifact of this task, spec included.
 
-   **Resolution order for `CHE_FEATURE_DIRECTORY`**:
-   1. If the user explicitly provided `CHE_FEATURE_DIRECTORY` (e.g., via environment variable, argument, or configuration), use it as-is
-   2. Otherwise, auto-generate it under `specs/`:
-      - Prefix is `YYYYMMDD-HHMMSS` (current timestamp)
-      - Construct the directory name: `<prefix>-<short-name>` (e.g., `20260319-143022-user-auth`)
-      - Set `CHE_FEATURE_DIRECTORY` to `specs/<directory-name>`
+   **Resolution**: reuse the `che paths` invocation from step 1 and take its `FEATURE_DIR` as `CHE_FEATURE_DIRECTORY`. The CLI resolves it as an explicit `--feature <slug>` > `CHE_FEATURE_DIRECTORY` env > session binding > the single task in `specs/`; never invent or auto-generate a new directory. The short name from step 1 is that directory's `SLUG`.
 
-   **Create the directory and spec file**:
+   **Create the spec file** (the task directory exists; `mkdir -p` is idempotent):
+   - Record the runs timeline start: `che state start specify --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available)
    - `mkdir -p CHE_FEATURE_DIRECTORY`
    - Use this skill's own `references/spec-template.md` as the spec template — no project scaffolding and no override/preset/extension resolution stack
    - Copy the resolved `spec-template` file to `CHE_FEATURE_DIRECTORY/spec.md` as the starting point
    - Set `SPEC_FILE` to `CHE_FEATURE_DIRECTORY/spec.md`
-   - Persist the resolved path to `.che/feature.json` by running `che feature set <resolved feature dir>` from the repository root (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`).
-     This allows downstream commands (`/che-compound-plan`, `/che-compound-tasks`, etc.) to locate the feature directory without relying on git branch name conventions.
 
    **IMPORTANT**:
    - You must only create one feature per `/che-compound-specify` invocation
@@ -188,7 +179,7 @@ Given that feature description, do this:
 
 ## Completion Report
 
-Report completion to the user with:
+Record the runs timeline completion: `che state done specify --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available). Then report completion to the user with:
 - `CHE_FEATURE_DIRECTORY` — the feature directory path
 - `SPEC_FILE` — the spec file path
 - Checklist results summary
@@ -279,5 +270,5 @@ Success criteria must be:
   - 回退：无 config 或用户拒绝 → 跳过；不建卡由交接门禁兜底（交接前必须补跑）
 - **条件**：
   - spec.md 已写入且质量清单通过
-  - 前置门禁 `/che-compound-require-intent` 必须已放行（`che require-intent` 退 0；已登记特性时还要求 `docs/intents/{slug}.intent.md` 与 `.che/feature.json` 当前 slug 一致）
+  - 前置门禁 `/che-compound-require-intent` 必须已放行（`che require-intent` 退 0；已解析任务时还要求任务目录内 `intent.md` 存在且 slug 与 session 绑定一致）
   - 涉 UI 特性澄清后进 `/che-compound-design`，无 UI 可跳过 design

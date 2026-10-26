@@ -14,7 +14,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
-1. **Setup**: Run `che setup-plan --json --references-dir .agents/skills/che-compound-plan/references` (global install: `~/.agents/skills/che-compound-plan/references`), from repo root, and parse JSON for FEATURE_SPEC, IMPL_PLAN, FEATURE_DIR, BRANCH (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`). The `plan-template` is provided by this skill's own `references/plan-template.md`; no project scaffolding. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+1. **Setup**: Run `che setup-plan --json --references-dir .agents/skills/che-compound-plan/references` (global install: `~/.agents/skills/che-compound-plan/references`), from repo root, and parse JSON for FEATURE_SPEC, IMPL_PLAN, FEATURE_DIR, BRANCH (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`). The `plan-template` is provided by this skill's own `references/plan-template.md`; no project scaffolding. Record the runs timeline start before any file write: `che state start plan --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available). For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 2. **Load context**: Read FEATURE_SPEC and `docs/constitution/constitution.md`. Load IMPL_PLAN template (resolved from this skill's `references/`). **Pack fork (ncw, port on upstream upgrade)**: if `$FEATURE_DIR/design-tasks.md` exists, read it too — its interaction rules, page states, and design requirement checklist (UI-xx) are binding UX input for the plan's UX/interaction sections. Align the plan with it; if it conflicts with FEATURE_SPEC, stop and ask the user to reconcile with product/design — never resolve the conflict silently.
 
@@ -28,7 +28,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Completion Report
 
-Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated artifacts. **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
+Command ends after Phase 1 design. Record the runs timeline completion: `che state done plan --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available). Then report branch, IMPL_PLAN path, and generated artifacts. **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
   主流程:
   - /che-adr-check: 对照 ADR 语料校验 plan 是否越决策边界（必经；无未处置 departure 才进 tasks）
   - /che-compound-tasks: 按 spec 用户故事生成依赖有序任务清单

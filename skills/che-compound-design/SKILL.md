@@ -30,6 +30,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 2. 从仓库根运行 `che paths --json` **恰好一次**，解析 JSON 取 `FEATURE_DIR` / `FEATURE_SPEC`。
 3. 校验 `$FEATURE_DIR/spec.md` 存在：脚本失败或 spec 缺失时停止，提示先运行 `/che-compound-specify`，绝不凭空继续。
 4. 本 skill 依赖一个具体的 spec 才能执行：后续澄清以该 spec 为需求材料，设计明细最终落到 `$FEATURE_DIR/design-tasks.md`（特性目录本身即唯一标识）。
+5. 首个写盘动作前记录 runs 时间线开始：`che state start design --session "$CHE_SESSION_ID"`（无 session id 时省略 --session）。Pack fork (ncw)，上游升级时移植。
 
 ### 段三：四盲区澄清
 
@@ -55,7 +56,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 方案无任何待解决事项（无「待补」、无未决疑问）后，按段四确定的规则与自检结论，参照 `references/design-tasks-template.md` 输出设计明细到 `$FEATURE_DIR/design-tasks.md`；功能名称与所属迭代记录在文档「任务目标」节，故事卡号（如有）一并写入，便于设计侧对齐 flow 溯源链。
 
-输出后向用户确认。用户提出任何改动建议、或自检发现需调整时，重新过一遍 `references/design-spec.md` 与 `references/design-selfcheck.md`（段四），再按段五重新产出。产出物确认后本 skill 结束；结束时按 flow 分组提示下一步（条目格式 `- /命令: [可选] 能做什么`）：
+输出后向用户确认。用户提出任何改动建议、或自检发现需调整时，重新过一遍 `references/design-spec.md` 与 `references/design-selfcheck.md`（段四），再按段五重新产出。产出物确认后本 skill 结束；结束前记录 runs 时间线完成：`che state done design --session "$CHE_SESSION_ID"`（无 session id 时省略 --session；Pack fork (ncw)）。结束时按 flow 分组提示下一步（条目格式 `- /命令: [可选] 能做什么`）：
 
 主流程:
 - /che-compound-plan: 交接门禁通过后开发侧出实现计划

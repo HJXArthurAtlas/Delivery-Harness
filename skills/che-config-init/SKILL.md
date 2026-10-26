@@ -9,7 +9,7 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 requir
 
 职责边界（必须遵守）：
 
-- 只写 `.che/config.yml`；**绝不**触碰 `.che/feature.json`（运行期特性指针，由 specify 阶段写入）。
+- 只写 `.che/config.yml`；**绝不**触碰 `.che/feature.json`（session→slug 绑定表，机器本地 gitignored，由 intent 阶段 `che task create` 写入）。
 - `.che/pingcode-config.yml` **绝不**由本技能直接生成——PingCode 接入链最后移交 `/che-pingcode-init` 完成。
 - 本技能无 scripts：写盘由 agent 按本文件的模板完成。
 
@@ -19,7 +19,7 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 requir
 
 ### 1. require_intent（before_specify 门禁；默认 on；选项 on / off）
 
-- **开（on）**：`/che-compound-specify` 之前必须先存在 intent 文档（`docs/intents/{slug}.intent.md`，由 `/che-compound-intent` 产出），没有就拦下 specify——强制「先想清楚为什么做，再写做什么」。
+- **开（on）**：`/che-compound-specify` 之前必须先存在 intent 文档（`che paths` 解析的任务目录内 `intent.md`，由 `/che-compound-intent` 产出），没有就拦下 specify——强制「先想清楚为什么做，再写做什么」。
 - **关（off）**：specify 直接放行，intent 变成可跳过。
 - **影响**：这是流程纪律的强弱开关。正式项目建议开（防止没想清楚就开工）；个人临时试用可以关。
 - 环境变量 `CHE_REQUIRE_INTENT` 优先于本配置。

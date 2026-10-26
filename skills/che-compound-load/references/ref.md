@@ -81,8 +81,10 @@ The base workflow asks "what do you want to build?" but doesn't structure:
 These are the things that prevent AI overreach and define what "done" really means.
 
 **Our two committed artifacts** fill this gap:
-- `docs/intents/{slug}.intent.md` — goal + constraints + failure conditions
-- `docs/expectations/{slug}.expectations.md` — success scenarios + done boundary
+- `{task_dir}/intent.md` — goal + constraints + failure conditions
+- `{task_dir}/expectations.md` — success scenarios + done boundary
+
+(Both live in the task directory — the `specs/NNN-{slug}/` directory that `che paths` reports as `FEATURE_DIR`.)
 
 ---
 

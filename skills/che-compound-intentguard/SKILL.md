@@ -48,18 +48,20 @@ an explicit `cross-model` or `cli:model` policy requires an external model CLI.
 
 ## Inputs you must load
 
-1. **Intent doc** at `docs/intents/{slug}.intent.md` — out-of-scope items, constraints, failure conditions
-2. **Expectations doc** at `docs/expectations/{slug}.expectations.md` — positive and edge scenarios
-3. **Tasks file** at `specs/{slug}/tasks.md` — including gapfill additions
+First resolve the task directory: run `che paths --json` from the repo root **once** and use its `FEATURE_DIR` as `$TASK_DIR` (the `specs/NNN-{slug}/` directory created at intent time; `SLUG` is the directory name minus its prefix).
+
+1. **Intent doc** at `{TASK_DIR}/intent.md` — out-of-scope items, constraints, failure conditions
+2. **Expectations doc** at `{TASK_DIR}/expectations.md` — positive and edge scenarios
+3. **Tasks file** at `{TASK_DIR}/tasks.md` — including gapfill additions
 4. **Git diff** of the current branch vs the merge base — use `git diff $(git merge-base HEAD main)...HEAD`
 
 If the intent or expectations doc is missing, stop and tell the user.
 
 ## Output you produce
 
-- `docs/intents/{slug}.intentguard.md` — the verdict report (records `checked_by` + `independence_tier`)
-- `docs/intents/{slug}.intentguard.briefing.md` — the **sealed briefing** the checker received (auditable proof it saw no builder context)
-- `docs/intents/{slug}.intentguard.checker.txt` — the checker's raw response (auditable proof of who judged)
+- `{TASK_DIR}/intentguard.md` — the verdict report (records `checked_by` + `independence_tier`)
+- `{TASK_DIR}/intentguard.briefing.md` — the **sealed briefing** the checker received (auditable proof it saw no builder context)
+- `{TASK_DIR}/intentguard.checker.txt` — the checker's raw response (auditable proof of who judged)
 - A clear **PASS / REVIEW NEEDED / BLOCKED** verdict in the file and in chat
 
 ---
@@ -83,7 +85,7 @@ Record pass/fail for each. **If any L1 check fails**, the final verdict is **BLO
 
 ### Phase 2 — L2: Task completion check *(you run this)*
 
-For each task in `specs/{slug}/tasks.md`:
+For each task in `{TASK_DIR}/tasks.md`:
 - Is it marked complete (checkbox checked)?
 - Does the diff contain evidence the task was actually executed (not just checked off)?
 
@@ -102,7 +104,7 @@ Record any task marked complete with no diff evidence as a **L2 concern**. If 80
 
 ### Phase 4 — Seal the briefing *(the firewall)*
 
-Write `docs/intents/{slug}.intentguard.briefing.md` containing **only**:
+Write `{TASK_DIR}/intentguard.briefing.md` containing **only**:
 - The goal sentence
 - **Locked intent**: the full out-of-scope list, every constraint (with IDs), every failure condition — copied verbatim
 - **Locked expectations**: every scenario (positive + edge) — copied verbatim
@@ -114,16 +116,16 @@ It must contain **NONE** of: your chat history, the plan's reasoning, task-by-ta
 
 ### Phase 5 — Dispatch the independent checker
 
-**Tier 1 (cross-model, e.g. Codex):** shell out via Bash in non-interactive mode, feeding it the sealed briefing, and capture stdout to `docs/intents/{slug}.intentguard.checker.txt`:
+**Tier 1 (cross-model, e.g. Codex):** shell out via Bash in non-interactive mode, feeding it the sealed briefing, and capture stdout to `{TASK_DIR}/intentguard.checker.txt`:
 
 ```bash
 # Feed the sealed briefing on stdin — robust for large diffs (avoids ARG_MAX).
 # `codex exec -` reads instructions from stdin. Confirm flags with `codex exec --help`.
 # Keep stderr OUT of the verdict file: Codex prints a banner + any MCP/plugin
 # warnings to stderr; the clean final message (with the JSON block) goes to stdout.
-codex exec - < docs/intents/{slug}.intentguard.briefing.md \
-  >  docs/intents/{slug}.intentguard.checker.txt \
-  2> docs/intents/{slug}.intentguard.checker.log
+codex exec - < "$TASK_DIR/intentguard.briefing.md" \
+  >  "$TASK_DIR/intentguard.checker.txt" \
+  2> "$TASK_DIR/intentguard.checker.log"
 # Codex defaults suit a validator: `approval: never`, `sandbox: read-only`.
 # Parse the LAST ```json block in checker.txt as the verdict (ignore any banner).
 # Options: `-m <model>` picks the checker model; `codex review` is a purpose-built
@@ -135,7 +137,7 @@ The briefing carries the **full diff**, so the cross-model checker judges hermet
 
 The briefing instructs the checker to end its response with the JSON verdict block. Extract that block from the captured output.
 
-**Tier 2 / Tier 3 (native subagent):** dispatch the **Agent/Task tool** with a read-only-capable agent (it needs Read + Bash to inspect files referenced in the diff, but **must not** Edit/Write code), passing the sealed briefing as the entire prompt. Set `model: haiku` for Tier 2; omit for Tier 3. Save its returned JSON to `docs/intents/{slug}.intentguard.checker.txt`.
+**Tier 2 / Tier 3 (native subagent):** dispatch the **Agent/Task tool** with a read-only-capable agent (it needs Read + Bash to inspect files referenced in the diff, but **must not** Edit/Write code), passing the sealed briefing as the entire prompt. Set `model: haiku` for Tier 2; omit for Tier 3. Save its returned JSON to `{TASK_DIR}/intentguard.checker.txt`.
 
 The checker performs **all of L3** internally:
 - **L3a — Out-of-scope** *(BLOCKING)*: for each out-of-scope item, inspect the diff for matching paths/symbols/strings. Clear (non-borderline) match → BLOCKED.
@@ -154,12 +156,12 @@ Take the checker's L3a–L3d verdicts **as given** and combine with your L1/L2:
 
 If you *disagree* with the checker, you may add a one-line **meta-note** to the report, but the checker's L3 verdict stands — overriding it re-merges the two contexts you just separated and voids the independence claim.
 
-Write `docs/intents/{slug}.intentguard.md` using the format below.
+Write `{TASK_DIR}/intentguard.md` using the format below.
 
 ### Phase 7 — Communicate verdict
 
 - **PASS**: *"Verdict: PASS (checked by {checker}, Tier {N}). Safe to merge. Run `/che-compound-writeback` to persist learnings before merging."*
-- **REVIEW NEEDED**: *"Verdict: REVIEW NEEDED (checked by {checker}). {N} items need human review (see `docs/intents/{slug}.intentguard.md`). Do not merge until reviewed."*
+- **REVIEW NEEDED**: *"Verdict: REVIEW NEEDED (checked by {checker}). {N} items need human review (see `{TASK_DIR}/intentguard.md`). Do not merge until reviewed."*
 - **BLOCKED**: *"Verdict: BLOCKED (checked by {checker}). {N} violations:"* — list each with the required fix.
 
 ---
@@ -190,7 +192,7 @@ Embed this in the briefing. Both native subagents and cross-model CLIs return th
 
 ---
 
-## Output format — `docs/intents/{slug}.intentguard.md`
+## Output format — `{TASK_DIR}/intentguard.md`
 
 ```markdown
 ---
