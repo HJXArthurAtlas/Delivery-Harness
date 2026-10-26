@@ -126,6 +126,7 @@ pingcode_integration: off
 | 症状 | 处理 |
 |---|---|
 | `npm install -g` 失败 | 检查 npm registry 可达性与全局 bin 目录权限；企业内网确认内部 registry 镜像 |
+| che 安装报 404（@newchiwan 不在公网） | 配置公司 Nexus 消费端：`npm config set @newchiwan:registry https://nexus.newchiwan.cn/repository/registry-npm/` 后重试 |
 | 安装后仍 `command not found: pingcode` | 重开 shell 确认 npm 全局 bin 目录在 PATH 中 |
 | `pingcode --version` 低于 0.14.0 | `npm install -g @metaphorli/pingcode-cli@latest` |
 | `auth status` 始终未认证 | 检查登录命令输出；或改设 `PINGCODE_CLIENT_ID`/`PINGCODE_CLIENT_SECRET` |
