@@ -1,5 +1,5 @@
 ---
-name: che-project-commit
+name: che-git-master
 description: 执行 git commit 的规范流程：消息格式 `type(scope): #故事卡ID 中文消息`、故事卡 ID 确认（接入 PingCode 时从 specs/pingcode-mapping.json 取当前任务卡 identifier 供确认）、小步拆分、精确暂存、敏感文件排除与安全边界。当用户说「提交」「commit」「帮我提交这些改动」「拆分提交」「这些改动怎么拆」「检查提交风险」或让你代拟 commit message 时使用——即使用户没提「规范」二字也用本 skill。适用于仓库内任何目录。
 ---
 

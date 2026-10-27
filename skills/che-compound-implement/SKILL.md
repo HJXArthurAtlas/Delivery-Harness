@@ -167,4 +167,4 @@ Report final status with summary of completed work. Record the runs timeline com
   - 涉 UI 任务已逐项核验 design-tasks.md 的 UI-xx 清单
   - 前置门禁 `/che-compound-planverify-gate`（block 模式时）已放行
   - 前置对账（入向，实现开始时）：spec 建卡后有改动的，`.che/pingcode-config.yml` 在位且 `specs/pingcode-mapping.json` 含本特性条目 → 先 `/che-pingcode-sync-cards` 对账（建议先 `--dry-run`）；未建卡或无 config → 跳过
-  - 提交走 `/che-project-commit` 带故事卡 ID（ID 优先从 `specs/pingcode-mapping.json` 当前任务条目解析确认）
+  - 提交走 `/che-git-master` 带故事卡 ID（ID 优先从 `specs/pingcode-mapping.json` 当前任务条目解析确认）

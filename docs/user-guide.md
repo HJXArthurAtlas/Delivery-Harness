@@ -43,7 +43,7 @@ flowchart TD
 | 3. 交接门禁 | 产品/UI → 开发 | 逐项核对（见下），全部通过后转开发 | — |
 | 4. plan | 开发 | `/che-compound-plan`；特性目录存在 `design-tasks.md` 时必读，与 spec 冲突时交产品/设计侧裁决 | plan.md 等计划工件 |
 | 5. tasks | 开发 | plan 后自动接续 adr-check 越界校验（无未处置 departure 才继续）→ `/che-compound-tasks`；配了 `mapping.task_artifact` 时结束时同样确认后自动补建任务卡 | `tasks.md`（+ 任务卡挂 story/spec 卡下） |
-| 6. implement | 开发 | `/che-compound-implement` 按 tasks.md 执行；开始时自动处理前置：spec 建卡后存在修改的，先提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；启用 `planverify_gate` block 的项目先自动过闸；UI 任务按设计稿 + `design-tasks.md` 的 UI-xx 清单逐项核验；提交经由 `/che-project-commit`，消息携带故事卡 ID | 代码 + 测试 |
+| 6. implement | 开发 | `/che-compound-implement` 按 tasks.md 执行；开始时自动处理前置：spec 建卡后存在修改的，先提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；启用 `planverify_gate` block 的项目先自动过闸；UI 任务按设计稿 + `design-tasks.md` 的 UI-xx 清单逐项核验；提交经由 `/che-git-master`，消息携带故事卡 ID | 代码 + 测试 |
 | 7. 收尾 | 开发 | 本地任务全部 `[x]` → `/che-pingcode-sync-status` | 卡片流转完成（单向，不回退） |
 
 > **建卡不是独立步骤**：它是 specify（以及配置了任务卡映射时的 tasks）结束时的确认提问，确认后 agent 自动执行 `/che-pingcode-specstoissues`；选择不建卡的，按 §4 门禁第 3 条在交接前补执行。
@@ -178,7 +178,7 @@ flowchart TD
 | `che-compound-planverify` | 独立校验者审 plan+tasks：PASS / REPLAN_ALLOWED / BLOCKED_DRIFT |
 | `che-compound-planverify-gate` | implement 前置门禁（implement 自动过闸，无需手动执行；默认 off，block 时 verdict 缺失或 BLOCKED_DRIFT 拒绝） |
 | `che-compound-implement` | 按 tasks.md 执行任务实现；UI 任务按设计稿 + UI-xx 清单逐项核验 |
-| `che-project-commit` | git commit 规范流程：`type(scope): #故事卡ID 中文消息` + `Co-Authored-By` 页脚，小步拆分、精确暂存、敏感文件排除；故事卡 ID 优先从 `specs/pingcode-mapping.json` 当前任务条目解析（吸收自 mturtle-commit） |
+| `che-git-master` | git commit 规范流程：`type(scope): #故事卡ID 中文消息` + `Co-Authored-By` 页脚，小步拆分、精确暂存、敏感文件排除；故事卡 ID 优先从 `specs/pingcode-mapping.json` 当前任务条目解析（吸收自 mturtle-commit） |
 | `che-compound-intentguard` | 独立校验者审实现 vs 锁定意图：PASS / REVIEW / BLOCKED |
 | `che-compound-writeback` | intentguard PASS 后沉淀新经验（ADR/corrections/patterns）回 compound store |
 | `che-compound-converge` | 代码现状 vs 工件差距 → 追加收敛任务进 tasks.md（可选） |
