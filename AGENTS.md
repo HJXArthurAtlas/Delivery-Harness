@@ -39,7 +39,7 @@ omp 另有原生插件分发（不走拷贝）：`.omp-plugin/marketplace.json` 
 
 职责分层与外部委托：
 
-- `che-compound-flow` 是流程衔接与门禁层，按引用委托 `che-compound-*` 系技能、`pingcode` skill、`mturtle-commit`，**不内联它们的规则**。主线命令技能（specify/clarify/design/plan/tasks/implement）的 Completion Report 末尾带统一「Pack fork」下一步提示——按主流程/可选分组，条目格式 `- /命令: [可选] 能做什么`（按 9 阶段表引导下一命令与建卡/对账/收尾提醒，上游升级需 port）。
+- `che-compound-flow` 是流程衔接与门禁层，按引用委托 `che-compound-*` 系技能、`pingcode` skill、`che-project-commit`，**不内联它们的规则**。主线命令技能（specify/clarify/design/plan/tasks/implement）的 Completion Report 末尾带统一「Pack fork」下一步提示——按主流程/可选分组，条目格式 `- /命令: [可选] 能做什么`（按 9 阶段表引导下一命令与建卡/对账/收尾提醒，上游升级需 port）。
 
 ## 技能清单（`skills/` 目录导览，全部随 pack 分发）
 

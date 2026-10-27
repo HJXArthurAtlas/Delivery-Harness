@@ -20,7 +20,7 @@ Current-state audit of the skills under `skills/`, including their `SKILL.md`, `
 
 | Skills | External reference | Current requirement |
 |---|---|---|
-| `che-compound-flow` | PingCode card workflow via pack skills `che-pingcode-*` (external `pingcode` CLI ≥ 0.14.0, authenticated) and `mturtle-commit`. | **Excluded from the rewrite and unchanged.** They remain required for the PingCode card workflow. |
+| `che-compound-flow` | PingCode card workflow via pack skills `che-pingcode-*` (external `pingcode` CLI ≥ 0.14.0, authenticated) and `/che-project-commit` (pack skill). | **Excluded from the rewrite and unchanged.** They remain required for the PingCode card workflow. |
 | `che-compound-{planverify,intentguard}` | `codex exec`, `gemini -p`, or `claude -p` for Tier-1 checking. | **Conditional.** Default `auto` uses native Tier-2/Tier-3 subagents when no cross-model CLI exists; a fresh default-model subagent is the pack-local baseline. Only forced `cross-model` or `cli:model` policy requires an external model CLI. |
 | `che-compound-intentguard` | `git` and the target project's build/test/lint toolchain. | **Host capabilities, unchanged.** They inspect the target diff and exercise the target project; they are not pack-downloaded dependencies. |
 

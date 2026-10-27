@@ -3,7 +3,7 @@
 本仓技能包 `ncw-delivery-harness` 承载「规格驱动开发 + PingCode」的 AI native 流程：**产品出规格建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**。本文按角色说明每个环节用什么技能、按什么顺序、每步做什么。
 
 - 流程规范正文：`skills/che-compound-flow/SKILL.md`（衔接与门禁层）
-- 技能全量字典：本文 §9（共 34 个）
+- 技能全量字典：本文 §9（共 35 个）
 
 ## 1. 一次性准备（项目首次接入）
 
@@ -44,7 +44,7 @@ flowchart TD
 | 5. plan | 开发 | `/che-compound-plan`；特性目录有 `design-tasks.md` 必读，与 spec 冲突回产品/设计裁决 | plan.md 等计划工件 |
 | 6. tasks | 开发 | 必跑 `/che-adr-check`（无未处置 departure 才继续）→ `/che-compound-tasks`；配了 `mapping.task_artifact` 才补建任务卡 | `tasks.md`（+ 任务卡挂 story/spec 卡下） |
 | 7. implement 前 | 开发 | implement 交接前置对账 `/che-pingcode-sync-cards`（已建卡才提示） | spec 改动与卡片增删改对齐 |
-| 8. implement | 开发 | `/che-compound-implement`；UI 任务按设计稿 + `design-tasks.md` 的 UI-xx 清单逐项核验；提交走 `mturtle-commit`，消息带故事卡 ID | 代码 + 测试 |
+| 8. implement | 开发 | `/che-compound-implement`；UI 任务按设计稿 + `design-tasks.md` 的 UI-xx 清单逐项核验；提交走 `/che-project-commit`，消息带故事卡 ID | 代码 + 测试 |
 | 9. 收尾 | 开发 | 本地任务全部 `[x]` → `/che-pingcode-sync-status` | 卡片流转完成（单向，不回退） |
 
 ## 4. 交接门禁（阶段 4，进开发前逐项必过）
@@ -133,7 +133,7 @@ flowchart TD
 
 `/che-mturtle-troubleshooting` —— 口头系统名 → 环境（生产/UAT/stg/漳州）→ Loki namespace/app → 数据库对号，业务单号/trace_id 追日志 + 数据库核事实互相印证；证据全部来自线上 MCP 数据源，不依赖本地工作目录。
 
-## 9. 技能字典（34 个）
+## 9. 技能字典（35 个）
 
 ### 一次性接入
 
@@ -177,7 +177,8 @@ flowchart TD
 | `che-compound-gapfill` | 对照 intent+expectations 补四类缺口测试进 tasks.md |
 | `che-compound-planverify` | 独立校验者审 plan+tasks：PASS / REPLAN_ALLOWED / BLOCKED_DRIFT |
 | `che-compound-planverify-gate` | implement 前 shell 门禁（默认 off；block 时 verdict 缺失或 BLOCKED_DRIFT 拒绝） |
-| `che-compound-implement` | 按 tasks.md 执行实现；UI 任务按设计稿 + UI-xx 清单逐项核验 |
+| `che-compound-implement` | 按 tasks.md 执行任务实现；UI 任务按设计稿 + UI-xx 清单逐项核验 |
+| `che-project-commit` | git commit 规范流程：`type(scope): #故事卡ID 中文消息` + `Co-Authored-By` 页脚，小步拆分、精确暂存、敏感文件排除；故事卡 ID 优先从 `specs/pingcode-mapping.json` 当前任务条目解析（吸收自 mturtle-commit） |
 | `che-compound-intentguard` | 独立校验者审实现 vs 锁定意图：PASS / REVIEW / BLOCKED |
 | `che-compound-writeback` | intentguard PASS 后沉淀新经验（ADR/corrections/patterns）回 compound store |
 | `che-compound-converge` | 代码现状 vs 工件差距 → 追加收敛任务进 tasks.md（可选） |

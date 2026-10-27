@@ -93,11 +93,11 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 
 ## 使用指南
 
-按角色（产品 / UI 设计 / 开发）的完整使用指南见 **[docs/user-guide.md](docs/user-guide.md)**：一次性准备、流程总览、主线 9 阶段、交接门禁、产品 / UI / 开发各侧顺序与纪律、辅助链（bug / 线上排查）、技能字典（34 个）、产物路径速查。
+按角色（产品 / UI 设计 / 开发）的完整使用指南见 **[docs/user-guide.md](docs/user-guide.md)**：一次性准备、流程总览、主线 9 阶段、交接门禁、产品 / UI / 开发各侧顺序与纪律、辅助链（bug / 线上排查）、技能字典（35 个）、产物路径速查。
 
 ## Pack 内容
 
-34 个技能按角色分组的清单与触发语见 **[docs/user-guide.md](docs/user-guide.md)**（§9 技能字典）；**权威触发描述以各 `skills/<name>/SKILL.md` frontmatter 的 `description` 为准**，本 README 不再维护副本。
+35 个技能按角色分组的清单与触发语见 **[docs/user-guide.md](docs/user-guide.md)**（§9 技能字典）；**权威触发描述以各 `skills/<name>/SKILL.md` frontmatter 的 `description` 为准**，本 README 不再维护副本。
 
 ## 运行时与外部 CLI（排除 init / flow）
 

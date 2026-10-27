@@ -20,7 +20,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 | 5. plan | 开发 | `/che-compound-plan`；特性目录存在 `design-tasks.md` 时必须先读，交互/页面状态按它对齐后再规划，与 spec 冲突时回产品/设计侧对齐 | 计划产物 |
 | 6 | tasks | 开发 | 必跑 `/che-adr-check` 校验 plan 越决策边界（无未处置 departure 才继续）→ `/che-compound-tasks`；配置了 `mapping.task_artifact` 时 tasks 后 Handoff 可选目标补建任务卡（`/che-pingcode-specstoissues`） | `tasks.md`（+ 任务卡挂 story/spec 卡下） |
 | 7. implement 前 | 开发 | implement 开始时 Handoff 前置对账（`/che-pingcode-sync-cards`，已建卡才提示） | spec 后续修改与卡片的增删改对齐 |
-| 8. implement | 开发 | `/che-compound-implement`；UI 任务按设计稿 + `design-tasks.md` 设计要求清单验收；提交走 `mturtle-commit`，消息带故事卡 ID | 代码 + 测试 |
+| 8. implement | 开发 | `/che-compound-implement`；UI 任务按设计稿 + `design-tasks.md` 设计要求清单验收；提交走 `/che-project-commit`，消息带故事卡 ID | 代码 + 测试 |
 | 9. 收尾 | 开发 | 本地任务全部 `[x]` → `/che-pingcode-sync-status` | 卡片流转完成（单向，不回退） |
 
 ## 任务与 slug 单一事实源
