@@ -17,8 +17,11 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 requir
 
 每项提问前必须先用下面的通俗口径讲解：**这个配置配了有什么用、不配或改了有什么影响**；有多个选项的必须讲清每个选项的含义。然后逐项单独提问（交互提问机制或自然对话），**绝不**把五个问题打包成一次问完——用户必须有机会对单项追问。
 
+**提问一律用自然语言**，按各项给出的「问法」口径发问，**绝不**把配置键名或选项字面值直接抛给用户——「`pingcode_integration` 要 on 还是 off？」是不合格的问法，应当像「是否开启 PingCode 同步？」这样问。键名只属于写盘与回显阶段，以及与用户核对技术细节（如环境变量冲突）时。
+
 ### 1. require_intent（before_specify 门禁；默认 on；选项 on / off）
 
+- 问法：「要不要开启『先想清楚再动手』的门——写特性规格之前，必须先有一份讲清『为什么做』的 intent 文档，没有就拦下来？」
 - **开（on）**：`/che-compound-specify` 之前必须先存在 intent 文档（`che paths` 解析的任务目录内 `intent.md`，由 `/che-compound-intent` 产出），没有就拦下 specify——强制「先想清楚为什么做，再写做什么」。
 - **关（off）**：specify 直接放行，intent 变成可跳过。
 - **影响**：这是流程纪律的强弱开关。正式项目建议开（防止没想清楚就开工）；个人临时试用可以关。
@@ -26,12 +29,15 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 requir
 
 ### 2. planverify_gate（before_implement 门禁；默认 off；选项 block / off）
 
+- 问法：「要不要在动手写代码之前，先让一个独立的 AI 审查者把实现计划过一遍？开了更稳，但流程会多一道检查。」
 - **block**：进入 `/che-compound-implement` 前必须先跑过 `/che-compound-planverify` 且裁决不是 `BLOCKED_DRIFT`——计划没过独立审查就不准动代码。
 - **off**：不拦截，planverify 做不做随用户。
 - **影响**：block 多一道实现前的独立校验关卡，更稳但流程更长。新项目建议先 off 跑顺流程，再按需开。
 - 环境变量 `SKC_PLANVERIFY_GATE` 优先于本配置。
 
 ### 3. checker（独立校验者策略；默认 auto）
+
+- 问法：「审查计划/实现的那个独立 AI 审查者，要挑多独立的？」选项用大白话讲：自动挑最独立的（默认）/ 必须用别家模型 / 钉死同家族便宜模型 / 钉死同款模型 / 你自己指定 CLI 和模型。
 
 planverify / intentguard 判定时**不让写计划/写代码的对话自己给自己打分**——判定外包给一个隔离的 checker。checker 按三级独立性阶梯选拔：跨厂商模型（Tier 1，如 codex / gemini）＞ 同家族便宜模型（Tier 2，subagent + haiku）＞ 同模型新上下文（Tier 3，subagent）。选项：
 
@@ -44,12 +50,14 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 
 ### 4. pingcode_integration（PingCode 集成开关；选项 on / off）
 
+- 问法：「是否开启 PingCode 同步？开启后特性规格会自动建卡到 PingCode，建卡、对账、收尾流转都在 PingCode 上走。」
 - **on**：本项目接入 PingCode 建卡链路（spec 卡 / story 卡 / 任务卡在 PingCode 建立与流转）。真正生效还需要 `.che/pingcode-config.yml`（项目/产品/迭代/映射配置，由 `/che-pingcode-init` 交互生成）。
 - **off**：不接 PingCode，卡片流程全部留本地。
 - 用户选 on 时，本技能顺手把环境装好：CLI 检查 → 登录 → 移交 `/che-pingcode-init`（见下方步骤 5「PingCode 接入链」）。
 
 ### 5. commit_story_id（提交消息绑定故事卡 ID；默认 on；选项 on / off）
 
+- 问法：「git 提交消息要不要自动带上故事卡编号（比如 #TECH-1234），让每笔提交都能对回工作项？」
 - **on**：`/che-git-master` 的提交消息必须是 `type(scope): #故事卡ID 中文消息`——每笔提交可溯源到工作项。
 - **off**：提交消息为 `type(scope): 中文消息`，不带 ID 也不追问——适合工作项管理不走这条链的仓库。
 - **影响**：off 后丢掉「提交 ↔ 卡片」溯源链（PingCode 收尾对账 `/che-pingcode-sync-status` 依赖它）；接入 PingCode 的项目建议 on，个人仓库 / 无工作项流程的项目可 off。
@@ -77,7 +85,7 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 
 ### 4. 逐项提问
 
-按上面五项的顺序讲解并问询，记录每项答案。`checker` 选 `cli:<model>` 时必须追问具体模型标识，写成完整值。
+按上面五项的顺序讲解并问询：先讲通俗口径，再用该项「问法」的自然语言提问，把答案落成对应的键值记录。`checker` 用户选「自己指定 CLI 和模型」时必须追问具体模型标识，写成 `cli:<model>` 完整值。
 
 ### 5. PingCode 接入链（仅当用户选择接入）
 
