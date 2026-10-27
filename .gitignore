@@ -3,3 +3,6 @@ __pycache__/
 .idea
 node_modules/
 packages/cli/dist/
+
+# npm pack 产物（发布经 Nexus REST 上传，随时可重新生成）
+packages/cli/*.tgz
