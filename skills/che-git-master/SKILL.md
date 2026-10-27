@@ -1,13 +1,13 @@
 ---
 name: che-git-master
-description: 执行 git commit 的规范流程：消息格式 `type(scope): #故事卡ID 中文消息`、故事卡 ID 确认（接入 PingCode 时从 specs/pingcode-mapping.json 取当前任务卡 identifier 供确认）、小步拆分、精确暂存、敏感文件排除与安全边界。当用户说「提交」「commit」「帮我提交这些改动」「拆分提交」「这些改动怎么拆」「检查提交风险」或让你代拟 commit message 时使用——即使用户没提「规范」二字也用本 skill。适用于仓库内任何目录。
+description: 执行 git commit 的规范流程：消息格式 `type(scope): #故事卡ID 中文消息`（是否带故事卡 ID 由项目 `.che/config.yml` 的 `commit_story_id` 决定，默认 on；接入 PingCode 时从 specs/pingcode-mapping.json 取当前任务卡 identifier 供确认）、小步拆分、精确暂存、敏感文件排除与安全边界。当用户说「提交」「commit」「帮我提交这些改动」「拆分提交」「这些改动怎么拆」「检查提交风险」或让你代拟 commit message 时使用——即使用户没提「规范」二字也用本 skill。适用于仓库内任何目录。
 ---
 
 # 按规范提交
 
-> Pack fork：吸收自 mturtle-commit 技能（freight-mono），纪律正文逐条保留；去除仓库特有的 hook 现状与敏感文件清单，故事卡 ID 接入本 pack 任务模型（`specs/pingcode-mapping.json` 解析）。上游规则升级时按此文件 port。
+> Pack fork：吸收自 mturtle-commit 技能（freight-mono），纪律正文逐条保留；去除仓库特有的 hook 现状与敏感文件清单，故事卡 ID 接入本 pack 任务模型（`specs/pingcode-mapping.json` 解析，绑定与否经 `.che/config.yml` 的 `commit_story_id` 配置，上游无此开关）。上游规则升级时按此文件 port。
 
-把一次用户请求的提交做对：正确的消息格式、干净的暂存区、不碰敏感文件、不越权操作。三个核心不变量先行记住：**只在用户明确要求时提交；消息格式 `type(scope): #故事卡ID 中文消息`；识别不到故事卡 ID 必须问用户，禁止编造。**
+把一次用户请求的提交做对：正确的消息格式、干净的暂存区、不碰敏感文件、不越权操作。三个核心不变量先行记住：**只在用户明确要求时提交；消息格式 `type(scope): 中文提交消息`（`commit_story_id` 开启时冒号后带 `#故事卡ID`，见下节）；开启时识别不到故事卡 ID 必须问用户，禁止编造。**
 
 本 skill 只负责提交工作流，不负责判断功能是否完成：实现、测试、验证未完成时先说明，再问是否提交。
 
@@ -15,11 +15,22 @@ description: 执行 git commit 的规范流程：消息格式 `type(scope): #故
 
 只有用户明确要求时才提交："提交"、"commit"、"帮我提交当前改动"算明确要求。功能开发、补测试完成时只能**询问**是否提交，不得自行 commit。未经用户明确指示：不 push、不 amend、不用 `--no-verify` / `--no-gpg-sign`、不执行 `git reset --hard` / `git clean -fd` / `git push --force`。这些限制保护的是共享历史和用户对仓库状态的控制权，不是形式主义。
 
+## ID 绑定开关（`commit_story_id` 配置项）
+
+提交消息是否绑定故事卡 ID，由项目根 `.che/config.yml` 的 `commit_story_id:` 决定（`git rev-parse --show-toplevel` 定位项目根；文件内逐行取首个 `commit_story_id:` 键，值只认 `on` / `off`）。**先读配置，再走后续逻辑**：
+
+- **on（默认）**——文件不存在、无此键、或项目根定位失败，一律按 on：消息格式 `type(scope): #故事卡ID 中文提交消息`，走「故事卡 ID 解析」全流程（解析 → 复述确认 → 提交）。
+- **off**——消息格式 `type(scope): 中文提交消息`，**整段跳过**故事卡 ID 解析：不读 mapping、不追问 ID、消息与页脚绝不出现 `#ID`；其余全部纪律（小步拆分、精确 stage、敏感文件、hook、收尾复查）不变。
+- **非法值**（既非 on 也非 off）——按 on 处理（宁可带 ID 不丢溯源），并在拆分方案里提醒用户配置值非法。
+- 本开关无环境变量覆盖、无 CLI 门禁，由本 skill 在提交工作流开始时读取；`.che/config.yml` 的生成与逐项讲解见 `/che-project-init`。
+
 ## 消息格式
 
 ```text
 type(scope): #故事卡ID 中文提交消息
 ```
+
+`commit_story_id: off` 时整个 `#故事卡ID` 段省略，即 `type(scope): 中文提交消息`；本节其余规则（type 表、scope、中文主体、页脚）不变。
 
 - `type` 反映改动目的，不为历史好看滥用 `feat`：
 
@@ -49,7 +60,7 @@ Co-Authored-By: Sisyphus
 
 ## 故事卡 ID 解析（本 pack 任务模型）
 
-当前任务 = session 绑定或 `che paths` 解析的任务目录（slug 即绑定句柄）。按以下优先级取故事卡 ID，**取出后必须向用户复述确认**，确认前不提交：
+当前任务 = session 绑定或 `che paths` 解析的任务目录（slug 即绑定句柄）。**仅在 `commit_story_id` 开启时进入本节**（off 时上节已裁定跳过）。按以下优先级取故事卡 ID，**取出后必须向用户复述确认**，确认前不提交：
 
 1. 用户输入里显式给出的 `#XXXX-123` 形式 ID
 2. `specs/pingcode-mapping.json` 中当前任务条目（键 = 当前任务目录名）：默认取 `artifacts.spec.card.identifier`（spec 卡）；改动明确只涉单一 `### User Story N` 章节时用对应 `artifacts.stories[].card.identifier`
@@ -60,7 +71,7 @@ Co-Authored-By: Sisyphus
 ## 工作流
 
 1. **确认前提**：用户已明确要求提交；实现/测试/验证未完成的先说明再动手。识别改动位置与涉及的子项目。
-2. **确认故事卡 ID**：按上节优先级解析并向用户复述确认。
+2. **确认故事卡 ID**（先读 `commit_story_id` 开关：off 直接跳过本步）：按上节优先级解析并向用户复述确认。
 3. **检查工作区**：依次执行 `git status --short`、`git diff`、`git diff --cached`、`git log -5 --oneline`。目的：分清 staged / unstaged / untracked，防止带入半成品、无关文件或敏感文件，并参考近期消息风格（含 ID 前缀习惯）。
 4. **排除敏感与无关改动**：`.env*`、`*.key`、`*.pem`、`credentials.json`、本地环境配置（如 `application-*.local.yaml`、`*.local.*`）、本地 IDE 临时文件一律不提交；已被 git 跟踪的本地配置文件，已有内容的正常修改可以提交，但**不得往里加新密钥**，发现疑似新增凭据必须先警告。用户点名要提交疑似敏感文件时，警告并等确认，不静默排除也不静默提交。
 5. **拆分小 commit**：一个 commit 表达一个目的——不同目的、不同模块、可独立回滚的改动都拆开（功能、格式调整、文档更新分开）。向用户输出拆分方案（每个 commit 的 type(scope)、文件列表、提交消息）后执行。
@@ -81,6 +92,8 @@ Co-Authored-By: Sisyphus
 
 - 没被要求就顺手 commit；提交完顺手 push；为补文件 amend 已有提交；用 `--no-verify` 跳 hook——全部需要用户明确要求。
 - 编造或猜测故事卡 ID；把 PingCode 卡 ID 与工作项 ID 混用而不确认。
+- `commit_story_id: off` 时还追问 ID 或把 `#ID` 写进消息。
+- 配置值非法时静默当 off——必须按 on 处理并提醒用户。
 - `git add .` 一把梭。
 - 功能、格式、文档混进一个 commit。
 - 写了 body，或 AI 辅助提交漏了 `Co-Authored-By` 页脚。

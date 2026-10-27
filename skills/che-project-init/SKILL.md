@@ -1,11 +1,11 @@
 ---
 name: che-project-init
-description: 交互式初始化项目 .che 配置：逐项讲解并确认 require_intent（before_specify 门禁）、planverify_gate（before_implement 门禁）、checker（独立校验者策略）、pingcode_integration（PingCode 集成开关）四个配置项，生成 .che/config.yml；顺带自检并按需安装 che / adrkit CLI；选择接入 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 /che-pingcode-init。当用户要初始化 .che 配置、开启或关闭规格流程门禁、配置校验者策略、接入或首次配置本 pack、检查 che/adrkit 有没有装时使用——即使用户没提命令名，意图匹配也用本 skill。
+description: 交互式初始化项目 .che 配置：逐项讲解并确认 require_intent（before_specify 门禁）、planverify_gate（before_implement 门禁）、checker（独立校验者策略）、commit_story_id（提交消息绑定故事卡 ID）、pingcode_integration（PingCode 集成开关）五个配置项，生成 .che/config.yml；顺带自检并按需安装 che / adrkit CLI；选择接入 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 /che-pingcode-init。当用户要初始化 .che 配置、开启或关闭规格流程门禁、配置校验者策略、接入或首次配置本 pack、检查 che/adrkit 有没有装时使用——即使用户没提命令名，意图匹配也用本 skill。
 ---
 
 # 项目接入初始化
 
-本技能是项目接入本 pack 的**第一步配置入口**：逐项向用户讲解并确认四个配置项，交互式生成项目根的 `.che/config.yml`。
+本技能是项目接入本 pack 的**第一步配置入口**：逐项向用户讲解并确认五个配置项，交互式生成项目根的 `.che/config.yml`。
 
 职责边界（必须遵守）：
 
@@ -15,7 +15,7 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 requir
 
 ## 配置项讲解（提问前必须逐条讲给用户）
 
-每项提问前必须先用下面的通俗口径讲解：**这个配置配了有什么用、不配或改了有什么影响**；有多个选项的必须讲清每个选项的含义。然后逐项单独提问（交互提问机制或自然对话），**绝不**把四个问题打包成一次问完——用户必须有机会对单项追问。
+每项提问前必须先用下面的通俗口径讲解：**这个配置配了有什么用、不配或改了有什么影响**；有多个选项的必须讲清每个选项的含义。然后逐项单独提问（交互提问机制或自然对话），**绝不**把五个问题打包成一次问完——用户必须有机会对单项追问。
 
 ### 1. require_intent（before_specify 门禁；默认 on；选项 on / off）
 
@@ -46,7 +46,14 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 
 - **on**：本项目接入 PingCode 建卡链路（spec 卡 / story 卡 / 任务卡在 PingCode 建立与流转）。真正生效还需要 `.che/pingcode-config.yml`（项目/产品/迭代/映射配置，由 `/che-pingcode-init` 交互生成）。
 - **off**：不接 PingCode，卡片流程全部留本地。
-- 用户选 on 时，本技能顺手把环境装好：CLI 检查 → 登录 → 移交 `/che-pingcode-init`（见步骤 4）。
+- 用户选 on 时，本技能顺手把环境装好：CLI 检查 → 登录 → 移交 `/che-pingcode-init`（见下方步骤 5「PingCode 接入链」）。
+
+### 5. commit_story_id（提交消息绑定故事卡 ID；默认 on；选项 on / off）
+
+- **on**：`/che-git-master` 的提交消息必须是 `type(scope): #故事卡ID 中文消息`——每笔提交可溯源到工作项。
+- **off**：提交消息为 `type(scope): 中文消息`，不带 ID 也不追问——适合工作项管理不走这条链的仓库。
+- **影响**：off 后丢掉「提交 ↔ 卡片」溯源链（PingCode 收尾对账 `/che-pingcode-sync-status` 依赖它）；接入 PingCode 的项目建议 on，个人仓库 / 无工作项流程的项目可 off。
+- 无环境变量覆盖、无 CLI 门禁：由 `/che-git-master` 在提交工作流开始时直接读本文件。
 
 ## 步骤
 
@@ -70,7 +77,7 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 
 ### 4. 逐项提问
 
-按上面四项的顺序讲解并问询，记录每项答案。`checker` 选 `cli:<model>` 时必须追问具体模型标识，写成完整值。
+按上面五项的顺序讲解并问询，记录每项答案。`checker` 选 `cli:<model>` 时必须追问具体模型标识，写成完整值。
 
 ### 5. PingCode 接入链（仅当用户选择接入）
 
@@ -118,6 +125,9 @@ checker: auto
 
 # PingCode 集成总开关：on 表示已接入（配合 .che/pingcode-config.yml 生效）
 pingcode_integration: off
+
+# 提交消息绑定故事卡 ID：on 时 /che-git-master 提交消息形如 type(scope): #故事卡ID 中文消息（off 不带 ID、不追问）
+commit_story_id: on
 ```
 
 - 文件已存在 → 逐键展示新旧值差异：
@@ -129,7 +139,7 @@ pingcode_integration: off
 ```
 ✅ 配置已生成: .che/config.yml
    require_intent: <值>   planverify_gate: <值>
-   checker: <值>   pingcode_integration: <值>
+   checker: <值>   pingcode_integration: <值>   commit_story_id: <值>
    che: <✓ 或 ✗ + 安装命令>   adrkit: <✓ 或 ✗ + 安装命令>
    gitignore: <✓ 已忽略 .che/feature.json、.che/*.bak 或 +新增规则 或 用户拒绝跳过>
 ```

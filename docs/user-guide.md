@@ -10,7 +10,7 @@
 
 | 命令 | 执行者 | 说明 |
 |---|---|---|
-| `/che-project-init` | 项目负责人 | 交互生成 `.che/config.yml`（require_intent 默认开 / planverify_gate 默认 off / checker / pingcode_integration 四键）；自检并按需安装 `che`（`npm i -g @newchiwan/che@latest`）与 `adrkit`（`npm i -g @adrkit/cli@0.20.0`）；选接 PingCode 时安装 `pingcode` CLI（≥ 0.14.0）并引导登录 |
+| `/che-project-init` | 项目负责人 | 交互生成 `.che/config.yml`（require_intent 默认开 / planverify_gate 默认 off / checker / pingcode_integration / commit_story_id 默认开 五键）；自检并按需安装 `che`（`npm i -g @newchiwan/che@latest`）与 `adrkit`（`npm i -g @adrkit/cli@0.20.0`）；选接 PingCode 时安装 `pingcode` CLI（≥ 0.14.0）并引导登录 |
 | `/che-pingcode-init` | 项目负责人 / 产品 | 交互选择 PingCode 项目/产品/迭代/映射类型，生成 `.che/pingcode-config.yml` |
 | `/che-compound-constitution` | 项目负责人（可选） | 建立/修订项目治理原则 `docs/constitution/constitution.md`，作为后续 spec/plan 的约束来源 |
 
@@ -43,7 +43,7 @@ flowchart TD
 | 3. 交接门禁 | 产品/UI → 开发 | 逐项核对（见下），全部通过后转开发 | — |
 | 4. plan | 开发 | `/che-compound-plan`；特性目录存在 `design-tasks.md` 时必读，与 spec 冲突时交产品/设计侧裁决 | plan.md 等计划工件 |
 | 5. tasks | 开发 | plan 后自动接续 adr-check 越界校验（无未处置 departure 才继续）→ `/che-compound-tasks`；配了 `mapping.task_artifact` 时结束时同样确认后自动补建任务卡 | `tasks.md`（+ 任务卡挂 story/spec 卡下） |
-| 6. implement | 开发 | `/che-compound-implement` 按 tasks.md 执行；开始时自动处理前置：spec 建卡后存在修改的，先提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；启用 `planverify_gate` block 的项目先自动过闸；UI 任务按设计稿 + `design-tasks.md` 的 UI-xx 清单逐项核验；提交经由 `/che-git-master`，消息携带故事卡 ID | 代码 + 测试 |
+| 6. implement | 开发 | `/che-compound-implement` 按 tasks.md 执行；开始时自动处理前置：spec 建卡后存在修改的，先提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；启用 `planverify_gate` block 的项目先自动过闸；UI 任务按设计稿 + `design-tasks.md` 的 UI-xx 清单逐项核验；提交经由 `/che-git-master`，`commit_story_id` 开启（默认）时消息携带故事卡 ID | 代码 + 测试 |
 | 7. 收尾 | 开发 | 本地任务全部 `[x]` → `/che-pingcode-sync-status` | 卡片流转完成（单向，不回退） |
 
 > **建卡不是独立步骤**：它是 specify（以及配置了任务卡映射时的 tasks）结束时的确认提问，确认后 agent 自动执行 `/che-pingcode-specstoissues`；选择不建卡的，按 §4 门禁第 3 条在交接前补执行。
@@ -104,7 +104,7 @@ flowchart TD
 4. `/che-compound-tasks` —— 生成依赖有序 `tasks.md`（入向前置：本会话无该 plan 的 adr-check 报告会拒绝）。
 5. `/che-compound-gapfill` —— 对照 intent + expectations 补四类缺口测试（约束违反/失败条件/越界回归/边界）。
 6. `/che-compound-planverify` —— 独立校验者审 plan+tasks；PASS 放行；REPLAN_ALLOWED 修改 plan 后重新执行；BLOCKED_DRIFT 返回 plan。
-7. `/che-compound-implement` —— 按 tasks.md 执行；开始时自动处理前置：spec 建卡后存在修改的，先提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；启用 `planverify_gate` block 的项目先自动过闸（verdict 缺失或 BLOCKED_DRIFT 拒绝）；UI 任务逐项核验 UI-xx 后方视为完成；提交消息携带故事卡 ID。
+7. `/che-compound-implement` —— 按 tasks.md 执行；开始时自动处理前置：spec 建卡后存在修改的，先提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；启用 `planverify_gate` block 的项目先自动过闸（verdict 缺失或 BLOCKED_DRIFT 拒绝）；UI 任务逐项核验 UI-xx 后方视为完成；提交消息按 `commit_story_id` 配置携带故事卡 ID（默认开）。
 8. `/che-compound-intentguard` —— 独立校验者审实现；PASS 交接；REVIEW 人工清除；BLOCKED 返回 implement 修复。
 9. `/che-pingcode-sync-status` —— 本地任务全 `[x]` 后收尾卡片（单向；重新开启需新建工作项）。
 10. `/che-compound-writeback` —— intentguard PASS 后把新经验（ADR/corrections/patterns）沉淀回 compound store。
@@ -139,7 +139,7 @@ flowchart TD
 
 | 技能 | 角色 | 用途 |
 |---|---|---|
-| `che-project-init` | 负责人 | 交互写 `.che/config.yml` 四键，自检安装 che/adrkit/pingcode CLI |
+| `che-project-init` | 负责人 | 交互写 `.che/config.yml` 五键，自检安装 che/adrkit/pingcode CLI |
 | `che-pingcode-init` | 负责人/产品 | 交互选项目/产品/迭代/映射，生成 `.che/pingcode-config.yml` |
 | `che-pingcode-discover-context` | 产品/负责人 | 探查 PingCode 类型/状态/优先级/迭代字典，生成配置片段 |
 | `che-compound-constitution` | 负责人 | 建/改项目治理原则 `docs/constitution/constitution.md` |
@@ -178,7 +178,7 @@ flowchart TD
 | `che-compound-planverify` | 独立校验者审 plan+tasks：PASS / REPLAN_ALLOWED / BLOCKED_DRIFT |
 | `che-compound-planverify-gate` | implement 前置门禁（implement 自动过闸，无需手动执行；默认 off，block 时 verdict 缺失或 BLOCKED_DRIFT 拒绝） |
 | `che-compound-implement` | 按 tasks.md 执行任务实现；UI 任务按设计稿 + UI-xx 清单逐项核验 |
-| `che-git-master` | git commit 规范流程：`type(scope): #故事卡ID 中文消息` + `Co-Authored-By` 页脚，小步拆分、精确暂存、敏感文件排除；故事卡 ID 优先从 `specs/pingcode-mapping.json` 当前任务条目解析（吸收自 mturtle-commit） |
+| `che-git-master` | git commit 规范流程：`type(scope): #故事卡ID 中文消息` + `Co-Authored-By` 页脚，小步拆分、精确暂存、敏感文件排除；故事卡 ID 优先从 `specs/pingcode-mapping.json` 当前任务条目解析（吸收自 mturtle-commit）；是否带 ID 由 `.che/config.yml` 的 `commit_story_id` 控制（默认 on，off 时消息不带 ID 也不追问） |
 | `che-compound-intentguard` | 独立校验者审实现 vs 锁定意图：PASS / REVIEW / BLOCKED |
 | `che-compound-writeback` | intentguard PASS 后沉淀新经验（ADR/corrections/patterns）回 compound store |
 | `che-compound-converge` | 代码现状 vs 工件差距 → 追加收敛任务进 tasks.md（可选） |
