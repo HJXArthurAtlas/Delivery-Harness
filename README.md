@@ -127,14 +127,11 @@ npm test   # ① test-skill-structure.sh：结构与分发面（skills frontmatt
 
 提交信息格式：`<type>(<scope>): #<工作项ID> <主题>`，如 `refactor(skills): #TECH-1234 技能更名`；无对应工作项时 ID 用默认 `#TECH-000`。type 取值：`feat` / `fix` / `refactor` / `docs` / `test` / `chore`。提交时由 `.githooks/commit-msg` 强制校验；首次克隆后执行一次 `git config core.hooksPath .githooks` 激活。
 
-## 发布（公司 Nexus）
+## 发布
 
-两个 npm 包发布到 Nexus 的 `internal-npm`（hosted）；安装侧走 `registry-npm`（group，含 internal 与公网代理）。版本自 0.1.0 起步：
+只有 `@newchiwan/che` 发布到公司 Nexus（`internal-npm` hosted；安装侧走 `registry-npm` group）。**根包（即整个 pack）不发 npm**（`package.json` 已 `private: true` 防误发）——它的分发就是 omp 插件与 DSH 插件两条插件路径，推到 main 即发布：
 
 ```bash
-# 根包（skills + dsh-entry.js + cordis.patch.yml）
-npm publish --registry https://nexus.newchiwan.cn/repository/internal-npm/
-
 # @newchiwan/che（bun 打包 dist/cli.js 单文件——Node 不剥 node_modules 内类型，纯 TS tarball 经 npm -g 装出来跑不了；需本机有 bun）
 bash packages/cli/scripts/publish.sh
 ```

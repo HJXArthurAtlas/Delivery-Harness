@@ -159,7 +159,7 @@ else
   ok
 fi
 
-# 9. @adrkit/cli 运行时依赖：必须钉精确版本，且 omp manifest 存在（无 manifest 时运行时跳过技能扫描）
+# 9. @adrkit/cli 运行时依赖：必须钉精确版本，且 omp manifest 存在；分发包 private（不发 npm——发布面只有 omp/DSH 插件与 @newchiwan/che）
 if command -v node >/dev/null 2>&1; then
   while IFS= read -r line; do
     case "$line" in OK) ok ;; FAIL\ *) bad "${line#FAIL }" ;; esac
@@ -171,6 +171,8 @@ if (!dep || !/^\d+\.\d+\.\d+$/.test(dep)) {
   console.log(`FAIL package.json 依赖 @adrkit/cli 必须钉精确版本，当前为 ${dep || "缺失"}`);
 } else if (!pkg.omp || typeof pkg.omp !== "object") {
   console.log("FAIL package.json 缺少 omp manifest（git/npm 插件安装路径的运行时技能发现依赖它）");
+} else if (pkg.private !== true) {
+  console.log("FAIL package.json 必须 private: true（分发包不发 npm，防误发）");
 } else {
   console.log("OK");
 }

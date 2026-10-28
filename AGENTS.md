@@ -101,11 +101,10 @@ npm test                                                  # 结构 + 运行时�
 git config core.hooksPath .githooks   # 首次克隆后激活 commit-msg 校验（一次性）
 ```
 
-发布（公司 Nexus，版本自 0.1.0 起步）：
+发布：只有 `@newchiwan/che` 发公司 Nexus；根包（即整个 pack）不发 npm（`package.json` `private: true` 防误发，`npm test` 强制），推 main 即发布（omp 插件 + DSH 插件两条路径）。
 
 ```bash
-npm publish --registry https://nexus.newchiwan.cn/repository/internal-npm/   # 根包 ncw-delivery-harness（skills + dsh-entry.js + cordis.patch.yml）
-bash packages/cli/scripts/publish.sh                                        # @newchiwan/che（bun 打包 dist 单文件，需 bun；产物不入 git）
+bash packages/cli/scripts/publish.sh   # @newchiwan/che（bun 打包 dist 单文件，需 bun；产物不入 git）
 ```
 
 根包版本改动后必须同步 `.omp-plugin/marketplace.json` 的 plugin `version`（`npm test` 强制一致）。npm 认证写用户级 `~/.npmrc`（`//nexus.newchiwan.cn/repository/internal-npm/:_auth`，按 registry URI 精确匹配，devops 账号），绝不入仓库。
@@ -124,7 +123,7 @@ bash packages/cli/scripts/publish.sh                                        # @n
 
 | 文件 | 作用 |
 |---|---|
-| `package.json` | `scripts.test`、`files: ["skills", "dsh-entry.js", "cordis.patch.yml"]`（npm 只发 skills/ 与 DSH bundle 两文件）、`dependencies.@adrkit/cli`（adrkit 技能外部运行时，精确版本钉；omp git/npm 插件安装路径由 bun 安装，仓内运行时测试经 `npm ci` 使用）与 `dependencies.@newchiwan/che`（`file:packages/cli` 本仓链接，不经 registry；安装提示统一 `@latest`——技能文本与 CLI 同仓同步演进，latest 恒与技能行为对齐）、`engines.node >=22.18` + `engines.dsh`（DSH 兼容范围，钉 `>=0.2.0-rc.2 <0.3.0`）、`main: dsh-entry.js` + `"type": "module"`、`dsh.bundle`（根包兼作 dsh 组合包 manifest，指向 `./cordis.patch.yml`） |
+| `package.json` | 根包兼作整个 pack 的分发包（**不发 npm**：`private: true`，`npm test` 强制；`version` 是 pack 版本单一事实源）：`scripts.test`、`files: ["skills", "dsh-entry.js", "cordis.patch.yml"]`（DSH git 安装按此落位）、`dependencies.@adrkit/cli`（adrkit 技能外部运行时，精确版本钉；omp git/npm 插件安装路径由 bun 安装，仓内运行时测试经 `npm ci` 使用）与 `dependencies.@newchiwan/che`（`file:packages/cli` 本仓链接，不经 registry；安装提示统一 `@latest`——技能文本与 CLI 同仓同步演进，latest 恒与技能行为对齐）、`engines.node >=22.18` + `engines.dsh`（DSH 兼容范围，钉 `>=0.2.0-rc.2 <0.3.0`）、`main: dsh-entry.js` + `"type": "module"`、`dsh.bundle`（根包兼作 dsh 组合包 manifest，指向 `./cordis.patch.yml`） |
 | `.githooks/commit-msg` | 提交格式校验（`core.hooksPath` 已在本仓激活） |
 | `.omp-plugin/marketplace.json` | omp marketplace catalog（omp 插件分发唯一入口；`version` 必须与 `package.json` 一致，`npm test` 强制） |
 | `README.md` | 面向用户的安装/开发文档；改动分发模型时同步 |
@@ -150,7 +149,7 @@ bash packages/cli/scripts/publish.sh                                        # @n
 6. `.agents/commands/*.md` frontmatter 合规（`---` 定界 + 非空 `description`），且不存在工具专属 `.omp/commands/`；
 7. `.omp-plugin/marketplace.json` 为合法 JSON，marketplace/plugin 名合规（小写开头结尾、可含 `-`/`.`、≤64），plugin `source` 恰为 `"./"`，`version` 与 `package.json` 一致且符合 omp 缓存路径字符集。JSON 校验用 node 内联脚本完成（node 是运行前提，非新增依赖）；
 8. `.omp-plugin/plugin.json` 绝不许存在（manifest remap 会把 `.agents/` 带进 omp 插件安装面，插件只分发 skills）。
-9. DSH bundle 分发面（根包兼作 dsh 组合包）：`package.json` 的 `dsh.bundle.patch` 恰为 `"./cordis.patch.yml"`、`main` 指向存在的 `dsh-entry.js`、`files` 含 `skills`/`dsh-entry.js`/`cordis.patch.yml` 三件、`engines.dsh` 非空（安装时 fail-closed）；`cordis.patch.yml` 存在且 `insert` 一行 `name` 指向 `package.json` 包名；`dsh-entry.js` 导出 `apply` 并调用 `ctx.skills.registerProvider`；两个 DSH 文件同做绝对路径泄漏扫描。
+9. DSH bundle 分发面（根包兼作 dsh 组合包）：`package.json` 的 `dsh.bundle.patch` 恰为 `"./cordis.patch.yml"`、`main` 指向存在的 `dsh-entry.js`、`files` 含 `skills`/`dsh-entry.js`/`cordis.patch.yml` 三件、`engines.dsh` 非空（安装时 fail-closed）；`cordis.patch.yml` 存在且 `insert` 一行 `name` 指向 `package.json` 包名；`dsh-entry.js` 导出 `apply` 并调用 `ctx.skills.registerProvider`；两个 DSH 文件同做绝对路径泄漏扫描。规则 9 同校验根包 `@adrkit/cli` 钉精确版本、`omp` manifest 存在、`private: true`（不发 npm）。
 10. `tests/skills/test-che-cli.sh` 驱动 `npm ci` 链接进 `node_modules/.bin` 的 `@newchiwan/che`，钉 CLI 契约：`paths`/`check` 的 JSON 与文本输出（含 `FEATURE_DIR:` 无空格行与 `FEATURE_DIR: ` 空格行的不对称）、`task create`/`feature bind|show` 任务与绑定契约（序号分配与 metadata 骨架含一句话 `summary`、重复 slug 拒绝、绑定幂等不重写、`--clear` 幂等、`task list` 输出 slug/阶段/summary）、`template`/`setup-plan`/`setup-tasks` 与 skill `references/` 模板的字节级 round-trip、不安全/缺失模板名非零退出并报 `Could not resolve required`、usage 错误退出 2、`--version` 与 `packages/cli/package.json#version` 一致；`paths` 输出 `SLUG` 字段（目录 basename 剥数字 `NNN-` 或 PingCode identifier 前缀的 slug 契约）、解析序 `--feature` > `CHE_FEATURE_DIRECTORY` > session 绑定 > 单任务自动（多任务歧义退 1 列候选）、推送改名透明（目录 mv 后绑定按 slug 解析）；`state start|done|show` 时间线契约（runs 结构、start 幂等、done 双关税 1、show 的 STAGE/NEXT 推导）；`require-intent` 门禁契约（默认开拦截、`CHE_REQUIRE_INTENT` 环境变量优先于 `.che/config.yml` 的 `require_intent:`、非法值 fail-closed、非项目目录报错、任务经 `--feature`/env/session 绑定解析后校验任务目录内 `intent.md` 存在、无任务或多任务未绑定退 1 列候选）；`planverify-gate` 门禁契约（默认 off 静默放行且不读报告、`SKC_PLANVERIFY_GATE` 环境变量优先于 `.che/config.yml` 的 `planverify_gate:`、非法值 fail-closed、非项目目录报错、block 下报告缺失/无 `verdict:` 行/`BLOCKED_DRIFT` 退 1、`PASS`/`REPLAN_ALLOWED` 退 0、报告落任务目录 `planverify.md`、多 slug 与未知参数退 2、缺 slug 且无法解析任务退 1 列候选、`--json` 输出 `SLUG`/`MODE`/`REPORT`/`VERDICT`/`PROCEED`）。Node 缺失硬 FAIL；Node 无原生 type stripping 时 SKIP（退出 0，不计 pass/fail）。
 11. `tests/skills/test-pack-runtime.sh` 把 adrkit 三个技能复制到临时 `.agents/skills/` 安装位，先以不含 `adrkit`/`che` 的最小 PATH 分别验证两个缺失 CLI 的非零退出与 npm 安装提示，再把 `npm ci` 安装的真实 `@adrkit/cli` 与仓内 `@newchiwan/che` 加入 PATH，驱动 feature paths（经 `adrkit-lib.sh` 的 `che paths` 解析）、scaffold、draft、lint、check、evaluate、context/queue、MADR migrate；require-intent / planverify-gate 薄封装同测缺失 che 提示与委托后的门禁行为；`jq` / `git` 仍不在最小 PATH。项目根判定用 `.git`，任务经 `che task create demo` 创建（单任务自动解析，薄封装无需绑定）。
 
