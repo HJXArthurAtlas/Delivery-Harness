@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# commit-msg 校验：固化格式 `<type>(<scope>): #TECH-<id> <主题>`，默认占位 #TECH-000。
+# commit-msg 校验：固化格式 `<type>(<scope>): <主题>`（提交消息不携带工作项/故事卡 ID）。
 # 激活：git config core.hooksPath .githooks（README「开发」节有说明）。
 set -u
 
@@ -11,10 +11,10 @@ case "$subject" in
   Merge\ *|Revert\ *|fixup!\ *|squash!\ *) exit 0 ;;
 esac
 
-if printf '%s' "$subject" | grep -qE '^[a-z]+(\([a-z0-9-]+\))?: #TECH-[0-9]+ .+'; then
+if printf '%s' "$subject" | grep -qE '^[a-z]+(\([a-z0-9-]+\))?: .+'; then
   exit 0
 fi
 
 echo "提交信息格式不符：$subject" >&2
-echo "要求：<type>(<scope>): #TECH-<id> <主题>；无工作项用默认 #TECH-000。示例：refactor(skills): #TECH-1234 技能更名" >&2
+echo "要求：<type>(<scope>): 中文主题。示例：refactor(skills): 技能更名" >&2
 exit 1

@@ -1,11 +1,11 @@
 ---
 name: che-project-init
-description: 交互式初始化项目 .che 配置：逐项讲解并确认 require_intent（before_specify 门禁）、planverify_gate（before_implement 门禁）、checker（独立校验者策略）、commit_story_id（提交消息绑定故事卡 ID）、pingcode_integration（PingCode 集成开关）五个配置项，生成 .che/config.yml（幂等增量：已初始化项目重跑只补缺失或非法的新配置项，已有合法配置沿用不重问）；顺带自检并按需安装 che / adrkit CLI；选择接入 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 /che-pingcode-init。当用户要初始化 .che 配置、开启或关闭规格流程门禁、配置校验者策略、接入或首次配置本 pack、harness 升级后补装新增配置项、检查 che/adrkit 有没有装时使用——即使用户没提命令名，意图匹配也用本 skill。
+description: 交互式初始化项目 .che 配置：逐项讲解并确认 require_intent（before_specify 门禁）、planverify_gate（before_implement 门禁）、checker（独立校验者策略）、pingcode_integration（PingCode 集成开关）四个配置项，生成 .che/config.yml（幂等增量：已初始化项目重跑只补缺失或非法的新配置项，已有合法配置沿用不重问）；顺带自检并按需安装 che / adrkit CLI；选择接入 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 /che-pingcode-init。当用户要初始化 .che 配置、开启或关闭规格流程门禁、配置校验者策略、接入或首次配置本 pack、harness 升级后补装新增配置项、检查 che/adrkit 有没有装时使用——即使用户没提命令名，意图匹配也用本 skill。
 ---
 
 # 项目接入初始化
 
-本技能是项目接入本 pack 的**第一步配置入口**：逐项向用户讲解并确认五个配置项，交互式生成项目根的 `.che/config.yml`。本技能**幂等可重复执行**：harness 迭代会新增配置键，已初始化的项目重跑时只补「缺失或值非法」的键（典型场景：新版 pack 新增了配置项），已有合法配置原样沿用、绝不重问、绝不改动。
+本技能是项目接入本 pack 的**第一步配置入口**：逐项向用户讲解并确认四个配置项，交互式生成项目根的 `.che/config.yml`。本技能**幂等可重复执行**：harness 迭代会新增配置键，已初始化的项目重跑时只补「缺失或值非法」的键（典型场景：新版 pack 新增了配置项），已有合法配置原样沿用、绝不重问、绝不改动。
 
 职责边界（必须遵守）：
 
@@ -55,20 +55,14 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 - **off**：不接 PingCode，卡片流程全部留本地。
 - 用户选 on 时，本技能顺手把环境装好：CLI 检查 → 登录 → 移交 `/che-pingcode-init`（见下方步骤 5「PingCode 接入链」）。
 
-### 5. commit_story_id（提交消息绑定故事卡 ID；默认 on；选项 on / off）
-
-- 问法：「git 提交消息要不要自动带上故事卡编号（比如 #TECH-1234），让每笔提交都能对回工作项？」
-- **on**：`/che-git-master` 的提交消息必须是 `type(scope): #故事卡ID 中文消息`——每笔提交可溯源到工作项。
-- **off**：提交消息为 `type(scope): 中文消息`，不带 ID 也不追问——适合工作项管理不走这条链的仓库。
-- **影响**：off 后丢掉「提交 ↔ 卡片」溯源链（PingCode 收尾对账 `/che-pingcode-sync-status` 依赖它）；接入 PingCode 的项目建议 on，个人仓库 / 无工作项流程的项目可 off。
-- 无环境变量覆盖、无 CLI 门禁：由 `/che-git-master` 在提交工作流开始时直接读本文件。
+> 已退役键：`commit_story_id`（提交消息绑定故事卡 ID）已从本 pack 移除——提交消息不再携带工作项 ID（见 `/che-git-master`）。旧项目 `.che/config.yml` 里残留的该键按「pack 不认识的键」原样保留、不再询问。
 
 ## 步骤
 
 ### 1. 定位项目根与现状
 
 1. `git rev-parse --show-toplevel` 失败 → 终止：本技能必须在 git 项目内运行。
-2. `.che/config.yml` 已存在 → 逐键读出现值，对照五个标准键标注状态：**已有且合法 / 缺失 / 值非法**（合法性口径见各配置项的选项定义）；pack 不认识的键原样保留、绝不删除，在回显中列出。此标注决定步骤 4 问哪些。
+2. `.che/config.yml` 已存在 → 逐键读出现值，对照四个标准键标注状态：**已有且合法 / 缺失 / 值非法**（合法性口径见各配置项的选项定义）；pack 不认识的键原样保留、绝不删除，在回显中列出。此标注决定步骤 4 问哪些。
 
 ### 2. CLI 运行时自检（che / adrkit）
 
@@ -85,7 +79,7 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 
 ### 4. 逐项提问
 
-按上面五项的顺序走一遍，**只对步骤 1 标注为缺失或值非法的键**讲解并问询（先讲通俗口径，再按该项「问法」的自然语言提问，把答案落成对应的键值记录）；已有合法值的键**绝不重问**，原样沿用，回显标注「沿用现有」。`checker` 用户选「自己指定 CLI 和模型」时必须追问具体模型标识，写成 `cli:<model>` 完整值。用户显式点名重配某项或全部重配 → 按其指定范围重问，仍逐项单独问；五键全部沿用 → 跳到步骤 8 回显「配置已是最新」。
+按上面四项的顺序走一遍，**只对步骤 1 标注为缺失或值非法的键**讲解并问询（先讲通俗口径，再按该项「问法」的自然语言提问，把答案落成对应的键值记录）；已有合法值的键**绝不重问**，原样沿用，回显标注「沿用现有」。`checker` 用户选「自己指定 CLI 和模型」时必须追问具体模型标识，写成 `cli:<model>` 完整值。用户显式点名重配某项或全部重配 → 按其指定范围重问，仍逐项单独问；四键全部沿用 → 跳到步骤 8 回显「配置已是最新」。
 
 ### 5. PingCode 接入链（仅当本次新选接入或用户显式要求补接）
 
@@ -133,9 +127,6 @@ checker: auto
 
 # PingCode 集成总开关：on 表示已接入（配合 .che/pingcode-config.yml 生效）
 pingcode_integration: off
-
-# 提交消息绑定故事卡 ID：on 时 /che-git-master 提交消息形如 type(scope): #故事卡ID 中文消息（off 不带 ID、不追问）
-commit_story_id: on
 ```
 
 - 文件已存在 → **只增补**步骤 4 的新答案（新增缺失键、修正非法值），已有合法键值逐字保留，绝不重写未询问的键；逐键展示增补前后的差异：
@@ -147,7 +138,7 @@ commit_story_id: on
 ```
 ✅ 配置已生成: .che/config.yml
    require_intent: <值>   planverify_gate: <值>
-   checker: <值>   pingcode_integration: <值>   commit_story_id: <值>
+   checker: <值>   pingcode_integration: <值>
    变更: <新增 键=值 …；修正 键=值 …；沿用 键 …；未识别键保留: 键 …（无增补时整行显示「已是最新」）>
    che: <✓ 或 ✗ + 安装命令>   adrkit: <✓ 或 ✗ + 安装命令>
    gitignore: <✓ 已忽略 .che/feature.json、.che/*.bak 或 +新增规则 或 用户拒绝跳过>

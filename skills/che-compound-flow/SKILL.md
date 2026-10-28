@@ -20,7 +20,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 | 5. plan | 开发 | `/che-compound-plan`；特性目录存在 `design-tasks.md` 时必须先读，交互/页面状态按它对齐后再规划，与 spec 冲突时回产品/设计侧对齐 | 计划产物 |
 | 6 | tasks | 开发 | 必跑 `/che-adr-check` 校验 plan 越决策边界（无未处置 departure 才继续）→ `/che-compound-tasks`；配置了 `mapping.task_artifact` 时 tasks 后 Handoff 可选目标补建任务卡（`/che-pingcode-specstoissues`） | `tasks.md`（+ 任务卡挂 story/spec 卡下） |
 | 7. implement 前 | 开发 | implement 开始时 Handoff 前置对账（`/che-pingcode-sync-cards`，已建卡才提示） | spec 后续修改与卡片的增删改对齐 |
-| 8. implement | 开发 | `/che-compound-implement`；UI 任务按设计稿 + `design-tasks.md` 设计要求清单验收；提交走 `/che-git-master`，消息带故事卡 ID | 代码 + 测试 |
+| 8. implement | 开发 | `/che-compound-implement`；UI 任务按设计稿 + `design-tasks.md` 设计要求清单验收；提交走 `/che-git-master`（消息不带工作项 ID） | 代码 + 测试 |
 | 9. 收尾 | 开发 | 本地任务全部 `[x]` → `/che-pingcode-sync-status` | 卡片流转完成（单向，不回退） |
 
 ## 任务与 slug 单一事实源
@@ -47,7 +47,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 - **tasks 前必过 adr-check**：plan 后先 `/che-adr-check` 对照 ADR 语料校验决策边界；有未处置 departure 回 plan 修正或 `/che-adr-draft` 立 ADR 变更，不带越界拆任务。
 - **implement 前必对账**：spec 在建卡后有过修改的，先 `sync-cards` 消化差异再动代码——卡片描述与 spec 漂移会让收尾阶段对不上账。
 - **涉 UI 必对 design-tasks**：特性目录有 `design-tasks.md` 的，plan 前先读——交互规则、页面状态、设计要求清单（UI-01…）是 plan 的 UX 输入；它与 spec 冲突时回产品/设计侧对齐，绝不自行裁决；实现与验收对照设计稿 + 设计要求清单，不让 plan 即兴发明交互。
-- **溯源链**：`specs/<NNN>-<short-name>/spec.md 章节 → mapping.json 卡片 id → 提交消息故事卡 ID → sync-status 收尾`。动手前先把当前任务的卡片 id 从 `pingcode-mapping.json` 里查出来，提交时才有 ID 可写。
+- **溯源链**：`specs/<NNN>-<short-name>/spec.md 章节 → mapping.json 卡片 id → sync-status 收尾`（提交消息不携带工作项 ID，溯源由 mapping.json 承担）。
 - **收尾单向**：任务卡随本地勾选收尾，不回退；需要重开就走新的工作项，不要手动改回收尾态以外的状态。
 
 ## 幂等与边界

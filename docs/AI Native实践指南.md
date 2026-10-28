@@ -233,7 +233,7 @@ UI 设计侧注意：
 4. `/che-compound-tasks` —— 生成依赖有序 `tasks.md`（本会话没有该 plan 的 adr-check 报告会拒绝）；配置了 `mapping.task_artifact` 时，结束确认后可接续补建任务卡并关联至 story / spec 卡
 5. `/che-compound-gapfill` —— 对照 intent + expectations 补四类缺口测试进 `tasks.md`（约束违反 / 失败条件 / 越界回归 / 边界）
 6. `/che-compound-planverify` —— 独立校验者审 plan + tasks：PASS 放行，REPLAN_ALLOWED 修订 plan 后重新校验，BLOCKED_DRIFT 回退至 plan
-7. `/che-compound-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；开了 `planverify_gate` block 的项目 → 先过闸（verdict 缺失或 BLOCKED_DRIFT 拒绝 implement）。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): #故事卡ID 中文消息` + `Co-Authored-By` 页脚，小步拆分、精确暂存、排除敏感文件，故事卡 ID 优先从 `specs/pingcode-mapping.json` 当前任务条目解析
+7. `/che-compound-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；开了 `planverify_gate` block 的项目 → 先过闸（verdict 缺失或 BLOCKED_DRIFT 拒绝 implement）。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): 中文消息` + `Co-Authored-By` 页脚（消息不带工作项 ID），小步拆分、精确暂存、排除敏感文件
 8. `/che-compound-intentguard` —— 独立校验者审实现 vs 锁定意图：PASS 交接，REVIEW 人工复核后放行，BLOCKED 回退至 implement 修复
 9. `/che-pingcode-sync-status` —— 本地任务全部 `[x]` 后卡片单向流转完成态
 10. `/che-compound-writeback` —— 把新经验（ADR / corrections / patterns）沉淀回 compound store，供后续特性复用
@@ -243,7 +243,7 @@ UI 设计侧注意：
 - **tasks 前必过 adr-check**，不带越界拆任务
 - **implement 前必对账**：spec 在建卡后改过的，先 sync-cards 消化差异再动代码
 - **涉 UI 必对 design-tasks**：实现与验收对照设计稿 + UI-xx 清单，不即兴发明交互
-- **溯源链**：spec 章节 → mapping.json 卡片 id → 提交消息故事卡 ID → sync-status 收尾；动手前先查当前任务的卡片 id
+- **溯源链**：spec 章节 → mapping.json 卡片 id → sync-status 收尾（提交消息不带工作项 ID，溯源由 mapping.json 承担）
 - **收尾单向**：卡片随本地勾选收尾不回退，重开走新工作项
 
 #### 质量环节

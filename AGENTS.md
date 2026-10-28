@@ -54,7 +54,7 @@ git config core.hooksPath .githooks
 ## 验证与提交
 
 - 修改技能、CLI 或分发配置后必须运行 `npm test`；三个测试脚本分别覆盖技能结构、che CLI 契约和技能运行时行为，具体契约以测试脚本为准。
-- 提交信息使用 `<type>(<scope>): #<工作项ID> <主题>`；type 为 `feat`、`fix`、`refactor`、`docs`、`test` 或 `chore`，无工作项时使用 `#TECH-000`。
+- 提交信息使用 `<type>(<scope>): 中文主题`；type 为 `feat`、`fix`、`refactor`、`docs`、`test` 或 `chore`，不绑定工作项/故事卡 ID（溯源由 `specs/pingcode-mapping.json` 承担）。
 - 一个逻辑改动一个提交，只包含相关文件，并通过 `npm test` 后再提交。
 
 ## 文档维护
