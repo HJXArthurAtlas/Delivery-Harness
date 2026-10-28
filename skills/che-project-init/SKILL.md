@@ -13,6 +13,7 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 langua
 
 - 写 `.che/config.yml` + 维护项目根 `.gitignore` 的 che 忽略规则（见步骤 6）；**绝不**读写 `.che/feature.json` 的内容（session→slug 绑定表，机器本地，由 intent 阶段 `che task create` 写入——本技能只负责让 git 忽略它）。
 - `.che/pingcode-config.yml` **绝不**由本技能直接生成——PingCode 接入链最后移交 `/che-pingcode-init` 完成。
+- 架构画像 `docs/architecture.md` 由 `/che-project-arch` 生成与刷新，本技能只在回显中提示缺失（见步骤 8）。
 - 本技能无 scripts：写盘由 agent 按本文件的模板完成。
 
 ## 配置项讲解（提问前必须逐条讲给用户）
@@ -160,6 +161,7 @@ pingcode_integration: off
 ```
 
 - 开始第一个特性：`/che-compound-intent`（全流程总览见 `/che-compound-flow`）。
+- 项目尚无 `docs/architecture.md` → 移交 `/che-project-arch` 生成架构画像（服务/应用清单 + 依赖图），供 `/che-compound-load` 每次会话装载。
 - 已接入 PingCode：spec 建卡走 `/che-pingcode-specstoissues`。
 
 ## 故障排除

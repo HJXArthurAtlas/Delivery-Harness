@@ -15,6 +15,7 @@
 | `skills/che-pingcode-*/` | PingCode 初始化、建卡与同步 |
 | `skills/che-bug-*/` | Bug 评估、修复和验证 |
 | `skills/che-project-init/` | 项目接入与基础配置 |
+| `skills/che-project-arch/` | 项目架构画像生成与对账（docs/architecture.md） |
 | `skills/che-mturtle-troubleshooting/` | 线上问题排查知识 |
 | `packages/cli/` | `@newchiwan/che` 源码与发布脚本 |
 | `tests/skills/` | 技能结构、CLI 和技能运行时测试 |

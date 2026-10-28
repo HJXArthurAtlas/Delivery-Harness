@@ -155,7 +155,7 @@ your-repo/
 
 ### 3.1 定位与依赖
 
-35 个 agent skill，承载「规格驱动开发 + PingCode」的流程：**产品出规格建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**。安装在 Agent 侧（omp 插件 / DSH 插件 / 手动拷贝到 `~/.agents/skills/` 三路任一）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
+36 个 agent skill，承载「规格驱动开发 + PingCode」的流程：**产品出规格建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加项目架构画像（`/che-project-arch` 生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / 手动拷贝到 `~/.agents/skills/` 三路任一）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
 
 ### 3.2 主线流程
 
@@ -280,5 +280,6 @@ bug 修复三步：
 
 1. **初始化（一次性）**：把 §1.1 第一段提示词发给 Agent → 复制骨架、安装技能包、接入 codegraph → 重启 Agent。
 2. **完善登记（一次性）**：发 §1.1 第二段提示词 → 验证索引、登记 `AGENTS.md` 布局、执行 `/che-project-init`。
-3. **日常交付**：按角色进入 harness 主线（§3.2）；产品从 intent 访谈开始，开发从 plan 开始；bug 使用修复链，线上问题使用排障技能。每会话 Agent 自动执行环境检查。
-4. **维护分工**：改骨架、初始化提示词、环境基线 → 直接改 monorepo-template 仓的 `README.md` 与 `AGENTS-TEMPLATE.md`（版本两处同步）；技能流程问题 → 去 harness 仓。
+3. **架构画像（可选，一次性）**：跑 `/che-project-arch` → Agent 扫描 `services/`、`apps/` 等布局生成 `docs/architecture.md`（服务/应用清单 + mermaid 依赖图），确认后入库；此后每个特性会话 `/che-compound-load` 自动装载，架构变化时重跑对账。
+4. **日常交付**：按角色进入 harness 主线（§3.2）；产品从 intent 访谈开始，开发从 plan 开始；bug 使用修复链，线上问题使用排障技能。每会话 Agent 自动执行环境检查。
+5. **维护分工**：改骨架、初始化提示词、环境基线 → 直接改 monorepo-template 仓的 `README.md` 与 `AGENTS-TEMPLATE.md`（版本两处同步）；技能流程问题 → 去 harness 仓。
