@@ -3,6 +3,7 @@ name: che-compound-tasks
 description: 任务清单生成：按现有设计工件产出依赖有序、可执行的 tasks.md（按用户故事组织）；入向前置——本会话需已有该 plan 的 adr-check 报告。当用户运行或提到 /che-compound-tasks，或说「出任务清单」「拆任务」「把 plan 拆成可执行任务」时使用——即使用户没提命令名，只要是 plan 到 tasks 的拆解也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 
 ## User Input
 

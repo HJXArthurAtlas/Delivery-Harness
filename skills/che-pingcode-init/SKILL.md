@@ -3,6 +3,8 @@ name: che-pingcode-init
 description: 交互式初始化 PingCode 集成配置：选择项目/产品/迭代/映射类型，生成 pingcode-config.yml。当用户要配置或重置 pingcode-config.yml、选择 PingCode 项目/产品/迭代/卡片类型映射、修正建卡映射层级、询问"怎么接入 PingCode"时使用——即使用户没提命令名，只要是给 spec 建卡流程做 PingCode 初始化配置也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # 初始化 PingCode 集成配置
 
 > **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.init` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；specify extension 的 hook 接线全部移除（pack 无 hook 执行机制，命令按流程节点手动调用）；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`。配置模板见本技能 `references/pingcode-config.template.yml`。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。

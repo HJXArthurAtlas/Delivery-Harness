@@ -48,6 +48,7 @@ npm test
 - `description` 非空且不超过 1024 字符；字面引用的 `references/`、`scripts/` 文件必须存在。
 - 仓内工具不新增 npm 依赖；外部 CLI 只从 PATH 调用。运行环境为 Node ≥ 22.18、bash 和 POSIX coreutils。
 - 上游技能的 pack fork 差异记录在对应技能中，上游升级时必须保留。
+- 每个 `SKILL.md` 顶部带语言规则块：读项目根 `.che/config.yml` 的 `language:`（缺省 `zh-cn`）决定全 pack 输出语言（含思考）；新增技能必须携带，`/che-project-init` 负责写入该键。
 - 技能写盘遵循同名不覆盖；版本号以仓内登记文件为准，不凭记忆填写。
 
 ## 验证与提交

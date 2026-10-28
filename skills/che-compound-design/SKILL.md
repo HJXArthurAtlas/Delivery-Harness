@@ -3,6 +3,8 @@ name: che-compound-design
 description: 需求澄清与设计明细产出（design 命令）：按四盲区问句库逐项澄清需求，按设计规约与设计自检对方案做七域走查，产出页面级设计明细 design-tasks.md 到当前特性目录。依赖活动特性（spec.md）才能执行；澄清结论不回写 spec。当用户运行或提到 /che-compound-design，或说「出设计明细」「design-tasks」「把这份 spec 转成设计明细」「设计走查这份需求」，或要在 spec 之后、开发之前做设计层澄清与设计明细产出时使用本 skill——即使用户没提「che-compound-design」命令名，只要是规格之后的设计澄清与设计明细转化意图也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # che-compound-design
 
 本 skill 只产出设计明细（`design-tasks.md`），绝不产出视觉稿、原型或代码；绝不代替用户拍板业务口径。

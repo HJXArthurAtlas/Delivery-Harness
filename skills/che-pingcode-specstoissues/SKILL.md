@@ -3,6 +3,8 @@ name: che-pingcode-specstoissues
 description: 把 specs/ 下的 spec 转换为 PingCode 需求树卡片（spec 卡/用户故事卡/任务卡三级映射，向上只补未映射祖先层），登记到 specs/pingcode-mapping.json。当用户说"建卡""把 spec 转成 PingCode 卡片""创建需求树""spec 转 issues""补建/重建卡片"，或 spec 定稿后要落 PingCode 工作项时使用——即使用户没提命令名，只要是从 spec 制品创建 PingCode 卡片也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # 从 Spec 创建 PingCode 卡片层级
 
 > **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.specstoissues` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 hook（after_specify/after_tasks）改接为 `/che-compound-specify` / `/che-compound-tasks` Handoff 块的可选目标（optional，`.che/pingcode-config.yml` 在位才提示，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约（`spec.md` 的 `### User Story N` 章节、`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记）与上游逐字一致。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。

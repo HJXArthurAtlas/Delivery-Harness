@@ -3,6 +3,8 @@ name: che-compound-require-intent
 description: specify 前门禁（默认开）：当前任务目录 specs/NNN-{slug}/ 里没有 intent.md 就拒绝 /che-compound-specify。任务经 session 绑定解析（或 --feature/--session 显式指定）；可经 CHE_REQUIRE_INTENT 环境变量或 .che/config.yml 的 require_intent 键关闭。手动或 agent 在 specify 边界前调用。当用户说「过一遍 specify 门禁」「检查 intent 放行了没」时使用——即使用户没提命令名，只要是规格前的门禁检查也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # Require Intent Before Specify
 
 This gate runs manually — invoked by the user or the agent before `/che-compound-specify`. The gate logic is **inlined in the `che` CLI** (`che require-intent`) — not an interactive prompt — so it runs deterministically.

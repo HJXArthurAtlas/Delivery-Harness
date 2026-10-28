@@ -8,6 +8,7 @@
 #     version 与 package.json 同步），并禁止 .omp-plugin/plugin.json（防 remap 把 .agents/ 带进 omp 插件安装面）
 #   - 新增：DSH bundle 分发面校验（dsh.bundle.patch 指向 cordis.patch.yml、main 入口、
 #     files 三件套、engines.dsh 兼容范围、patch 行引用包名、入口导出 apply、无路径泄漏）
+#   - 新增：每个 SKILL.md 顶部语言规则块（读 .che/config.yml 的 language 决定全 pack 输出语言）
 set -u
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -59,6 +60,10 @@ for skill_dir in "$SKILLS_DIR"/*/; do
       *) ok ;; # 安装位/宿主路径，运行时解析
     esac
   done < <(grep -oE '`[^`]+`' "$skill_md" | tr -d '`' | grep -E '(references|scripts)/' | sort -u)
+
+  # 4b. 语言规则块：SKILL.md 顶部必须声明 pack 语言配置（.che/config.yml 的 language）
+  grep -Eq '^> \*\*语言规则（pack fork.*\.che/config\.yml' "$skill_md" \
+    && ok || bad "$skill: SKILL.md 顶部缺少语言规则块（读 .che/config.yml 的 language 决定输出语言）"
 done
 
 # 5. 泄漏扫描：技能与 omp 目录文件不得含本机绝对路径

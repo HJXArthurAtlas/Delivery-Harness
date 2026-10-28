@@ -3,6 +3,8 @@ name: che-adr-check
 description: 对照治理决策校验已产出的 plan 是否越界（只读）：把 plan 与 adrkit 语料 docs/adr/ 中约束本工作的决策逐条比对，标出违反项与需补的 ADR 变更；plan 产出后必跑，是进入 /che-compound-tasks 前的前置。当用户说「check 这个 plan」「校验 plan 越没越界」「plan 有没有违反决策」「adr-check」时使用——即使用户没提命令名，只要是 plan 之后的决策越界校验也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # Adrkit Check Skill
 
 # adrkit — check this plan

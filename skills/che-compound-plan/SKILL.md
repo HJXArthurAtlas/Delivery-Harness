@@ -3,6 +3,7 @@ name: che-compound-plan
 description: 实现规划：按 plan 模板产出设计工件（research/data-model/contracts/quickstart 与 plan.md）；存在 design-tasks.md 时必读并对齐 UX 约束，与 spec 冲突回用户裁决。当用户运行或提到 /che-compound-plan，或说「出 plan」「做实现计划」「把 spec 转成实现规划」时使用——即使用户没提命令名，只要是 spec 之后的实现规划也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 
 ## User Input
 

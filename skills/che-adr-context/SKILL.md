@@ -3,6 +3,8 @@ name: che-adr-context
 description: 规划前把治理决策装载进上下文（只读）：按给定路径读取 docs/adr/ 语料中约束本工作的 governed/active/history 决策，不给路径则列出待 ARB 评审队列。在 /che-compound-plan 之前或需要确认约束来源时使用。当用户说「这个改动受哪些决策约束」「列出待评审决策」「取治理决策」时使用——即使用户没提命令名，只要是规划前的治理决策装载也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # Adrkit Context Skill
 
 # adrkit — governing decisions

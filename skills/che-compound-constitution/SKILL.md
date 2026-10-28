@@ -3,6 +3,7 @@ name: che-compound-constitution
 description: 创建或更新项目章程 docs/constitution/constitution.md（交互收集或按给定原则输入），作为后续 spec/plan 的治理约束来源。当用户运行或提到 /che-compound-constitution，或说「立章程」「修订治理原则」「建项目宪章」时使用——即使用户没提命令名，只要是项目治理原则的建立或修订也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 
 ## User Input
 

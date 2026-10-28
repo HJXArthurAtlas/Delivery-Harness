@@ -3,6 +3,8 @@ name: che-git-master
 description: 执行 git commit 的规范流程：消息格式 `type(scope): 中文消息`、小步拆分、精确暂存、敏感文件排除与安全边界。当用户说「提交」「commit」「帮我提交这些改动」「拆分提交」「这些改动怎么拆」「检查提交风险」或让你代拟 commit message 时使用——即使用户没提「规范」二字也用本 skill。适用于仓库内任何目录。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # 按规范提交
 
 > Pack fork：吸收自 mturtle-commit 技能（freight-mono），纪律正文逐条保留；去除仓库特有的 hook 现状与敏感文件清单。**提交消息不绑定任何工作项/PingCode ID**——消息里绝不出现 `#ID` 段（上游 mturtle-commit 的工作项 ID 机制已整段移除，上游规则升级时按此文件 port 并保持移除）。

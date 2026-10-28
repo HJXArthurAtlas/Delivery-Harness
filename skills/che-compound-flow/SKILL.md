@@ -3,6 +3,8 @@ name: che-compound-flow
 description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流程操作规范（产品出规格建卡 → 开发接规格规划实现 → 卡片随实现收尾）。当用户要执行或提到 /che-compound-specify、/che-compound-design、/che-compound-plan、/che-compound-tasks、/che-compound-implement、specstoissues、sync-cards、sync-status，或说"出 spec""写规格""这个需求转开发了""接需求开始 plan""建卡""对账卡片""任务卡收尾"，或任务涉及 specs/ 产物、pingcode-mapping.json、需求树（idea/epic/feature/story）与本地任务的对应关系时使用本 skill——即使用户没提"che-compound"命令名，只要是在这套规格驱动流程里干活（产品侧或开发侧）也要使用。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # che-compound-flow
 
 团队 AI native 开发流程的**衔接与门禁层**：不替代 `/che-compound-*` 命令与 `/che-pingcode-*` 命令（它们各自的规则以自身为准），也不复述 `pingcode` skill 的 ID 安全规则与 `mturtle-commit` 的提交格式——本 skill 只定义角色怎么交接、什么才算交接完成、卡片与产物怎么对得上账。

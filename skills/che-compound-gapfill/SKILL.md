@@ -3,6 +3,8 @@ name: che-compound-gapfill
 description: 任务缺口补全：把 intent + expectations 对照已生成的 tasks.md 交叉核对，追加缺失的四类测试任务（约束违反/失败条件/越界回归/边界场景）并带来源注释。当用户说「补任务缺口」「gapfill」「对照 intent 查任务覆盖」时使用——即使用户没提命令名，只要是 tasks 的覆盖缺口补全也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # Gap-Fill Analysis
 
 You are running a **gap-fill analysis**. Your job is to cross-reference the intent doc + expectations doc against the generated tasks list, identify coverage gaps, and append the missing tasks to `{task_dir}/tasks.md`.

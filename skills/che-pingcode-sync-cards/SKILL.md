@@ -3,6 +3,8 @@ name: che-pingcode-sync-cards
 description: 核对 specs/ 产物与 PingCode 卡片的一致性，按差异增删改卡片（删除逐项确认）。当用户说"对账""同步卡片""spec 改了卡片也要同步""实现前核对卡片""卡片和 spec 对不上"时使用——即使用户没提命令名，只要是建卡后把制品差异同步到 PingCode 也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # 核对 spec 制品与 PingCode 卡片一致
 
 > **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.sync-cards` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 before_implement hook 改接为 `/che-compound-implement` Handoff 块的前置对账条件（optional，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约与上游逐字一致。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。

@@ -3,6 +3,8 @@ name: che-pingcode-discover-context
 description: 探查 PingCode 项目的类型/状态/优先级/迭代/产品字典并生成配置片段。当用户问 PingCode 项目有哪些工作项类型、状态、优先级、迭代，要写或校对 pingcode-config.yml 配置片段，或建卡时报类型名/状态名匹配失败需要查实际字典时使用——即使用户没提命令名，只要是探查 PingCode 项目字典也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # 发现 PingCode 项目上下文
 
 > **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.discover-context` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根），探查产物 `pingcode-discovered-context.json` 仍落项目根；hook 接线移除（pack 无 hook 执行机制，手动调用）；命令名改为 `/che-pingcode-*`。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。

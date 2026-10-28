@@ -3,6 +3,8 @@ name: che-compound-expectations
 description: 期望捕获（validator-only）：访谈式捕获成功场景与边界场景，单独落任务目录的 expectations.md（`{TASK_DIR}/expectations.md`，`che paths` 的 `FEATURE_DIR`），与同目录的 intent.md 分文件存放——文件隔离是防 reward-hack 的设计。当用户说「补期望场景」「写 expectations」「捕获边界场景」时使用——即使用户没提命令名，只要是期望场景的捕获落盘也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # Expectations Interview
 
 You are running an **expectations interview** — the compartmented counterpart to `/che-compound-intent`. Your job is to capture user-observable success and edge scenarios that the validator (`/che-compound-intentguard`) will use to decide whether the implementation is truly done.

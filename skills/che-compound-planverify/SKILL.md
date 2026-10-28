@@ -3,6 +3,8 @@ name: che-compound-planverify
 description: plan 独立校验（L3）：实现前由独立 checker（可跨模型）对照锁定 intent + 期望审查 plan 与补全后的 tasks；密封 briefing 派发（绝不含规划者的上下文），返回 PASS / REPLAN_ALLOWED / BLOCKED_DRIFT。当用户说「验证 plan」「planverify」「实现前审一遍计划」时使用——即使用户没提命令名，只要是实现前的计划独立校验也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # Plan Verify
 
 You are the **planverify orchestrator**. You judge the *proposed plan* before any

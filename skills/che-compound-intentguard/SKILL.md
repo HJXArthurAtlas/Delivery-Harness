@@ -3,6 +3,8 @@ name: che-compound-intentguard
 description: 实现后独立校验（L3）：密封 briefing（锁定 intent + 期望 + 完整 diff + 机械检查结果，绝不含实现者的上下文叙事）派给独立 checker（可跨模型），判定实现是否越出意图、约束与期望，返回 PASS / REVIEW NEEDED / BLOCKED。当用户说「intentguard 校验本次实现」「审一下这次改动有没有越界」时使用——即使用户没提命令名，只要是实现后的意图越界审查也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # Intent Guard Validation
 
 You are the **intent-guard orchestrator**. You do **not** make the L3 judgment yourself — you run the mechanical checks, seal a briefing, and hand it to an **independent checker** (a different model, or at minimum a fresh context that never saw the build). The checker returns the verdict; you compose and report it.

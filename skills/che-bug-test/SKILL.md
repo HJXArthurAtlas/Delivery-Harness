@@ -3,6 +3,8 @@ name: che-bug-test
 description: 验证 bug 修复是否真正解决：重跑复现步骤、补新测试与回归，产出验证报告 docs/bugs/<slug>/test.md；verdict 为 failed 时带新证据回退重跑评估。当用户运行或提到 /che-bug-test，或说「验证这个修复」「回归这个 bug」「确认 bug 修好了」时使用——即使用户没提命令名，只要是修复后的验证收口也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # Bug Test Skill
 
 # Test Bug Fix

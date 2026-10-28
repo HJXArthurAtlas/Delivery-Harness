@@ -3,6 +3,8 @@ name: che-pingcode-sync-status
 description: 本地任务全部勾选后，把对应的 PingCode 卡片（任务卡/story 卡/spec 卡）流转到完成态并输出进度。当用户说"收尾卡片""同步完成状态""任务勾完了把卡关掉""卡片流转完成态""看卡片进度"时使用——即使用户没提命令名，只要是本地任务完成后收尾 PingCode 卡片也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # 同步任务完成状态到 PingCode
 
 > **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.sync-status` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；hook 接线移除（pack 无 hook 执行机制，手动调用）；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约（`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记、`pingcode-sync-log.json`）与上游逐字一致。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。

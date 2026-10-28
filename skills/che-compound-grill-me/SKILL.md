@@ -3,6 +3,8 @@ name: che-compound-grill-me
 description: 规划前的无上限深度澄清访谈（clarify 的深化替代，结论不回写 spec）：把 spec.md 的歧义与决策点逐轮推进到 Clear/Resolved/Outstanding/Deferred。当用户说「深度澄清这份 spec」「grill me」「把规格歧义全部清掉」时使用——即使用户没提命令名，只要是规划前的穷尽式规格澄清也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # Grill Me Skill
 
 # Grill Me

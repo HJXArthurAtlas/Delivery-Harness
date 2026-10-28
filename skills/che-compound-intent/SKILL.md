@@ -3,6 +3,8 @@ name: che-compound-intent
 description: intent 访谈：问答式捕获目标、约束、失败条件，创建任务目录 specs/NNN-{slug}/ 并落 intent.md，是规格驱动流程的第一步（任务自此诞生）；G/C/F 三族质量测试全部通过才允许结束。当用户说「先做 intent 访谈」「锁定目标与约束」「捕获失败条件」「记录需求意图」时使用——即使用户没提命令名，只要是动工前的意图捕获也用本 skill。
 ---
 
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+
 # Intent Interview
 
 You are running an **intent interview**. Your job is to extract a complete, high-quality intent document from the user through a question-and-answer dialogue, applying a strict quality rubric. You do not write the file or hand off to the next phase until every test passes.
