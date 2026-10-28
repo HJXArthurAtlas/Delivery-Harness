@@ -46,7 +46,7 @@ If the user tries to skip a phase, refuse politely and explain which specific te
 
 ## Inputs you have
 
-- The user's rough description of the outcome (provided in chat after `/che-compound-intent` is invoked, or asked for as the first question)
+- The user's rough description of the outcome (provided in chat when `/che-compound-intent` is invoked, or — only after the Phase 0 input gate passes — asked for as the first question)
 - The context loaded by `/che-compound-load` — settled ADRs from the adrkit corpus (`docs/adr/`) plus corrections and patterns from `docs/corrections/` and `docs/patterns/`. Use them to inform your pushback (see "Compound store interaction" below).
 
 ## Output you produce
@@ -55,6 +55,26 @@ If the user tries to skip a phase, refuse politely and explain which specific te
 - Slug derived from the locked goal (3–5 words, lowercase, hyphenated) — it becomes part of the task directory name and the stable handle for the whole flow
 - Format: see "Output format" at the bottom of this file
 - Then offer to chain to `/che-compound-expectations`
+
+---
+
+## Phase 0 — Input gate（入向输入门禁）
+
+> Pack fork (ncw)，上游升级需 port。
+
+进入 Phase 1 之前必须先做输入门禁检查，逐项核对两个来源：
+
+1. **前置上下文**：当前会话是否已存在与本次意图相关的实质内容——需求片段、设计讨论、粘贴的报告/issue，已装载的 `COMPOUND STORE LOADED` 摘要，或用户明确指向的 `specs/`、`docs/` 现有制品。
+2. **调用输入**：触发本 skill 的那条消息里是否包含对结果/特性/问题的实质描述。
+
+判定纪律：
+
+- 纯触发词不算有效输入——「开始」「跑一下 intent」「继续」这类无主题内容的消息按无效处理。
+- **两个来源都为空 → 必须中断**：不建任务、不推 slug、不从仓库猜主题。直接向用户明确提问，例如：
+  > 我目前没有任何关于本次意图的上下文或输入。请说明需要澄清的意图是什么：用一句话描述期望的结果（解决什么问题、给谁带来什么），或给出相关讨论 / 文档 / issue 的指向。收到有效描述后我再开始访谈。
+
+  收到用户的有效描述前绝不进入 Phase 1；该描述即为 Phase 1 的 goal 输入，照常过 G1–G5。
+- 只有其一 → 照常进入 Phase 1。若只有前置上下文而没有调用输入，先用一句话复述你从上下文推断的主题，请用户确认或纠正后再开始 G 测试——绝不基于推断的主题直接开跑。
 
 ---
 
@@ -265,5 +285,6 @@ created: {YYYY-MM-DD}
 
 - **目标**：`/che-compound-expectations` —— 起草正/边界场景期望
 - **条件**：
+  - 入向输入门禁（intent 开始时，Phase 0）：intent 之前无任何上下文且调用时无有效输入 → 中断，向用户明确提问需要澄清的意图，拿到有效描述后才开访谈
   - 前置装载（入向，intent 开始时）：会话上下文无 `COMPOUND STORE LOADED` 摘要 → 先跑 `/che-compound-load` 再开访谈；已有摘要（本会话已装载）→ 跳过
   - `{TASK_DIR}/intent.md` 已写入（任务目录已由 `che task create` 创建，session 已绑定）且用户确认；AskUserQuestion 选 continue 直接链式调用，stop/quit 由用户稍后手动跑
