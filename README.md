@@ -1,6 +1,6 @@
 # NCW Delivery Harness
 
-newchiwan 团队的跨端 agent skill pack：把 PingCode 规格驱动的 AI native 开发流程（speckit 全流程与建卡收尾）、adrkit / grill / compound / bug 治理与线上排障做成可安装的 agent skill，DSH / OpenCode / omp 等等。GitLab 项目：[Tech Council / ncw-delivery-harness](https://git.newchiwan.com/council/ncw-delivery-harness)（内部仓，默认分支 `main`）。
+newchiwan 团队的跨端 agent skill pack：把 PingCode 规格驱动的 AI native 开发流程（speckit 全流程与建卡收尾）、adrkit / grill / compound / bug 治理与线上排障做成可安装的 agent skill，可在 DSH / OpenCode / omp 等端使用。GitLab 项目：[Tech Council / ncw-delivery-harness](https://git.newchiwan.com/council/ncw-delivery-harness)（内部仓，默认分支 `main`）。
 
 ## 一键安装（For Agent）
 
@@ -120,7 +120,7 @@ CLI 解析（`adrkit-lib.sh`）：只执行 PATH 上的 `adrkit` 与 `che`，不
 
 ```bash
 npm ci     # 安装钉版本的 @adrkit/cli，并把仓内 @newchiwan/che（file:packages/cli）链接进 node_modules/.bin，供运行时契约测试使用
-npm test   # ① test-skill-structure.sh：结构与分发面（skills frontmatter/引用/泄漏、.omp-plugin catalog、.agents/commands、DSH bundle 分发面）；② test-che-cli.sh：che CLI 契约（paths/check/feature/require-intent/template/setup-plan/setup-tasks，模板字节级 round-trip）；③ test-pack-runtime.sh：临时 .agents/skills 安装 + 最小 PATH，验证缺失 CLI 的 npm 安装提示，再用真实 @adrkit/cli 与 che 驱动特性解析、ADR scaffold/draft/lint/check/evaluate/context/queue/migrate
+npm test   # 依次运行技能结构、che CLI 契约和技能运行时契约测试
 ```
 
 新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）；`npm test` 会把关。omp 插件按 `skills/` 目录自动发现，无需另行登记。命名格式 `che-{submodule}-action`（如 `che-pingcode-init`），全名 ≤32 字符。

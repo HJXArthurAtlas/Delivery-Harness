@@ -155,31 +155,33 @@ your-repo/
 
 ### 3.1 定位与依赖
 
-35 个 agent skill，承载「规格驱动开发 + PingCode」的流程：**产品出规格建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**。安装在 Agent 侧（omp 插件 / DSH 插件 / 手动拷贝到 `~/.agents/skills/` 三路任一），运行时依赖三个全局 CLI：`che`（`@newchiwan/che`，公司 Nexus）、`adrkit`（`@adrkit/cli`）、`pingcode`——初始化提示词与 `/che-project-init` 会自检并按需安装。
+35 个 agent skill，承载「规格驱动开发 + PingCode」的流程：**产品出规格建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**。安装在 Agent 侧（omp 插件 / DSH 插件 / 手动拷贝到 `~/.agents/skills/` 三路任一）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
 
 ### 3.2 主线流程
 
-主线 7 阶段：**specify（出规格，结束确认后自动建卡）→ 设计清单（涉 UI 必经）→ 交接门禁 → plan（结束自动接续 adr-check）→ tasks → implement（开始自动执行前置：对账、过闸）→ 卡片收尾**；另有独立辅助链：bug 修复三步（assess → fix → test）与线上问题排查（环境对号 → Loki 日志 → 数据库核事实）。
+主线 9 阶段：**specify → 设计明细（涉 UI，与建卡并行）→ 建卡 → 交接门禁 → plan → tasks（先 adr-check）→ implement 前对账 → implement → 卡片收尾**；另有独立辅助链：bug 修复三步（assess → fix → test）与线上问题排查（环境对号 → Loki 日志 → 数据库核事实）。
 
 ```mermaid
 flowchart TD
   subgraph PM["产品"]
     direction TB
-    IT["intent 意图访谈"] --> EX["expectations 期望捕获"] --> SP["specify 出规格 spec.md（结束确认 → 自动建卡）"] --> CL["clarify 澄清（≤5 问）"]
+    IT["intent 意图访谈"] --> EX["expectations 期望捕获"] --> SP["specify 出规格 spec.md"] --> CL["clarify 澄清（≤5 问）"]
+    PC["建卡并登记 mapping（交接前完成）"]
   end
   subgraph DS["UI 设计"]
-    DE["design 设计清单 design-tasks.md（涉 UI 必跑）"]
+    DE["design 设计清单 design-tasks.md（涉 UI，与建卡并行）"]
   end
   subgraph DV["开发"]
     PL["plan 实现规划"] --> AC["adr-check 越界校验"] --> TK["tasks 任务清单"] --> IM["implement 实现"] --> ST["sync-status 卡片收尾"]
   end
+  SP --> PC
   SP --> DE
-  DE --> GA{"交接门禁"}
-  SP -. 无 UI 直达 .-> GA
+  PC --> GA{"交接门禁"}
+  DE -. 设计约束 .-> PL
   GA -->|全过| PL
 ```
 
-> **哪些是自动的**：建卡、require-intent 门禁、adr-check 接续、sync-cards 对账、planverify-gate 过闸都不是需要手动执行的命令——它们是技能内建的自动行为，agent 按条件在后台触发。下面的顺序只列需要人执行或裁决的动作，自动行为写在原位（什么条件 → 自动做什么 → 起什么作用）；跟随 agent 的交互提示即可。
+> **阶段如何衔接**：建卡、adr-check、sync-cards 和各类门禁由技能的 Handoff 与入向条件驱动，agent 按条件提示或接续；本 pack 无 hook 执行器，不把它们理解为后台自动任务。下面的顺序列出需要执行或裁决的动作，条件不满足时按提示补跑。
 
 #### 产品侧（需求 → 规格 → 建卡）
 
@@ -188,9 +190,9 @@ flowchart TD
 1. `/che-compound-load` —— 装载 ADR 语料与经验（corrections / patterns）进上下文，每会话一次（intent 技能会提示）
 2. `/che-compound-intent` —— 访谈式捕获目标、约束、失败条件；结束时创建任务目录 `specs/NNN-{slug}/` 并写入 `intent.md`，任务由此创建
 3. `/che-compound-expectations` —— 捕获成功 / 边界场景期望，写入 `expectations.md`
-4. `/che-compound-specify` —— 生成特性规格 `spec.md`（含 `### User Story N` 章节与 P1 / P2 / P3 优先级）。结束时会确认提问「是否推送到 PingCode 自动建卡？」——确认后自动建卡：spec 转需求树卡片（idea → epic → feature 规格卡 → story 卡），登记 `specs/pingcode-mapping.json`，任务目录改名 `{identifier}-{slug}`（slug 不变）；选择「否」时，按交接门禁要求在交接前执行 `/che-pingcode-specstoissues`
+4. `/che-compound-specify` —— 生成特性规格 `spec.md`（含 `### User Story N` 章节与 P1 / P2 / P3 优先级）。结束后可确认接续 `/che-pingcode-specstoissues` 建卡：spec 转需求树卡片（idea → epic → feature 规格卡 → story 卡），登记 `specs/pingcode-mapping.json`，任务目录改名 `{identifier}-{slug}`（slug 不变）；选择「否」时，按交接门禁要求在交接前补建
 5. `/che-compound-clarify` —— ≤5 个针对性问题澄清，结论**回写** spec
-6. 涉 UI 的特性移交 UI 设计侧生成设计清单（见下），产出后回到本侧
+6. 涉 UI 的特性可并行移交 UI 设计侧生成设计清单（见下）；它不阻塞建卡与交接，产物供开发 plan / implement 使用
 7. 逐项核对交接门禁（见下），全过才移交开发
 
 自动行为：specify 提示缺少 `intent.md` 并拒绝执行，是内置 require-intent 门禁（默认开）在拦截——用于保证出规格前先完成意图访谈；先执行 `/che-compound-intent` 补齐意图再 specify 即可，门禁由 specify 自动通过，无需手动操作。
@@ -201,18 +203,18 @@ flowchart TD
 - 建卡时类型 / 状态匹配失败 → `/che-pingcode-discover-context` 查 PingCode 真实字典，绝不猜 ID
 - 任务 slug 全流程唯一且不变，以 `che paths --json` 输出为准；并行多任务靠 session 绑定（`CHE_SESSION_ID`）或 `--feature` 消歧
 
-#### UI 设计侧（涉 UI 必经）
+#### UI 设计侧（涉 UI 时执行，不阻塞交接）
 
-进入时机：产品的规格卡建好后。
+进入时机：specify 后，与建卡并行。
 
 1. `/che-compound-load` —— 会话内装载过就跳过（design 会提示）
-2. `/che-compound-design` —— 按四盲区问句库澄清需求 + 设计规约 / 自检七域走查，产出页面级 `design-tasks.md`（交互规则、页面状态、UI-01… 要求清单）；产出后交回产品侧过交接门禁
+2. `/che-compound-design` —— 按四盲区问句库澄清需求 + 设计规约 / 自检七域走查，产出页面级 `design-tasks.md`（交互规则、页面状态、UI-01… 要求清单）；产物供开发 plan / implement 使用
 
 UI 设计侧注意：
 
 - 澄清结论**不回写** spec；需求疑点与产品一起执行 `/che-compound-clarify`
 - 与 spec 冲突时回产品 / 设计侧裁决，开发绝不自行解决
-- `design-tasks.md` 是涉 UI 特性的交接门禁项，开发 plan / implement 必读
+- `design-tasks.md` 不是交接门禁项；存在时开发 plan / implement 必读
 
 #### 交接门禁（产品 / UI → 开发，逐项必过）
 
@@ -220,7 +222,6 @@ UI 设计侧注意：
 2. `specs/pingcode-mapping.json` 已登记，每张卡 id / 状态可追溯——没登记等于建卡没完成
 3. 建卡是可选环节：选择不建卡的，交接前执行 `/che-pingcode-specstoissues`
 4. `.che/pingcode-config.yml` 在位（未执行过时先执行 `/che-pingcode-init`），`pingcode` CLI 已装并认证
-5. 涉 UI 特性 `design-tasks.md` 已产出；无 UI 特性跳过本项
 
 任一不过就留在产品 / 设计侧处理完再交接，不把半成品推给开发。
 
@@ -228,11 +229,11 @@ UI 设计侧注意：
 
 1. `/che-compound-load` —— 每会话一次（plan 的入向前置）
 2. `/che-compound-plan` —— spec 转实现规划（research / data-model / contracts / quickstart）；有 `design-tasks.md` 必读并对齐，冲突回产品 / 设计裁决
-3. `/che-adr-check` —— plan 结束后 agent **自动接续**的必过校验：校验 plan 是否越出决策边界；存在未处置 departure 时暂停并等待裁决——修订 plan，或通过 `/che-adr-draft` 新增 ADR 后重新校验
-4. `/che-compound-tasks` —— 生成依赖有序 `tasks.md`（本会话没有该 plan 的 adr-check 报告会拒绝）；配置了 `mapping.task_artifact` 时，结束确认后自动补建任务卡并关联至 story / spec 卡
+3. `/che-adr-check` —— plan 后的必过校验：校验 plan 是否越出决策边界；存在未处置 departure 时暂停并等待裁决——修订 plan，或通过 `/che-adr-draft` 新增 ADR 后重新校验
+4. `/che-compound-tasks` —— 生成依赖有序 `tasks.md`（本会话没有该 plan 的 adr-check 报告会拒绝）；配置了 `mapping.task_artifact` 时，结束确认后可接续补建任务卡并关联至 story / spec 卡
 5. `/che-compound-gapfill` —— 对照 intent + expectations 补四类缺口测试进 `tasks.md`（约束违反 / 失败条件 / 越界回归 / 边界）
 6. `/che-compound-planverify` —— 独立校验者审 plan + tasks：PASS 放行，REPLAN_ALLOWED 修订 plan 后重新校验，BLOCKED_DRIFT 回退至 plan
-7. `/che-compound-implement` —— 按 `tasks.md` 执行。开始时自动处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；开了 `planverify_gate` block 的项目 → 自动过闸（verdict 缺失或 BLOCKED_DRIFT 拒绝 implement）。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-project-commit`：`type(scope): #故事卡ID 中文消息` + `Co-Authored-By` 页脚，小步拆分、精确暂存、排除敏感文件，故事卡 ID 优先从 `specs/pingcode-mapping.json` 当前任务条目解析
+7. `/che-compound-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；开了 `planverify_gate` block 的项目 → 先过闸（verdict 缺失或 BLOCKED_DRIFT 拒绝 implement）。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): #故事卡ID 中文消息` + `Co-Authored-By` 页脚，小步拆分、精确暂存、排除敏感文件，故事卡 ID 优先从 `specs/pingcode-mapping.json` 当前任务条目解析
 8. `/che-compound-intentguard` —— 独立校验者审实现 vs 锁定意图：PASS 交接，REVIEW 人工复核后放行，BLOCKED 回退至 implement 修复
 9. `/che-pingcode-sync-status` —— 本地任务全部 `[x]` 后卡片单向流转完成态
 10. `/che-compound-writeback` —— 把新经验（ADR / corrections / patterns）沉淀回 compound store，供后续特性复用
@@ -252,7 +253,7 @@ UI 设计侧注意：
 | 技能 | 时机 | 作用 |
 |---|---|---|
 | `che-compound-grill-me` | 产品侧，specify / clarify 之后 | 对 spec 执行追问式深度澄清，暴露隐含假设与自相矛盾；结论**不回写** spec，如需回写先执行 clarify |
-| `che-compound-grill-with-docs` | 产品侧，同上 | 采用同样的追问方式，并将领域结论沉淀为 `docs/adr/` 里的 ADR——后续所有特性的 adr-check 决策边界因此更完整 |
+| `che-compound-grill-with-docs` | 产品侧，同上 | 深度澄清并沉淀跨特性知识：术语与主题文档落 `docs/domain_knowledge/`，符合记录门的决策归口 `docs/adr/`；后续 adr-check 的决策边界因此更完整 |
 | `che-adr-context` | 开发 plan 前 | 取 ADR 决策语料进上下文（只读），避免 plan 与既有决策冲突 |
 | `che-compound-analyze` | 开发 tasks 后 | spec / plan / tasks 跨制品一致性只读分析，尽早发现工件间的漂移 |
 | `che-compound-converge` | 实现之后 | 代码现状与工件有差距时，追加收敛任务进 tasks.md，避免差距持续累积 |
@@ -273,7 +274,7 @@ bug 修复三步：
 
 ### 3.3 产出物结构
 
-每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`intent.md`（意图）、`expectations.md`（期望）、`spec.md`（规格）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单）、`planverify.md`（门禁报告）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
+每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`intent.md`（意图）、`expectations.md`（期望）、`spec.md`（规格）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单）、`planverify.md`（门禁报告）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/domain_knowledge/`（跨特性术语与主题知识）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
 
 ## 4. 使用路径：从初始化到日常交付
 
