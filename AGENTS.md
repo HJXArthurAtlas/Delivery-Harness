@@ -20,7 +20,7 @@
 | `tests/skills/` | 技能结构、CLI 和技能运行时测试 |
 | `.omp-plugin/marketplace.json` | omp 插件 catalog |
 | `dsh-entry.js`、`cordis.patch.yml` | DSH bundle 入口与补丁 |
-| `.githooks/`、`.agents/commands/` | 提交校验与仓内维护命令 |
+| `.agents/commands/` | 仓内维护命令 |
 
 ## 插件分发
 
@@ -38,7 +38,6 @@
 ```bash
 npm ci
 npm test
-git config core.hooksPath .githooks
 ```
 
 根包不发布 npm（`private: true`），推送 `main` 即发布 omp 与 DSH 插件；仅 `@newchiwan/che` 通过 `bash packages/cli/scripts/publish.sh` 发布到公司 Nexus。npm 认证只写用户级 `~/.npmrc`，绝不入库。
