@@ -1,6 +1,6 @@
 ---
 name: che-compound-clarify
-description: 规格澄清问答：最多提 5 个高针对性的澄清问题，找出当前特性 spec 定义不足的区域，并把结论回写进 spec.md。在 specify 之后、plan 之前使用。当用户运行或提到 /che-compound-clarify，或说「澄清规格」「补全需求细节」「解决需求歧义」时使用——即使用户没提命令名，只要是对 spec 的澄清回写也用本 skill。
+description: 规格澄清问答（产品澄清独占）：最多提 5 个高针对性的澄清问题，找出当前特性 spec 定义不足的区域，把结论直接合并进 spec.md 对应章节，并把 `[NEEDS CLARIFICATION]` 产品标记清零（specify 最多留 3 个明确标记，clarify 必须以零标记完成）。在 specify 之后、plan 之前使用。当用户运行或提到 /che-compound-clarify，或说「澄清规格」「补全需求细节」「解决需求歧义」时使用——即使用户没提命令名，只要是对 spec 的澄清回写也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -142,55 +142,36 @@ Execution steps:
 
 6. Integration after EACH accepted answer (incremental update approach):
     - Maintain in-memory representation of the spec (loaded once at start) plus the raw file contents.
-    - For the first integrated answer in this session:
-       - Ensure a `## Clarifications` section exists (create it immediately after `## Compound store refs` and before `## 统一语言` in the unified spec if missing — it belongs to the builder-readable intent/spec body, ahead of the specification sections).
-       - Under it, create (if not present) a `### Session YYYY-MM-DD` subheading for today.
-    - Append a bullet line immediately after acceptance: `- Q: <question> → A: <final answer>`.
-    - Then immediately apply the clarification to the most appropriate section(s):
+    - Do NOT write a `## Clarifications` Q&A history — the accepted answer is recorded only by integrating it into the affected spec sections.
+    - Immediately apply the clarification to the most appropriate section(s):
        - Functional ambiguity → Update or add a bullet in Functional Requirements.
-       - User interaction / actor distinction → Update User Stories or Actors subsection (if present) with clarified role, constraint, or scenario.
-       - Data shape / entities → Update Data Model (add fields, types, relationships) preserving ordering; note added constraints succinctly.
+       - User interaction / actor distinction → Update User Stories with the clarified role, constraint, or scenario.
+       - **Acceptance Scenarios / Edge Cases**: if the answer changes or overturns a scenario, REPLACE that scenario's text in place, keeping its existing `E#` ID — never append a contradictory alternative and never renumber or reuse IDs. Only a genuinely NEW scenario gets the next unused `E#`. After any scenario change, re-run the scenario quality tests `SQ1–SQ4` (defined in `/che-compound-specify`) and fix failures before saving.
+       - Data shape / entities → Update Key Entities (add fields, types, relationships) preserving ordering; note added constraints succinctly.
        - Non-functional constraint → Add/modify measurable criteria in Success Criteria > Measurable Outcomes (convert vague adjective to metric or explicit target).
-       - Edge case / negative flow → Add a new bullet under Edge Cases / Error Handling (or create such subsection if template provides placeholder for it).
-       - Terminology conflict → Normalize term across spec; retain original only if necessary by adding `(formerly referred to as "X")` once.
+       - Edge case / negative flow → Add or replace an entry under Edge Cases (new entries take the next unused `E#`).
+       - Terminology conflict → Normalize term across spec; retain original only if necessary by adding `(formerly referred to as "X")` once. New domain terms are registered into the matching 域节 of `docs/GLOSSARY.md`.
     - If the clarification invalidates an earlier ambiguous statement, replace that statement instead of duplicating; leave no obsolete contradictory text.
     - Save the spec file AFTER each integration to minimize risk of context loss (atomic overwrite).
     - Preserve formatting: do not reorder unrelated sections; keep heading hierarchy intact.
     - Keep each inserted clarification minimal and testable (avoid narrative drift).
 
 7. Validation (performed after EACH write plus final pass):
-   - Clarifications session contains exactly one bullet per accepted answer (no duplicates).
-   - Total asked (accepted) questions ≤ 5.
    - Updated sections contain no lingering vague placeholders the new answer was meant to resolve.
    - No contradictory earlier statement remains (scan for now-invalid alternative choices removed).
-   - Markdown structure valid; only allowed new headings: `## Clarifications`, `### Session YYYY-MM-DD`.
+   - Scenario IDs: every pre-existing `E#` still present (or explicitly replaced in place), sequence unchanged, no duplicates; changed scenarios re-pass `SQ1–SQ4`.
+   - Markdown structure valid; no new top-level sections added beyond integration into existing ones (no `## Clarifications`).
    - Terminology consistency: same canonical term used across all updated sections.
 
 8. Write the updated spec back to `FEATURE_SPEC`.
 
-9. **Re-validate Spec Quality Checklist** (if it exists):
-   - Check if `FEATURE_DIR/checklists/requirements.md` exists.
-   - If it does NOT exist, skip this step silently.
-   - If it exists:
-     1. Read the checklist file.
-     2. Identify all GitHub task-list checkbox lines — lines matching `- [ ]`, `- [x]`, or `- [X]` (case-insensitive, tolerant of leading whitespace for nested items) outside of code fences. Ignore all other content (headings, notes, non-checkbox bullets, metadata).
-     3. For each checkbox line, record its current marker state (checked or unchecked) and item text into a before-snapshot list.
-     4. Re-evaluate each checkbox item against the **updated** spec (the version just saved in step 7).
-     5. For each checkbox item, update only if the checked/unchecked state actually changes:
-        - If the item now passes and was unchecked: change `[ ]` to `[x]`.
-        - If the item now fails and was checked: change `[x]`/`[X]` to `[ ]`.
-        - If the state is unchanged: leave the marker as-is (preserve existing case to avoid cosmetic diffs).
-     6. Save the updated checklist file. **Only toggle the `[ ]`/`[x]` marker portion of checkbox lines whose state changed.** All other file content — headings, metadata, notes, line ordering, whitespace — must remain unchanged to avoid noisy diffs.
-     7. Compare the before-snapshot with the current state to compute three lists for the Completion Report:
-        - **Newly passing**: items that changed from unchecked to checked.
-        - **Regressions**: items that changed from checked to unchecked.
-        - **Still unchecked**: items that remain unchecked.
-     8. Record the before/after pass counts as checked/total checkbox items (e.g., "12/16 → 15/16 items passing").
+9. **Final marker sweep**: confirm zero `[NEEDS CLARIFICATION]` markers remain in the spec — clarify is the only writer allowed to resolve them, and it must end with none (specify may leave at most 3 explicit markers; they are resolved here).
 
 Behavior rules:
 
 - If no meaningful ambiguities found (or all potential questions would be low-impact), respond: "No critical ambiguities detected worth formal clarification." and suggest proceeding.
 - If spec file missing, instruct user to run `/che-compound-specify` first (do not create a new spec here).
+- `[NEEDS CLARIFICATION]` markers are clarify's exclusive domain: always sweep the spec for them (even when no new questions arise) and resolve or explicitly settle each one — completion with zero markers is mandatory.
 - Never exceed 5 total asked questions (clarification retries for a single question do not count as new questions).
 - Avoid speculative tech stack questions unless the absence blocks functional clarity.
 - Respect user early termination signals ("stop", "done", "proceed").
@@ -205,7 +186,8 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
 - Number of questions asked & answered.
 - Path to updated spec.
 - Sections touched (list names).
-- Spec quality checklist status (if `FEATURE_DIR/checklists/requirements.md` was re-validated): show before/after pass counts (e.g., "Spec Quality Checklist: 12/16 → 15/16 items passing") and list any items that changed state — both newly checked (unchecked → checked) and any regressions (checked → unchecked). If any items remain unchecked, list them as areas needing attention.
+- Scenario changes: replaced in place (with their kept `E#` IDs) vs newly added (`E#`), and confirmation that changed scenarios re-pass `SQ1–SQ4`.
+- Remaining `[NEEDS CLARIFICATION]` markers: must be zero.
 - Coverage summary table listing each taxonomy category with Status: Resolved (was Partial/Missing and addressed), Deferred (exceeds question quota, or remaining item is specifically implementation method, tech-stack comparison, or task breakdown), Clear (already sufficient), Outstanding (still Partial/Missing but low impact).
 - If any Outstanding or Deferred remain, recommend whether to proceed to `/che-compound-plan` or run `/che-compound-clarify` again later post-plan.
 - Suggested next command.
@@ -219,9 +201,10 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
 
 ## Done When
 
-- [ ] Spec ambiguities identified and clarifications integrated into spec file
-- [ ] Spec quality checklist re-validated against updated spec (if `FEATURE_DIR/checklists/requirements.md` exists)
-- [ ] Completion reported to user with questions answered, sections touched, checklist status, and coverage summary
+- [ ] Spec ambiguities identified and clarifications integrated directly into the affected spec sections (no `## Clarifications` history written)
+- [ ] Zero `[NEEDS CLARIFICATION]` markers remain in the spec
+- [ ] Scenario `E#` IDs preserved for replaced scenarios; only genuinely new scenarios took new IDs; changed scenarios re-pass `SQ1–SQ4`
+- [ ] Completion reported to user with questions answered, sections touched, scenario changes, and coverage summary
 
 ---
 

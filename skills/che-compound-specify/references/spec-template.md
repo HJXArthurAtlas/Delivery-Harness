@@ -1,14 +1,8 @@
 ---
-slug: {kebab-case-slug}
 status: active
-created: {YYYY-MM-DD}
 ---
 
 # Feature Specification: {goal sentence}
-
-**Feature Branch**: `[###-feature-name]`
-
-**Input**: User description: "$ARGUMENTS"
 
 ## Why now *(mandatory)*
 
@@ -26,35 +20,22 @@ created: {YYYY-MM-DD}
 
 ## Constraints *(mandatory)*
 
+<!-- Quality-gated by CQ1–CQ5; no fixed count — keep every constraint that passes. -->
+
 - **C1**: {constraint, with measurable target}
 - **C2**: {constraint, with measurable target}
 - **C3**: {constraint, with measurable target}
-- **C4**: {constraint, with measurable target}
-- **C5**: {constraint, with measurable target}
-- *(C6, C7 optional)*
 
 ## Failure conditions *(mandatory)*
 
-- **F1**: {binary check}
-- **F2**: {binary check}
-- **F3**: {binary check}
-- *(F4–F7 optional)*
+<!-- Quality-gated by FQ1–FQ4; no fixed count — keep every condition that passes. -->
 
-## Test record *(mandatory)*
-
-- Goal: G1 ✓  G2 ✓  G3 ✓  G4 ✓  G5 ✓
-- Constraints: {N} total, all pass C1–C5
-- Failure conditions: {N} total, all pass F1–F4
-
-## Compound store refs *(mandatory)*
-
-- ADRs respected: {list of ADR IDs referenced or none}
-- Corrections applied: {list of correction note slugs referenced or none}
-- Patterns reached for: {list of pattern slugs referenced or none}
+- **F1**: {binary, observable check}
+- **F2**: {binary, observable check}
 
 ## 统一语言 *(mandatory)*
 
-本规格遵循中央统一语言词汇表 `docs/GLOSSARY.md` 的【域名片段】域，
+本规格遵循中央统一语言词汇表 `docs/GLOSSARY.md` 的【域名称】域，
 全文术语以词汇表为准，不重复定义已收录词条。本 spec 新引入的领域概念，
 须已同步登记至词汇表对应域节（治理规则见 `docs/GLOSSARY.md`
 「使用规则」节）。
@@ -64,16 +45,9 @@ created: {YYYY-MM-DD}
 ## User Scenarios & Testing *(mandatory)*
 
 <!--
-  IMPORTANT: User stories should be PRIORITIZED as user journeys ordered by importance.
-  Each user story/journey must be INDEPENDENTLY TESTABLE - meaning if you implement just ONE of them,
-  you should still have a viable MVP (Minimum Viable Product) that delivers value.
-
-  Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
-  Think of each story as a standalone slice of functionality that can be:
-  - Developed independently
-  - Tested independently
-  - Deployed independently
-  - Demonstrated to users independently
+  User stories are PRIORITIZED user journeys (P1 = most critical), each independently
+  testable. Acceptance scenarios use globally stable IDs (E1…En) shared with Edge Cases:
+  never renumber, never reuse an ID. Each scenario cites the FRs it validates.
 -->
 
 ### User Story 1 - [Brief Title] (Priority: P1)
@@ -82,12 +56,12 @@ created: {YYYY-MM-DD}
 
 **Why this priority**: [Explain the value and why it has this priority level]
 
-**Independent Test**: [Describe how this can be tested independently - e.g., "Can be fully tested by [specific action] and delivers [specific value]"]
+**Independent Test**: [Describe how this can be tested independently]
 
 **Acceptance Scenarios**:
 
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
-2. **Given** [initial state], **When** [action], **Then** [expected outcome]
+1. **E1**: **Given** [initial state], **When** [action], **Then** [observable outcome]
+   Validates: **FR-001**, **FR-003**
 
 ---
 
@@ -101,21 +75,8 @@ created: {YYYY-MM-DD}
 
 **Acceptance Scenarios**:
 
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
-
----
-
-### User Story 3 - [Brief Title] (Priority: P3)
-
-[Describe this user journey in plain language]
-
-**Why this priority**: [Explain the value and why it has this priority level]
-
-**Independent Test**: [Describe how this can be tested independently]
-
-**Acceptance Scenarios**:
-
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
+1. **E2**: **Given** [initial state], **When** [action], **Then** [observable outcome]
+   Validates: **FR-002**
 
 ---
 
@@ -124,32 +85,24 @@ created: {YYYY-MM-DD}
 ### Edge Cases
 
 <!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right edge cases.
+  Boundaries and graceful-degradation cases, derived from out-of-scope items,
+  failure conditions, and relevant corrections. IDs continue the global E# sequence.
 -->
 
-- What happens when [boundary condition]?
-- How does system handle [error scenario]?
+- **E4**: **Given** [boundary condition], **When** [action], **Then** [observable outcome]
+  Validates: **FR-005**
 
 ## Requirements *(mandatory)*
-
-<!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right functional requirements.
--->
 
 ### Functional Requirements
 
 - **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
 - **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
-- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
-- **FR-005**: System MUST [behavior, e.g., "log all security events"]
 
-*Example of marking unclear requirements:*
+*Mark unclear requirements inline; at most 3 markers survive specify (clarify clears them):*
 
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **FR-004**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified — email/password, SSO, OAuth?]
 
 ### Key Entities *(include if feature involves data)*
 
@@ -158,27 +111,17 @@ created: {YYYY-MM-DD}
 
 ## Success Criteria *(mandatory)*
 
-<!--
-  ACTION REQUIRED: Define measurable success criteria.
-  These must be technology-agnostic and measurable.
--->
-
 ### Measurable Outcomes
 
 - **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
-- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
-- **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
 
-## Assumptions
+## Assumptions *(optional — remove when empty)*
 
-<!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right assumptions based on reasonable defaults
-  chosen when the feature description did not specify certain details.
--->
+- [Assumption about target users or environment]
+- [Dependency on existing system/service]
 
-- [Assumption about target users, e.g., "Users have stable internet connectivity"]
-- [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
-- [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
-- [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+## References *(optional — remove when empty)*
+
+- ADRs respected: {ADR IDs from `docs/adr/`, or remove}
+- Corrections applied: {correction note slugs from `docs/corrections/`, or remove}

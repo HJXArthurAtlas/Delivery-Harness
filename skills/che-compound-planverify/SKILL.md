@@ -1,6 +1,6 @@
 ---
 name: che-compound-planverify
-description: plan 独立校验（L3）：实现前由独立 checker（可跨模型）对照统一 spec 锁定的范围/约束/失败条件 + 期望审查 plan 与补全后的 tasks；密封 briefing 派发（绝不含规划者的上下文），返回 PASS / REPLAN_ALLOWED / BLOCKED_DRIFT。当用户说「验证 plan」「planverify」「实现前审一遍计划」时使用——即使用户没提命令名，只要是实现前的计划独立校验也用本 skill。
+description: plan 独立校验（L3）：实现前由独立 checker（可跨模型）对照统一 spec 锁定的范围/约束/失败条件 + 场景（Acceptance/Edge `E#`）审查 plan 与补全后的 tasks；密封 briefing 派发（绝不含规划者的上下文），返回 PASS / REPLAN_ALLOWED / BLOCKED_DRIFT。当用户说「验证 plan」「planverify」「实现前审一遍计划」时使用——即使用户没提命令名，只要是实现前的计划独立校验也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -63,12 +63,11 @@ an explicit `cross-model` or `cli:model` policy requires an external model CLI.
 
 (`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR` — run `che paths --session "$CHE_SESSION_ID"` once, bare when no session id is available.)
 
-1. **Unified spec** `{task_dir}/spec.md` — read `## In scope`, `## Out of scope`, `## Constraints`, `## Failure conditions` for in-scope, out-of-scope, constraints, failure conditions
-2. **Expectations** `{task_dir}/expectations.md` — positive + edge scenarios
-3. **Plan** `{task_dir}/plan.md` — the proposed plan, including any `requested_surface` blocks
-4. **Tasks** `{task_dir}/tasks.md` — the gapfilled task list
+1. **Unified spec** `{task_dir}/spec.md` — read `## In scope`, `## Out of scope`, `## Constraints`, `## Failure conditions`; read the `**Acceptance Scenarios**` blocks and `### Edge Cases` for the scenarios (global stable `E#` IDs)
+2. **Plan** `{task_dir}/plan.md` — the proposed plan, including any `requested_surface` blocks
+3. **Tasks** `{task_dir}/tasks.md` — the gapfilled task list
 
-If the spec or expectations is missing, stop and tell the user (a missing `spec.md` means `/che-compound-specify` has not run).
+If the spec is missing, stop and tell the user (a missing `spec.md` means `/che-compound-specify` has not run). If the spec has no scenario content (neither Acceptance Scenarios nor Edge Cases), stop — scenarios are mandatory spec sections.
 
 ## Outputs you produce
 
@@ -83,10 +82,9 @@ If the spec or expectations is missing, stop and tell the user (a missing `spec.
 
 ### Phase 0 — Load all inputs
 
-Read all four sources. Compute: number of constraints, failure conditions, OOS
-items; number of positive + edge scenarios; number of tasks.
+Read all three sources. Compute: number of constraints, failure conditions, OOS items; number of acceptance + edge scenarios (`E#`); number of tasks.
 
-Confirm: *"Loaded spec ({Nc} constraints, {Nf} failure conditions, {No} OOS), expectations ({Np}+{Ne} scenarios), plan, and {Nt} tasks. Running surface analysis here, then dispatching plan judgment to an independent checker."*
+Confirm: *"Loaded spec ({Nc} constraints, {Nf} failure conditions, {No} OOS, {Na}+{Ne} scenarios), plan, and {Nt} tasks. Running surface analysis here, then dispatching plan judgment to an independent checker."*
 
 ### Phase 1 — Surface analysis *(you run this — the mechanical layer)*
 
@@ -116,7 +114,7 @@ Announce: *"Independent checker: {name} (Tier {N} — {cross-model | cross-tier 
 Write `{task_dir}/planverify.briefing.md` containing **only**:
 - The goal sentence
 - **Locked intent** (from the unified spec): full out-of-scope list, every constraint (with IDs), every failure condition — verbatim
-- **Locked expectations**: every scenario — verbatim
+- **Locked scenarios** (from the unified spec): every Acceptance Scenario and Edge Case, with their `E#` IDs — verbatim
 - **The plan**: full `{task_dir}/plan.md`
 - **The tasks**: full `{task_dir}/tasks.md`
 - **Surface analysis**: the drift-candidate list from Phase 1 (path, classification, requested/unrequested) as plain facts
@@ -148,7 +146,7 @@ Tier 2; omit for Tier 3. Save returned JSON to the checker file.
 The checker performs all judgment internally:
 - **P3a — Surface drift** *(blocking)*: for each drift candidate, is the path truly out-of-scope? Clear out-of-scope match → BLOCKED_DRIFT.
 - **P3b — Drift requests** *(the REPLAN_ALLOWED path)*: for each `requested_surface` block, is it necessary, bounded, and inside intent? Apply the decision table. → REPLAN_ALLOWED | BLOCKED_DRIFT.
-- **P3c — Obligation coverage**: does plan + tasks plan to satisfy every constraint / failure condition / expectation? Missing coverage → REPLAN_ALLOWED (grow inward, not drift outward).
+- **P3c — Obligation coverage**: does plan + tasks plan to satisfy every constraint, every failure condition, every scenario (Acceptance `E#` and Edge `E#`), and every out-of-scope regression obligation? Missing coverage → REPLAN_ALLOWED (grow inward, not drift outward).
 - **P3d — Constraint pre-check**: does the planned approach already contradict a constraint? → BLOCKED_DRIFT.
 
 **If dispatch fails** (CLI error, timeout, unparseable): fall one tier down,
@@ -212,7 +210,8 @@ requested_surface:
     {"files": ["..."], "risk_class": "behavioral", "bounded_by": "intent: fix save flow", "verdict": "REPLAN_ALLOWED|BLOCKED_DRIFT", "rationale": "..."}
   ],
   "p3c_obligation_coverage": [
-    {"id": "C1", "planned_by": "task ref | null", "verdict": "PASS|REPLAN_ALLOWED"}
+    {"id": "C1", "planned_by": "task ref | null", "verdict": "PASS|REPLAN_ALLOWED"},
+    {"id": "E1", "type": "acceptance|edge", "planned_by": "task ref | null", "verdict": "PASS|REPLAN_ALLOWED"}
   ],
   "p3d_constraint_precheck": [
     {"id": "C2", "verdict": "PASS|BLOCKED_DRIFT", "rationale": "..."}
@@ -243,7 +242,7 @@ drift_candidates: {N}
 ## Verdict: **{PASS | REPLAN_ALLOWED | BLOCKED_DRIFT}**
 
 > **Checked by {checker} — Tier {N} ({cross-model | cross-tier | same-model fresh-context}).**
-> The checker received only the locked intent, locked expectations, the plan, the
+> The checker received only the locked intent, locked scenarios, the plan, the
 > tasks, and the surface analysis (see `…planverify.briefing.md`). It did not see
 > the planning.
 
@@ -260,6 +259,7 @@ drift_candidates: {N}
 
 ## P3c — Obligation coverage *(independent checker)*
 - **C1**: planned by {task ref} → PASS / (none) → REPLAN_ALLOWED
+- **E1** (acceptance): planned by {task ref} → PASS / (none) → REPLAN_ALLOWED
 
 ## P3d — Constraint pre-check *(independent checker)*
 - **C2**: {verdict} — {rationale}
@@ -276,7 +276,7 @@ drift_candidates: {N}
 ---
 
 ## Tool choices
-- **Read** for the four artifacts
+- **Read** for the three artifacts (spec, plan, tasks)
 - **Bash** for CLI detection (`command -v`), Tier-1 dispatch, reading config
 - **Agent/Task** for Tier-2/Tier-3 native subagent dispatch (`model: haiku` for Tier 2)
 - **Write** for the briefing, captured checker response, and the `planverify.md` report
@@ -287,7 +287,7 @@ drift_candidates: {N}
 - **Override the checker's verdict.** Disagreement goes in a meta-note only.
 - **Auto-patch the plan.** You report; the user replans. Validator, not fixer.
 - **Silently degrade tiers.** Record the tier actually achieved.
-- **Re-write the spec's locked intent sections or expectations.** Those are locked — a locked-intent change means re-running `/che-compound-specify` (update path).
+- **Re-write the spec's locked sections.** They are locked — a locked-intent change means re-running `/che-compound-specify` (update path), keeping existing `E#` IDs.
 
 ---
 

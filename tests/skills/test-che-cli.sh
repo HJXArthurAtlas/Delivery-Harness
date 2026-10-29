@@ -425,19 +425,41 @@ node -e '
   && ok || bad "state done: metadata.json runs.specify 结构不符"
 run "$CHE_BIN" state show --session s1 --json
 [ "$RC" -eq 0 ] && ok || bad "state show --json: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-json_matches "$OUT" "{\"TASK_DIR\":\"$PROJECT/specs/NCW-4921-demo\",\"SLUG\":\"demo\",\"STAGE\":\"plan\",\"NEXT\":\"expectations\",\"DURATION_SECONDS\":{\"specify\":0}}" \
+json_matches "$OUT" "{\"TASK_DIR\":\"$PROJECT/specs/NCW-4921-demo\",\"SLUG\":\"demo\",\"STAGE\":\"plan\",\"NEXT\":\"clarify\",\"DURATION_SECONDS\":{\"specify\":0}}" \
   && ok || bad "state show --json: 输出不符：$OUT"
 run "$CHE_BIN" state show --session s1
 [ "$RC" -eq 0 ] && ok || bad "state show text: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-printf '%s\n' "$OUT" | grep -qx "NEXT: expectations" \
-  && ok || bad "state show text: 缺 NEXT 行：$OUT"
+printf '%s\n' "$OUT" | grep -qx "NEXT: clarify" \
+  && ok || bad "state show text: specify 关闭后 NEXT 应为 clarify：$OUT"
 run "$CHE_BIN" state start expectations --session s1
-[ "$RC" -eq 0 ] && ok || bad "state start expectations: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-run "$CHE_BIN" state done expectations --session s1
-[ "$RC" -eq 0 ] && ok || bad "state done expectations: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+[ "$RC" -eq 1 ] && ok || bad "state start expectations（已退役）: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *retired*) ok ;;
+  *) bad "state start expectations: 错误信息应标明 retired：$(<"$TMP/stderr")" ;;
+esac
+# legacy open expectations run：仍可读取、不参与 NEXT 计算、可关闭。
+node -e '
+  const fs = require("node:fs");
+  const p = process.argv[1];
+  const meta = JSON.parse(fs.readFileSync(p, "utf8"));
+  meta.runs.expectations = [{ start: "2020-01-01T00:00:00.000Z", end: null }];
+  fs.writeFileSync(p, JSON.stringify(meta) + "\n");
+' "$PROJECT/specs/NCW-4921-demo/metadata.json"
 run "$CHE_BIN" state show --session s1 --json
-json_matches "$OUT" "{\"NEXT\":\"clarify\",\"DURATION_SECONDS\":{\"specify\":0,\"expectations\":0}}" \
-  && ok || bad "state show（expectations 闭环后）: NEXT 应为 clarify：$OUT"
+json_matches "$OUT" '{"NEXT":"clarify","RUNS":{"expectations":[{"start":"2020-01-01T00:00:00.000Z","end":null}]}}' \
+  && ok || bad "state show（legacy open run）: expectations 应可见且不参与 NEXT：$OUT"
+run "$CHE_BIN" state done expectations --session s1
+[ "$RC" -eq 0 ] && ok || bad "state done expectations（legacy 开放 run）: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+node -e '
+  const fs = require("node:fs");
+  const meta = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+  const run = meta.runs.expectations[0];
+  if (run.end === null || Number.isNaN(Date.parse(run.end))) process.exit(1);
+  process.exit(0);
+' "$PROJECT/specs/NCW-4921-demo/metadata.json" \
+  && ok || bad "state done expectations: legacy run 未被关闭"
+run "$CHE_BIN" state done expectations --session s1
+[ "$RC" -eq 1 ] && ok || bad "state done expectations（已闭环）: 退出码 ${RC}，预期 1"
 run "$CHE_BIN" state start intent --session s1
 [ "$RC" -eq 1 ] && ok || bad "state start intent: 退出码 ${RC}，预期 1（intent 阶段已移除）"
 run "$CHE_BIN" state start bogus --session s1

@@ -1,6 +1,6 @@
 ---
 name: che-compound-intentguard
-description: 实现后独立校验（L3）：密封 briefing（锁定 intent + 期望 + 完整 diff + 机械检查结果，绝不含实现者的上下文叙事）派给独立 checker（可跨模型），判定实现是否越出意图、约束与期望，返回 PASS / REVIEW NEEDED / BLOCKED。当用户说「intentguard 校验本次实现」「审一下这次改动有没有越界」时使用——即使用户没提命令名，只要是实现后的意图越界审查也用本 skill。
+description: 实现后独立校验（L3）：密封 briefing（锁定 intent + spec 场景 + 完整 diff + 机械检查结果，绝不含实现者的上下文叙事）派给独立 checker（可跨模型），判定实现是否越出意图、约束与场景，返回 PASS / REVIEW NEEDED / BLOCKED。当用户说「intentguard 校验本次实现」「审一下这次改动有没有越界」时使用——即使用户没提命令名，只要是实现后的意图越界审查也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -17,7 +17,7 @@ This is the command that makes the headline claim literally true: **the builder 
 
 - **L1** — tests pass, build clean, lint clean. *(Mechanical, you run it via Bash.)*
 - **L2** — output matches the augmented task list. *(Mechanical: tasks.md completion + diff evidence — you run it.)*
-- **L3** — implementation stayed within intent scope and constraints; expectations are satisfied. *(LLM judgment over the diff — the **independent checker** runs it, not you.)*
+- **L3** — implementation stayed within intent scope and constraints; the spec's scenarios are satisfied. *(LLM judgment over the diff — the **independent checker** runs it, not you.)*
 
 L1/L2 are objective, so the orchestrator does them. L3 is judgment, so it is **delegated** — that delegation is the whole point of this command.
 
@@ -52,12 +52,11 @@ an explicit `cross-model` or `cli:model` policy requires an external model CLI.
 
 First resolve the task directory: run `che paths --json` from the repo root **once** and use its `FEATURE_DIR` as `$TASK_DIR` (the `specs/NNN-{slug}/` directory created at specify time; `SLUG` is the directory name minus its prefix).
 
-1. **Unified spec** at `{TASK_DIR}/spec.md` — read `## Out of scope`, `## Constraints`, `## Failure conditions` for out-of-scope items, constraints, failure conditions
-2. **Expectations doc** at `{TASK_DIR}/expectations.md` — positive and edge scenarios
-3. **Tasks file** at `{TASK_DIR}/tasks.md` — including gapfill additions
-4. **Git diff** of the current branch vs the merge base — use `git diff $(git merge-base HEAD main)...HEAD`
+1. **Unified spec** at `{TASK_DIR}/spec.md` — read `## Out of scope`, `## Constraints`, `## Failure conditions` for out-of-scope items, constraints, failure conditions; read the `**Acceptance Scenarios**` blocks and `### Edge Cases` for the scenarios (global stable `E#` IDs)
+2. **Tasks file** at `{TASK_DIR}/tasks.md` — including gapfill additions
+3. **Git diff** of the current branch vs the merge base — use `git diff $(git merge-base HEAD main)...HEAD`
 
-If the spec or expectations doc is missing, stop and tell the user (a missing `spec.md` means `/che-compound-specify` has not run).
+If the spec is missing, stop and tell the user (a missing `spec.md` means `/che-compound-specify` has not run). If the spec has no scenario content (neither Acceptance Scenarios nor Edge Cases), stop — scenarios are mandatory spec sections.
 
 ## Output you produce
 
@@ -72,9 +71,9 @@ If the spec or expectations doc is missing, stop and tell the user (a missing `s
 
 ### Phase 0 — Load all inputs
 
-Read all four sources. Compute basic stats: lines changed in diff, files touched in diff, number of tasks marked complete.
+Read all three sources. Compute basic stats: lines changed in diff, files touched in diff, number of tasks marked complete.
 
-Confirm to user: *"Loaded spec, expectations, tasks ({N} of {M} complete), and diff ({N} lines across {M} files). Running L1/L2 here, then dispatching L3 to an independent checker."*
+Confirm to user: *"Loaded spec ({N} acceptance + {N} edge scenarios, {N} constraints, {N} failure conditions), tasks ({N} of {M} complete), and diff ({N} lines across {M} files). Running L1/L2 here, then dispatching L3 to an independent checker."*
 
 ### Phase 1 — L1: Mechanical checks *(you run these)*
 
@@ -109,7 +108,8 @@ Record any task marked complete with no diff evidence as a **L2 concern**. If 80
 Write `{TASK_DIR}/intentguard.briefing.md` containing **only**:
 - The goal sentence
 - **Locked intent** (from the unified spec): the full out-of-scope list, every constraint (with IDs), every failure condition — copied verbatim
-- **Locked expectations**: every scenario (positive + edge) — copied verbatim
+- **Locked scenarios** (from the unified spec): every Acceptance Scenario and Edge Case, with their `E#` IDs — copied verbatim
+- Relevant ADRs and `docs/corrections/` notes (so the checker can flag a diff that contradicts a recorded decision or repeats a past mistake)
 - **The git diff** — the complete `git diff $(git merge-base HEAD main)...HEAD`
 - **Mechanical results**: L1 (build/test/lint pass/fail) and L2 (tasks complete with/without evidence) as plain facts
 - **The verdict contract** (see below) telling the checker exactly what to return
@@ -145,7 +145,7 @@ The checker performs **all of L3** internally:
 - **L3a — Out-of-scope** *(BLOCKING)*: for each out-of-scope item, inspect the diff for matching paths/symbols/strings. Clear (non-borderline) match → BLOCKED.
 - **L3b — Constraints** *(BLOCKING for hard violations, REVIEW for borderline)*: for each constraint, read the actual code in the diff (not keyword-match) and decide PASS / BLOCKED / REVIEW with diff-cited rationale.
 - **L3c — Failure conditions**: confirm each failure condition has a covering check (in tasks.md after gapfill, or CI). No cover → REVIEW.
-- **L3d — Expectations**: each positive scenario must be demonstrated by diff + L1 tests; each edge scenario must show the graceful-degradation behavior. PASS / REVIEW / BLOCKED per scenario.
+- **L3d — Scenarios**: each Acceptance Scenario must be demonstrated by diff + L1 tests; each Edge Case must show the graceful-degradation behavior. PASS / REVIEW / BLOCKED per scenario (`E#`).
 
 **If the dispatch fails** (CLI error, timeout, unparseable output): fall **one tier down**, re-dispatch, and record the actual tier reached. Never claim a higher tier than was achieved.
 
@@ -154,7 +154,7 @@ The checker performs **all of L3** internally:
 Take the checker's L3a–L3d verdicts **as given** and combine with your L1/L2:
 - **PASS** — all of L1, L2, L3a, L3b, L3c, L3d are PASS (at most a few minor REVIEW items)
 - **REVIEW NEEDED** — any L3 check is REVIEW, no L1 fail, nothing BLOCKED
-- **BLOCKED** — any L1 fail, OR any L3a/L3b BLOCKED, OR any expectations scenario BLOCKED
+- **BLOCKED** — any L1 fail, OR any L3a/L3b BLOCKED, OR any scenario BLOCKED
 
 If you *disagree* with the checker, you may add a one-line **meta-note** to the report, but the checker's L3 verdict stands — overriding it re-merges the two contexts you just separated and voids the independence claim.
 
@@ -184,7 +184,7 @@ Embed this in the briefing. Both native subagents and cross-model CLIs return th
   "l3c_failure_conditions": [
     {"id": "F1", "covered_by": "task/CI ref | null", "verdict": "PASS|REVIEW"}
   ],
-  "l3d_expectations": [
+  "l3d_scenarios": [
     {"id": "E1", "type": "positive|edge", "verdict": "PASS|REVIEW|BLOCKED", "rationale": "..."}
   ],
   "l3_summary": "one short paragraph",
@@ -212,7 +212,7 @@ diff_files: {N}
 ## Verdict: **{PASS | REVIEW NEEDED | BLOCKED}**
 
 > **Checked by {checker} — Tier {N} ({cross-model | cross-tier | same-model fresh-context}).**
-> The checker received only the locked intent, locked expectations, the diff, and the
+> The checker received only the locked intent, locked scenarios, the diff, and the
 > mechanical results (see `…intentguard.briefing.md`). It did not see the build.
 
 ## L1 — Mechanical *(orchestrator)*
@@ -234,8 +234,9 @@ diff_files: {N}
 ## L3c — Failure condition coverage *(independent checker)*
 - **F1**: covered by {task or CI check} → PASS
 
-## L3d — Expectations satisfaction *(independent checker)*
-- **E1**: {verdict} — {rationale}
+## L3d — Scenario satisfaction *(independent checker)*
+- **E1** (positive): {verdict} — {rationale}
+- **E4** (edge): {verdict} — {rationale}
 
 ## Recommendations
 {If BLOCKED: list specific violations and the required fix for each}
@@ -256,7 +257,7 @@ diff_files: {N}
 
 ## Tool choices
 
-- **Read** for the four artifacts (spec, expectations, tasks; diff via Bash)
+- **Read** for the three artifacts (spec, tasks; diff via Bash)
 - **Bash** for `git diff` / `git merge-base`, the L1 build/test/lint, CLI detection (`command -v`), and Tier-1 cross-model dispatch (`codex exec` / `gemini -p` / `claude -p`)
 - **Agent/Task** for Tier-2/Tier-3 native-subagent dispatch (`model: haiku` for Tier 2)
 - **Write** for the briefing, the captured checker response, and the `.intentguard.md` report
@@ -266,13 +267,13 @@ diff_files: {N}
 
 ## What you do NOT do
 
-- **Judge L3 yourself.** L3a–L3d belong to the independent checker. Your opinion on scope/constraints/expectations does not enter the verdict — delegating that judgment *is* this command.
+- **Judge L3 yourself.** L3a–L3d belong to the independent checker. Your opinion on scope/constraints/scenarios does not enter the verdict — delegating that judgment *is* this command.
 - **Leak builder context into the briefing.** The checker sees only locked criteria, the diff, and mechanical results. No chat, no plan reasoning, no "what I intended."
 - **Override the checker's L3 verdict.** Disagreement goes in a meta-note only; overriding re-merges the contexts and voids the independence claim.
 - **Silently degrade tiers.** If you cannot reach the requested tier, say so and record the tier actually achieved. Never claim a stronger check than happened.
 - **Auto-merge or auto-revert** — you only report. The human decides.
 - **Modify the diff** — you are a validator, not a fixer.
-- **Re-write the spec or expectations** — those are locked. If they need to change, the user re-runs `/che-compound-specify` (update path, for locked intent changes) or `/che-compound-expectations`.
+- **Re-write the spec** — it is locked. If it needs to change, the user re-runs `/che-compound-specify` (update path), keeping existing `E#` IDs.
 
 ---
 

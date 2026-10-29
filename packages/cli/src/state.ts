@@ -25,8 +25,11 @@ Commands:
   che state done <stage>    Close the open run for the stage
   che state show            Stage, next step, and per-stage durations
 
-Stages (in flow order): specify, expectations, clarify, design, plan,
+Stages (in flow order): specify, clarify, design, plan,
 tasks, gapfill, planverify, intentguard, writeback, implement.
+Retired stage \`expectations\` is rejected by \`state start\`; legacy runs in
+existing metadata.json files still decode, display, and can be closed with
+\`state done expectations\`.
 
 Options:
   --feature <slug>  Resolve this task explicitly (overrides session binding)
@@ -38,7 +41,6 @@ Options:
 /** Flow order; OPTIONAL stages may be skipped without blocking the chain. */
 const STAGES = [
   'specify',
-  'expectations',
   'clarify',
   'design',
   'plan',
@@ -50,7 +52,27 @@ const STAGES = [
   'implement',
 ] as const;
 
+/**
+ * Stages retired from the forward flow. `state start` rejects them; legacy
+ * runs.* entries in existing metadata.json files still decode, display, and
+ * close via `state done` so no open run is left un-closable and no telemetry
+ * is silently dropped. They never participate in next-stage computation.
+ */
+const RETIRED_STAGES = [
+  'expectations',
+] as const;
+
 type Stage = (typeof STAGES)[number];
+type LegacyStage = (typeof RETIRED_STAGES)[number];
+
+const KNOWN_STAGES: readonly string[] = [...STAGES, ...RETIRED_STAGES];
+
+/** Display/runs order: forward flow with retired stages in their historical slot. */
+const DISPLAY_STAGES: readonly (Stage | LegacyStage)[] = [
+  STAGES[0],
+  ...RETIRED_STAGES,
+  ...STAGES.slice(1),
+];
 
 interface Run {
   start: string;
@@ -60,7 +82,7 @@ interface Run {
 interface Metadata {
   slug: string;
   created_at: string;
-  runs: Partial<Record<Stage, Run[]>>;
+  runs: Partial<Record<Stage | LegacyStage, Run[]>>;
 }
 
 function metadataPath(taskDir: string): string {
@@ -86,17 +108,23 @@ function writeMetadata(taskDir: string, meta: Metadata): void {
   writeFileSync(metadataPath(taskDir), JSON.stringify(meta) + '\n', 'utf-8');
 }
 
-function parseStage(raw: string): Stage {
-  if (!(STAGES as readonly string[]).includes(raw)) {
+function parseStage(raw: string, opts: { allowRetired?: boolean } = {}): Stage | LegacyStage {
+  if (!KNOWN_STAGES.includes(raw)) {
     throw new FeatureResolutionError(
-      `ERROR: unknown stage '${raw}' (expected one of: ${STAGES.join(', ')})`,
+      `ERROR: unknown stage '${raw}' (expected one of: ${KNOWN_STAGES.join(', ')})`,
     );
   }
-  return raw as Stage;
+  if (!opts.allowRetired && (RETIRED_STAGES as readonly string[]).includes(raw)) {
+    throw new FeatureResolutionError(
+      `ERROR: stage '${raw}' is retired — it is no longer part of the forward flow ` +
+      `(existing runs can still be closed with \`che state done ${raw}\`)`,
+    );
+  }
+  return raw as Stage | LegacyStage;
 }
 
-function isStage(value: unknown): value is Stage {
-  return typeof value === 'string' && (STAGES as readonly string[]).includes(value);
+function isKnownStage(value: unknown): value is Stage | LegacyStage {
+  return typeof value === 'string' && KNOWN_STAGES.includes(value);
 }
 
 /** Total wall-clock seconds; open runs count up to now. */
@@ -211,7 +239,7 @@ function runDone(argv: string[]): number {
   }
 
   try {
-    const stage = parseStage(parsed.positionals[0]);
+    const stage = parseStage(parsed.positionals[0], { allowRetired: true });
     const repoRoot = getRepoRoot();
     const task = resolveTask(repoRoot, resolutionOpts(parsed.values));
     const meta = readMetadata(task.path);
@@ -263,7 +291,7 @@ function runShow(argv: string[]): number {
     const durations: Record<string, number> = {};
     const runCounts: Record<string, number> = {};
     for (const key of Object.keys(meta.runs)) {
-      if (!isStage(key)) continue;
+      if (!isKnownStage(key)) continue;
       const stageRuns = meta.runs[key];
       if (!Array.isArray(stageRuns) || stageRuns.length === 0) continue;
       durations[key] = stageDurationSeconds(stageRuns, now);
@@ -287,7 +315,7 @@ function runShow(argv: string[]): number {
     process.stdout.write(`TASK: ${task.name}  (${task.path})\n`);
     process.stdout.write(`STAGE: ${stage}\n`);
     process.stdout.write(`NEXT: ${next === '' ? '(flow complete)' : next}\n`);
-    for (const entry of STAGES) {
+    for (const entry of DISPLAY_STAGES) {
       const seconds = durations[entry];
       if (seconds === undefined) continue;
       const open = (meta.runs[entry] ?? []).some((run) => run.end === null) ? ' [running]' : '';

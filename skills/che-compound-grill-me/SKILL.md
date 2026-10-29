@@ -15,7 +15,7 @@ Following the "Interview discipline (applies to every round)" in this file, perf
 
 > **See the Glossary for terms such as design tree, question candidate pool, frontier, round, category, decision-point status, aggregate category status, and coverage map.**
 
-**This command must be able to run as an alternative to `che-compound-clarify` in a macOS / Linux + Bash environment.** In supported environments, preserve compatibility with clarify's artifacts and side effects by producing them in the same form (`## Clarifications`, incorporation into the relevant sections, validation after every write, revalidation of `checklists/requirements.md`, and a completion report with coverage). The internal elicitation and convergence algorithm intentionally differs to achieve deeper clarification.
+**This command must be able to run as an alternative to `che-compound-clarify` in a macOS / Linux + Bash environment.** In supported environments, preserve compatibility with clarify's artifacts and side effects by producing them in the same form (direct incorporation into the relevant spec sections, validation after every write, and a completion report with coverage; no `## Clarifications` Q&A history is written, and no checklist file is touched). The internal elicitation and convergence algorithm intentionally differs to achieve deeper clarification.
 
 This compatibility applies to **artifacts and side effects**. It does not mean that this command supports every runtime environment supported by the base toolkit. Use only the pack-bundled Python prerequisite helper; do not substitute project-local Bash, PowerShell, or Python copies.
 
@@ -61,7 +61,7 @@ Do not delete descendants that no longer apply. Keep each as a **Resolved node w
 
 - Remove the corresponding question from both the current frontier and the question candidate pool.
 - Change the corresponding decision point in the coverage map to Resolved and record a rationale such as "Not applicable because parent decision <decision point> was settled as <result>."
-- If obsolete child-decision text remains in the spec, remove or revise it through Step 4A or Step 4B according to the source that settled the parent, then save and validate. Do not add a separate Clarifications Q&A for a child that became inapplicable in addition to the parent answer's Clarifications record.
+- If obsolete child-decision text remains in the spec, remove or revise it through Step 4A or Step 4B according to the source that settled the parent, then save and validate. Do not add a separate Q&A record for a child that became inapplicable in addition to the parent answer's integration.
 - Recalculate the design tree and aggregate category statuses.
 
 Conversely, when a changed parent decision makes a descendant that was inapplicable, Outstanding, or Deferred because of that parent applicable again, remove the parent-dependent terminal rationale and do the following:
@@ -97,7 +97,7 @@ An interview unit corresponding to one frontier. Ask questions one at a time in 
 
 ### Categories
 
-The ambiguity scan (Step 1) and coverage report (Step 8) organize decision points into the following ten categories. A category is an aggregate grouping of multiple decision points, not the smallest unit that receives a status. Throughout this file, "all categories" refers to these ten.
+The ambiguity scan (Step 1) and coverage report (Step 7) organize decision points into the following ten categories. A category is an aggregate grouping of multiple decision points, not the smallest unit that receives a status. Throughout this file, "all categories" refers to these ten.
 
 - **Functional scope and behavior**: Core goals and success criteria / explicit out-of-scope declarations / role and persona distinctions
 - **Domain and data model**: Entities, attributes, and relationships / uniqueness and identity rules / lifecycle and state transitions / expected data volume
@@ -135,7 +135,7 @@ Derive a category's display status mechanically from all decision points beneath
 4. Otherwise, use `Resolved` if at least one point is Resolved.
 5. Use `Clear` if every point was clear from the beginning.
 
-For example, if Performance is Resolved, Observability is Outstanding, Security is Deferred, and the remaining points are Clear under "Non-functional quality," the aggregate category status is Deferred. However, Steps 6 and 8 must also include the per-point breakdown, including all Outstanding points.
+For example, if Performance is Resolved, Observability is Outstanding, Security is Deferred, and the remaining points are Clear under "Non-functional quality," the aggregate category status is Deferred. However, Steps 6 and 7 must also include the per-point breakdown, including all Outstanding points.
 
 ### Coverage map
 
@@ -164,7 +164,7 @@ A list associating the semantic identity of every decision point (category, deci
 - **Follow up on ambiguous or contradictory answers.** Do not stop until the answer is precise. You may create hypothetical scenarios to probe boundaries, but explicitly label them "hypothetical" in the question. Until the user accepts them, do not treat them as project facts, requirements, or decisions and do not incorporate them into the spec. Add each follow-up to the question candidate pool and confirm it on a later frontier.
 - **Do not preview later questions.** Present only the current question. Do not reveal or list the remaining questions in the current round or any future round ahead of time.
 - **Do not act on a decision until shared understanding is confirmed.** Incorporate only into spec.md; do not begin plans, tasks, or code.
-- **Respect interruption signals such as "stop," "that's enough," or "let's move on for now."** Stop presenting new questions immediately and enter the "Interrupted completion path." Ending the question loop does not mean skipping the checklist or completion report.
+- **Respect interruption signals such as "stop," "that's enough," or "let's move on for now."** Stop presenting new questions immediately and enter the "Interrupted completion path." Ending the question loop does not mean skipping the completion report.
 
 ### Interrupted completion path
 
@@ -172,9 +172,9 @@ If the user asks to stop after the spec has been loaded, perform these steps in 
 
 1. Do not incorporate any answer that has not yet been accepted. Preserve changes that were accepted, saved, and validated before the interruption.
 2. Change every remaining Partial / Missing decision point to Deferred, including the current question, unpresented candidates, candidates blocked by dependencies, unfinished factual research, and points reopened for conflict confirmation. Record the reason as "User interruption" and move corresponding design-tree nodes to terminal hold. Empty the frontier and question candidate pool, then recalculate aggregate category statuses.
-3. Run the final full validation from Step 4C against the already saved spec. Do not fill unresolved content by assumption or create new Clarifications Q&A entries.
-4. Skip the Step 5 rescan and Step 6 satisfaction gate, and proceed to checklist revalidation in Step 7.
-5. Issue the Step 8 completion report as "Completed by user interruption." Include the interruption point, decision points deferred with reasons, coverage table, checklist results, and a recommendation on whether to proceed to planning or rerun this command later.
+3. Run the final full validation from Step 4C against the already saved spec. Do not fill unresolved content by assumption.
+4. Skip the Step 5 rescan and Step 6 satisfaction gate, and proceed directly to the completion report in Step 7.
+5. Issue the Step 7 completion report as "Completed by user interruption." Include the interruption point, decision points deferred with reasons, coverage table, and a recommendation on whether to proceed to planning or rerun this command later.
 
 ### Question format
 
@@ -190,7 +190,7 @@ Present questions one at a time in sequence using the following format. Restart 
 - **Free-form** — Another answer, partial adoption, or a conditional answer (unlimited length)
 ```
 
-Vary the number of choices between one and three according to the situation, but always include the `**Free-form**` line. The user may answer the one currently presented question with a single label such as "A" or "B," with "recommended," or in free form. Accept "yes" only when its meaning is unambiguous in the current question. If the user says "skip" or "defer," carry the question into a later round and renumber it there. Also accept free-form text that addresses a question other than the one currently presented—such as an advance answer to a later question or an explicit revision to a settled decision—and incorporate each decision through Step 4A just like the answer to the current question. Recalculate the frontier only at the end of the round. Numbers are for reference within a round and are not recorded in spec.md; use the Clarifications format in Step 4A. When referring to a question from an earlier round, use "Round n, Qk (<question title or summary>)" and always restate the question content because the number alone is not memorable.
+Vary the number of choices between one and three according to the situation, but always include the `**Free-form**` line. The user may answer the one currently presented question with a single label such as "A" or "B," with "recommended," or in free form. Accept "yes" only when its meaning is unambiguous in the current question. If the user says "skip" or "defer," carry the question into a later round and renumber it there. Also accept free-form text that addresses a question other than the one currently presented—such as an advance answer to a later question or an explicit revision to a settled decision—and incorporate each decision through Step 4A just like the answer to the current question. Recalculate the frontier only at the end of the round. Numbers are for reference within a round and are not recorded in spec.md; reference the affected spec section in Step 4A. When referring to a question from an earlier round, use "Round n, Qk (<question title or summary>)" and always restate the question content because the number alone is not memorable.
 
 ## Workflow
 
@@ -207,7 +207,7 @@ Do not leave an excluded point as Partial / Missing. Immediately change it in th
 Whenever candidates are added to the question candidate pool, apply the **fact gate** below before calculating the frontier to all candidates that have not yet passed it and all candidates whose premises changed because a dependency was settled or for another reason. This applies not only to candidates created by the initial Step 1 scan, but also to follow-ups, drill-downs, decision-derived checks, and rescans.
 
 1. Classify the candidate's answer as either "a fact that investigation can establish" or "a decision the user must make as project policy."
-2. Investigate factual candidates yourself in the codebase, project documents, and existing specs. Remove candidates whose answers are established from the question candidate pool. If the investigated fact resolves ambiguous text in the spec, edit only the main spec through **Step 4B**, then change the corresponding point to Resolved after incorporation and validation. Do not add it to Clarifications.
+2. Investigate factual candidates yourself in the codebase, project documents, and existing specs. Remove candidates whose answers are established from the question candidate pool. If the investigated fact resolves ambiguous text in the spec, edit only the main spec through **Step 4B**, then change the corresponding point to Resolved after incorporation and validation.
 3. Keep a candidate whose factual investigation depends on an unresolved decision or cannot finish during the current round in the pool as "awaiting research." Do not add it to the frontier or turn it into a user question. Reapply the fact gate after its dependency is settled or the research is complete.
 4. Reclassify a candidate as a decision only if, after exhausting available sources, it becomes clear that new project policy or requirements must be chosen. If a factual answer exists externally but simply cannot be obtained, do not treat it as a decision. Mark it Outstanding if it has no impact on implementation or validation strategy; otherwise mark it Deferred and record why it could not be investigated.
 
@@ -243,35 +243,34 @@ Step 4 does not run sequentially after Step 3. Invoke Step 4A from Step 3 whenev
 
 #### Step 4A. Incorporate a user answer
 
-1. On the first answer only, ensure that spec.md contains `### Session YYYY-MM-DD` under `## Clarifications`; if `## Clarifications` does not exist, add it immediately after the spec overview section.
-2. For every accepted answer, append one line: `- Q: <question> → A: <settled answer>`.
-3. Incorporate the settled decision into the main spec according to "Step 4C. Shared incorporation and validation rules."
-4. If one answer contains multiple decisions, incorporate, save, and validate each decision separately. Keep only one Clarifications Q&A line per accepted answer; do not duplicate the same answer.
-5. After each decision has been saved and validated successfully, change its point to Resolved and recalculate aggregate category status.
+1. Do not write a `## Clarifications` Q&A history — clarify no longer keeps one, and this command must not reintroduce it. The accepted answer is recorded only by integrating it into the affected spec sections.
+2. Incorporate the settled decision into the main spec according to "Step 4C. Shared incorporation and validation rules."
+3. If one answer contains multiple decisions, incorporate, save, and validate each decision separately.
+4. After each decision has been saved and validated successfully, change its point to Resolved and recalculate aggregate category status.
 
 #### Step 4B. Incorporate a fact established by investigation
 
-1. Do not create `## Clarifications` / `### Session YYYY-MM-DD` and do not append a Q&A line. Clarifications records only the user interview.
-2. Incorporate only facts verified from the codebase, project documents, or existing specs into the main spec according to "Step 4C. Shared incorporation and validation rules." Never incorporate assumptions or hypothetical scenarios as facts.
-3. Incorporate, save, and validate each verified fact separately.
-4. After it has been saved and validated successfully, change the point resolved by that fact to Resolved and recalculate aggregate category status.
+1. Incorporate only facts verified from the codebase, project documents, or existing specs into the main spec according to "Step 4C. Shared incorporation and validation rules." Never incorporate assumptions or hypothetical scenarios as facts.
+2. Incorporate, save, and validate each verified fact separately.
+3. After it has been saved and validated successfully, change the point resolved by that fact to Resolved and recalculate aggregate category status.
 
 #### Step 4C. Shared incorporation and validation rules
 
 1. Incorporate content into the best section:
    - Functional ambiguity → Functional Requirements
    - Actor or action distinctions → User Stories / Actors
+   - **Acceptance Scenarios / Edge Cases**: replace an overturned scenario's text in place, keeping its existing `E#` ID — never append contradictory alternatives, never renumber or reuse IDs; only genuinely new scenarios take the next unused `E#`. After any scenario change, re-run the scenario quality tests `SQ1–SQ4` (defined in `/che-compound-specify`) and fix failures before saving.
    - Data shape → Data Model, preserving the existing field order and keeping constraints concise
    - Non-functional requirement → measurable form under Success Criteria; convert vague adjectives into metrics
    - Edge case → Edge Cases / Error Handling
-   - Terminology → normalize to the canonical term throughout the spec; if needed, note `(formerly "X")` once
+   - Terminology → normalize to the canonical term throughout the spec; register new domain terms in the matching 域节 of `docs/GLOSSARY.md`; if needed, note `(formerly "X")` once
 2. If new content invalidates older ambiguous text, **replace** it rather than appending a duplicate. Leave no conflicting obsolete text.
 3. **Save spec.md after every incorporation.** Do not reorder unrelated sections or alter their heading hierarchy. Keep additions minimal and testable.
 4. **Validate after every save**, and run one final full pass after the last round:
-   - For Step 4A, ensure the Clarifications Session has exactly one non-duplicated line per accepted answer. For Step 4B, ensure Clarifications has no diff.
    - Ensure no ambiguous text or placeholder that the incorporation should resolve remains.
    - Ensure no invalidated option or conflicting obsolete text remains.
-   - Ensure Markdown structure is valid. The only new headings may be `## Clarifications` / `### Session YYYY-MM-DD` from Step 4A.
+   - Ensure scenario `E#` IDs are stable (pre-existing IDs kept, no duplicates), and changed scenarios re-pass `SQ1–SQ4`.
+   - Ensure Markdown structure is valid. No new top-level sections are added — integration happens inside existing sections only.
    - Ensure canonical terminology is consistent across every updated section.
 
 ### Step 5. Rescan loop
@@ -311,22 +310,13 @@ If the user selects 2, ask a confirmation question requesting a free-form descri
 
 Also accept free-form answers outside the choices, such as directly identifying an additional point, and treat them like option 2 or 3 according to their content.
 
-### Step 7. Revalidate the checklist
-
-If `FEATURE_DIR/checklists/requirements.md` exists, perform the following. If it does not, skip silently.
-
-1. Record as a before snapshot only checkbox lines outside code fences (`- [ ]` / `- [x]` / `- [X]`, allowing indentation for nesting), including each item's current status and text.
-2. Reevaluate every item against the **updated spec**. Save changes only for items whose state changes, toggling `[ ]` / `[x]`. Do not alter anything else: headings, metadata, notes, line order, or whitespace. Avoid diff noise.
-3. Compare against the before snapshot and produce three lists: **newly passed** (unchecked → checked), **regressed** (checked → unchecked), and **still failing**. Also record before/after pass counts, for example `12/16 → 15/16`.
-
-### Step 8. Completion report
+### Step 7. Completion report
 
 Report:
 
 - Completion type (normal / user interruption). For an interruption, include where it occurred and that no post-interruption question or answer was incorporated.
-- Number of rounds and total questions; optionally include a per-round breakdown. The question-and-answer list may refer to Clarifications.
+- Number of rounds and total questions; optionally include a per-round breakdown.
 - Path to the updated spec and the sections changed.
-- Checklist before/after pass counts, newly passed and regressed items, and items still failing, listed as areas needing attention.
 - Coverage table: show every category's aggregate status as **Resolved** / **Clear** / **Deferred** / **Outstanding**, with a per-point status breakdown for each category. Do not proceed to the completion report if even one Partial / Missing point remains.
 - If Outstanding / Deferred items remain, recommend whether to proceed to the agent-specific invocation of `che-compound-plan` or rerun this command later.
 - Suggested next command, normally the agent-specific invocation of `che-compound-plan` (for example, `/che-compound-plan` or `$che-compound-plan`).
@@ -336,7 +326,7 @@ Report:
 - This workflow is expected to finish **before** `che-compound-plan`. If the user explicitly skips it and proceeds, comply after warning that the risk of downstream rework will increase.
 - If no significant ambiguity exists, report "No critical ambiguities detected," provide an aggregate category summary showing all points as Clear, and proceed to the Step 6 satisfaction gate. Do not invent questions.
 - Do not ask speculative questions about the technology stack unless they block functional clarification.
-- This command may modify only spec.md and `checklists/requirements.md` (and only checkbox states in Step 7). Do not modify plans, tasks, code, or any other file.
+- This command may modify only spec.md. Do not modify plans, tasks, code, or any other file. Never write a `## Clarifications` Q&A history.
 
 ## Done When
 
@@ -346,8 +336,8 @@ Report:
 - [ ] Current parent decisions and the applicability of all descendants agree. No child that became applicable again retains an obsolete non-applicable or parent-dependent terminal rationale.
 - [ ] Every decision point has reached one of the final statuses—Clear / Resolved / Outstanding / Deferred—and aggregate category statuses have been recalculated.
 - [ ] User satisfaction is explicit, except upon interruption.
-- [ ] `checklists/requirements.md` has been revalidated against the updated spec, if present.
-- [ ] A completion report has been issued with rounds, question count, changed sections, checklist status, and a coverage table containing aggregate category statuses and per-point breakdowns.
+- [ ] No `## Clarifications` Q&A history was written; scenario `E#` IDs stayed stable, and changed scenarios re-pass `SQ1–SQ4`.
+- [ ] A completion report has been issued with rounds, question count, changed sections, and a coverage table containing aggregate category statuses and per-point breakdowns.
 
 ---
 

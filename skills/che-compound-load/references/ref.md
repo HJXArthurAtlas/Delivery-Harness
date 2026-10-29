@@ -34,7 +34,7 @@ Three separate paradigms brought together. They are compatible but not the same 
 
 **P2. Internal contradictions across templates.** The toolkit's manifesto declares test-first development *"NON-NEGOTIABLE."* Its task template, shipped in the same repo in the same week, says *"Tests are OPTIONAL, only include them if explicitly requested."* Its implement template says *"Follow the TDD approach."* A goal-seeking model handed three contradictory rules picks one and improvises — the exact behavior the rigid method was supposed to prevent.
 
-These are not bugs in our extension scope, but they explain why the unified spec's intent block + a separate expectations doc + gapfill are needed: they are the structural defense against templates that silently hedge.
+These are not bugs in our extension scope, but they explain why the unified spec's intent block + in-spec scenarios + gapfill are needed: they are the structural defense against templates that silently hedge.
 
 **The key insight:**
 The `/che-compound-tasks` output IS the "expectations" node in the Activated Thinker agentic loop model. The toolkit is what generates the right side of the intent/expectations diagram.
@@ -58,7 +58,7 @@ as done)
 ```
 
 **Intent** = the left side of the diagram. What you provide.
-**Expectations** = also what you provide. The toolkit generates *task-level* expectations from your intent, but `/che-compound-expectations` captures the user-level "done" boundary that the validator (not the builder) consumes.
+**Scenarios** = also what you provide. The toolkit generates *task-level* expectations from your intent, but `/che-compound-specify` captures the user-level "done" boundary — Acceptance Scenarios and Edge Cases with stable `E#` IDs — inside the same `spec.md` that carries the intent. The validator consumes them from there.
 **The harness** = runs the loop. Could be Claude Code, Copilot Workspace, Cursor, etc.
 
 **Alternative framing: ICE in IDSD.** Kapil Viren Ahuja's "Intent-Driven Software Development" (IDSD) frames this layer as **ICE — Intent, Context, Expectations**:
@@ -67,24 +67,23 @@ as done)
 |---|---|---|
 | **Intent** | Goal + constraints + failure conditions | Human |
 | **Context** | The surround (stack, codebase, prior decisions), fed progressively | Harness |
-| **Expectations** | Success scenarios + boundary of done, compartmented from Intent | Human |
+| **Expectations** | Success scenarios + boundary of done | Human |
 
-The compartmentation rule from IDSD: success scenarios must not appear in the artifact the builder reads, because LLMs reward-hack — the builder will optimize for the validator's checks if both come from the same file. Our `/che-compound-specify` (unified spec.md, intent block included) and `/che-compound-expectations` (separate expectations.md) split implements this.
+The IDSD compartmentation rule originally put success scenarios in a separate file so the builder could not read the validator's checks. **This pack no longer does that.** Scenarios live in `spec.md` next to the intent; the accepted tradeoff is that the validation criteria are not secret from the builder. What is preserved is *independent judgment*: the validator (`/che-compound-intentguard`) still judges through a sealed briefing and an independent checker (fresh context, ideally a different model) that never saw the builder's reasoning — the firewall moved from the file system to the dispatch boundary.
 
 **The gap the base workflow leaves:**
 The base workflow asks "what do you want to build?" but doesn't structure:
 - Scope boundaries (what should NOT be touched)
 - Constraints (technical, UX, performance limits) — directional, unconditional, in business language
 - Failure conditions (binary, post-output, observable)
-- Success scenarios — kept separate from intent for reward-hack defense
+- User-observable acceptance and edge scenarios with stable IDs
 
 These are the things that prevent AI overreach and define what "done" really means.
 
-**Our two committed artifacts** fill this gap:
-- `{task_dir}/spec.md` — the unified, builder-readable artifact: goal, why now, in/out scope, constraints, failure conditions (the intent block) PLUS the generated feature specification (User Stories, FRs, SCs)
-- `{task_dir}/expectations.md` — success scenarios + done boundary, validator-only
+**Our single committed requirement artifact** fills this gap:
+- `{task_dir}/spec.md` — goal, why now, in/out scope, constraints, failure conditions (the intent block) PLUS User Stories with prioritized Acceptance Scenarios, Edge Cases, Functional Requirements, Success Criteria — one requirement source of truth with a stable global `E#` ID sequence
 
-(Both live in the task directory — the `specs/NNN-{slug}/` directory that `che paths` reports as `FEATURE_DIR`.) Soft compartmentation is therefore **specify versus expectations**: the builder reads `spec.md`; the validator reads both `spec.md` (intent sections) and `expectations.md`.
+(It lives in the task directory — the `specs/NNN-{slug}/` directory that `che paths` reports as `FEATURE_DIR`.) The builder reads `spec.md`; the validator reads the same file through a sealed briefing.
 
 ---
 
@@ -133,14 +132,14 @@ They map onto specific parts of the Activated Thinker / ICE diagram:
 |---|---|
 | Compound store | `pull context` step — loaded before every loop iteration via `/che-compound-load` |
 | Intent block (in unified spec.md) | `INTENT` node — what you provide on the left (goal + constraints + failure conditions) |
-| Expectations doc | `EXPECTATIONS` node — what you provide on the right (success scenarios, compartmented) |
+| Spec scenarios (Acceptance + Edge, `E#` IDs, same spec.md) | `EXPECTATIONS` node — what you provide on the right |
 | Generated tasks | Task-level expectations the harness loops against |
 | `/che-compound-implement` | The harness — runs work → validate → loop |
 | Intentguard | Validates the `met?` decision beyond just tests (L3) |
 | Compound writeback | Updates compound store after loop exits, via `/che-compound-writeback` |
 
 **The summary in one sentence:**
-We are automating the SDD workflow with smarter inputs (intent + expectations layer, compartmented), making its outputs more complete (gapfill), and making the whole system compound over time (compound engineering store).
+We are automating the SDD workflow with a smarter single input (intent + scenarios in one spec), making its outputs more complete (gapfill), and making the whole system compound over time (compound engineering store).
 
 ---
 
@@ -158,37 +157,37 @@ The toolkit and its harnesses store agent memory locally. This breaks across ses
 
 The compound store is version-controlled and committed: artifacts live in `docs/adr/`, `docs/corrections/`, and `docs/patterns/`, while metadata remains under `docs/compound/`. It is treated as a first-class repo artifact — because that is exactly what it is.
 
-### Intent and Expectations are separate artifacts (soft compartmentation, v0.2)
-Per IDSD's compartmentation principle, success scenarios must not appear in the artifact the builder reads, because LLMs reward-hack — the builder will optimize for the scenarios the validator checks if both come from the same file.
+### One requirement artifact; independence at the dispatch boundary (supersedes the v0.2 file split)
+IDSD's original compartmentation principle kept success scenarios out of the artifact the builder reads, because LLMs reward-hack — the builder will optimize for the scenarios the validator checks. v0.2 shipped that as two files: `/che-compound-specify` wrote `spec.md` (intent + generated specification) and a separate `/che-compound-expectations` wrote the validator-only `expectations.md`.
 
-For v0.2, we ship **soft compartmentation**: `/che-compound-specify` captures the intent (goal, scope, constraints, failure conditions) and generates the feature specification into one unified builder-readable `spec.md`; `/che-compound-expectations` writes the validator-only scenarios to a separate `expectations.md`. The builder (during `/che-compound-implement`) reads `spec.md`; the validator (during `/che-compound-intentguard`) reads the spec's intent sections plus the expectations doc. Same agent, different artifacts.
+**Current design (single-artifact model):** the expectations phase is retired. `/che-compound-specify` drafts the Acceptance Scenarios and Edge Cases in the same interview and writes them into `spec.md` with a global stable `E#` ID sequence (never renumbered, never reused). There is one requirement source of truth, one forward stage chain, and no second spec writer — `/che-compound-clarify` is the only later writer, and it integrates answers directly into the spec sections.
 
-Hard compartmentation (separate agents, encrypted evals, builder structurally unable to read the expectations file) is deferred until we have evidence the soft version is being gamed.
+What the merge gives up — the validation criteria are no longer hidden from the builder — was an accepted tradeoff. What it keeps is **independent judgment**: `/che-compound-intentguard` and `/che-compound-planverify` still extract the locked intent, the scenarios, and the diff (or plan) into a sealed briefing and hand it to an independent checker (fresh context at minimum, a different model when available) that never saw the builder's or planner's reasoning. The compartmentation that remains real is the briefing firewall, not file visibility. Hard compartmentation (separate agents, encrypted evals) remains deferred until there is evidence the briefing firewall is being gamed.
 
 ### Compound load and writeback are two separate commands (extension-system convention)
 v0.1 drafts considered a single `compound` command with `load` and `writeback` subactions, matching Every's `/ce-compound` shape. When we ran the first live install test in v0.2, we discovered the extension system does not support subactions — each slash command must be its own file (the bundled git extension exposes its `commit`, `feature`, `initialize`, `remote`, and `validate` commands as five separate files, not one with subactions). We split accordingly: `/che-compound-load` and `/che-compound-writeback` are two halves of one mechanism, registered separately. The compartmentation and semantics are unchanged; only the surface shape differs.
 
-### The unified spec's intent sections + expectations doc are the gapfill input
-The toolkit generates tasks (expectations) from a feature description. But it generates primarily happy-path tasks.
+### The unified spec (intent sections + scenarios) is the gapfill input
+The toolkit generates tasks (task-level expectations) from a feature description. But it generates primarily happy-path tasks.
 
-The unified spec's **out-of-scope** and **constraints** sections, plus the expectations doc's **negative scenarios**, are the inputs that `/che-compound-gapfill` uses to generate the missing tests — constraint violation checks, scope regression checks, negative paths.
+The unified spec's **out-of-scope** and **constraints** sections, plus the **Edge Cases** (and the Acceptance Scenarios the tasks must demonstrate), are the inputs that `/che-compound-gapfill` uses to generate the missing tests — constraint violation checks, scope regression checks, negative paths.
 
-Without these sections, gapfill has no reference to know what constraints exist or what's out of scope.
+Without these sections, gapfill has no reference to know what constraints exist, what's out of scope, or which `E#` scenarios still lack a task.
 
 ### Validation Level 3 (Intent Guard)
 Most harnesses validate at:
 - L1: Tests pass, build is clean
 - L2: Output matches the spec
 
-L3 is new: did the implementation **stay within the unified spec's declared scope and constraints, and satisfy the expectations doc**?
+L3 is new: did the implementation **stay within the unified spec's declared scope and constraints, and satisfy the spec's Acceptance Scenarios and Edge Cases**?
 
-This requires comparing the git diff against the spec's out-of-scope and constraints sections, and against the expectations doc's success scenarios — something that requires a separate LLM call, not just test execution.
+This requires comparing the git diff against the spec's out-of-scope and constraints sections, and against the spec's `E#` scenarios — something that requires a separate LLM call, not just test execution.
 
 The intentguard prompt specifically checks:
 1. Were any out-of-scope items touched? (BLOCKED if yes)
 2. Were any constraints violated? (BLOCKED if yes)
 3. Were any failure conditions tripped? (BLOCKED if yes)
-4. Do the success scenarios pass? (REVIEW if uncertain)
+4. Do the scenarios pass? (REVIEW if uncertain)
 
 ### Extension, not fork; extension, not harness
 Built as a community extension using the official extension mechanism (`extension.yml` + command templates + `specify extension add`).
@@ -227,16 +226,16 @@ Existing Friends entries for reference format:
 "A compound-engineering extension that adds intent-driven scoping (ICE), compound engineering memory, and intent guard validation to the SDD workflow."
 
 **The story for GDE content:**
-- The base workflow generates expectations but misses intent (scope, constraints, non-goals)
-- The Activated Thinker / IDSD model shows why: intent and expectations are separate inputs that must be compartmented
+- The base workflow generates task-level expectations but misses intent (scope, constraints, non-goals) and user-level scenarios
+- The Activated Thinker / IDSD model shows why: intent and expectations are separate inputs the human must provide; this pack captures both in one interview
 - Compound engineering solves the memory problem that the toolkit and harnesses leave unsolved
 - This extension wires all three together as a publishable extension
 
 **What makes it novel:**
 - Intent Guard (L3 validation) — not done by any existing extension
 - Compound store as committed repo artifacts — solves the local-memory limitation
-- Intent/Expectations split with soft compartmentation — defense against reward-hacking
-- Gapfill driven by intent + expectations docs — not generic, purpose-built
+- One requirement artifact (intent + scenarios with stable `E#` IDs in `spec.md`), with validator independence preserved by the sealed-briefing firewall — not file hiding
+- Gapfill driven by the spec's intent sections + scenarios — not generic, purpose-built
 
 ---
 
@@ -245,7 +244,7 @@ Existing Friends entries for reference format:
 | Command | Phase | What it does |
 |---|---|---|
 | `/che-compound-constitution` | Init | Create project governing principles |
-| `/che-compound-specify` | Spec | Capture intent (goal, constraints, failure conditions) + generate the unified spec from feature description |
+| `/che-compound-specify` | Spec | Capture intent (goal, constraints, failure conditions) + draft acceptance/edge scenarios (`E#` IDs) into one unified spec |
 | `/che-compound-clarify` | Spec | Clarify underspecified areas |
 | `/che-compound-plan` | Plan | Generate technical implementation plan |
 | `/che-compound-tasks` | Tasks | Generate task breakdown (= task-level expectations) |
@@ -253,7 +252,6 @@ Existing Friends entries for reference format:
 | `/che-compound-analyze` | Optional | Cross-artifact consistency check |
 | quality-checklist generation | Optional | Generate quality checklists (not shipped in this pack) |
 | tasks-to-issues conversion | Optional | Convert tasks to GitHub issues (not shipped in this pack) |
-| `/che-compound-expectations` | **Extension** | Success scenarios, definition of done — compartmented (this extension) |
 | `/che-compound-load` | **Extension** | Load ADRs, corrections, patterns into context (this extension) |
 | `/che-compound-writeback` | **Extension** | Persist learnings back to compound store (this extension) |
 | `/che-compound-gapfill` | **Extension** | Fill generated-task gaps with constraint/negative tests (this extension) |
