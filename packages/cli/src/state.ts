@@ -25,7 +25,7 @@ Commands:
   che state done <stage>    Close the open run for the stage
   che state show            Stage, next step, and per-stage durations
 
-Stages (in flow order): intent, expectations, specify, clarify, design, plan,
+Stages (in flow order): specify, expectations, clarify, design, plan,
 tasks, gapfill, planverify, intentguard, writeback, implement.
 
 Options:
@@ -37,9 +37,8 @@ Options:
 
 /** Flow order; OPTIONAL stages may be skipped without blocking the chain. */
 const STAGES = [
-  'intent',
-  'expectations',
   'specify',
+  'expectations',
   'clarify',
   'design',
   'plan',

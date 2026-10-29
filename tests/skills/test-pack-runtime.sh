@@ -31,7 +31,7 @@ TMP="$(mktemp -d)"
 TMP="$(cd "$TMP" && pwd -P)"
 trap 'PATH=$ORIG_PATH; rm -rf "$TMP"' EXIT
 unset ADRKIT_FEATURE_DIR ADRKIT_SNAPSHOT ADRKIT_AS_OF
-unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_SESSION_ID CHE_REQUIRE_INTENT SKC_PLANVERIFY_GATE
+unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_SESSION_ID SKC_PLANVERIFY_GATE
 unset SPECIFY_INIT_DIR SPECIFY_FEATURE SPECIFY_FEATURE_DIRECTORY SPECIFY_FEATURE_NO_PERSIST
 
 INSTALL="$TMP/install"
@@ -41,8 +41,6 @@ mkdir -p "$SKILLS" "$PROJECT/.git" "$PROJECT/docs/adr"
 for skill in che-adr-check che-adr-context che-adr-draft; do
   cp -R "$REPO_ROOT/skills/$skill" "$SKILLS/$skill"
 done
-cp -R "$REPO_ROOT/skills/che-compound-require-intent" "$SKILLS/che-compound-require-intent"
-GATE_WRAPPER="$SKILLS/che-compound-require-intent/scripts/bash/require-intent.sh"
 cp -R "$REPO_ROOT/skills/che-compound-planverify-gate" "$SKILLS/che-compound-planverify-gate"
 PV_GATE_WRAPPER="$SKILLS/che-compound-planverify-gate/scripts/bash/planverify-gate.sh"
 
@@ -111,14 +109,8 @@ case "$(<"$TMP/stderr")" in
   *"npm install -g @newchiwan/che@latest"*) ok ;;
   *) bad "missing che: 未提示 npm 安装：$(<"$TMP/stderr")" ;;
 esac
-# Missing-che contract: the require-intent wrapper delegates to the che CLI
+# Missing-che contract: the planverify-gate wrapper delegates to the che CLI
 # and must surface the install hint when che is absent.
-run "$GATE_WRAPPER"
-[ "$RC" -eq 1 ] && ok || bad "require-intent missing che: 退出码 ${RC}，预期 1"
-case "$(<"$TMP/stderr")" in
-  *"npm install -g @newchiwan/che@latest"*) ok ;;
-  *) bad "require-intent missing che: 未提示 npm 安装：$(<"$TMP/stderr")" ;;
-esac
 run "$PV_GATE_WRAPPER" demo
 [ "$RC" -eq 1 ] && ok || bad "planverify-gate missing che: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
@@ -151,22 +143,6 @@ run che paths --json
 [ "$RC" -eq 0 ] && ok || bad "che paths: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"FEATURE_DIR\":\"$PROJECT/specs/001-demo\",\"FEATURE_SPEC\":\"$PROJECT/specs/001-demo/spec.md\"}" \
   && ok || bad "che paths: JSON 未返回活动 feature 路径：$OUT"
-
-# The require-intent wrapper delegates to `che require-intent`: gate on by
-# default (task dir has no intent.md yet), env toggle passes silently, and
-# an intent doc lets specify proceed.
-run "$GATE_WRAPPER"
-[ "$RC" -eq 1 ] && ok || bad "require-intent 默认拦截: 退出码 ${RC}，预期 1"
-case "$(<"$TMP/stderr")" in
-  *"Task directory has no intent doc (001-demo)"*) ok ;;
-  *) bad "require-intent 默认拦截: 错误信息不符：$(<"$TMP/stderr")" ;;
-esac
-OUT="$(cd "$PROJECT" && CHE_REQUIRE_INTENT=off "$GATE_WRAPPER" 2>"$TMP/stderr")"
-RC=$?
-[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "require-intent env off: RC=$RC OUT=$OUT，预期静默退 0"
-printf '# Intent\n' > "$PROJECT/specs/001-demo/intent.md"
-run "$GATE_WRAPPER"
-[ "$RC" -eq 0 ] && ok || bad "require-intent 有 intent 放行: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 
 # The planverify-gate wrapper delegates to `che planverify-gate`: default off
 # is a silent no-op; block mode gates on the task dir's planverify.md report.

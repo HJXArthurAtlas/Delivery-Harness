@@ -29,7 +29,7 @@ fi
 TMP="$(mktemp -d)"
 TMP="$(cd "$TMP" && pwd -P)"
 trap 'rm -rf "$TMP"' EXIT
-unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_SESSION_ID CHE_REQUIRE_INTENT SKC_PLANVERIFY_GATE
+unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_SESSION_ID SKC_PLANVERIFY_GATE
 unset SPECIFY_INIT_DIR SPECIFY_FEATURE SPECIFY_FEATURE_DIRECTORY SPECIFY_FEATURE_NO_PERSIST
 unset ADRKIT_FEATURE_DIR ADRKIT_DIR ADRKIT_SNAPSHOT ADRKIT_AS_OF
 
@@ -72,7 +72,7 @@ byte_equal() { # byte_equal <file> <file>
   cmp -s "$1" "$2"
 }
 
-# 1. No tasks yet → resolution error naming task create / intent.
+# 1. No tasks yet → resolution error naming specify / task create.
 run "$CHE_BIN" paths
 [ "$RC" -eq 1 ] && ok || bad "paths 无任务: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
@@ -328,71 +328,13 @@ node -e '
 ' "$TASKS_REFS/tasks-template.md" <<<"$OUT" \
   && ok || bad "setup-tasks: TASKS_TEMPLATE_CONTENT 与 references/tasks-template.md 非字节一致"
 
-# 19. require-intent gate: bound task without intent doc is blocked.
+# 19. require-intent removed: follows the normal unknown-command path (exit 2).
 run "$CHE_BIN" require-intent --session s1
-[ "$RC" -eq 1 ] && ok || bad "require-intent 默认拦截: 退出码 ${RC}，预期 1"
+[ "$RC" -eq 2 ] && ok || bad "require-intent 已移除: 退出码 ${RC}，预期 2"
 case "$(<"$TMP/stderr")" in
-  *"Task directory has no intent doc (NCW-4921-demo)"*) ok ;;
-  *) bad "require-intent 默认拦截: 错误信息不符：$(<"$TMP/stderr")" ;;
+  *"ERROR: Unknown command 'require-intent'"*) ok ;;
+  *) bad "require-intent 已移除: 错误信息不符：$(<"$TMP/stderr")" ;;
 esac
-run "$CHE_BIN" require-intent --session s1 --json
-[ "$RC" -eq 1 ] && ok || bad "require-intent --json 拦截: 退出码 ${RC}，预期 1"
-json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"GATE\":\"on\",\"TASK_DIR\":\"$PROJECT/specs/NCW-4921-demo\",\"SLUG\":\"demo\",\"INTENT_DOC\":\"$PROJECT/specs/NCW-4921-demo/intent.md\"}" \
-  && ok || bad "require-intent --json: 状态不符：$OUT"
-
-# Unbound session with gate on → resolution error (must bind or create first).
-run "$CHE_BIN" require-intent --session ghost
-[ "$RC" -eq 1 ] && ok || bad "require-intent 未绑定: 退出码 ${RC}，预期 1"
-case "$(<"$TMP/stderr")" in
-  *"session 'ghost' is not bound"*) ok ;;
-  *) bad "require-intent 未绑定: 错误信息不符：$(<"$TMP/stderr")" ;;
-esac
-
-# Matching intent doc passes.
-printf '# Intent\n' > "$PROJECT/specs/NCW-4921-demo/intent.md"
-run "$CHE_BIN" require-intent --session s1 --json
-[ "$RC" -eq 0 ] && ok || bad "require-intent 放行: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-json_matches "$OUT" '{"GATE":"on","SLUG":"demo"}' \
-  && ok || bad "require-intent 放行: 状态不符：$OUT"
-
-# Toggle off via env: silent pass (json reports GATE off, no task resolution).
-run env CHE_REQUIRE_INTENT=off "$CHE_BIN" require-intent --session s1
-[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "require-intent env off: RC=$RC OUT=$OUT，预期静默退 0"
-run env CHE_REQUIRE_INTENT=off "$CHE_BIN" require-intent --session s1 --json
-[ "$RC" -eq 0 ] && json_matches "$OUT" '{"GATE":"off","TASK_DIR":null,"SLUG":"","INTENT_DOC":""}' \
-  && ok || bad "require-intent env off --json: RC=$RC OUT=$OUT"
-
-# Toggle via .che/config.yml; env beats config.
-printf 'require_intent: off\n' > "$PROJECT/.che/config.yml"
-run "$CHE_BIN" require-intent --session s1
-[ "$RC" -eq 0 ] && ok || bad "require-intent config off: 退出码 ${RC}，预期 0"
-run env CHE_REQUIRE_INTENT=on "$CHE_BIN" require-intent --session ghost
-[ "$RC" -eq 1 ] && ok || bad "require-intent env 优先于 config: 退出码 ${RC}，预期 1"
-printf 'require_intent: on\n' > "$PROJECT/.che/config.yml"
-run env CHE_REQUIRE_INTENT=off "$CHE_BIN" require-intent --session s1
-[ "$RC" -eq 0 ] && ok || bad "require-intent env off 优先于 config on: 退出码 ${RC}，预期 0"
-printf 'require_intent: maybe\n' > "$PROJECT/.che/config.yml"
-run "$CHE_BIN" require-intent --session s1
-[ "$RC" -eq 1 ] && ok || bad "require-intent 非法值: 退出码 ${RC}，预期 fail-closed 1"
-case "$(<"$TMP/stderr")" in
-  *'invalid require_intent toggle "maybe"'*) ok ;;
-  *) bad "require-intent 非法值: 错误信息不符：$(<"$TMP/stderr")" ;;
-esac
-rm "$PROJECT/.che/config.yml"
-
-# Outside a project: hard error.
-OUT="$(cd "$TMP" && "$CHE_BIN" require-intent 2>"$TMP/stderr")"
-RC=$?
-[ "$RC" -eq 1 ] && ok || bad "require-intent 非项目目录: 退出码 ${RC}，预期 1"
-case "$(<"$TMP/stderr")" in
-  *"not in an SDD project"*) ok ;;
-  *) bad "require-intent 非项目目录: 错误信息不符：$(<"$TMP/stderr")" ;;
-esac
-
-run "$CHE_BIN" require-intent --help
-[ "$RC" -eq 0 ] && ok || bad "require-intent --help: 退出码 ${RC}"
-run "$CHE_BIN" require-intent --bogus
-[ "$RC" -eq 2 ] && ok || bad "require-intent 未知参数: 退出码 ${RC}，预期 2"
 
 # 20. planverify-gate: default off silent; block verdicts read task-dir report.
 run "$CHE_BIN" planverify-gate --session s1
@@ -462,33 +404,42 @@ run "$CHE_BIN" planverify-gate --bogus
 [ "$RC" -eq 2 ] && ok || bad "planverify-gate 未知参数: 退出码 ${RC}，预期 2"
 
 # 20b. state: runs timeline in metadata.json; stage/next derived, never stored.
-run "$CHE_BIN" state start intent --session s1
-[ "$RC" -eq 0 ] && ok || bad "state start: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+run "$CHE_BIN" state start specify --session s1
+[ "$RC" -eq 0 ] && ok || bad "state start specify: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 _before="$(md5 -q "$PROJECT/specs/NCW-4921-demo/metadata.json")"
-run "$CHE_BIN" state start intent --session s1
+run "$CHE_BIN" state start specify --session s1
 [ "$RC" -eq 0 ] && [ "$(md5 -q "$PROJECT/specs/NCW-4921-demo/metadata.json")" = "$_before" ] \
   && ok || bad "state start 幂等: 已开启的 run 被改写"
-run "$CHE_BIN" state done intent --session s1
-[ "$RC" -eq 0 ] && ok || bad "state done: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-run "$CHE_BIN" state done intent --session s1
+run "$CHE_BIN" state done specify --session s1
+[ "$RC" -eq 0 ] && ok || bad "state done specify: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+run "$CHE_BIN" state done specify --session s1
 [ "$RC" -eq 1 ] && ok || bad "state done 双关: 退出码 ${RC}，预期 1"
 node -e '
   const fs = require("node:fs");
   const meta = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
-  const runs = meta.runs.intent;
+  const runs = meta.runs.specify;
   if (!Array.isArray(runs) || runs.length !== 1) process.exit(1);
   if (Number.isNaN(Date.parse(runs[0].start)) || Number.isNaN(Date.parse(runs[0].end))) process.exit(1);
   process.exit(0);
 ' "$PROJECT/specs/NCW-4921-demo/metadata.json" \
-  && ok || bad "state done: metadata.json runs.intent 结构不符"
+  && ok || bad "state done: metadata.json runs.specify 结构不符"
 run "$CHE_BIN" state show --session s1 --json
 [ "$RC" -eq 0 ] && ok || bad "state show --json: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-json_matches "$OUT" "{\"TASK_DIR\":\"$PROJECT/specs/NCW-4921-demo\",\"SLUG\":\"demo\",\"STAGE\":\"plan\",\"NEXT\":\"expectations\",\"DURATION_SECONDS\":{\"intent\":0}}" \
+json_matches "$OUT" "{\"TASK_DIR\":\"$PROJECT/specs/NCW-4921-demo\",\"SLUG\":\"demo\",\"STAGE\":\"plan\",\"NEXT\":\"expectations\",\"DURATION_SECONDS\":{\"specify\":0}}" \
   && ok || bad "state show --json: 输出不符：$OUT"
 run "$CHE_BIN" state show --session s1
 [ "$RC" -eq 0 ] && ok || bad "state show text: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 printf '%s\n' "$OUT" | grep -qx "NEXT: expectations" \
   && ok || bad "state show text: 缺 NEXT 行：$OUT"
+run "$CHE_BIN" state start expectations --session s1
+[ "$RC" -eq 0 ] && ok || bad "state start expectations: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+run "$CHE_BIN" state done expectations --session s1
+[ "$RC" -eq 0 ] && ok || bad "state done expectations: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+run "$CHE_BIN" state show --session s1 --json
+json_matches "$OUT" "{\"NEXT\":\"clarify\",\"DURATION_SECONDS\":{\"specify\":0,\"expectations\":0}}" \
+  && ok || bad "state show（expectations 闭环后）: NEXT 应为 clarify：$OUT"
+run "$CHE_BIN" state start intent --session s1
+[ "$RC" -eq 1 ] && ok || bad "state start intent: 退出码 ${RC}，预期 1（intent 阶段已移除）"
 run "$CHE_BIN" state start bogus --session s1
 [ "$RC" -eq 1 ] && ok || bad "state 未知阶段: 退出码 ${RC}，预期 1"
 run "$CHE_BIN" state show extra --session s1

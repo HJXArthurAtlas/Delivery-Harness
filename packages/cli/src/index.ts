@@ -2,7 +2,6 @@
 import { parseArgs } from 'node:util';
 import { isMainModule } from './main-module.ts';
 import { CHECK_USAGE, PATHS_USAGE, runCheck, runPaths } from './check.ts';
-import { REQUIRE_INTENT_USAGE, runRequireIntent } from './require-intent.ts';
 import { PLANVERIFY_GATE_USAGE, runPlanVerifyGate } from './planverify-gate.ts';
 import { FEATURE_USAGE, runFeature } from './feature.ts';
 import { TASK_USAGE, runTask } from './tasks.ts';
@@ -22,7 +21,6 @@ Commands:
   state start|done <stage> / show [--json]         Task runs timeline (metadata.json; stage/next derived)
   paths [--json] [--feature <slug>] [--session <id>]  Resolve task paths
   check [--json] [--require-spec] [--require-tasks] [--include-tasks]
-  require-intent [--json] [--feature <slug>] [--session <id>]  Gate /che-compound-specify on the task's intent doc
   planverify-gate [<slug>] [--json]                Gate /che-compound-implement on the planverify verdict
   feature bind <slug> --session <id> | show [--json]  Manage session→task bindings (.che/feature.json, local)
   template <name> --references-dir <dir> [--json]  Resolve a bundled references/ template
@@ -49,7 +47,6 @@ const COMMAND_USAGE: Record<string, string> = {
   state: STATE_USAGE,
   paths: PATHS_USAGE,
   check: CHECK_USAGE,
-  'require-intent': REQUIRE_INTENT_USAGE,
   'planverify-gate': PLANVERIFY_GATE_USAGE,
   feature: FEATURE_USAGE,
   template: TEMPLATE_USAGE,
@@ -98,8 +95,6 @@ export function main(argv: string[]): number {
       return runPaths(rest);
     case 'check':
       return runCheck(rest);
-    case 'require-intent':
-      return runRequireIntent(rest);
     case 'planverify-gate':
       return runPlanVerifyGate(rest);
     case 'feature':

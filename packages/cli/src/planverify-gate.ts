@@ -214,7 +214,7 @@ export function runPlanVerifyGate(argv: string[]): number {
     );
   }
 
-  // Gate off: silent no-op (mirrors require-intent's off mode).
+  // Gate off: silent no-op.
   if (mode !== 'block') return 0;
 
   if (verdict === '') {

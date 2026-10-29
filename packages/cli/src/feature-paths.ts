@@ -162,7 +162,6 @@ export function deriveStage(taskDir: string): string {
   if (isFileIn(taskDir, 'tasks.md')) return 'tasks';
   if (isFileIn(taskDir, 'plan.md')) return 'plan';
   if (isFileIn(taskDir, 'spec.md')) return 'specify';
-  if (isFileIn(taskDir, 'intent.md')) return 'intent';
   return 'created';
 }
 
@@ -310,7 +309,7 @@ export function resolveTask(
   if (tasks.length === 1) return tasks[0];
   if (tasks.length === 0) {
     throw new FeatureResolutionError(
-      'ERROR: No task directories found under specs/. Run /che-compound-intent or `che task create <slug>` first.',
+      'ERROR: No task directories found under specs/. Run /che-compound-specify or `che task create <slug>` first.',
     );
   }
   throw new FeatureResolutionError(
