@@ -1,6 +1,12 @@
 # NCW Delivery Harness
 
-newchiwan 团队的跨端 agent skill pack：把 PingCode 规格驱动的 AI native 开发流程（speckit 全流程与建卡收尾）、adrkit / grill / compound / bug 治理与线上排障做成可安装的 agent skill，可在 DSH / OpenCode / omp 等端使用。GitLab 项目：[Tech Council / ncw-delivery-harness](https://git.newchiwan.com/council/ncw-delivery-harness)（内部仓，默认分支 `main`）。
+赤湾东方自建软件交付 Harness：把团队 AI native 交付方法做成跨端 agent skill pack，可在 DSH / OpenCode / omp 等端安装。方法底座三条：
+
+- **知识工程**——把团队知识落盘为机器可装载的资产：宪法 `docs/constitution/`、ADR 语料 `docs/adr/`、领域知识库 `docs/domain_knowledge/`、compound store（`docs/corrections/`、`docs/patterns/`）与线上排障知识；会话开场装载（load），交付后回写（writeback）。
+- **Intent Driven Development**——规格是唯一意图来源：specify → clarify/grill → plan → tasks → implement，以宪法与 ADR 为治理约束，planverify 门禁与 intentguard 独立校验实现不越出意图。
+- **Compound Engineering**——每次交付让下次更快：新经验写回 store、耐久纠偏升格为 ADR，bug 走 assess → fix → test 闭环沉淀回归，组织经验随交付复利。
+
+流程与 PingCode 打通：产品出规格建卡 → 开发接规格规划实现 → 卡片随实现收尾。GitLab 项目：[Tech Council / ncw-delivery-harness](https://git.newchiwan.com/council/ncw-delivery-harness)（内部仓，默认分支 `main`）。
 
 ## 一键安装（For Agent）
 

@@ -2,7 +2,7 @@
 
 ## 仓库定位
 
-本仓是 newchiwan 团队的跨端 agent skill pack，向 DSH、OpenCode、omp 等端分发 PingCode 规格驱动流程及 adrkit、grill、compound、bug 扩展技能。
+本仓是赤湾东方自建软件交付 Harness——以知识工程、Intent Driven Development、Compound Engineering 为方法底座的跨端 agent skill pack，向 DSH、OpenCode、omp 等端分发规格驱动流程及 adrkit、grill、compound、bug 扩展技能。
 
 本仓同时维护 `@newchiwan/che` CLI；monorepo 骨架由 `council/monorepo-template` 负责。仓内无 CI，本地 `npm test` 是唯一质量门。
 
