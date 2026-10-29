@@ -33,7 +33,7 @@
 flowchart LR
   subgraph base["团队底座（两个仓库）"]
     T["monorepo-template<br/>项目骨架"]
-    H["ncw-delivery-harness<br/>流程技能包（35 技能）"]
+    H["ncw-delivery-harness<br/>流程技能包（34 技能）"]
   end
   T -->|"一键开始提示词：复制骨架<br/>实例化宪法 · 环境基线"| P["你的项目仓库<br/>services/ · apps/ · docs/ · AGENTS.md"]
   H -->|"插件安装 / 手动拷贝<br/>+ che · adrkit · pingcode CLI"| A["你的 AI Agent"]
@@ -155,27 +155,27 @@ your-repo/
 
 ### 3.1 定位与依赖
 
-36 个 agent skill，承载「规格驱动开发 + PingCode」的流程：**产品出规格建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加项目架构画像（`/che-project-arch` 生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / 手动拷贝到 `~/.agents/skills/` 三路任一）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
+34 个 agent skill，承载「规格驱动开发 + PingCode」的流程：**产品出规格建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加项目架构画像（`/che-project-arch` 生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / 手动拷贝到 `~/.agents/skills/` 三路任一）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
 
 ### 3.2 主线流程
 
-主线 9 阶段：**specify → 设计明细（涉 UI，与建卡并行）→ 建卡 → 交接门禁 → plan → tasks（先 adr-check）→ implement 前对账 → implement → 卡片收尾**；另有独立辅助链：bug 修复三步（assess → fix → test）与线上问题排查（环境对号 → Loki 日志 → 数据库核事实）。
+主线链条（阶段数随角色取舍浮动，不按固定数字计）：**统一 specify（含 intent 访谈）→ expectations → clarify → UI 设计明细 / 建卡 / 交接门禁 → plan → tasks（先 adr-check）→ implement 前对账 → implement → 卡片收尾**；另有独立辅助链：bug 修复三步（assess → fix → test）与线上问题排查（环境对号 → Loki 日志 → 数据库核事实）。
 
 ```mermaid
 flowchart TD
   subgraph PM["产品"]
     direction TB
-    IT["intent 意图访谈"] --> EX["expectations 期望捕获"] --> SP["specify 出规格 spec.md"] --> CL["clarify 澄清（≤5 问）"]
-    PC["建卡并登记 mapping（交接前完成）"]
+    SP["specify 意图访谈 + 统一 spec.md"] --> EX["expectations 期望捕获"] --> CL["clarify 澄清（≤5 问）"]
+    PC["建卡并登记 mapping（optional，交接前完成）"]
   end
   subgraph DS["UI 设计"]
-    DE["design 设计清单 design-tasks.md（涉 UI，与建卡并行）"]
+    DE["design 设计清单 design-tasks.md（涉 UI，澄清后与建卡并行）"]
   end
   subgraph DV["开发"]
     PL["plan 实现规划"] --> AC["adr-check 越界校验"] --> TK["tasks 任务清单"] --> IM["implement 实现"] --> ST["sync-status 卡片收尾"]
   end
   SP --> PC
-  SP --> DE
+  CL --> DE
   PC --> GA{"交接门禁"}
   DE -. 设计约束 .-> PL
   GA -->|全过| PL
@@ -187,15 +187,13 @@ flowchart TD
 
 进入时机：新特性从零开始。
 
-1. `/che-compound-load` —— 装载 ADR 语料与经验（corrections / patterns）进上下文，每会话一次（intent 技能会提示）
-2. `/che-compound-intent` —— 访谈式捕获目标、约束、失败条件；结束时创建任务目录 `specs/NNN-{slug}/` 并写入 `intent.md`，任务由此创建
-3. `/che-compound-expectations` —— 捕获成功 / 边界场景期望，写入 `expectations.md`
-4. `/che-compound-specify` —— 生成特性规格 `spec.md`（含 `### User Story N` 章节与 P1 / P2 / P3 优先级）。结束后可确认接续 `/che-pingcode-specstoissues` 建卡：spec 转需求树卡片（idea → epic → feature 规格卡 → story 卡），登记 `specs/pingcode-mapping.json`，任务目录改名 `{identifier}-{slug}`（slug 不变）；选择「否」时，按交接门禁要求在交接前补建
-5. `/che-compound-clarify` —— ≤5 个针对性问题澄清，结论**回写** spec
+1. `/che-compound-load` —— 装载 ADR 语料与经验（corrections / patterns）进上下文，每会话一次（specify 技能会提示）
+2. `/che-compound-specify` —— 意图访谈式捕获目标、范围、约束、失败条件，并生成统一特性规格 `spec.md`（意图块 + `### User Story N` 章节与 P1 / P2 / P3 优先级）；结束时经 `che task create` 创建任务目录 `specs/NNN-{slug}/` 并绑定 session，任务由此诞生
+3. `/che-compound-expectations` —— 捕获成功 / 边界场景期望，写入 `expectations.md`（validator-only，不复制场景进 spec）
+4. `/che-compound-clarify` —— ≤5 个针对性问题澄清，结论**回写** spec
+5. 结束后可确认接续 `/che-pingcode-specstoissues` 建卡：spec 转需求树卡片（idea → epic → feature 规格卡 → story 卡），登记 `specs/pingcode-mapping.json`，任务目录改名 `{identifier}-{slug}`（slug 不变）；选择「否」时，按交接门禁要求在交接前补建
 6. 涉 UI 的特性可并行移交 UI 设计侧生成设计清单（见下）；它不阻塞建卡与交接，产物供开发 plan / implement 使用
 7. 逐项核对交接门禁（见下），全过才移交开发
-
-自动行为：specify 提示缺少 `intent.md` 并拒绝执行，是内置 require-intent 门禁（默认开）在拦截——用于保证出规格前先完成意图访谈；先执行 `/che-compound-intent` 补齐意图再 specify 即可，门禁由 specify 自动通过，无需手动操作。
 
 产品侧注意：
 
@@ -205,7 +203,7 @@ flowchart TD
 
 #### UI 设计侧（涉 UI 时执行，不阻塞交接）
 
-进入时机：specify 后，与建卡并行。
+进入时机：clarify 之后，与建卡并行（对着已澄清的规格做设计）。
 
 1. `/che-compound-load` —— 会话内装载过就跳过（design 会提示）
 2. `/che-compound-design` —— 按四盲区问句库澄清需求 + 设计规约 / 自检七域走查，产出页面级 `design-tasks.md`（交互规则、页面状态、UI-01… 要求清单）；产物供开发 plan / implement 使用
@@ -231,7 +229,7 @@ UI 设计侧注意：
 2. `/che-compound-plan` —— spec 转实现规划（research / data-model / contracts / quickstart）；有 `design-tasks.md` 必读并对齐，冲突回产品 / 设计裁决
 3. `/che-adr-check` —— plan 后的必过校验：校验 plan 是否越出决策边界；存在未处置 departure 时暂停并等待裁决——修订 plan，或通过 `/che-adr-draft` 新增 ADR 后重新校验
 4. `/che-compound-tasks` —— 生成依赖有序 `tasks.md`（本会话没有该 plan 的 adr-check 报告会拒绝）；配置了 `mapping.task_artifact` 时，结束确认后可接续补建任务卡并关联至 story / spec 卡
-5. `/che-compound-gapfill` —— 对照 intent + expectations 补四类缺口测试进 `tasks.md`（约束违反 / 失败条件 / 越界回归 / 边界）
+5. `/che-compound-gapfill` —— 对照统一 spec 意图块（In scope / Out of scope / Constraints / Failure conditions）+ expectations 补四类缺口测试进 `tasks.md`（约束违反 / 失败条件 / 越界回归 / 边界）
 6. `/che-compound-planverify` —— 独立校验者审 plan + tasks：PASS 放行，REPLAN_ALLOWED 修订 plan 后重新校验，BLOCKED_DRIFT 回退至 plan
 7. `/che-compound-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；开了 `planverify_gate` block 的项目 → 先过闸（verdict 缺失或 BLOCKED_DRIFT 拒绝 implement）。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): 中文消息` + `Co-Authored-By` 页脚（消息不带工作项 ID），小步拆分、精确暂存、排除敏感文件
 8. `/che-compound-intentguard` —— 独立校验者审实现 vs 锁定意图：PASS 交接，REVIEW 人工复核后放行，BLOCKED 回退至 implement 修复
@@ -274,12 +272,12 @@ bug 修复三步：
 
 ### 3.3 产出物结构
 
-每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`intent.md`（意图）、`expectations.md`（期望）、`spec.md`（规格）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单）、`planverify.md`（门禁报告）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/domain_knowledge/`（跨特性术语与主题知识）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
+每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`spec.md`（统一规格：意图块 + User Story / FR / SC）、`expectations.md`（期望）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单）、`planverify.md`（门禁报告）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/domain_knowledge/`（跨特性术语与主题知识）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
 
 ## 4. 使用路径：从初始化到日常交付
 
 1. **初始化（一次性）**：把 §1.1 第一段提示词发给 Agent → 复制骨架、安装技能包、接入 codegraph → 重启 Agent。
 2. **完善登记（一次性）**：发 §1.1 第二段提示词 → 验证索引、登记 `AGENTS.md` 布局、执行 `/che-project-init`。
 3. **架构画像（可选，一次性）**：跑 `/che-project-arch` → Agent 扫描 `services/`、`apps/` 等布局生成 `docs/architecture.md`（服务/应用清单 + mermaid 依赖图），确认后入库；此后每个特性会话 `/che-compound-load` 自动装载，架构变化时重跑对账。
-4. **日常交付**：按角色进入 harness 主线（§3.2）；产品从 intent 访谈开始，开发从 plan 开始；bug 使用修复链，线上问题使用排障技能。每会话 Agent 自动执行环境检查。
+4. **日常交付**：按角色进入 harness 主线（§3.2）；产品从 specify（含 intent 访谈）开始，开发从 plan 开始；bug 使用修复链，线上问题使用排障技能。每会话 Agent 自动执行环境检查。
 5. **维护分工**：改骨架、初始化提示词、环境基线 → 直接改 monorepo-template 仓的 `README.md` 与 `AGENTS-TEMPLATE.md`（版本两处同步）；技能流程问题 → 去 harness 仓。
