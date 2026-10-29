@@ -53,7 +53,7 @@ specs/[###-feature]/
 ├── data-model.md        # Phase 1 output (/che-compound-plan command)
 ├── quickstart.md        # Phase 1 output (/che-compound-plan command)
 ├── contracts/           # Phase 1 output (/che-compound-plan command)
-└── tasks.md             # Phase 2 output (/che-compound-tasks command - NOT created by /che-compound-plan)
+└── tasks.md             # Phase 2 task-generation output (/che-compound-plan command)
 ```
 
 ### Source Code (repository root)

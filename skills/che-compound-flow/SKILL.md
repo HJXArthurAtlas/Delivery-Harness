@@ -1,6 +1,6 @@
 ---
 name: che-compound-flow
-description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流程操作规范（产品出规格建卡 → 开发接规格规划实现 → 卡片随实现收尾）。当用户要执行或提到 /che-compound-specify、/che-compound-design、/che-compound-plan、/che-compound-tasks、/che-compound-implement、specstoissues、sync-cards、sync-status，或说"出 spec""写规格""这个需求转开发了""接需求开始 plan""建卡""对账卡片""任务卡收尾"，或任务涉及 specs/ 产物、pingcode-mapping.json、需求树（idea/epic/feature/story）与本地任务的对应关系时使用本 skill——即使用户没提"che-compound"命令名，只要是在这套规格驱动流程里干活（产品侧或开发侧）也要使用。
+description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流程操作规范（产品出规格建卡 → 开发接规格规划实现 → 卡片随实现收尾）。当用户要执行或提到 /che-compound-specify、/che-compound-design、/che-compound-plan、/che-compound-implement、specstoissues、sync-cards、sync-status，或说"出 spec""写规格""这个需求转开发了""接需求开始 plan""拆任务""建卡""对账卡片""任务卡收尾"，或任务涉及 specs/ 产物、pingcode-mapping.json、需求树（idea/epic/feature/story）与本地任务的对应关系时使用本 skill——即使用户没提"che-compound"命令名，只要是在这套规格驱动流程里干活（产品侧或开发侧）也要使用。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -9,7 +9,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 
 团队 AI native 开发流程的**衔接与门禁层**：不替代 `/che-compound-*` 命令与 `/che-pingcode-*` 命令（它们各自的规则以自身为准），也不复述 `pingcode` skill 的 ID 安全规则与 `mturtle-commit` 的提交格式——本 skill 只定义角色怎么交接、什么才算交接完成、卡片与产物怎么对得上账。
 
-**前提**：规格驱动开发流程就绪（`.che/pingcode-config.yml` 由 `/che-pingcode-init` 生成，`pingcode` CLI ≥ 0.14.0 已安装并认证）。本 pack 无 hook 执行器——pingcode 卡流程经 clarify/tasks/implement 的 Handoff 块可选目标/前置对账交接（条件不满足或拒绝即跳过），其余场景按各阶段要求手动跑命令即可。阶段间交接以各技能 SKILL.md 末尾的 `## Handoff` 块为准（目标 + 条件 + 回退）。
+**前提**：规格驱动开发流程就绪（`.che/pingcode-config.yml` 由 `/che-pingcode-init` 生成，`pingcode` CLI ≥ 0.14.0 已安装并认证）。本 pack 无 hook 执行器——pingcode 卡流程经 clarify/plan/implement 的 Handoff 块可选目标/前置对账交接（条件不满足或拒绝即跳过），其余场景按各阶段要求手动跑命令即可。阶段间交接以各技能 SKILL.md 末尾的 `## Handoff` 块为准（目标 + 条件 + 回退）。
 
 ## 流程主线
 
@@ -20,15 +20,14 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 | 3. 设计明细 | 产品/设计 | 涉 UI 的特性跑 `/che-compound-design`；无 UI 跳过；与建卡并行 | `specs/<NNN>-<short-name>/design-tasks.md`（设计明细；不是交接门禁项，不阻塞建卡与交接） |
 | 4. 建卡 | 产品 | `/che-pingcode-specstoissues` 命令（optional） | 需求树 idea → epic → feature(spec 卡) → story 卡；登记 `specs/pingcode-mapping.json` |
 | 5. 交接 | 产品→开发 | 门禁检查（下节），通过后转开发 | — |
-| 6. plan | 开发 | `/che-compound-plan`；特性目录存在 `design-tasks.md` 时必须先读，交互/页面状态按它对齐后再规划，与 spec 冲突时回产品/设计侧对齐 | 计划产物 |
-| 7. tasks | 开发 | 必跑 `/che-adr-check` 校验 plan 越决策边界（无未处置 departure 才继续）→ `/che-compound-tasks`；配置了 `mapping.task_artifact` 时 tasks 后 Handoff 可选目标补建任务卡（`/che-pingcode-specstoissues`） | `tasks.md`（+ 任务卡挂 story/spec 卡下） |
-| 8. implement 前 | 开发 | implement 开始时 Handoff 前置对账（`/che-pingcode-sync-cards`，已建卡才提示） | spec 后续修改与卡片的增删改对齐 |
-| 9. implement | 开发 | `/che-compound-implement`；UI 任务按设计稿 + `design-tasks.md` 设计要求清单验收；提交走 `/che-git-master`（消息不带工作项 ID） | 代码 + 测试 |
-| 10. 收尾 | 开发 | 本地任务全部 `[x]` → `/che-pingcode-sync-status` | 卡片流转完成（单向，不回退） |
+| 6. plan+tasks | 开发 | `/che-compound-plan` 单命令一次产出 plan 工件（research/data-model/contracts/quickstart + plan.md）与依赖有序 `tasks.md`；特性目录存在 `design-tasks.md` 时必须先读，交互/页面状态按它对齐后再规划，与 spec 冲突时回产品/设计侧对齐；配置了 `mapping.task_artifact` 时 Handoff 可选目标补建任务卡（`/che-pingcode-specstoissues`） | `plan.md` 等计划产物 + `tasks.md`（+ 任务卡挂 story/spec 卡下） |
+| 7. implement 前 | 开发 | implement 开始时 Handoff 前置对账（`/che-pingcode-sync-cards`，已建卡才提示） | spec 后续修改与卡片的增删改对齐 |
+| 8. implement | 开发 | `/che-compound-implement`；UI 任务按设计稿 + `design-tasks.md` 设计要求清单验收；提交走 `/che-git-master`（消息不带工作项 ID） | 代码 + 测试 |
+| 9. 收尾 | 开发 | 本地任务全部 `[x]` → `/che-pingcode-sync-status` | 卡片流转完成（单向，不回退） |
 
 ## 任务与 slug 单一事实源
 
-全流程（specify（含 intent 访谈与场景起草）→ clarify/design → plan → tasks → gapfill → planverify → intentguard → writeback）围绕**任务目录**展开：`/che-compound-specify` 用 `che task create {slug} --session <id>` 创建 `specs/NNN-{slug}/`（任务自此诞生，session 绑定落 `.che/feature.json`，机器本地不入库），后续所有制品都落这个目录。slug 是任务的全流程稳定句柄：目录名剥 `NNN-` 数字前缀（推送 PingCode 后为 `NCW-x` identifier 前缀）即得，`che paths --json` 的 `SLUG` 字段即该值。
+全流程（specify（含 intent 访谈与场景起草）→ clarify/design → plan（含 tasks 生成）→ gapfill → planverify → intentguard → writeback）围绕**任务目录**展开：`/che-compound-specify` 用 `che task create {slug} --session <id>` 创建 `specs/NNN-{slug}/`（任务自此诞生，session 绑定落 `.che/feature.json`，机器本地不入库），后续所有制品都落这个目录。slug 是任务的全流程稳定句柄：目录名剥 `NNN-` 数字前缀（推送 PingCode 后为 `NCW-x` identifier 前缀）即得，`che paths --json` 的 `SLUG` 字段即该值。
 
 - 下游各技能取 slug/目录一律从 `che paths`（带 `--session` 或在单任务时裸跑）读，不各自拼猜；链式调用（如 specify → clarify）直接沿用上游技能选定的 `TASK_DIR`/`SLUG`，不在多任务间重新解析；specify / planverify / intentguard 产物按 `{任务目录}/spec.md`、`{任务目录}/planverify.md` 等落盘。
 - spec 推送 PingCode 后 `/che-pingcode-specstoissues` 把目录改名为 `{pingcode-identifier}-{slug}`（如 `NCW-4921-demo`）——slug 不变，session 绑定与后续解析不受影响。
@@ -46,7 +45,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 
 ## 开发侧纪律
 
-- **tasks 前必过 adr-check**：plan 后先 `/che-adr-check` 对照 ADR 语料校验决策边界；有未处置 departure 回 plan 修正或 `/che-adr-draft` 立 ADR 变更，不带越界拆任务。
+- **gapfill/implement 前必过 adr-check**：plan+tasks 产出后先 `/che-adr-check` 对照 ADR 语料校验决策边界；有未处置 departure 回 plan 修正（重跑 `/che-compound-plan` 重生 tasks.md）或 `/che-adr-draft` 立 ADR 变更，不带越界补任务、动代码。
 - **implement 前必对账**：spec 在建卡后有过修改的，先 `sync-cards` 消化差异再动代码——卡片描述与 spec 漂移会让收尾阶段对不上账。
 - **涉 UI 必对 design-tasks**：特性目录有 `design-tasks.md` 的，plan 前先读——交互规则、页面状态、设计要求清单（UI-01…）是 plan 的 UX 输入；它与 spec 冲突时回产品/设计侧对齐，绝不自行裁决；实现与验收对照设计稿 + 设计要求清单，不让 plan 即兴发明交互。
 - **溯源链**：`specs/<NNN>-<short-name>/spec.md 章节 → mapping.json 卡片 id → sync-status 收尾`（提交消息不携带工作项 ID，溯源由 mapping.json 承担）。

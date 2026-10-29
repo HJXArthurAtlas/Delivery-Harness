@@ -309,7 +309,7 @@ byte_equal "$PROJECT/specs/NCW-4921-demo/plan.md" "$PLAN_REFS/plan-template.md" 
   && ok || bad "setup-plan 重跑: plan.md 被改动"
 
 # 18. setup-tasks requires plan.md; otherwise resolves tasks-template byte-exact.
-TASKS_REFS="$REPO_ROOT/skills/che-compound-tasks/references"
+TASKS_REFS="$REPO_ROOT/skills/che-compound-plan/references"
 rm "$PROJECT/specs/NCW-4921-demo/plan.md"
 run "$CHE_BIN" setup-tasks --json --references-dir "$TASKS_REFS" --session s1
 [ "$RC" -eq 1 ] && ok || bad "setup-tasks 无 plan: 退出码 ${RC}，预期 1"

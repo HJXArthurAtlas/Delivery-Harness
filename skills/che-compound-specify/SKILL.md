@@ -153,7 +153,7 @@ Continue until every failure condition passes FQ1–FQ4 — no fixed count; cove
 - API contract changed without version bump
 - Quality gate (Sonar, etc.) fails
 
-**Do not advance past a failed GQ/CQ/FQ test.** Tech-stack choices remain excluded (they belong to `/che-compound-plan`); task breakdown remains excluded (it belongs to `/che-compound-tasks`).
+**Do not advance past a failed GQ/CQ/FQ test.** Tech-stack choices remain excluded (they belong to `/che-compound-plan`); task breakdown remains excluded (it also belongs to `/che-compound-plan`'s task-generation phase).
 
 #### Phase 7 — Draft stories and scenarios (merged from the retired expectations interview)
 
@@ -333,7 +333,7 @@ If the compound store was loaded:
 ## What you do NOT capture in this file
 
 - **Tech stack choices** — these go into `/che-compound-plan` later. If the user names a stack, ask whether it's a hard constraint (in which case it's a CQ-failing constraint that probably belongs in Context) or just a preference (defer to /che-compound-plan).
-- **Task breakdown** — that's `/che-compound-tasks`. Don't pre-decompose work here.
+- **Task breakdown** — that's `/che-compound-plan`'s task generation. Don't pre-decompose work here.
 - **Clarification Q&A history** — do not write a `## Clarifications` section; `/che-compound-clarify` integrates resolved answers directly into the spec sections.
 
 ### For AI Generation

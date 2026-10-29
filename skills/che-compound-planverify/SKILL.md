@@ -168,7 +168,7 @@ Read the gate mode (`SKC_PLANVERIFY_GATE` env, else `planverify_gate:` in
 `.che/config.yml`, default `off`) and record it in the report frontmatter.
 
 - **PASS**: *"Verdict: PASS (checked by {checker}, Tier {N}). Plan is in scope and complete. Safe to run `/che-compound-implement`."*
-- **REPLAN_ALLOWED**: *"Verdict: REPLAN_ALLOWED (checked by {checker}). {N} items to address (see `{task_dir}/planverify.md`). Re-run `/che-compound-plan` or edit the plan, then re-run `/che-compound-planverify`."* (planverify does not patch the plan for you.)
+- **REPLAN_ALLOWED**: *"Verdict: REPLAN_ALLOWED (checked by {checker}). {N} items to address (see `{task_dir}/planverify.md`). Fix via `/che-compound-plan` — re-running it regenerates plan and tasks together, and manual plan edits also need a re-run so `tasks.md` stays in sync — then re-run `/che-compound-planverify`."* (planverify does not patch the plan for you.)
 - **BLOCKED_DRIFT**: *"Verdict: BLOCKED_DRIFT (checked by {checker}). {N} unjustified expansions:"* — list each with the bounded alternative. If gate is `block`, `/che-compound-implement` and the first source-file write are now blocked until this resolves.
 
 ---
@@ -297,4 +297,4 @@ drift_candidates: {N}
 
 - **目标**：`/che-compound-implement`
 - **条件**：判定 PASS 才放行 implement；`SKC_PLANVERIFY_GATE=block` 时另需过 `/che-compound-planverify-gate`
-- **回退**：REPLAN_ALLOWED → 改 plan 后重跑 planverify；BLOCKED_DRIFT → 回到 plan 修正，gate 为 block 时 implement 被拒绝
+- **回退**：REPLAN_ALLOWED → 修订 plan 后重跑 planverify（plan 有改动就重跑 `/che-compound-plan` 让 tasks.md 同步再生，不校验陈旧的 plan/tasks 组合）；BLOCKED_DRIFT → 回到 plan 修正，gate 为 block 时 implement 被拒绝

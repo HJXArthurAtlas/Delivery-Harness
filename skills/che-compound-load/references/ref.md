@@ -14,7 +14,7 @@ Three separate paradigms brought together. They are compatible but not the same 
 
 **What it actually is:**
 - A `specify` CLI that installs prompt template files into your project
-- Slash commands: `/che-compound-constitution` → `/che-compound-specify` → `/che-compound-clarify` → `/che-compound-plan` → `/che-compound-tasks` → `/che-compound-implement`
+- Slash commands: `/che-compound-constitution` → `/che-compound-specify` → `/che-compound-clarify` → `/che-compound-plan` (plan + task breakdown in one command) → `/che-compound-implement`
 - These are markdown prompt files the agent reads and executes — no API surface, no library
 
 **What it does well:**
@@ -37,7 +37,7 @@ Three separate paradigms brought together. They are compatible but not the same 
 These are not bugs in our extension scope, but they explain why the unified spec's intent block + in-spec scenarios + gapfill are needed: they are the structural defense against templates that silently hedge.
 
 **The key insight:**
-The `/che-compound-tasks` output IS the "expectations" node in the Activated Thinker agentic loop model. The toolkit is what generates the right side of the intent/expectations diagram.
+The `/che-compound-plan` task-generation output IS the "expectations" node in the Activated Thinker agentic loop model. The toolkit is what generates the right side of the intent/expectations diagram.
 
 ---
 
@@ -164,6 +164,9 @@ IDSD's original compartmentation principle kept success scenarios out of the art
 
 What the merge gives up — the validation criteria are no longer hidden from the builder — was an accepted tradeoff. What it keeps is **independent judgment**: `/che-compound-intentguard` and `/che-compound-planverify` still extract the locked intent, the scenarios, and the diff (or plan) into a sealed briefing and hand it to an independent checker (fresh context at minimum, a different model when available) that never saw the builder's or planner's reasoning. The compartmentation that remains real is the briefing firewall, not file visibility. Hard compartmentation (separate agents, encrypted evals) remains deferred until there is evidence the briefing firewall is being gamed.
 
+### Plan and tasks are one command (artifacts stay separate)
+v0.2 shipped plan→tasks as two commands with the adr-check gate between them. The gate was never a compartmentation requirement — plan and tasks are both dev-side outputs and no firewall exists between them — so the split only bought a resumable checkpoint at the cost of an extra command trigger and a full context reload. The merged `/che-compound-plan` generates `plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`, **and** `tasks.md` in one run (Phase 0 research → Phase 1 design → Phase 2 task generation); the artifacts remain separate files with unchanged templates and state stages. adr-check moves to after the merged command and stays mandatory before gapfill/implement; a departure found there re-runs the command to regenerate tasks. Independent judgment is unaffected: it lives in adr-check, planverify, and intentguard, not in the plan→tasks boundary.
+
 ### Compound load and writeback are two separate commands (extension-system convention)
 v0.1 drafts considered a single `compound` command with `load` and `writeback` subactions, matching Every's `/ce-compound` shape. When we ran the first live install test in v0.2, we discovered the extension system does not support subactions — each slash command must be its own file (the bundled git extension exposes its `commit`, `feature`, `initialize`, `remote`, and `validate` commands as five separate files, not one with subactions). We split accordingly: `/che-compound-load` and `/che-compound-writeback` are two halves of one mechanism, registered separately. The compartmentation and semantics are unchanged; only the surface shape differs.
 
@@ -246,8 +249,7 @@ Existing Friends entries for reference format:
 | `/che-compound-constitution` | Init | Create project governing principles |
 | `/che-compound-specify` | Spec | Capture intent (goal, constraints, failure conditions) + draft acceptance/edge scenarios (`E#` IDs) into one unified spec |
 | `/che-compound-clarify` | Spec | Clarify underspecified areas |
-| `/che-compound-plan` | Plan | Generate technical implementation plan |
-| `/che-compound-tasks` | Tasks | Generate task breakdown (= task-level expectations) |
+| `/che-compound-plan` | Plan | Generate implementation plan + task breakdown in one command (= task-level expectations) |
 | `/che-compound-implement` | Implement | Execute tasks via agentic loop |
 | `/che-compound-analyze` | Optional | Cross-artifact consistency check |
 | quality-checklist generation | Optional | Generate quality checklists (not shipped in this pack) |
