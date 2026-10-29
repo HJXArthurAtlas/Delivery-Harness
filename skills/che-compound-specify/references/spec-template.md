@@ -1,12 +1,56 @@
-# Feature Specification: [FEATURE NAME]
+---
+slug: {kebab-case-slug}
+status: active
+created: {YYYY-MM-DD}
+---
+
+# Feature Specification: {goal sentence}
 
 **Feature Branch**: `[###-feature-name]`
 
-**Created**: [DATE]
-
-**Status**: Draft
-
 **Input**: User description: "$ARGUMENTS"
+
+## Why now *(mandatory)*
+
+{user's paragraph — why this work, why now, what changed}
+
+## In scope *(mandatory)*
+
+- {item}
+- {item}
+
+## Out of scope *(mandatory)*
+
+- {item}
+- {item}
+
+## Constraints *(mandatory)*
+
+- **C1**: {constraint, with measurable target}
+- **C2**: {constraint, with measurable target}
+- **C3**: {constraint, with measurable target}
+- **C4**: {constraint, with measurable target}
+- **C5**: {constraint, with measurable target}
+- *(C6, C7 optional)*
+
+## Failure conditions *(mandatory)*
+
+- **F1**: {binary check}
+- **F2**: {binary check}
+- **F3**: {binary check}
+- *(F4–F7 optional)*
+
+## Test record *(mandatory)*
+
+- Goal: G1 ✓  G2 ✓  G3 ✓  G4 ✓  G5 ✓
+- Constraints: {N} total, all pass C1–C5
+- Failure conditions: {N} total, all pass F1–F4
+
+## Compound store refs *(mandatory)*
+
+- ADRs respected: {list of ADR IDs referenced or none}
+- Corrections applied: {list of correction note slugs referenced or none}
+- Patterns reached for: {list of pattern slugs referenced or none}
 
 ## 统一语言 *(mandatory)*
 
