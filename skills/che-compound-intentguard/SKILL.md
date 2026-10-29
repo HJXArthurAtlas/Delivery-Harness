@@ -50,14 +50,14 @@ an explicit `cross-model` or `cli:model` policy requires an external model CLI.
 
 ## Inputs you must load
 
-First resolve the task directory: run `che paths --json` from the repo root **once** and use its `FEATURE_DIR` as `$TASK_DIR` (the `specs/NNN-{slug}/` directory created at intent time; `SLUG` is the directory name minus its prefix).
+First resolve the task directory: run `che paths --json` from the repo root **once** and use its `FEATURE_DIR` as `$TASK_DIR` (the `specs/NNN-{slug}/` directory created at specify time; `SLUG` is the directory name minus its prefix).
 
-1. **Intent doc** at `{TASK_DIR}/intent.md` — out-of-scope items, constraints, failure conditions
+1. **Unified spec** at `{TASK_DIR}/spec.md` — read `## Out of scope`, `## Constraints`, `## Failure conditions` for out-of-scope items, constraints, failure conditions
 2. **Expectations doc** at `{TASK_DIR}/expectations.md` — positive and edge scenarios
 3. **Tasks file** at `{TASK_DIR}/tasks.md` — including gapfill additions
 4. **Git diff** of the current branch vs the merge base — use `git diff $(git merge-base HEAD main)...HEAD`
 
-If the intent or expectations doc is missing, stop and tell the user.
+If the spec or expectations doc is missing, stop and tell the user (a missing `spec.md` means `/che-compound-specify` has not run).
 
 ## Output you produce
 
@@ -74,7 +74,7 @@ If the intent or expectations doc is missing, stop and tell the user.
 
 Read all four sources. Compute basic stats: lines changed in diff, files touched in diff, number of tasks marked complete.
 
-Confirm to user: *"Loaded intent, expectations, tasks ({N} of {M} complete), and diff ({N} lines across {M} files). Running L1/L2 here, then dispatching L3 to an independent checker."*
+Confirm to user: *"Loaded spec, expectations, tasks ({N} of {M} complete), and diff ({N} lines across {M} files). Running L1/L2 here, then dispatching L3 to an independent checker."*
 
 ### Phase 1 — L1: Mechanical checks *(you run these)*
 
@@ -108,7 +108,7 @@ Record any task marked complete with no diff evidence as a **L2 concern**. If 80
 
 Write `{TASK_DIR}/intentguard.briefing.md` containing **only**:
 - The goal sentence
-- **Locked intent**: the full out-of-scope list, every constraint (with IDs), every failure condition — copied verbatim
+- **Locked intent** (from the unified spec): the full out-of-scope list, every constraint (with IDs), every failure condition — copied verbatim
 - **Locked expectations**: every scenario (positive + edge) — copied verbatim
 - **The git diff** — the complete `git diff $(git merge-base HEAD main)...HEAD`
 - **Mechanical results**: L1 (build/test/lint pass/fail) and L2 (tasks complete with/without evidence) as plain facts
@@ -256,7 +256,7 @@ diff_files: {N}
 
 ## Tool choices
 
-- **Read** for the four artifacts (intent, expectations, tasks; diff via Bash)
+- **Read** for the four artifacts (spec, expectations, tasks; diff via Bash)
 - **Bash** for `git diff` / `git merge-base`, the L1 build/test/lint, CLI detection (`command -v`), and Tier-1 cross-model dispatch (`codex exec` / `gemini -p` / `claude -p`)
 - **Agent/Task** for Tier-2/Tier-3 native-subagent dispatch (`model: haiku` for Tier 2)
 - **Write** for the briefing, the captured checker response, and the `.intentguard.md` report
@@ -272,7 +272,7 @@ diff_files: {N}
 - **Silently degrade tiers.** If you cannot reach the requested tier, say so and record the tier actually achieved. Never claim a stronger check than happened.
 - **Auto-merge or auto-revert** — you only report. The human decides.
 - **Modify the diff** — you are a validator, not a fixer.
-- **Re-write the intent or expectations** — those are locked. If they need to change, the user re-runs `/che-compound-intent` or `/che-compound-expectations`.
+- **Re-write the spec or expectations** — those are locked. If they need to change, the user re-runs `/che-compound-specify` (update path, for locked intent changes) or `/che-compound-expectations`.
 
 ---
 

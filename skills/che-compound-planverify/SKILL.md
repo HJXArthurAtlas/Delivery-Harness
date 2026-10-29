@@ -1,6 +1,6 @@
 ---
 name: che-compound-planverify
-description: plan 独立校验（L3）：实现前由独立 checker（可跨模型）对照锁定 intent + 期望审查 plan 与补全后的 tasks；密封 briefing 派发（绝不含规划者的上下文），返回 PASS / REPLAN_ALLOWED / BLOCKED_DRIFT。当用户说「验证 plan」「planverify」「实现前审一遍计划」时使用——即使用户没提命令名，只要是实现前的计划独立校验也用本 skill。
+description: plan 独立校验（L3）：实现前由独立 checker（可跨模型）对照统一 spec 锁定的范围/约束/失败条件 + 期望审查 plan 与补全后的 tasks；密封 briefing 派发（绝不含规划者的上下文），返回 PASS / REPLAN_ALLOWED / BLOCKED_DRIFT。当用户说「验证 plan」「planverify」「实现前审一遍计划」时使用——即使用户没提命令名，只要是实现前的计划独立校验也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -63,12 +63,12 @@ an explicit `cross-model` or `cli:model` policy requires an external model CLI.
 
 (`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR` — run `che paths --session "$CHE_SESSION_ID"` once, bare when no session id is available.)
 
-1. **Intent** `{task_dir}/intent.md` — in-scope, out-of-scope, constraints, failure conditions
+1. **Unified spec** `{task_dir}/spec.md` — read `## In scope`, `## Out of scope`, `## Constraints`, `## Failure conditions` for in-scope, out-of-scope, constraints, failure conditions
 2. **Expectations** `{task_dir}/expectations.md` — positive + edge scenarios
 3. **Plan** `{task_dir}/plan.md` — the proposed plan, including any `requested_surface` blocks
 4. **Tasks** `{task_dir}/tasks.md` — the gapfilled task list
 
-If intent or expectations is missing, stop and tell the user.
+If the spec or expectations is missing, stop and tell the user (a missing `spec.md` means `/che-compound-specify` has not run).
 
 ## Outputs you produce
 
@@ -86,7 +86,7 @@ If intent or expectations is missing, stop and tell the user.
 Read all four sources. Compute: number of constraints, failure conditions, OOS
 items; number of positive + edge scenarios; number of tasks.
 
-Confirm: *"Loaded intent ({Nc} constraints, {Nf} failure conditions, {No} OOS), expectations ({Np}+{Ne} scenarios), plan, and {Nt} tasks. Running surface analysis here, then dispatching plan judgment to an independent checker."*
+Confirm: *"Loaded spec ({Nc} constraints, {Nf} failure conditions, {No} OOS), expectations ({Np}+{Ne} scenarios), plan, and {Nt} tasks. Running surface analysis here, then dispatching plan judgment to an independent checker."*
 
 ### Phase 1 — Surface analysis *(you run this — the mechanical layer)*
 
@@ -95,7 +95,7 @@ There is nothing built, so there are no L1/L2 mechanical checks. Instead:
 1. Extract the **proposed surface** — every file/path the plan intends to touch.
    Gather from: plan.md prose, every `requested_surface:` block, and file paths
    referenced in tasks.md.
-2. Read intent's declared **in-scope** and **out-of-scope** lists.
+2. Read the spec's declared **in-scope** and **out-of-scope** lists (`## In scope` / `## Out of scope`).
 3. For each proposed path, classify: `in-scope` / `out-of-scope` / `undeclared`.
 4. A proposed path that is out-of-scope or undeclared is a **drift candidate**.
    Note for each whether a matching `requested_surface` block exists (`requested`)
@@ -115,7 +115,7 @@ Announce: *"Independent checker: {name} (Tier {N} — {cross-model | cross-tier 
 
 Write `{task_dir}/planverify.briefing.md` containing **only**:
 - The goal sentence
-- **Locked intent**: full out-of-scope list, every constraint (with IDs), every failure condition — verbatim
+- **Locked intent** (from the unified spec): full out-of-scope list, every constraint (with IDs), every failure condition — verbatim
 - **Locked expectations**: every scenario — verbatim
 - **The plan**: full `{task_dir}/plan.md`
 - **The tasks**: full `{task_dir}/tasks.md`
@@ -287,7 +287,7 @@ drift_candidates: {N}
 - **Override the checker's verdict.** Disagreement goes in a meta-note only.
 - **Auto-patch the plan.** You report; the user replans. Validator, not fixer.
 - **Silently degrade tiers.** Record the tier actually achieved.
-- **Re-write intent or expectations.** Those are locked.
+- **Re-write the spec's locked intent sections or expectations.** Those are locked — a locked-intent change means re-running `/che-compound-specify` (update path).
 
 ---
 

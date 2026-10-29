@@ -15,25 +15,26 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 
 | 阶段 | 角色 | 动作 | 产物 / 卡片 |
 |---|---|---|---|
-| 1. specify | 产品 | `/che-compound-specify` 生成规格 | `specs/<NNN>-<short-name>/spec.md`（含 `### User Story N` 章节） |
-| 2. 设计明细 | 产品/设计 | 涉 UI 的特性跑 `/che-compound-design`（先 `/che-compound-clarify` 更佳）；无 UI 跳过；与建卡并行 | `specs/<NNN>-<short-name>/design-tasks.md`（设计明细；不是交接门禁项，不阻塞建卡与交接） |
-| 3. 建卡 | 产品 | `/che-pingcode-specstoissues` 命令（optional；specify Handoff 可选目标） | 需求树 idea → epic → feature(spec 卡) → story 卡；登记 `specs/pingcode-mapping.json` |
-| 4. 交接 | 产品→开发 | 门禁检查（下节），通过后转开发 | — |
-| 5. plan | 开发 | `/che-compound-plan`；特性目录存在 `design-tasks.md` 时必须先读，交互/页面状态按它对齐后再规划，与 spec 冲突时回产品/设计侧对齐 | 计划产物 |
-| 6 | tasks | 开发 | 必跑 `/che-adr-check` 校验 plan 越决策边界（无未处置 departure 才继续）→ `/che-compound-tasks`；配置了 `mapping.task_artifact` 时 tasks 后 Handoff 可选目标补建任务卡（`/che-pingcode-specstoissues`） | `tasks.md`（+ 任务卡挂 story/spec 卡下） |
-| 7. implement 前 | 开发 | implement 开始时 Handoff 前置对账（`/che-pingcode-sync-cards`，已建卡才提示） | spec 后续修改与卡片的增删改对齐 |
-| 8. implement | 开发 | `/che-compound-implement`；UI 任务按设计稿 + `design-tasks.md` 设计要求清单验收；提交走 `/che-git-master`（消息不带工作项 ID） | 代码 + 测试 |
-| 9. 收尾 | 开发 | 本地任务全部 `[x]` → `/che-pingcode-sync-status` | 卡片流转完成（单向，不回退） |
+| 1. specify | 产品 | `/che-compound-specify` 意图访谈（目标/范围/约束/失败条件）+ 生成统一规格；任务目录 `specs/<NNN>-<short-name>/` 由本阶段 `che task create` 创建并绑定 session | `specs/<NNN>-<short-name>/spec.md`（含 Why now / In scope / Out of scope / Constraints / Failure conditions 意图块与 `### User Story N` 章节） |
+| 2. expectations | 产品 | `/che-compound-expectations` 捕获成功 / 边界场景期望（validator-only，紧随 specify） | `specs/<NNN>-<short-name>/expectations.md` |
+| 3. clarify | 产品 | `/che-compound-clarify` ≤5 问澄清并把结论回写 spec | 更新后的 `spec.md`（含 `## Clarifications`） |
+| 4. 设计明细 | 产品/设计 | 涉 UI 的特性跑 `/che-compound-design`；无 UI 跳过；与建卡并行 | `specs/<NNN>-<short-name>/design-tasks.md`（设计明细；不是交接门禁项，不阻塞建卡与交接） |
+| 5. 建卡 | 产品 | `/che-pingcode-specstoissues` 命令（optional；specify Handoff 可选目标） | 需求树 idea → epic → feature(spec 卡) → story 卡；登记 `specs/pingcode-mapping.json` |
+| 6. 交接 | 产品→开发 | 门禁检查（下节），通过后转开发 | — |
+| 7. plan | 开发 | `/che-compound-plan`；特性目录存在 `design-tasks.md` 时必须先读，交互/页面状态按它对齐后再规划，与 spec 冲突时回产品/设计侧对齐 | 计划产物 |
+| 8. tasks | 开发 | 必跑 `/che-adr-check` 校验 plan 越决策边界（无未处置 departure 才继续）→ `/che-compound-tasks`；配置了 `mapping.task_artifact` 时 tasks 后 Handoff 可选目标补建任务卡（`/che-pingcode-specstoissues`） | `tasks.md`（+ 任务卡挂 story/spec 卡下） |
+| 9. implement 前 | 开发 | implement 开始时 Handoff 前置对账（`/che-pingcode-sync-cards`，已建卡才提示） | spec 后续修改与卡片的增删改对齐 |
+| 10. implement | 开发 | `/che-compound-implement`；UI 任务按设计稿 + `design-tasks.md` 设计要求清单验收；提交走 `/che-git-master`（消息不带工作项 ID） | 代码 + 测试 |
+| 11. 收尾 | 开发 | 本地任务全部 `[x]` → `/che-pingcode-sync-status` | 卡片流转完成（单向，不回退） |
 
 ## 任务与 slug 单一事实源
 
-全流程（intent → expectations → specify → clarify/design → plan → tasks → gapfill → planverify → intentguard → writeback）围绕**任务目录**展开：`/che-compound-intent` 用 `che task create {slug} --session <id>` 创建 `specs/NNN-{slug}/`（任务自此诞生，session 绑定落 `.che/feature.json`，机器本地不入库），后续所有制品都落这个目录。slug 是任务的全流程稳定句柄：目录名剥 `NNN-` 数字前缀（推送 PingCode 后为 `NCW-x` identifier 前缀）即得，`che paths --json` 的 `SLUG` 字段即该值。
+全流程（specify（含 intent 访谈）→ expectations → clarify/design → plan → tasks → gapfill → planverify → intentguard → writeback）围绕**任务目录**展开：`/che-compound-specify` 用 `che task create {slug} --session <id>` 创建 `specs/NNN-{slug}/`（任务自此诞生，session 绑定落 `.che/feature.json`，机器本地不入库），后续所有制品都落这个目录。slug 是任务的全流程稳定句柄：目录名剥 `NNN-` 数字前缀（推送 PingCode 后为 `NCW-x` identifier 前缀）即得，`che paths --json` 的 `SLUG` 字段即该值。
 
-- 下游各技能取 slug/目录一律从 `che paths`（带 `--session` 或在单任务时裸跑）读，不各自拼猜；intent / expectations / planverify / intentguard 产物按 `{任务目录}/intent.md`、`{任务目录}/expectations.md` 等落盘。
-- spec 推送 PingCode 后 `/che-pingcode-specstoissues` 把目录改名为 `{pingcode-identifier}-{slug}`（如 `NCW-4921-demo`）——slug 不变，session 绑定与门禁解析不受影响。
-- 门禁 `/che-compound-require-intent` 校验当前任务目录里 `intent.md` 存在（session 绑定解析任务），缺失即拒绝并指回 `/che-compound-intent`。
+- 下游各技能取 slug/目录一律从 `che paths`（带 `--session` 或在单任务时裸跑）读，不各自拼猜；链式调用（如 specify → expectations）直接沿用上游技能选定的 `TASK_DIR`/`SLUG`，不在多任务间重新解析；specify / expectations / planverify / intentguard 产物按 `{任务目录}/spec.md`、`{任务目录}/expectations.md` 等落盘。
+- spec 推送 PingCode 后 `/che-pingcode-specstoissues` 把目录改名为 `{pingcode-identifier}-{slug}`（如 `NCW-4921-demo`）——slug 不变，session 绑定与后续解析不受影响。
 
-## 交接门禁（阶段 4，spec 转开发前逐项核对）
+## 交接门禁（阶段 6，spec 转开发前逐项核对）
 
 1. `### User Story N` 章节齐备，每章标题行内标注优先级 `(Priority: P1/P2/P3)`（bundled spec 模板的既有格式）——这是卡片优先级映射的来源，缺了卡片优先级落不下来。
 2. `specs/pingcode-mapping.json` 已登记：每张卡的 id 与状态可追溯。没有登记 = 建卡没完成，不能交接。
@@ -42,7 +43,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 
 任何一项不过 → 留在产品侧处理完再交接，不要把半成品 spec 推给开发。
 
-设计明细（阶段 2 的 `design-tasks.md`）不在本门禁清单内：无 UI 特性不产出；涉 UI 未产出也不阻塞产品→开发交接，由设计侧自行跟进。
+设计明细（阶段 4 的 `design-tasks.md`）不在本门禁清单内：无 UI 特性不产出；涉 UI 未产出也不阻塞产品→开发交接，由设计侧自行跟进。
 
 ## 开发侧纪律
 

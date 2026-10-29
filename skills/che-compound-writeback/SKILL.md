@@ -22,7 +22,7 @@ Read `{task_dir}/intentguard.md` (`{task_dir}` = the task directory `che paths` 
 
 **2. Scan the session for writeback candidates:**
 
-**ADR candidates** — non-obvious architectural choices made during `/che-compound-intent` or `/che-compound-implement`:
+**ADR candidates** — non-obvious architectural choices made during `/che-compound-specify` or `/che-compound-implement`:
 - Library/framework selection that locks in a pattern
 - Storage / persistence approach decisions
 - API contract decisions
@@ -91,7 +91,7 @@ context: "{one line of background: the past mistake and why the rule exists}"
 {one-line rationale, often references an ADR}
 
 ## Examples in this repo
-- `{task_dir}/intent.md` (feature {slug})
+- `{task_dir}/spec.md` (feature {slug})
 - ...
 ```
 
@@ -109,9 +109,9 @@ Show each draft and ask (use AskUserQuestion per draft):
 - For corrections: write `docs/corrections/{YYYY-MM-DD}-{slug}.md`, prefixing the filename with the date. Always include the `paths:`/`match:`/`rule:`/`context:` frontmatter from the template above so the correction is enforceable — only fall back to a frontmatter-less body if the user explicitly wants a context-only note.
 - For patterns: write `docs/patterns/{slug}.md`, using the slug only as the filename.
 
-**6. Update intent doc status.**
+**6. Update specification status.**
 
-In the corresponding `{task_dir}/intent.md`, change the frontmatter:
+In the corresponding `{task_dir}/spec.md`, change the frontmatter:
 ```yaml
 status: active   →   status: completed
 completed: {YYYY-MM-DD}
@@ -119,7 +119,7 @@ completed: {YYYY-MM-DD}
 
 **7. Summary**:
 
-*"Writeback complete. {N} ADRs committed to the adrkit corpus (`docs/adr/`), {N} corrections committed to `docs/corrections/`, and {N} patterns committed to `docs/patterns/`. Intent `{slug}` marked completed. Corpus size: {N} ADRs; store size: {N} corrections / {N} patterns."*
+*"Writeback complete. {N} ADRs committed to the adrkit corpus (`docs/adr/`), {N} corrections committed to `docs/corrections/`, and {N} patterns committed to `docs/patterns/`. Specification `{slug}` marked completed. Corpus size: {N} ADRs; store size: {N} corrections / {N} patterns."*
 
 ---
 
@@ -128,7 +128,7 @@ completed: {YYYY-MM-DD}
 - **Read** for scanning session history and intent guard verdict
 - **Bash** for the adrkit scaffold entry point and `.agents/skills/che-adr-draft/scripts/adr.sh lint`
 - **Write** for new compound files
-- **Edit** for updating intent doc status (frontmatter only)
+- **Edit** for updating specification status (spec.md frontmatter only)
 - **AskUserQuestion** for per-draft accept/edit/reject/defer
 
 ---
