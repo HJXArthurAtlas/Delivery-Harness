@@ -1,13 +1,16 @@
 #!/bin/bash
 # scripts/bash/planverify-gate.sh
 #
-# Gate: refuses to let /che-compound-implement proceed when the gate mode is
-# block and the feature's planverify verdict is missing or BLOCKED_DRIFT.
-# Invoked manually or by the agent before /che-compound-implement.
+# Gate: refuses to let /che-compound-implement proceed when a blocking gate
+# rejects the feature's planverify report. Invoked manually or by the agent
+# before /che-compound-implement.
 #
 # Thin wrapper: the gate logic is inlined in the che CLI
-# (`che planverify-gate <slug>`), including the gate mode — SKC_PLANVERIFY_GATE
-# env, else `planverify_gate:` in .che/config.yml, default off. An invalid mode
+# (`che planverify-gate <slug>`), including both gate modes —
+# SKC_ADR_GATE env, else `adr_gate:` in .che/config.yml, default block
+# (report present, adr_status clean, spec/plan/tasks SHA-256 fresh);
+# SKC_PLANVERIFY_GATE env, else `planverify_gate:`, default off (refuses
+# BLOCKED_DRIFT / BLOCKED_ADR; unknown verdicts fail closed). An invalid mode
 # fails closed (exit 1).
 #
 # A shell script, not an interactive prompt, so the gate executes

@@ -45,7 +45,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 
 ## 开发侧纪律
 
-- **gapfill/implement 前必过 adr-check**：plan+tasks 产出后先 `/che-adr-check` 对照 ADR 语料校验决策边界；有未处置 departure 回 plan 修正（重跑 `/che-compound-plan` 重生 tasks.md）或 `/che-adr-draft` 立 ADR 变更，不带越界补任务、动代码。
+- **implement 前必过 planverify，ADR 层始终强制**：gapfill 后跑 `/che-compound-planverify`（其机械层对 gapfill 后的最终 tasks 跑确定性 ADR 查询 + 独立 checker 判 P3e）；`adr_gate` 默认 block——报告缺失、`adr_status` 非 clean、或 spec/plan/tasks 改动后 hash 不匹配，`/che-compound-implement` 一律拒绝；BLOCKED_ADR 时回 plan 修正（重跑 `/che-compound-plan` 重生 tasks.md）或 `/che-adr-draft` 立 superseding ADR 经人工 accept 后重跑 planverify（draft 状态不放行），不带越界补任务、动代码。规划过程中可随时手动 `/che-adr-check` 排查，但它无门禁效力。
 - **implement 前必对账**：spec 在建卡后有过修改的，先 `sync-cards` 消化差异再动代码——卡片描述与 spec 漂移会让收尾阶段对不上账。
 - **涉 UI 必对 design-tasks**：特性目录有 `design-tasks.md` 的，plan 前先读——交互规则、页面状态、设计要求清单（UI-01…）是 plan 的 UX 输入；它与 spec 冲突时回产品/设计侧对齐，绝不自行裁决；实现与验收对照设计稿 + 设计要求清单，不让 plan 即兴发明交互。
 - **溯源链**：`specs/<NNN>-<short-name>/spec.md 章节 → mapping.json 卡片 id → sync-status 收尾`（提交消息不携带工作项 ID，溯源由 mapping.json 承担）。

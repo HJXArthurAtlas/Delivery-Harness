@@ -23,7 +23,7 @@ ADR records live in the shared adrkit corpus at `docs/adr/` — same numbering a
 
 Architecture decisions made during real features are allocated by the adrkit scaffold entry point (`che-adr-draft/scripts/scaffold.sh`), which owns the numeric id and the schema frontmatter (`status`, `affects`, `relatesTo`, ...). Bodies follow the writeback shape: Context → Decision → Options considered → Consequences → **Rule for AI** (one-line directive for future agents).
 
-The "Rule for AI" line is what `/che-compound-load` injects into context, together with the rest of the corpus. Future agents are instructed not to re-debate these decisions, and `/che-adr-check` validates plans against the corpus at plan time.
+The "Rule for AI" line is what `/che-compound-load` injects into context, together with the rest of the corpus. Future agents are instructed not to re-debate these decisions, and the planverify mechanical layer validates plans against the corpus at plan time (via the shared `che-adr-check/scripts/check.sh`; `/che-adr-check` itself remains an on-demand manual diagnostic).
 
 ### `docs/corrections/`
 

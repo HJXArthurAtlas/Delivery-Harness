@@ -159,7 +159,7 @@ your-repo/
 
 ### 3.2 主线流程
 
-主线链条（阶段数随角色取舍浮动，不按固定数字计）：**统一 specify（含 intent 访谈与场景起草）→ clarify → UI 设计明细 / 建卡 / 交接门禁 → plan → tasks（先 adr-check）→ implement 前对账 → implement → 卡片收尾**；另有独立辅助链：bug 修复三步（assess → fix → test）与线上问题排查（环境对号 → Loki 日志 → 数据库核事实）。
+主线链条（阶段数随角色取舍浮动，不按固定数字计）：**统一 specify（含 intent 访谈与场景起草）→ clarify → UI 设计明细 / 建卡 / 交接门禁 → plan → gapfill → planverify（含确定性 ADR 校验）→ implement 前对账 → implement → 卡片收尾**；另有独立辅助链：bug 修复三步（assess → fix → test）与线上问题排查（环境对号 → Loki 日志 → 数据库核事实）。
 
 ```mermaid
 flowchart TD
@@ -172,7 +172,7 @@ flowchart TD
     DE["design 设计清单 design-tasks.md（涉 UI，澄清后与建卡并行）"]
   end
   subgraph DV["开发"]
-    PL["plan 实现规划"] --> AC["adr-check 越界校验"] --> TK["tasks 任务清单"] --> IM["implement 实现"] --> ST["sync-status 卡片收尾"]
+    PL["plan 实现规划 + tasks 任务清单"] --> GF["gapfill 缺口补全"] --> PV["planverify 独立校验（含 ADR 机械层 + P3e）"] --> IM["implement 实现"] --> ST["sync-status 卡片收尾"]
   end
   SP --> PC
   CL --> DE
@@ -181,7 +181,7 @@ flowchart TD
   GA -->|全过| PL
 ```
 
-> **阶段如何衔接**：建卡、adr-check、sync-cards 和各类门禁由技能的 Handoff 与入向条件驱动，agent 按条件提示或接续；本 pack 无 hook 执行器，不把它们理解为后台自动任务。下面的顺序列出需要执行或裁决的动作，条件不满足时按提示补跑。
+> **阶段如何衔接**：建卡、planverify 及其门禁、sync-cards 和各类门禁由技能的 Handoff 与入向条件驱动，agent 按条件提示或接续；本 pack 无 hook 执行器，不把它们理解为后台自动任务。下面的顺序列出需要执行或裁决的动作，条件不满足时按提示补跑。
 
 #### 产品侧（需求 → 规格 → 建卡）
 
@@ -226,17 +226,16 @@ UI 设计侧注意：
 
 1. `/che-compound-load` —— 每会话一次（plan 的入向前置）
 2. `/che-compound-plan` —— 单命令一次完成实现规划与任务拆解：spec 转实现规划（research / data-model / contracts / quickstart）后，同一命令按用户故事生成依赖有序 `tasks.md`；有 `design-tasks.md` 必读并对齐，冲突回产品 / 设计裁决；配置了 `mapping.task_artifact` 时，结束确认后可接续补建任务卡并关联至 story / spec 卡
-3. `/che-adr-check` —— plan+tasks 产出后的必过校验：校验 plan 是否越出决策边界；存在未处置 departure 时暂停并等待裁决——修订 plan（重跑 `/che-compound-plan` 重生 `tasks.md`），或通过 `/che-adr-draft` 新增 ADR 后重新校验
-4. `/che-compound-gapfill` —— 对照统一 spec 意图块（In scope / Out of scope / Constraints / Failure conditions）+ spec 场景（Acceptance / Edge `E#`）补四类缺口测试进 `tasks.md`（约束违反 / 失败条件 / 越界回归 / 边界）
-5. `/che-compound-planverify` —— 独立校验者审 plan + tasks：PASS 放行，REPLAN_ALLOWED 修订 plan 后重新校验，BLOCKED_DRIFT 回退至 plan
-6. `/che-compound-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；开了 `planverify_gate` block 的项目 → 先过闸（verdict 缺失或 BLOCKED_DRIFT 拒绝 implement）。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): 中文消息` + `Co-Authored-By` 页脚（消息不带工作项 ID），小步拆分、精确暂存、排除敏感文件
-7. `/che-compound-intentguard` —— 独立校验者审实现 vs 锁定意图：PASS 交接，REVIEW 人工复核后放行，BLOCKED 回退至 implement 修复
-8. `/che-pingcode-sync-status` —— 本地任务全部 `[x]` 后卡片单向流转完成态
-9. `/che-compound-writeback` —— 把新经验（ADR / corrections / patterns）沉淀回 compound store，供后续特性复用
+3. `/che-compound-gapfill` —— 对照统一 spec 意图块（In scope / Out of scope / Constraints / Failure conditions）+ spec 场景（Acceptance / Edge `E#`）补四类缺口测试进 `tasks.md`（约束违反 / 失败条件 / 越界回归 / 边界）
+4. `/che-compound-planverify` —— 正式实现前校验的唯一入口：机械层对 gapfill 后的最终 plan/tasks 表面跑确定性 ADR 查询（共用 `che-adr-check` 的 check.sh，产出 `planverify.adr.json` 审计记录与报告 hash），密封 briefing 交独立 checker 审 plan + tasks（含 P3e ADR conformance）；PASS 放行；REPLAN_ALLOWED 修订 plan（重跑 `/che-compound-plan` 再生 tasks.md）后重新校验；BLOCKED_DRIFT 回退至 plan；BLOCKED_ADR（越过 governing ADR）修 plan 或 `/che-adr-draft` 起草 superseding ADR 经人工 accept 后重跑（draft 状态不放行）。规划过程中也可随时手动 `/che-adr-check` 排查，但它只读、无门禁效力
+5. `/che-compound-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；先过 `/che-compound-planverify-gate`——`adr_gate` 默认 block（报告缺失、`adr_status` 非 clean、或 spec/plan/tasks 改动后 hash 不匹配即拒绝），`planverify_gate` 为 block 时再拒 BLOCKED_DRIFT / BLOCKED_ADR。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): 中文消息` + `Co-Authored-By` 页脚（消息不带工作项 ID），小步拆分、精确暂存、排除敏感文件
+6. `/che-compound-intentguard` —— 独立校验者审实现 vs 锁定意图：PASS 交接，REVIEW 人工复核后放行，BLOCKED 回退至 implement 修复
+7. `/che-pingcode-sync-status` —— 本地任务全部 `[x]` 后卡片单向流转完成态
+8. `/che-compound-writeback` —— 把新经验（ADR / corrections / patterns）沉淀回 compound store，供后续特性复用
 
 开发侧纪律：
 
-- **gapfill/implement 前必过 adr-check**，不带越界补任务、动代码
+- **implement 前必过 planverify，ADR 层始终强制**：ADR 机械层（adrkit 查询 + P3e）是 planverify 的正式前置层，`adr_gate` 默认 block——报告缺失、非 clean、或工件改动后 hash 不匹配，implement 一律拒绝；不带越界补任务、动代码
 - **implement 前必对账**：spec 在建卡后改过的，先 sync-cards 消化差异再动代码
 - **涉 UI 必对 design-tasks**：实现与验收对照设计稿 + UI-xx 清单，不即兴发明交互
 - **溯源链**：spec 章节 → mapping.json 卡片 id → sync-status 收尾（提交消息不带工作项 ID，溯源由 mapping.json 承担）
@@ -244,12 +243,12 @@ UI 设计侧注意：
 
 #### 质量环节
 
-以下技能并非主线的强制环节，但它们是这套流程中提升质量的关键——尤其 grill 类：需求阶段的矛盾在访谈中暴露，成本远低于在实现阶段返工；grill-with-docs 沉淀的 ADR 会反哺 adr-check 的越界校验，治理链随使用不断完善。
+以下技能并非主线的强制环节，但它们是这套流程中提升质量的关键——尤其 grill 类：需求阶段的矛盾在访谈中暴露，成本远低于在实现阶段返工；grill-with-docs 沉淀的 ADR 会反哺 planverify 机械层的越界校验，治理链随使用不断完善。
 
 | 技能 | 时机 | 作用 |
 |---|---|---|
 | `che-compound-grill-me` | 产品侧，specify / clarify 之后 | 对 spec 执行追问式深度澄清，暴露隐含假设与自相矛盾；结论**不回写** spec，如需回写先执行 clarify |
-| `che-compound-grill-with-docs` | 产品侧，同上 | 深度澄清并沉淀跨特性知识：术语与主题文档落 `docs/domain_knowledge/`，符合记录门的决策归口 `docs/adr/`；后续 adr-check 的决策边界因此更完整 |
+| `che-compound-grill-with-docs` | 产品侧，同上 | 深度澄清并沉淀跨特性知识：术语与主题文档落 `docs/domain_knowledge/`，符合记录门的决策归口 `docs/adr/`；planverify 的 ADR 决策边界因此更完整 |
 | `che-adr-context` | 开发 plan 前 | 取 ADR 决策语料进上下文（只读），避免 plan 与既有决策冲突 |
 | `che-compound-analyze` | 开发 tasks 后 | spec / plan / tasks 跨制品一致性只读分析，尽早发现工件间的漂移 |
 | `che-compound-converge` | 实现之后 | 代码现状与工件有差距时，追加收敛任务进 tasks.md，避免差距持续累积 |
@@ -270,7 +269,7 @@ bug 修复三步：
 
 ### 3.3 产出物结构
 
-每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`spec.md`（统一规格：意图块 + User Story / Acceptance / Edge / FR / SC，场景带全局稳定 `E#` ID）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单）、`planverify.md`（门禁报告）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/domain_knowledge/`（跨特性术语与主题知识）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
+每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`spec.md`（统一规格：意图块 + User Story / Acceptance / Edge / FR / SC，场景带全局稳定 `E#` ID）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单）、`planverify.md`（门禁报告，frontmatter 记录 verdict、`adr_status` 与 spec/plan/tasks SHA-256）、`planverify.adr.json`（adrkit 原始审计记录）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/domain_knowledge/`（跨特性术语与主题知识）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
 
 ## 4. 使用路径：从初始化到日常交付
 

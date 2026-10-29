@@ -39,7 +39,7 @@ https://git.newchiwan.com/council/ncw-delivery-harness）。按步骤执行，�
    - 技能发现：omp 用 omp plugin list；手动拷贝方式确认 ~/.agents/skills/ 下的技能目录已就位
 
 4. 最后询问我：是否要在当前 git 项目里运行 /che-project-init 做项目级配置
-   （.che/config.yml 四键 + 可选 PingCode 接入）。我不需要就到此为止。
+   （.che/config.yml 五键 + 可选 PingCode 接入）。我不需要就到此为止。
 ```
 
 手动安装步骤见下文「安装」。

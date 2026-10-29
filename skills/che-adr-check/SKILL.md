@@ -1,6 +1,6 @@
 ---
 name: che-adr-check
-description: 对照治理决策校验已产出的 plan 是否越界（只读）：把 plan 与 adrkit 语料 docs/adr/ 中约束本工作的决策逐条比对，标出违反项与需补的 ADR 变更；/che-compound-plan（plan+tasks 合并产出）之后必跑，是进入 gapfill/implement 前的前置。当用户说「check 这个 plan」「校验 plan 越没越界」「plan 有没有违反决策」「adr-check」时使用——即使用户没提命令名，只要是 plan 之后的决策越界校验也用本 skill。
+description: 按需对 plan 做独立 ADR 越界检查（只读）：把 plan 拟修改的路径与 adrkit 语料 docs/adr/ 中约束这些路径的决策逐条比对，标出违反项与需补的 ADR 变更。正式实现前校验与门禁由 /che-compound-planverify 承担（其机械层共用本技能的 check.sh）；本技能用于规划过程中随时手动排查，不参与强制流程、不产生可供 gate 消费的 verdict、不满足 adr_gate。当用户说「check 这个 plan」「校验 plan 越没越界」「plan 有没有违反决策」「adr-check」时使用——即使用户没提命令名，只要是规划中的手动决策越界排查也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -9,10 +9,15 @@ description: 对照治理决策校验已产出的 plan 是否越界（只读）�
 
 # adrkit — check this plan
 
-Runs after a plan exists, and answers one question: does this plan sit inside
+Answers one question on demand: does this plan sit inside
 the decisions already made, or does it quietly cross one?
 
-Run this check manually after `/che-compound-plan` has produced a plan.
+This is an **on-demand diagnostic**, not a gate. The formal pre-implement
+verification and gate live in `/che-compound-planverify` (whose deterministic
+ADR layer invokes this same `scripts/check.sh` against the gapfilled plan/tasks
+surface). Running this command manually never writes `planverify.md`, produces
+no verdict the gate consumes, and does not satisfy `adr_gate` — a manual PASS
+here does not replace the pre-implement planverify.
 
 ## User Input
 
@@ -43,7 +48,8 @@ $ARGUMENTS
      evaluator routes; it does not approve. Do not read a clean route as sign-off.
 5. If the plan does cross a decision, the next step is
    `/che-adr-draft` — record the new decision rather than letting the
-   plan silently overrule the old one.
+   plan silently overrule the old one. For a formal clearance, re-run
+   `/che-compound-planverify` afterwards.
 
 ## Notes
 
@@ -52,8 +58,8 @@ $ARGUMENTS
   overrides feature-dir resolution.
 - Requires `@adrkit/cli` 0.20.0 with `adrkit` on `PATH`. If unavailable,
   install it with `npm install -g @adrkit/cli@0.20.0` and retry.
-- Read-only, and that is load-bearing rather than incidental: this command is
-  part of the plan-review chain, so it must never write.
+- Read-only, and that is load-bearing rather than incidental: this command
+  never writes — no `planverify.md`, no verdict, no gate-relevant state.
 - Exit code 1 means findings exist (corpus errors, or the evaluator returned the
   proposal). The report is still complete. Exit code 2 is a usage error.
 - Configuration: `ADRKIT_DIR` (corpus, default `docs/adr/`), `ADRKIT_SNAPSHOT`
@@ -66,5 +72,6 @@ $ARGUMENTS
 
 > Pack fork (ncw), port on upstream upgrade.
 
-- **目标**：`/che-compound-gapfill` —— 在 plan 通过检查后补四类缺口任务
-- **条件**：plan 已产出即必跑（`/che-compound-plan` 产出 plan 与 tasks 后的必经步，不再是可选项）；本检查只读；无未处置 departure 才交接 gapfill，回退：departure → 回 plan 修正（重跑 `/che-compound-plan` 重生 tasks.md）或走 `/che-adr-draft` 记录为正式 ADR 变更后重跑本检查
+- **目标**：无强制交接目标——本技能是按需排查工具，不参与强制流程
+- **条件**：只读；输出仅终端报告；不产生正式 verdict、不满足 `adr_gate`；正式实现前校验一律走 `/che-compound-planverify`
+- **回退**：发现 departure → 修 plan（重跑 `/che-compound-plan` 重生 tasks.md）或走 `/che-adr-draft` 立正式 ADR 变更，随后以 `/che-compound-planverify` 产出正式判定

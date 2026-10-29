@@ -43,8 +43,10 @@ $ARGUMENTS
      for records it touches, and a `review.tier` matching the blast radius.
 5. Leave the status as `draft`. Ratification is a human act, and this command
    does not perform it.
-6. Run `/che-adr-check` afterwards to confirm the new record is valid and
-   does not conflict with an existing decision.
+6. After the new record is ratified (a human act — a `draft` status alone
+   clears nothing), re-run `/che-compound-planverify` to produce the formal
+   pre-implement verdict. Optionally run `/che-adr-check` afterwards to confirm
+   the new record is valid and does not conflict with an existing decision.
 
 ## Notes
 

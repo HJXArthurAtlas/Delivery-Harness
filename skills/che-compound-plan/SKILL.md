@@ -38,9 +38,8 @@ Report branch, IMPL_PLAN path, generated design artifacts (research/data-model/c
 - Format validation: Confirm ALL tasks follow the checklist format (checkbox, ID, labels, file paths)
 - **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
   主流程:
-  - /che-adr-check: 对照 ADR 语料校验 plan 是否越决策边界（必经；无未处置 departure 才继续，回退：回 plan 修正或 /che-adr-draft 立正式 ADR 变更后重跑——plan 有修正时重跑本命令重生 tasks.md）
   - /che-compound-gapfill: 对照 spec 意图块与场景补四类缺口任务（约束违反/失败条件/越界回归/边界）
-  - /che-compound-planverify: 独立校验者审 plan + tasks
+  - /che-compound-planverify: 独立校验者审 plan + tasks（含确定性 ADR 机械层与 P3e；正式实现前校验与门禁唯一入口）
   可选:
   - /che-pingcode-specstoissues: [可选] 配了 mapping.task_artifact 时现在补建任务卡（implement 前 spec 有改动先跑 /che-pingcode-sync-cards 对账）
   - /che-compound-analyze: [可选] spec/plan/tasks 三工件一致性只读分析
@@ -197,7 +196,7 @@ Every task MUST strictly follow this format:
 
 - Use absolute paths for filesystem operations; use project-relative paths for references in documentation
 - ERROR on gate failures or unresolved clarifications
-- Regenerating tasks after a plan revision (e.g. post adr-check or planverify REPLAN_ALLOWED): re-run this command — Setup skips existing plan.md and Phase 0/1 re-validate against the revised plan before regenerating tasks.md
+- Regenerating tasks after a plan revision (e.g. post planverify REPLAN_ALLOWED or BLOCKED_ADR): re-run this command — Setup skips existing plan.md and Phase 0/1 re-validate against the revised plan before regenerating tasks.md
 
 ## Done When
 
@@ -219,5 +218,4 @@ Every task MUST strictly follow this format:
   - 前置装载（入向，plan 开始时）：会话上下文无 `COMPOUND STORE LOADED` 摘要 → 先跑 `/che-compound-load` 再 Setup；已有摘要（本会话已装载）→ 跳过
   - plan 工件齐备，存在 `design-tasks.md` 时已按其 UX 约束对齐
   - tasks.md 已按用户故事生成且依赖有序
-  - 必经 `/che-adr-check`：对照 ADR 语料校验越界，无未处置 departure 才交接 gapfill；回退：departure → 回 plan 修正（重跑本命令重生 tasks.md）或 `/che-adr-draft` 立正式 ADR 变更后重跑
   - 配了 `mapping.task_artifact` 时任务卡已补建

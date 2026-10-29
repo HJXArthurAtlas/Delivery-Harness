@@ -1,13 +1,13 @@
 ---
 name: che-project-init
-description: 交互式初始化项目 .che 配置：逐项讲解并确认 language（全 pack 输出语言）、planverify_gate（before_implement 门禁）、checker（独立校验者策略）、pingcode_integration（PingCode 集成开关）四个配置项，生成 .che/config.yml（幂等增量：已初始化项目重跑只补缺失或非法的新配置项，已有合法配置沿用不重问）；顺带自检并按需安装 che / adrkit CLI；选择接入 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 /che-pingcode-init。当用户要初始化 .che 配置、设置或切换输出语言、开启或关闭规格流程门禁、配置校验者策略、接入或首次配置本 pack、harness 升级后补装新增配置项、检查 che/adrkit 有没有装时使用——即使用户没提 skill 名，意图匹配也用本 skill。
+description: 交互式初始化项目 .che 配置：逐项讲解并确认 language（全 pack 输出语言）、adr_gate（ADR 机械层门禁）、planverify_gate（语义 verdict 门禁）、checker（独立校验者策略）、pingcode_integration（PingCode 集成开关）五个配置项，生成 .che/config.yml（幂等增量：已初始化项目重跑只补缺失或非法的新配置项，已有合法配置沿用不重问）；顺带自检并按需安装 che / adrkit CLI；选择接入 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 /che-pingcode-init。当用户要初始化 .che 配置、设置或切换输出语言、开启或关闭规格流程门禁、配置校验者策略、接入或首次配置本 pack、harness 升级后补装新增配置项、检查 che/adrkit 有没有装时使用——即使用户没提 skill 名，意图匹配也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 
 # 项目接入初始化
 
-本技能是项目接入本 pack 的**第一步配置入口**：逐项向用户讲解并确认四个配置项，交互式生成项目根的 `.che/config.yml`。本技能**幂等可重复执行**：harness 迭代会新增配置键，已初始化的项目重跑时只补「缺失或值非法」的键（典型场景：新版 pack 新增了配置项），已有合法配置原样沿用、绝不重问、绝不改动。
+本技能是项目接入本 pack 的**第一步配置入口**：逐项向用户讲解并确认五个配置项，交互式生成项目根的 `.che/config.yml`。本技能**幂等可重复执行**：harness 迭代会新增配置键，已初始化的项目重跑时只补「缺失或值非法」的键（典型场景：新版 pack 新增了配置项），已有合法配置原样沿用、绝不重问、绝不改动。
 
 职责边界（必须遵守）：
 
@@ -31,15 +31,23 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 langua
 - 合法值：BCP-47 风格语言代码（`zh-cn`、`en`、`ja`…）。交互只提供上面两个常用选项；用户主动要求其他语言时按其要求写入对应代码。
 - 本项没有环境变量覆盖。
 
-### 1. planverify_gate（before_implement 门禁；默认 off；选项 block / off）
+### 1. adr_gate（ADR 机械层门禁；默认 block；选项 block / off）
 
-- 问法：「要不要在动手写代码之前，先让一个独立的 AI 审查者把实现计划过一遍？开了更稳，但流程会多一道检查。」
-- **block**：进入 `/che-compound-implement` 前必须先跑过 `/che-compound-planverify` 且裁决不是 `BLOCKED_DRIFT`——计划没过独立审查就不准动代码。
-- **off**：不拦截，planverify 做不做随用户。
-- **影响**：block 多一道实现前的独立校验关卡，更稳但流程更长。新项目建议先 off 跑顺流程，再按需开。
+- 问法：「要不要在实现前强制校验计划没有违反已落地的架构决策？开着会拦住越过 ADR 的实现，建议保持开启。」
+- **block**：进入 `/che-compound-implement` 前，该特性的 planverify 报告必须在位、`adr_status: clean`，且报告记录的 spec/plan/tasks SHA-256 与当前文件一致——计划改了没重新校验、或 ADR 机械层（adrkit 查询 + P3e 判定）没过，一律拒绝动代码。缺 `adr_status` 的旧报告按「需要重跑」处理，绝不当作 clean 放行。
+- **off**：不拦截 ADR 机械层（语义层的 `planverify_gate` 独立控制）。
+- **影响**：block 是默认且推荐——它挡的是「计划悄悄推翻已有决策」这类最贵的返工；ADR 语料为空或项目暂不接 ADR 流程时可 off。
+- 环境变量 `SKC_ADR_GATE` 优先于本配置。
+
+### 2. planverify_gate（语义 verdict 门禁；默认 off；选项 block / off）
+
+- 问法：「要不要在动手写代码之前，再强制让一个独立的 AI 审查者把实现计划的语义裁决过一遍？开了更稳，但流程会多一道检查。」
+- **block**：进入 `/che-compound-implement` 前，planverify 裁决不能是 `BLOCKED_DRIFT` / `BLOCKED_ADR`（在 `adr_gate` 之上额外强制语义层）。
+- **off**：不拦截语义裁决，planverify 做不做随用户（ADR 机械层仍由 `adr_gate` 控制）。
+- **影响**：block 多一道实现前的独立语义校验关卡，更稳但流程更长。新项目建议先 off 跑顺流程，再按需开。
 - 环境变量 `SKC_PLANVERIFY_GATE` 优先于本配置。
 
-### 2. checker（独立校验者策略；默认 auto）
+### 3. checker（独立校验者策略；默认 auto）
 
 - 问法：「审查计划/实现的那个独立 AI 审查者，要挑多独立的？」选项用大白话讲：自动挑最独立的（默认）/ 必须用别家模型 / 钉死同家族便宜模型 / 钉死同款模型 / 你自己指定 CLI 和模型。
 
@@ -52,7 +60,7 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 - `cli:<model>`：显式指定外部 CLI 与模型，完全由用户指定。
 - 环境变量 `SKC_CHECKER` 优先于本配置。
 
-### 3. pingcode_integration（PingCode 集成开关；选项 on / off）
+### 4. pingcode_integration（PingCode 集成开关；选项 on / off）
 
 - 问法：「是否开启 PingCode 同步？开启后特性规格会自动建卡到 PingCode，建卡、对账、收尾流转都在 PingCode 上走。」
 - **on**：本项目接入 PingCode 建卡链路（spec 卡 / story 卡 / 任务卡在 PingCode 建立与流转）。真正生效还需要 `.che/pingcode-config.yml`（项目/产品/迭代/映射配置，由 `/che-pingcode-init` 交互生成）。
@@ -66,7 +74,7 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 ### 1. 定位项目根与现状
 
 1. `git rev-parse --show-toplevel` 失败 → 终止：本技能必须在 git 项目内运行。
-2. `.che/config.yml` 已存在 → 逐键读出现值，对照四个标准键（language 与三个流程键）标注状态：**已有且合法 / 缺失 / 值非法**（合法性口径见各配置项的选项定义）；pack 不认识的键原样保留、绝不删除，在回显中列出。此标注决定步骤 4 问哪些。
+2. `.che/config.yml` 已存在 → 逐键读出现值，对照五个标准键（language 与四个流程键）标注状态：**已有且合法 / 缺失 / 值非法**（合法性口径见各配置项的选项定义）；pack 不认识的键原样保留、绝不删除，在回显中列出。此标注决定步骤 4 问哪些。
 
 ### 2. CLI 运行时自检（che / adrkit）
 
@@ -79,11 +87,11 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 
 ### 3. 环境变量冲突预检
 
-`printenv SKC_PLANVERIFY_GATE SKC_CHECKER` 有非空值 → 明确提醒用户：这些环境变量优先于 config.yml，本次写入的对应键在该 shell 不生效；经用户确认后继续。
+`printenv SKC_ADR_GATE SKC_PLANVERIFY_GATE SKC_CHECKER` 有非空值 → 明确提醒用户：这些环境变量优先于 config.yml，本次写入的对应键在该 shell 不生效；经用户确认后继续。
 
 ### 4. 逐项提问
 
-language 需要问时**最先问**（本项固定中文提问，用户选定后，本次会话后续讲解与提问切换为所选语言），再按上面 1～3 项的顺序走一遍，**只对步骤 1 标注为缺失或值非法的键**讲解并问询（先讲通俗口径，再按该项「问法」的自然语言提问，把答案落成对应的键值记录）；已有合法值的键**绝不重问**，原样沿用，回显标注「沿用现有」。`checker` 用户选「自己指定 CLI 和模型」时必须追问具体模型标识，写成 `cli:<model>` 完整值。用户显式点名重配某项或全部重配 → 按其指定范围重问，仍逐项单独问；四键全部沿用 → 跳到步骤 8 回显「配置已是最新」。
+language 需要问时**最先问**（本项固定中文提问，用户选定后，本次会话后续讲解与提问切换为所选语言），再按上面 1～4 项的顺序走一遍，**只对步骤 1 标注为缺失或值非法的键**讲解并问询（先讲通俗口径，再按该项「问法」的自然语言提问，把答案落成对应的键值记录）；已有合法值的键**绝不重问**，原样沿用，回显标注「沿用现有」。`checker` 用户选「自己指定 CLI 和模型」时必须追问具体模型标识，写成 `cli:<model>` 完整值。用户显式点名重配某项或全部重配 → 按其指定范围重问，仍逐项单独问；五键全部沿用 → 跳到步骤 8 回显「配置已是最新」。
 
 ### 5. PingCode 接入链（仅当本次新选接入或用户显式要求补接）
 
@@ -118,12 +126,16 @@ language 需要问时**最先问**（本项固定中文提问，用户选定后�
 
 ```yaml
 # .che/config.yml — ncw-delivery-harness 项目配置（/che-project-init 生成）
-# 环境变量优先于本文件：SKC_PLANVERIFY_GATE、SKC_CHECKER。
+# 环境变量优先于本文件：SKC_ADR_GATE、SKC_PLANVERIFY_GATE、SKC_CHECKER。
 
 # 全 pack 输出语言：所有技能对话输出（含思考）使用的语言代码（zh-cn / en 等）
 language: zh-cn
 
-# before_implement 门禁：block 时实现前必须通过 /che-compound-planverify（off 不拦截）
+# ADR 机械层门禁（默认 block）：block 时 planverify 报告必须在位、adr_status: clean、
+# 且 spec/plan/tasks 的 SHA-256 与报告记录一致，否则拒绝 /che-compound-implement
+adr_gate: block
+
+# 语义 verdict 门禁：block 时实现前 planverify 裁决不得为 BLOCKED_DRIFT / BLOCKED_ADR（off 不拦截语义层）
 planverify_gate: off
 
 # planverify / intentguard 独立校验者策略（auto | cross-model | same-family | same-model | cli:<model>）
@@ -142,6 +154,7 @@ pingcode_integration: off
 ```
 ✅ 配置已生成: .che/config.yml
    language: <值>（全 pack 输出语言）
+   adr_gate: <值>
    planverify_gate: <值>
    checker: <值>   pingcode_integration: <值>
    变更: <新增 键=值 …；修正 键=值 …；沿用 键 …；未识别键保留: 键 …（无增补时整行显示「已是最新」）>

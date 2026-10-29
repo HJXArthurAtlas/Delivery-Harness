@@ -1,6 +1,6 @@
 ---
 name: che-compound-planverify-gate
-description: implement 前门禁（默认 off 静默放行）：gate 模式为 block（SKC_PLANVERIFY_GATE 环境变量或 .che/config.yml 的 planverify_gate 键）时，planverify 裁决缺失或 BLOCKED_DRIFT 即拒绝 /che-compound-implement。手动或 agent 在 implement 边界前调用。当用户说「过一遍 implement 门禁」「检查 planverify 放行了没」时使用——即使用户没提命令名，只要是实现前的门禁检查也用本 skill。
+description: implement 前门禁（双 gate）：adr_gate 默认 block——planverify 报告缺失、adr_status 缺失或非 clean、或 spec/plan/tasks 的 SHA-256 与报告记录不匹配即拒绝；planverify_gate（默认 off）为 block 时再拒绝 BLOCKED_DRIFT / BLOCKED_ADR 裁决；未知 verdict 一律 fail-closed；两者均 off 才静默放行。手动或 agent 在 implement 边界前调用。当用户说「过一遍 implement 门禁」「检查 planverify 放行了没」时使用——即使用户没提命令名，只要是实现前的门禁检查也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -12,8 +12,8 @@ This gate runs manually — invoked by the user or the agent via Bash before
 the `che` CLI** (`che planverify-gate`) — the bundled script is a thin wrapper
 over it — so it executes deterministically, not as an interactive prompt.
 
-Its job: optionally gate `/che-compound-implement` on the planverify verdict of
-the feature about to be implemented.
+Its job: gate `/che-compound-implement` on the planverify verdict **and** the
+ADR mechanical layer of the feature about to be implemented.
 
 ---
 
@@ -37,20 +37,33 @@ order as `che paths`).
 The command:
 
 1. Walks up from cwd to find the project root (the directory containing `.git`)
-2. Resolves the gate mode — `SKC_PLANVERIFY_GATE` env, else `planverify_gate:` in `.che/config.yml`, default `off`; an invalid value is an error (fail-closed)
-3. If mode is not `block` → exits 0 silently — `/che-compound-implement` proceeds normally
-4. If mode is `block`:
-   - No planverify report exists for `<slug>` (`{task_dir}/planverify.md` in the task directory `che paths` reports as `FEATURE_DIR`) → exits 1 (run `/che-compound-planverify` for that feature first)
-   - That report's verdict is `BLOCKED_DRIFT` → exits 1 (replan first)
-   - That report's verdict is `PASS` or `REPLAN_ALLOWED` → exits 0 (proceed)
+2. Resolves both gate modes, each: env first (`SKC_ADR_GATE` / `SKC_PLANVERIFY_GATE`), else
+   `adr_gate:` / `planverify_gate:` in `.che/config.yml`; invalid values are errors (fail-closed)
+3. If **both** modes are not `block` → exits 0 silently — `/che-compound-implement` proceeds normally
+4. Otherwise, against the task's `planverify.md` (`{task_dir}` = `che paths` `FEATURE_DIR`):
+   - **ADR layer (`adr_gate`, default `block`)**:
+     - No planverify report → exits 1 (run `/che-compound-planverify` for that feature first)
+     - `adr_status` missing or not `clean` → exits 1 (a pre-ADR report counts as *needs re-run*,
+       never as clean; a blocked ADR layer needs a plan fix or a ratified superseding ADR)
+     - Any recorded spec/plan/tasks SHA-256 missing or differing from the artifacts on disk
+       → exits 1 (the report is stale; re-run planverify to refresh it)
+   - **Verdict layer (`planverify_gate`, default `off`)**:
+     - `BLOCKED_DRIFT` → exits 1 (replan first)
+     - `BLOCKED_ADR` → exits 1 (fix the plan, or `/che-adr-draft` + human `adr accept`, then re-run planverify)
+   - Unrecognized `verdict` → exits 1 (fail-closed; the old "any other value passes" behavior is gone)
+   - Verdict `PASS` / `REPLAN_ALLOWED` with a clean, hash-fresh ADR layer → exits 0 (proceed)
 
 Exit code 2 means a usage error (e.g. duplicate `<slug>`); a missing
 `che` CLI exits 1 with the install hint (`npm install -g @newchiwan/che@latest`).
 
 If the command exits non-zero, **do not continue with `/che-compound-implement`**. Relay
-the message to the user:
+the message to the user — the recovery path depends on the rejection:
 
-> *"planverify gate is ON and the plan is not cleared. Run `/che-compound-planverify` (and replan if it returned BLOCKED_DRIFT) before `/che-compound-implement`."*
+> *"planverify gate is ON and the plan is not cleared. Run `/che-compound-planverify` first."* (missing report)
+
+> *"The planverify report is stale — spec/plan/tasks changed after it was written. Re-run `/che-compound-planverify`."* (hash mismatch)
+
+> *"Verdict is BLOCKED_DRIFT / BLOCKED_ADR. Replan via `/che-compound-plan` (then gapfill + planverify), or record the decision change via `/che-adr-draft` and have it ratified before re-running planverify."* (blocked verdict)
 
 ---
 
@@ -64,4 +77,5 @@ the message to the user:
 ## Handoff
 
 - **目标**：`/che-compound-implement` —— 在 plan 判定通过后执行实现
-- **条件**：gate 模式非 block → 直接放行；block 模式下该特性任务目录 `planverify.md` 判定为 PASS 或 REPLAN_ALLOWED 才放行；缺失或 BLOCKED_DRIFT 拒绝，先跑/重跑 `/che-compound-planverify`
+- **条件**：双 gate 均 off → 直接放行；`adr_gate` block（默认）时报告在位、`adr_status: clean`、三工件 hash 匹配；`planverify_gate` block 时裁决为 PASS 或 REPLAN_ALLOWED；缺失、非 clean、hash 不匹配、BLOCKED_DRIFT / BLOCKED_ADR、未知 verdict 均拒绝
+- **回退**：拒绝时按错误消息分流——缺报告/旧报告 → 重跑 `/che-compound-planverify`；hash 不匹配 → 改动后重跑 planverify；BLOCKED_ADR → 修 plan 或 `/che-adr-draft` 起草 superseding ADR 经人工 `adr accept` 后重跑 planverify；BLOCKED_DRIFT → 回 plan 修正后重跑 planverify

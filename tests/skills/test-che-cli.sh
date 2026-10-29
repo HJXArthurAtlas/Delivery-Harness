@@ -29,7 +29,7 @@ fi
 TMP="$(mktemp -d)"
 TMP="$(cd "$TMP" && pwd -P)"
 trap 'rm -rf "$TMP"' EXIT
-unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_SESSION_ID SKC_PLANVERIFY_GATE
+unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_SESSION_ID SKC_PLANVERIFY_GATE SKC_ADR_GATE
 unset SPECIFY_INIT_DIR SPECIFY_FEATURE SPECIFY_FEATURE_DIRECTORY SPECIFY_FEATURE_NO_PERSIST
 unset ADRKIT_FEATURE_DIR ADRKIT_DIR ADRKIT_SNAPSHOT ADRKIT_AS_OF
 
@@ -336,35 +336,144 @@ case "$(<"$TMP/stderr")" in
   *) bad "require-intent 已移除: 错误信息不符：$(<"$TMP/stderr")" ;;
 esac
 
-# 20. planverify-gate: default off silent; block verdicts read task-dir report.
-run "$CHE_BIN" planverify-gate --session s1
-[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate 默认 off: RC=$RC OUT=$OUT，预期静默退 0"
-run "$CHE_BIN" planverify-gate --session s1 --json
-json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"SLUG\":\"demo\",\"MODE\":\"off\",\"REPORT\":null,\"VERDICT\":null,\"PROCEED\":true}" \
-  && ok || bad "planverify-gate off --json: RC=$RC OUT=$OUT"
+# 20. planverify-gate: 双 gate —— adr_gate（默认 block）+ planverify_gate（默认 off）。
+DEMO_DIR="$PROJECT/specs/NCW-4921-demo"
+PV_REPORT="$DEMO_DIR/planverify.md"
+# 写一份带 ADR 字段与三工件 hash 的完整报告：<verdict> <adr_status>
+write_full_report() {
+  {
+    printf 'verdict: %s\n' "$1"
+    printf 'adr_status: %s\n' "$2"
+    printf 'adr_governed: 0\n'
+    printf 'adr_departures: 0\n'
+    printf 'adr_corpus_errors: 0\n'
+    printf 'adr_evaluator: not_configured\n'
+    printf 'spec_sha256: %s\n' "$(shasum -a 256 "$DEMO_DIR/spec.md" | awk '{print $1}')"
+    printf 'plan_sha256: %s\n' "$(shasum -a 256 "$DEMO_DIR/plan.md" | awk '{print $1}')"
+    printf 'tasks_sha256: %s\n' "$(shasum -a 256 "$DEMO_DIR/tasks.md" | awk '{print $1}')"
+  } > "$PV_REPORT"
+}
 
-printf 'verdict: PASS\n' > "$PROJECT/specs/NCW-4921-demo/planverify.md"
-run env SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate --session s1
+# 默认配置：adr_gate=block 缺报告 → 拒绝；JSON 报告 ADR_GATE=block。
+run "$CHE_BIN" planverify-gate --session s1
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate 默认 adr block 无报告: RC=$RC，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"no planverify report exists for 'demo'"*) ok ;;
+  *) bad "planverify-gate 默认 adr block: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+run "$CHE_BIN" planverify-gate --session s1 --json
+json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"SLUG\":\"demo\",\"MODE\":\"off\",\"ADR_GATE\":\"block\",\"REPORT\":null,\"VERDICT\":null,\"PROCEED\":false}" \
+  && ok || bad "planverify-gate 默认 --json: RC=$RC OUT=$OUT"
+
+# 旧报告缺 adr_status → 默认配置要求重跑，不按 clean 放行。
+printf 'verdict: PASS\n' > "$PV_REPORT"
+run "$CHE_BIN" planverify-gate --session s1
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate 旧报告缺 adr_status: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"predates the ADR layer"*) ok ;;
+  *) bad "planverify-gate 旧报告缺 adr_status: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+
+# 双 gate 均 off → 不阻断（静默退 0）。
+run env SKC_ADR_GATE=off "$CHE_BIN" planverify-gate --session s1
+[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate 双 off: RC=$RC OUT=[$OUT] 预期静默退 0"
+run env SKC_ADR_GATE=off "$CHE_BIN" planverify-gate --session s1 --json
+json_matches "$OUT" "{\"SLUG\":\"demo\",\"MODE\":\"off\",\"ADR_GATE\":\"off\",\"PROCEED\":true}" \
+  && ok || bad "planverify-gate 双 off --json: RC=$RC OUT=$OUT"
+
+# adr_gate=off + planverify_gate=block：仅语义 verdict，不查 ADR 字段/hash。
+printf 'verdict: PASS\n' > "$PV_REPORT"
+run env SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate --session s1
 case "$OUT" in
   *"✓ planverify verdict for 'demo': PASS"*) ok ;;
-  *) bad "planverify-gate block+PASS: RC=$RC OUT=$OUT，stderr: $(<"$TMP/stderr")" ;;
+  *) bad "planverify-gate block+PASS: RC=$RC OUT=[$OUT] stderr: $(<"$TMP/stderr")" ;;
 esac
-printf 'verdict: REPLAN_ALLOWED\n' > "$PROJECT/specs/NCW-4921-demo/planverify.md"
-run env SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate --session s1
+printf 'verdict: REPLAN_ALLOWED\n' > "$PV_REPORT"
+run env SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate --session s1
 [ "$RC" -eq 0 ] && ok || bad "planverify-gate block+REPLAN_ALLOWED: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-printf 'verdict: BLOCKED_DRIFT\n' > "$PROJECT/specs/NCW-4921-demo/planverify.md"
-run env SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate --session s1
+printf 'verdict: BLOCKED_DRIFT\n' > "$PV_REPORT"
+run env SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate --session s1
 [ "$RC" -eq 1 ] && ok || bad "planverify-gate block+BLOCKED_DRIFT: 退出码 ${RC}，预期 1"
-run env SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate --session s1 --json
-json_matches "$OUT" "{\"SLUG\":\"demo\",\"MODE\":\"block\",\"REPORT\":\"$PROJECT/specs/NCW-4921-demo/planverify.md\",\"VERDICT\":\"BLOCKED_DRIFT\",\"PROCEED\":false}" \
+run env SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate --session s1 --json
+json_matches "$OUT" "{\"SLUG\":\"demo\",\"MODE\":\"block\",\"ADR_GATE\":\"off\",\"REPORT\":\"$PV_REPORT\",\"VERDICT\":\"BLOCKED_DRIFT\",\"PROCEED\":false}" \
   && ok || bad "planverify-gate DRIFT --json: RC=$RC OUT=$OUT"
-printf 'frontmatter without verdict\n' > "$PROJECT/specs/NCW-4921-demo/planverify.md"
-run env SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate --session s1
+# 未知 verdict → fail-closed。
+printf 'verdict: GARBAGE\n' > "$PV_REPORT"
+run env SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate --session s1
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate 未知 verdict: 退出码 ${RC}，预期 fail-closed 1"
+case "$(<"$TMP/stderr")" in
+  *"Unrecognized planverify verdict"*) ok ;;
+  *) bad "planverify-gate 未知 verdict: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+printf 'frontmatter without verdict\n' > "$PV_REPORT"
+run env SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate --session s1
 [ "$RC" -eq 1 ] && ok || bad "planverify-gate 无 verdict 行: 退出码 ${RC}，预期 1"
-rm "$PROJECT/specs/NCW-4921-demo/planverify.md"
+
+# 完整报告 + 默认双 gate：PASS + adr clean + hash 匹配 → 放行。
+printf '# Tasks\n' > "$DEMO_DIR/tasks.md"
+write_full_report PASS clean
+run "$CHE_BIN" planverify-gate --session s1
+case "$OUT" in
+  *"✓ planverify verdict for 'demo': PASS"*) ok ;;
+  *) bad "planverify-gate 完整报告 PASS: RC=$RC OUT=[$OUT] stderr: $(<"$TMP/stderr")" ;;
+esac
+run "$CHE_BIN" planverify-gate --session s1 --json
+json_matches "$OUT" "{\"SLUG\":\"demo\",\"MODE\":\"off\",\"ADR_GATE\":\"block\",\"VERDICT\":\"PASS\",\"ADR_STATUS\":\"clean\",\"HASHES_MATCH\":true,\"PROCEED\":true}" \
+  && ok || bad "planverify-gate 完整报告 --json: RC=$RC OUT=$OUT"
+
+# BLOCKED_ADR：adr_status=blocked（adr_gate 默认 block 拒绝）；verdict=BLOCKED_ADR
+# + adr clean（planverify_gate=block 拒绝）。
+write_full_report BLOCKED_ADR blocked
+run "$CHE_BIN" planverify-gate --session s1
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate adr_status blocked: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"adr_status is 'blocked'"*) ok ;;
+  *) bad "planverify-gate adr_status blocked: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+write_full_report BLOCKED_ADR clean
+run env SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate --session s1
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate pv block+BLOCKED_ADR: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"verdict is BLOCKED_ADR"*) ok ;;
+  *) bad "planverify-gate pv block+BLOCKED_ADR: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+# 未知 verdict 在默认 adr_gate block 路径同样 fail-closed。
+write_full_report GARBAGE clean
+run "$CHE_BIN" planverify-gate --session s1
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate 默认路径未知 verdict: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"Unrecognized planverify verdict"*) ok ;;
+  *) bad "planverify-gate 默认路径未知 verdict: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+
+# hash 不匹配（修 plan 后未重跑 planverify）→ 拒绝；JSON 报 HASHES_MATCH=false。
+write_full_report PASS clean
+printf '# Plan v2\n' > "$DEMO_DIR/plan.md"
+run "$CHE_BIN" planverify-gate --session s1
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate hash 不匹配: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"no longer matches the current"*) ok ;;
+  *) bad "planverify-gate hash 不匹配: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+run "$CHE_BIN" planverify-gate --session s1 --json
+json_matches "$OUT" "{\"VERDICT\":\"PASS\",\"ADR_STATUS\":\"clean\",\"HASHES_MATCH\":false,\"PROCEED\":false}" \
+  && ok || bad "planverify-gate hash 不匹配 --json: RC=$RC OUT=$OUT"
+# 报告缺 hash 字段同样视为过期。
+{
+  printf 'verdict: PASS\n'
+  printf 'adr_status: clean\n'
+} > "$PV_REPORT"
+run "$CHE_BIN" planverify-gate --session s1
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate 缺 hash 字段: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"no longer matches the current"*) ok ;;
+  *) bad "planverify-gate 缺 hash 字段: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+printf '# Plan\n' > "$DEMO_DIR/plan.md"
+rm "$PV_REPORT" "$DEMO_DIR/tasks.md"
 
 # Positional slug form resolves the other task; missing report names planverify.
-run env SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate payment
+run env SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate payment
 [ "$RC" -eq 1 ] && ok || bad "planverify-gate 报告缺失: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
   *"no planverify report exists for 'payment'"*) ok ;;
@@ -372,19 +481,29 @@ case "$(<"$TMP/stderr")" in
 esac
 
 # 开关经 .che/config.yml；env 优先；非法值 fail-closed。
-printf 'planverify_gate: block\n' > "$PROJECT/.che/config.yml"
+printf 'adr_gate: off\nplanverify_gate: off\n' > "$PROJECT/.che/config.yml"
 run "$CHE_BIN" planverify-gate --session s1
-[ "$RC" -eq 1 ] && ok || bad "planverify-gate config block: 退出码 ${RC}，预期 1"
-run env SKC_PLANVERIFY_GATE=off "$CHE_BIN" planverify-gate --session s1
-[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate env off 优先于 config block: RC=$RC OUT=$OUT"
-printf 'planverify_gate: maybe\n' > "$PROJECT/.che/config.yml"
+[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate config 双 off: RC=$RC OUT=[$OUT] 预期静默退 0"
+printf 'adr_gate: block\n' > "$PROJECT/.che/config.yml"
+run "$CHE_BIN" planverify-gate --session s1
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate config adr block: 退出码 ${RC}，预期 1"
+run env SKC_ADR_GATE=off "$CHE_BIN" planverify-gate --session s1
+[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate env adr off 优先于 config block: RC=$RC OUT=$OUT"
+printf 'adr_gate: maybe\n' > "$PROJECT/.che/config.yml"
+run "$CHE_BIN" planverify-gate --session s1
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate config adr 非法值: 退出码 ${RC}，预期 fail-closed 1"
+case "$(<"$TMP/stderr")" in
+  *'invalid adr_gate mode "maybe"'*) ok ;;
+  *) bad "planverify-gate config adr 非法值: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+printf 'adr_gate: off\nplanverify_gate: maybe\n' > "$PROJECT/.che/config.yml"
 run "$CHE_BIN" planverify-gate --session s1
 [ "$RC" -eq 1 ] && ok || bad "planverify-gate config 非法值: 退出码 ${RC}，预期 fail-closed 1"
 case "$(<"$TMP/stderr")" in
   *'invalid planverify_gate mode "maybe"'*) ok ;;
   *) bad "planverify-gate config 非法值: 错误信息不符：$(<"$TMP/stderr")" ;;
 esac
-run env SKC_PLANVERIFY_GATE=bogus "$CHE_BIN" planverify-gate --session s1
+run env SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=bogus "$CHE_BIN" planverify-gate --session s1
 [ "$RC" -eq 1 ] && ok || bad "planverify-gate env 非法值: 退出码 ${RC}，预期 1"
 rm "$PROJECT/.che/config.yml"
 

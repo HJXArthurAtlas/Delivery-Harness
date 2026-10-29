@@ -1,6 +1,6 @@
 # `adr-check` 与 `planverify` 融合方案
 
-> 状态：设计已确认，尚未实施。保留 `/che-adr-check` 为按需使用的只读技能；正式实现前校验与门禁统一由 `/che-compound-planverify` 承担。
+> 状态：已实施。保留 `/che-adr-check` 为按需使用的只读技能；正式实现前校验与门禁统一由 `/che-compound-planverify` 承担。
 
 ## 1. 背景与问题
 

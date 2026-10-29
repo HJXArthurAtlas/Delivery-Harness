@@ -16,6 +16,7 @@ if ! command -v node >/dev/null 2>&1; then
 fi
 
 ORIG_PATH=$PATH
+GREP_BIN="$(command -v grep)"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ADRKIT_BIN="$REPO_ROOT/node_modules/.bin/adrkit"
 CHE_BIN="$REPO_ROOT/node_modules/.bin/che"
@@ -31,7 +32,7 @@ TMP="$(mktemp -d)"
 TMP="$(cd "$TMP" && pwd -P)"
 trap 'PATH=$ORIG_PATH; rm -rf "$TMP"' EXIT
 unset ADRKIT_FEATURE_DIR ADRKIT_SNAPSHOT ADRKIT_AS_OF
-unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_SESSION_ID SKC_PLANVERIFY_GATE
+unset CHE_INIT_DIR CHE_FEATURE CHE_FEATURE_DIRECTORY CHE_SESSION_ID SKC_PLANVERIFY_GATE SKC_ADR_GATE
 unset SPECIFY_INIT_DIR SPECIFY_FEATURE SPECIFY_FEATURE_DIRECTORY SPECIFY_FEATURE_NO_PERSIST
 
 INSTALL="$TMP/install"
@@ -41,6 +42,7 @@ mkdir -p "$SKILLS" "$PROJECT/.git" "$PROJECT/docs/adr"
 for skill in che-adr-check che-adr-context che-adr-draft; do
   cp -R "$REPO_ROOT/skills/$skill" "$SKILLS/$skill"
 done
+cp -R "$REPO_ROOT/skills/che-compound-planverify" "$SKILLS/che-compound-planverify"
 cp -R "$REPO_ROOT/skills/che-compound-planverify-gate" "$SKILLS/che-compound-planverify-gate"
 PV_GATE_WRAPPER="$SKILLS/che-compound-planverify-gate/scripts/bash/planverify-gate.sh"
 
@@ -144,11 +146,21 @@ run che paths --json
 json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"FEATURE_DIR\":\"$PROJECT/specs/001-demo\",\"FEATURE_SPEC\":\"$PROJECT/specs/001-demo/spec.md\"}" \
   && ok || bad "che paths: JSON 未返回活动 feature 路径：$OUT"
 
-# The planverify-gate wrapper delegates to `che planverify-gate`: default off
-# is a silent no-op; block mode gates on the task dir's planverify.md report.
-run "$PV_GATE_WRAPPER" demo
-[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate 默认 off: RC=$RC OUT=$OUT，预期静默退 0"
-OUT="$(cd "$PROJECT" && SKC_PLANVERIFY_GATE=block "$PV_GATE_WRAPPER" demo 2>"$TMP/stderr")"
+# The planverify-gate wrapper delegates to `che planverify-gate`: both gates
+# off is a silent no-op; the default config (adr_gate block) refuses a missing
+# report; planverify_gate=block (ADR layer off, to isolate the semantic path)
+# gates on the task dir's planverify.md report.
+OUT="$(cd "$PROJECT" && SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=off "$PV_GATE_WRAPPER" demo 2>"$TMP/stderr")"
+RC=$?
+[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate 双 off: RC=$RC OUT=[$OUT] 预期静默退 0"
+OUT="$(cd "$PROJECT" && "$PV_GATE_WRAPPER" demo 2>"$TMP/stderr")"
+RC=$?
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate 默认 adr block 无报告: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"no planverify report exists for 'demo'"*) ok ;;
+  *) bad "planverify-gate 默认 adr block: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+OUT="$(cd "$PROJECT" && SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=block "$PV_GATE_WRAPPER" demo 2>"$TMP/stderr")"
 RC=$?
 [ "$RC" -eq 1 ] && ok || bad "planverify-gate block 无报告: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
@@ -156,7 +168,7 @@ case "$(<"$TMP/stderr")" in
   *) bad "planverify-gate block 无报告: 错误信息不符：$(<"$TMP/stderr")" ;;
 esac
 printf 'verdict: PASS\n' > "$PROJECT/specs/001-demo/planverify.md"
-OUT="$(cd "$PROJECT" && SKC_PLANVERIFY_GATE=block "$PV_GATE_WRAPPER" demo 2>"$TMP/stderr")"
+OUT="$(cd "$PROJECT" && SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=block "$PV_GATE_WRAPPER" demo 2>"$TMP/stderr")"
 RC=$?
 [ "$RC" -eq 0 ] && ok || bad "planverify-gate block+PASS 放行: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 
@@ -222,6 +234,26 @@ run "$SKILLS/che-adr-draft/scripts/adr.sh" migrate --from madr --dir "$TMP/legac
 json_matches "$OUT" '{"results":[{"outcome":"migrated"}]}' && ok || bad "migrate: 结果不符：$OUT"
 node -e 'const fs=require("node:fs"); process.exit(fs.readFileSync(process.argv[1],"utf8").includes("schemaVersion")?0:1)' "$TMP/legacy/0001-cli.md" \
   && ok || bad "migrate: 未写入 adrkit frontmatter"
+
+# planverify × adr-check fusion contract: the planverify skill invokes the
+# shared script by its installed path (no copy, second adrkit call path, or
+# missing target in the install layout).
+"$GREP_BIN" -q '.agents/skills/che-adr-check/scripts/check.sh' "$SKILLS/che-compound-planverify/SKILL.md" \
+  && ok || bad "planverify 未引用共享 check.sh 路径"
+"$GREP_BIN" -q '~/.agents/skills/che-adr-check/scripts/check.sh' "$SKILLS/che-compound-planverify/SKILL.md" \
+  && ok || bad "planverify 未给出全局安装共享脚本路径"
+[ -f "$SKILLS/che-adr-check/scripts/check.sh" ] \
+  && ok || bad "融合契约: 安装布局缺 che-adr-check/scripts/check.sh"
+"$GREP_BIN" -q 'planverify.adr.json' "$SKILLS/che-compound-planverify/SKILL.md" \
+  && ok || bad "planverify 未定义 planverify.adr.json 审计产物"
+"$GREP_BIN" -q 'p3e_adr_conformance' "$SKILLS/che-compound-planverify/SKILL.md" \
+  && ok || bad "planverify 未定义 P3e ADR conformance 契约"
+"$GREP_BIN" -q 'adr_gate' "$SKILLS/che-compound-planverify-gate/SKILL.md" \
+  && ok || bad "planverify-gate 技能未同步 adr_gate"
+
+# 流程文本契约：adr-check 不再作为 gapfill / implement 的必经前置出现。
+_fusion_leak="$("$GREP_BIN" -rnE 'adr-check[^`]*(必跑|必经)|(必跑|必经)[^`]*adr-check|无未处置 departure 才交接|前必过 adr-check' "$REPO_ROOT/skills" || true)"
+[ -z "$_fusion_leak" ] && ok || bad "流程文本仍把 /che-adr-check 描述为必经前置：$_fusion_leak"
 
 printf 'pack-runtime: %d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]
