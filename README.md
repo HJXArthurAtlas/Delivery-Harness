@@ -75,7 +75,7 @@ omp 实测同时读项目级与全局级；OpenCode 官方支持同两个路径�
 
 ```bash
 npm config set @newchiwan:registry https://nexus.newchiwan.cn/repository/registry-npm/   # Nexus group（internal + 公网代理）
-npm install -g @newchiwan/che@latest        # 特性路径解析（规格驱动 / grill / adrkit 系技能）
+npm install -g @newchiwan/che@latest        # 特性路径解析（意图驱动 / grill / adrkit 系技能）
 npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 ```
 
@@ -105,7 +105,7 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 
 技能清单与触发语**以各 `skills/<name>/SKILL.md` frontmatter 的 `description` 为准**，本 README 不维护副本。
 
-0.4.0 起规格驱动技能由 `che-compound-*` 统一更名为 `che-*` 二段名（如 `/che-compound-plan` → `/che-plan`）。从旧版升级后，手动删除技能发现目录里残留的 `che-compound-*` 旧目录——技能安装同名不覆盖，不删会新旧双份并存。
+0.4.0 起意图驱动技能由 `che-compound-*` 统一更名为 `che-*` 二段名（如 `/che-compound-plan` → `/che-plan`）。从旧版升级后，手动删除技能发现目录里残留的 `che-compound-*` 旧目录——技能安装同名不覆盖，不删会新旧双份并存。
 
 ## 运行时与外部 CLI（排除 init）
 

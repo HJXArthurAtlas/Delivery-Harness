@@ -2,7 +2,7 @@
 
 ## 仓库定位
 
-本仓是赤湾东方自建软件交付 Harness——以知识工程、Intent Driven Development、Compound Engineering 为方法底座的跨端 agent skill pack，向 DSH、OpenCode、omp 等端分发规格驱动流程及 adrkit、grill、compound、bug 扩展技能。
+本仓是赤湾东方自建软件交付 Harness——以知识工程、Intent Driven Development、Compound Engineering 为方法底座的跨端 agent skill pack，向 DSH、OpenCode、omp 等端分发意图驱动流程及 adrkit、grill、compound、bug 扩展技能。
 
 本仓同时维护 `@newchiwan/che` CLI；monorepo 骨架由 `council/monorepo-template` 负责。仓内无 CI，本地 `npm test` 是唯一质量门。
 
@@ -10,7 +10,7 @@
 
 | 路径 | 简要说明 |
 |---|---|
-| `skills/che-{intend,clarify,design,plan,planverify,planverify-gate,implement,intentverify,grill,grill-with-docs,gapfill,analyze,converge,load,retro,constitution}/` | 规格驱动开发主流程及 compound 扩展 |
+| `skills/che-{intend,clarify,design,plan,planverify,planverify-gate,implement,intentverify,grill,grill-with-docs,gapfill,analyze,converge,load,retro,constitution}/` | 意图驱动开发主流程及 compound 扩展 |
 | `skills/che-adr-*/` | ADR 检查、上下文和起草 |
 | `skills/che-pingcode-*/` | PingCode 初始化、建卡与同步 |
 | `skills/che-bug-*/` | Bug 评估、修复和验证 |

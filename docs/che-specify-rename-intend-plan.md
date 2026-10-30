@@ -1,7 +1,9 @@
 # che-specify → che-intend 改名计划
 
 日期：2026-10-30
-状态：待执行（已确认决策，未动工）
+状态：已执行完毕（2026-10-30 落地）
+
+验证记录：`che-specify`、`spec.md` 工件路径、`after_specify`/`before_specify`、`--require-spec` 在 skills/、packages/cli/src、tests/ 零残留；CLI `featureSpec` 值已为 `intent.md`、state 阶段已为 `intend`、校验字段已为 `intent_sha256`；npm test 全绿。
 
 ## 已确认决策
 
@@ -83,7 +85,9 @@
 # 附录：che-writeback → che-retro 改名计划
 
 日期：2026-10-30
-状态：待执行（未动工）
+状态：已执行完毕（2026-10-30 落地）
+
+验证记录：`writeback` / `che-writeback` 在 skills/、packages/cli/src、tests/、README、AGENTS 零残留；唯一例外 `docs/che-compound-specify-simplification-plan.md` 按计划不动。
 
 ## 已确认决策
 
@@ -133,10 +137,12 @@
 
 ---
 
-# 附录二：che-intentverify → che-intentverify 改名计划
+# 附录二：che-intentverify 改名计划（目标名待定）
 
 日期：2026-10-30
-状态：待执行（未动工）
+状态：待执行（目标名未填、决策未完成，暂不动工）
+
+现状备注（2026-10-30 术语统一时补充）：che-writeback 已改名 che-retro，文中消费方即 che-retro；description 的「intent + spec 场景」冗余清理已先行落地为「锁定 intent + intent.md 场景」。执行本附录前先补目标名并重 grep 定位行号。
 
 ## 已确认决策
 

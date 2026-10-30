@@ -27,7 +27,7 @@
 | 组成 | 仓库 | 职责 | 承载位置 |
 |---|---|---|---|
 | monorepo-template | `council/monorepo-template` | 定义**项目内包含什么**：目录骨架、治理文件、环境基线、门禁 | 你的项目仓库 |
-| ncw-delivery-harness | `council/ncw-delivery-harness` | 定义 **Agent 执行什么**：规格驱动开发主线、PingCode 建卡收尾、bug 修复 | 你的 AI Agent |
+| ncw-delivery-harness | `council/ncw-delivery-harness` | 定义 **Agent 执行什么**：意图驱动开发主线、PingCode 建卡收尾、bug 修复 | 你的 AI Agent |
 
 ```mermaid
 flowchart LR
@@ -155,7 +155,7 @@ your-repo/
 
 ### 3.1 定位与依赖
 
-33 个 agent skill，承载「规格驱动开发 + PingCode」的流程：**产品出规格建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加项目架构画像（`/che-project-arch` 生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / 手动拷贝到 `~/.agents/skills/` 三路任一）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
+33 个 agent skill，承载「意图驱动开发 + PingCode」的流程：**产品出意图建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加项目架构画像（`/che-project-arch` 生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / 手动拷贝到 `~/.agents/skills/` 三路任一）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
 
 ### 3.2 主线流程
 
