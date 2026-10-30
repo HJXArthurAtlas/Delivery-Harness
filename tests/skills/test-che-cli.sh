@@ -270,7 +270,7 @@ case "$(<"$TMP/stderr")" in
 esac
 
 # 16. template resolves bundled references/ byte-exact; unsafe/missing names fail.
-CONSTITUTION_REFS="$REPO_ROOT/skills/che-compound-constitution/references"
+CONSTITUTION_REFS="$REPO_ROOT/skills/che-constitution/references"
 run "$CHE_BIN" template constitution-template --json --references-dir "$CONSTITUTION_REFS"
 [ "$RC" -eq 0 ] && ok || bad "template: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 node -e '
@@ -291,7 +291,7 @@ run "$CHE_BIN" template constitution-template --json
 [ "$RC" -eq 2 ] && ok || bad "template 缺 --references-dir: 退出码 ${RC}，预期 2"
 
 # 17. setup-plan copies plan-template byte-exact via session; rerun skips.
-PLAN_REFS="$REPO_ROOT/skills/che-compound-plan/references"
+PLAN_REFS="$REPO_ROOT/skills/che-plan/references"
 rm -f "$PROJECT/specs/NCW-4921-demo/plan.md"
 run "$CHE_BIN" setup-plan --json --references-dir "$PLAN_REFS" --session s1
 [ "$RC" -eq 0 ] && ok || bad "setup-plan: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
@@ -309,7 +309,7 @@ byte_equal "$PROJECT/specs/NCW-4921-demo/plan.md" "$PLAN_REFS/plan-template.md" 
   && ok || bad "setup-plan 重跑: plan.md 被改动"
 
 # 18. setup-tasks requires plan.md; otherwise resolves tasks-template byte-exact.
-TASKS_REFS="$REPO_ROOT/skills/che-compound-plan/references"
+TASKS_REFS="$REPO_ROOT/skills/che-plan/references"
 rm "$PROJECT/specs/NCW-4921-demo/plan.md"
 run "$CHE_BIN" setup-tasks --json --references-dir "$TASKS_REFS" --session s1
 [ "$RC" -eq 1 ] && ok || bad "setup-tasks 无 plan: 退出码 ${RC}，预期 1"

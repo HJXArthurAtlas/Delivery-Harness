@@ -9,7 +9,7 @@ import { STATE_USAGE, runState } from './state.ts';
 import { SETUP_PLAN_USAGE, SETUP_TASKS_USAGE, runSetupPlan, runSetupTasks } from './setup.ts';
 import { TemplateResolutionError, resolveTemplateContent } from './template.ts';
 
-export const CLI_VERSION = '0.2.0';
+export const CLI_VERSION = '0.2.1';
 
 const USAGE = `che — newchiwan delivery harness CLI
 
@@ -21,7 +21,7 @@ Commands:
   state start|done <stage> / show [--json]         Task runs timeline (metadata.json; stage/next derived)
   paths [--json] [--feature <slug>] [--session <id>]  Resolve task paths
   check [--json] [--require-spec] [--require-tasks] [--include-tasks]
-  planverify-gate [<slug>] [--json]                Gate /che-compound-implement on the planverify verdict
+  planverify-gate [<slug>] [--json]                Gate /che-implement on the planverify verdict
   feature bind <slug> --session <id> | show [--json]  Manage session→task bindings (.che/feature.json, local)
   template <name> --references-dir <dir> [--json]  Resolve a bundled references/ template
   setup-plan --references-dir <dir> [--json]       Create plan.md from plan-template

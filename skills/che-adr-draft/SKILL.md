@@ -44,7 +44,7 @@ $ARGUMENTS
 5. Leave the status as `draft`. Ratification is a human act, and this command
    does not perform it.
 6. After the new record is ratified (a human act — a `draft` status alone
-   clears nothing), re-run `/che-compound-planverify` to produce the formal
+   clears nothing), re-run `/che-planverify` to produce the formal
    pre-implement verdict. Optionally run `/che-adr-check` afterwards to confirm
    the new record is valid and does not conflict with an existing decision.
 
@@ -62,8 +62,8 @@ $ARGUMENTS
 - It writes exactly one new file and never edits an existing record. If the
   target path is already taken it refuses rather than overwriting (exit 1).
 - Single corpus: since the ADR-unification cutover, `docs/adr/` (or
-  `$ADRKIT_DIR`) is the project's only ADR corpus. `che-compound-grill-with-docs`
-  and `che-compound-writeback` allocate their records here too, through this
+  `$ADRKIT_DIR`) is the project's only ADR corpus. `che-grill-with-docs`
+  and `che-writeback` allocate their records here too, through this
   skill's `scripts/scaffold.sh` — the plan-less variant of this command's
   deterministic half (same CLI, same id allocation, no plan required). All
   writers share one numbering sequence; never hand-number.

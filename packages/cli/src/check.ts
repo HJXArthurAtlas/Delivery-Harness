@@ -186,7 +186,7 @@ export function runCheck(argv: string[]): number {
   if (values['require-tasks'] && !isFile(paths.tasks)) {
     process.stderr.write(`ERROR: tasks.md not found in ${paths.featureDir}\n`);
     process.stderr.write(
-      `Run ${formatPackCommand('tasks')} first to create the task list.\n`,
+      `Run ${formatPackCommand('plan')} first to create the task list.\n`,
     );
     return 1;
   }

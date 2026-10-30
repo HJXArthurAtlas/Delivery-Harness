@@ -34,7 +34,7 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 langua
 ### 1. adr_gate（ADR 机械层门禁；默认 block；选项 block / off）
 
 - 问法：「要不要在实现前强制校验计划没有违反已落地的架构决策？开着会拦住越过 ADR 的实现，建议保持开启。」
-- **block**：进入 `/che-compound-implement` 前，该特性的 planverify 报告必须在位、`adr_status: clean`，且报告记录的 spec/plan/tasks SHA-256 与当前文件一致——计划改了没重新校验、或 ADR 机械层（adrkit 查询 + P3e 判定）没过，一律拒绝动代码。缺 `adr_status` 的旧报告按「需要重跑」处理，绝不当作 clean 放行。
+- **block**：进入 `/che-implement` 前，该特性的 planverify 报告必须在位、`adr_status: clean`，且报告记录的 spec/plan/tasks SHA-256 与当前文件一致——计划改了没重新校验、或 ADR 机械层（adrkit 查询 + P3e 判定）没过，一律拒绝动代码。缺 `adr_status` 的旧报告按「需要重跑」处理，绝不当作 clean 放行。
 - **off**：不拦截 ADR 机械层（语义层的 `planverify_gate` 独立控制）。
 - **影响**：block 是默认且推荐——它挡的是「计划悄悄推翻已有决策」这类最贵的返工；ADR 语料为空或项目暂不接 ADR 流程时可 off。
 - 环境变量 `SKC_ADR_GATE` 优先于本配置。
@@ -42,7 +42,7 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 langua
 ### 2. planverify_gate（语义 verdict 门禁；默认 off；选项 block / off）
 
 - 问法：「要不要在动手写代码之前，再强制让一个独立的 AI 审查者把实现计划的语义裁决过一遍？开了更稳，但流程会多一道检查。」
-- **block**：进入 `/che-compound-implement` 前，planverify 裁决不能是 `BLOCKED_DRIFT` / `BLOCKED_ADR`（在 `adr_gate` 之上额外强制语义层）。
+- **block**：进入 `/che-implement` 前，planverify 裁决不能是 `BLOCKED_DRIFT` / `BLOCKED_ADR`（在 `adr_gate` 之上额外强制语义层）。
 - **off**：不拦截语义裁决，planverify 做不做随用户（ADR 机械层仍由 `adr_gate` 控制）。
 - **影响**：block 多一道实现前的独立语义校验关卡，更稳但流程更长。新项目建议先 off 跑顺流程，再按需开。
 - 环境变量 `SKC_PLANVERIFY_GATE` 优先于本配置。
@@ -67,7 +67,7 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 - **off**：不接 PingCode，卡片流程全部留本地。
 - 用户选 on 时，本技能顺手把环境装好：CLI 检查 → 登录 → 移交 `/che-pingcode-init`（见下方步骤 5「PingCode 接入链」）。
 
-> 已退役键：`commit_story_id`（提交消息绑定故事卡 ID）与旧的 before_specify 门禁键（intent 访谈已并入 `/che-compound-specify`，不再有需要单独开关的门禁）均已从本 pack 移除——提交消息不再携带工作项 ID（见 `/che-git-master`）；intent 捕获由 specify 一体化完成。旧项目 `.che/config.yml` 里残留的该键按「pack 不认识的键」原样保留、不再询问。
+> 已退役键：`commit_story_id`（提交消息绑定故事卡 ID）与旧的 before_specify 门禁键（intent 访谈已并入 `/che-specify`，不再有需要单独开关的门禁）均已从本 pack 移除——提交消息不再携带工作项 ID（见 `/che-git-master`）；intent 捕获由 specify 一体化完成。旧项目 `.che/config.yml` 里残留的该键按「pack 不认识的键」原样保留、不再询问。
 
 ## 步骤
 
@@ -132,7 +132,7 @@ language 需要问时**最先问**（本项固定中文提问，用户选定后�
 language: zh-cn
 
 # ADR 机械层门禁（默认 block）：block 时 planverify 报告必须在位、adr_status: clean、
-# 且 spec/plan/tasks 的 SHA-256 与报告记录一致，否则拒绝 /che-compound-implement
+# 且 spec/plan/tasks 的 SHA-256 与报告记录一致，否则拒绝 /che-implement
 adr_gate: block
 
 # 语义 verdict 门禁：block 时实现前 planverify 裁决不得为 BLOCKED_DRIFT / BLOCKED_ADR（off 不拦截语义层）
@@ -162,8 +162,8 @@ pingcode_integration: off
    gitignore: <✓ 已忽略 .che/feature.json、.che/*.bak 或 +新增规则 或 用户拒绝跳过>
 ```
 
-- 开始第一个特性：`/che-compound-specify`（意图访谈 + 统一 spec 一体完成；全流程总览见 `/che-compound-flow`）。
-- 项目尚无 `docs/architecture.md` → 移交 `/che-project-arch` 生成架构画像（服务/应用清单 + 依赖图），供 `/che-compound-load` 每次会话装载。
+- 开始第一个特性：`/che-specify`（意图访谈 + 统一 spec 一体完成；全流程总览见 `/che-flow`）。
+- 项目尚无 `docs/architecture.md` → 移交 `/che-project-arch` 生成架构画像（服务/应用清单 + 依赖图），供 `/che-load` 每次会话装载。
 - 已接入 PingCode：spec 建卡走 `/che-pingcode-specstoissues`。
 
 ## 故障排除

@@ -1,6 +1,6 @@
 #!/bin/sh
 # che-adr-check — check a produced plan against the decisions that govern
-# it. Run manually after /che-compound-plan has produced a plan. It is a
+# it. Run manually after /che-plan has produced a plan. It is a
 # read-only check, so it writes nothing, ever.
 #
 # Emits one or two sections on stdout, each introduced by a fixed marker line and

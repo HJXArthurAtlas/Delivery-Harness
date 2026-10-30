@@ -52,11 +52,11 @@ adrkit_feature_dir() {
 		adrkit_fail "che CLI not found on PATH; install it with 'npm install -g @newchiwan/che@latest', or set ADRKIT_FEATURE_DIR"
 
 	_adrkit_paths="$(che paths)" ||
-		adrkit_fail "che feature resolution failed — run /che-compound-specify first, or set ADRKIT_FEATURE_DIR"
+		adrkit_fail "che feature resolution failed — run /che-specify first, or set ADRKIT_FEATURE_DIR"
 	_adrkit_feature="$(printf '%s\n' "$_adrkit_paths" | sed -n 's/^FEATURE_DIR: *//p' | head -n 1)"
 
 	[ -n "$_adrkit_feature" ] ||
-		adrkit_fail "Resolver returned no FEATURE_DIR — run /che-compound-specify first, or set ADRKIT_FEATURE_DIR"
+		adrkit_fail "Resolver returned no FEATURE_DIR — run /che-specify first, or set ADRKIT_FEATURE_DIR"
 	[ -d "$_adrkit_feature" ] ||
 		adrkit_fail "Resolver returned FEATURE_DIR '$_adrkit_feature', but that directory does not exist"
 
@@ -68,6 +68,6 @@ adrkit_feature_dir() {
 adrkit_plan_path() {
 	_adrkit_plan="$(adrkit_feature_dir)/plan.md"
 	[ -f "$_adrkit_plan" ] ||
-		adrkit_fail "no plan at '$_adrkit_plan' — run /che-compound-plan first"
+		adrkit_fail "no plan at '$_adrkit_plan' — run /che-plan first"
 	printf '%s' "$_adrkit_plan"
 }

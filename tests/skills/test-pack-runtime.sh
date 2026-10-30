@@ -42,9 +42,9 @@ mkdir -p "$SKILLS" "$PROJECT/.git" "$PROJECT/docs/adr"
 for skill in che-adr-check che-adr-context che-adr-draft; do
   cp -R "$REPO_ROOT/skills/$skill" "$SKILLS/$skill"
 done
-cp -R "$REPO_ROOT/skills/che-compound-planverify" "$SKILLS/che-compound-planverify"
-cp -R "$REPO_ROOT/skills/che-compound-planverify-gate" "$SKILLS/che-compound-planverify-gate"
-PV_GATE_WRAPPER="$SKILLS/che-compound-planverify-gate/scripts/bash/planverify-gate.sh"
+cp -R "$REPO_ROOT/skills/che-planverify" "$SKILLS/che-planverify"
+cp -R "$REPO_ROOT/skills/che-planverify-gate" "$SKILLS/che-planverify-gate"
+PV_GATE_WRAPPER="$SKILLS/che-planverify-gate/scripts/bash/planverify-gate.sh"
 
 printf '%s' '{"schemaVersion":"adrkit.pass0.snapshot/v1"}' > "$TMP/snapshot.json"
 
@@ -238,17 +238,17 @@ node -e 'const fs=require("node:fs"); process.exit(fs.readFileSync(process.argv[
 # planverify × adr-check fusion contract: the planverify skill invokes the
 # shared script by its installed path (no copy, second adrkit call path, or
 # missing target in the install layout).
-"$GREP_BIN" -q '.agents/skills/che-adr-check/scripts/check.sh' "$SKILLS/che-compound-planverify/SKILL.md" \
+"$GREP_BIN" -q '.agents/skills/che-adr-check/scripts/check.sh' "$SKILLS/che-planverify/SKILL.md" \
   && ok || bad "planverify 未引用共享 check.sh 路径"
-"$GREP_BIN" -q '~/.agents/skills/che-adr-check/scripts/check.sh' "$SKILLS/che-compound-planverify/SKILL.md" \
+"$GREP_BIN" -q '~/.agents/skills/che-adr-check/scripts/check.sh' "$SKILLS/che-planverify/SKILL.md" \
   && ok || bad "planverify 未给出全局安装共享脚本路径"
 [ -f "$SKILLS/che-adr-check/scripts/check.sh" ] \
   && ok || bad "融合契约: 安装布局缺 che-adr-check/scripts/check.sh"
-"$GREP_BIN" -q 'planverify.adr.json' "$SKILLS/che-compound-planverify/SKILL.md" \
+"$GREP_BIN" -q 'planverify.adr.json' "$SKILLS/che-planverify/SKILL.md" \
   && ok || bad "planverify 未定义 planverify.adr.json 审计产物"
-"$GREP_BIN" -q 'p3e_adr_conformance' "$SKILLS/che-compound-planverify/SKILL.md" \
+"$GREP_BIN" -q 'p3e_adr_conformance' "$SKILLS/che-planverify/SKILL.md" \
   && ok || bad "planverify 未定义 P3e ADR conformance 契约"
-"$GREP_BIN" -q 'adr_gate' "$SKILLS/che-compound-planverify-gate/SKILL.md" \
+"$GREP_BIN" -q 'adr_gate' "$SKILLS/che-planverify-gate/SKILL.md" \
   && ok || bad "planverify-gate 技能未同步 adr_gate"
 
 # 流程文本契约：adr-check 不再作为 gapfill / implement 的必经前置出现。

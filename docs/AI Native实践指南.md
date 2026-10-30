@@ -133,7 +133,7 @@ your-repo/
 | IV. 治理工件独立 | 宪法、ADR、技能、指南各自在自己的范围内自足并直接约束 Agent，不搞引用链 |
 | V. 简单与无聊技术 | 正确性优先，其次六个月后的可维护性；拒绝无谓抽象与投机性建设 |
 
-跨域不变量（安全 / 性能与集成 / 工具链 / 语言）直接绑定：授权只在后端、日志与返回不得泄漏敏感字段、SQL 必须参数化、远程调用必须有超时与有界重试、工具链版本以锁文件为准、**所有输出用简体中文**。项目专属不变量追加到 Cross-Domain Invariants，不得削弱基础条款；修订走 `che-compound-constitution`。
+跨域不变量（安全 / 性能与集成 / 工具链 / 语言）直接绑定：授权只在后端、日志与返回不得泄漏敏感字段、SQL 必须参数化、远程调用必须有超时与有界重试、工具链版本以锁文件为准、**所有输出用简体中文**。项目专属不变量追加到 Cross-Domain Invariants，不得削弱基础条款；修订走 `che-constitution`。
 
 ### 2.5 工具链基线与每会话环境检查
 
@@ -187,9 +187,9 @@ flowchart TD
 
 进入时机：新特性从零开始。
 
-1. `/che-compound-load` —— 装载 ADR 语料与经验（corrections / patterns）进上下文，每会话一次（specify 技能会提示）
-2. `/che-compound-specify` —— 意图访谈式捕获目标、范围、约束、失败条件，起草 User Stories、Acceptance Scenarios 与 Edge Cases（全局稳定 `E#` ID），并生成统一特性规格 `spec.md`（意图块 + `### User Story N` 章节与 P1 / P2 / P3 优先级 + `### Edge Cases`）；结束时经 `che task create` 创建任务目录 `specs/NNN-{slug}/` 并绑定 session，任务由此诞生
-3. `/che-compound-clarify` —— ≤5 个针对性问题澄清，结论**回写** spec 对应章节，并把 `[NEEDS CLARIFICATION]` 产品标记清零；场景改动保留既有 `E#` ID，只有真正新增的场景才分配新 ID
+1. `/che-load` —— 装载 ADR 语料与经验（corrections / patterns）进上下文，每会话一次（specify 技能会提示）
+2. `/che-specify` —— 意图访谈式捕获目标、范围、约束、失败条件，起草 User Stories、Acceptance Scenarios 与 Edge Cases（全局稳定 `E#` ID），并生成统一特性规格 `spec.md`（意图块 + `### User Story N` 章节与 P1 / P2 / P3 优先级 + `### Edge Cases`）；结束时经 `che task create` 创建任务目录 `specs/NNN-{slug}/` 并绑定 session，任务由此诞生
+3. `/che-clarify` —— ≤5 个针对性问题澄清，结论**回写** spec 对应章节，并把 `[NEEDS CLARIFICATION]` 产品标记清零；场景改动保留既有 `E#` ID，只有真正新增的场景才分配新 ID
 4. 结束后可确认接续 `/che-pingcode-specstoissues` 建卡：spec 转需求树卡片（idea → epic → feature 规格卡 → story 卡），登记 `specs/pingcode-mapping.json`，任务目录改名 `{identifier}-{slug}`（slug 不变）；选择「否」时，按交接门禁要求在交接前补建
 5. 涉 UI 的特性可并行移交 UI 设计侧生成设计清单（见下）；它不阻塞建卡与交接，产物供开发 plan / implement 使用
 6. 逐项核对交接门禁（见下），全过才移交开发
@@ -204,12 +204,12 @@ flowchart TD
 
 进入时机：clarify 之后，与建卡并行（对着已澄清的规格做设计）。
 
-1. `/che-compound-load` —— 会话内装载过就跳过（design 会提示）
-2. `/che-compound-design` —— 按四盲区问句库澄清需求 + 设计规约 / 自检七域走查，产出页面级 `design-tasks.md`（交互规则、页面状态、UI-01… 要求清单）；产物供开发 plan / implement 使用
+1. `/che-load` —— 会话内装载过就跳过（design 会提示）
+2. `/che-design` —— 按四盲区问句库澄清需求 + 设计规约 / 自检七域走查，产出页面级 `design-tasks.md`（交互规则、页面状态、UI-01… 要求清单）；产物供开发 plan / implement 使用
 
 UI 设计侧注意：
 
-- 澄清结论**不回写** spec；需求疑点与产品一起执行 `/che-compound-clarify`
+- 澄清结论**不回写** spec；需求疑点与产品一起执行 `/che-clarify`
 - 与 spec 冲突时回产品 / 设计侧裁决，开发绝不自行解决
 - `design-tasks.md` 不是交接门禁项；存在时开发 plan / implement 必读
 
@@ -224,14 +224,14 @@ UI 设计侧注意：
 
 #### 开发侧（plan → 实现 → 收尾）
 
-1. `/che-compound-load` —— 每会话一次（plan 的入向前置）
-2. `/che-compound-plan` —— 单命令一次完成实现规划与任务拆解：spec 转实现规划（research / data-model / contracts / quickstart）后，同一命令按用户故事生成依赖有序 `tasks.md`；有 `design-tasks.md` 必读并对齐，冲突回产品 / 设计裁决；配置了 `mapping.task_artifact` 时，结束确认后可接续补建任务卡并关联至 story / spec 卡
-3. `/che-compound-gapfill` —— 对照统一 spec 意图块（In scope / Out of scope / Constraints / Failure conditions）+ spec 场景（Acceptance / Edge `E#`）补四类缺口测试进 `tasks.md`（约束违反 / 失败条件 / 越界回归 / 边界）
-4. `/che-compound-planverify` —— 正式实现前校验的唯一入口：机械层对 gapfill 后的最终 plan/tasks 表面跑确定性 ADR 查询（共用 `che-adr-check` 的 check.sh，产出 `planverify.adr.json` 审计记录与报告 hash），密封 briefing 交独立 checker 审 plan + tasks（含 P3e ADR conformance）；PASS 放行；REPLAN_ALLOWED 修订 plan（重跑 `/che-compound-plan` 再生 tasks.md）后重新校验；BLOCKED_DRIFT 回退至 plan；BLOCKED_ADR（越过 governing ADR）修 plan 或 `/che-adr-draft` 起草 superseding ADR 经人工 accept 后重跑（draft 状态不放行）。规划过程中也可随时手动 `/che-adr-check` 排查，但它只读、无门禁效力
-5. `/che-compound-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；先过 `/che-compound-planverify-gate`——`adr_gate` 默认 block（报告缺失、`adr_status` 非 clean、或 spec/plan/tasks 改动后 hash 不匹配即拒绝），`planverify_gate` 为 block 时再拒 BLOCKED_DRIFT / BLOCKED_ADR。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): 中文消息` + `Co-Authored-By` 页脚（消息不带工作项 ID），小步拆分、精确暂存、排除敏感文件
-6. `/che-compound-intentguard` —— 独立校验者审实现 vs 锁定意图：PASS 交接，REVIEW 人工复核后放行，BLOCKED 回退至 implement 修复
+1. `/che-load` —— 每会话一次（plan 的入向前置）
+2. `/che-plan` —— 单命令一次完成实现规划与任务拆解：spec 转实现规划（research / data-model / contracts / quickstart）后，同一命令按用户故事生成依赖有序 `tasks.md`；有 `design-tasks.md` 必读并对齐，冲突回产品 / 设计裁决；配置了 `mapping.task_artifact` 时，结束确认后可接续补建任务卡并关联至 story / spec 卡
+3. `/che-gapfill` —— 对照统一 spec 意图块（In scope / Out of scope / Constraints / Failure conditions）+ spec 场景（Acceptance / Edge `E#`）补四类缺口测试进 `tasks.md`（约束违反 / 失败条件 / 越界回归 / 边界）
+4. `/che-planverify` —— 正式实现前校验的唯一入口：机械层对 gapfill 后的最终 plan/tasks 表面跑确定性 ADR 查询（共用 `che-adr-check` 的 check.sh，产出 `planverify.adr.json` 审计记录与报告 hash），密封 briefing 交独立 checker 审 plan + tasks（含 P3e ADR conformance）；PASS 放行；REPLAN_ALLOWED 修订 plan（重跑 `/che-plan` 再生 tasks.md）后重新校验；BLOCKED_DRIFT 回退至 plan；BLOCKED_ADR（越过 governing ADR）修 plan 或 `/che-adr-draft` 起草 superseding ADR 经人工 accept 后重跑（draft 状态不放行）。规划过程中也可随时手动 `/che-adr-check` 排查，但它只读、无门禁效力
+5. `/che-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；先过 `/che-planverify-gate`——`adr_gate` 默认 block（报告缺失、`adr_status` 非 clean、或 spec/plan/tasks 改动后 hash 不匹配即拒绝），`planverify_gate` 为 block 时再拒 BLOCKED_DRIFT / BLOCKED_ADR。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): 中文消息` + `Co-Authored-By` 页脚（消息不带工作项 ID），小步拆分、精确暂存、排除敏感文件
+6. `/che-intentguard` —— 独立校验者审实现 vs 锁定意图：PASS 交接，REVIEW 人工复核后放行，BLOCKED 回退至 implement 修复
 7. `/che-pingcode-sync-status` —— 本地任务全部 `[x]` 后卡片单向流转完成态
-8. `/che-compound-writeback` —— 把新经验（ADR / corrections / patterns）沉淀回 compound store，供后续特性复用
+8. `/che-writeback` —— 把新经验（ADR / corrections / patterns）沉淀回 compound store，供后续特性复用
 
 开发侧纪律：
 
@@ -247,11 +247,11 @@ UI 设计侧注意：
 
 | 技能 | 时机 | 作用 |
 |---|---|---|
-| `che-compound-grill-me` | 产品侧，specify / clarify 之后 | 对 spec 执行追问式深度澄清，暴露隐含假设与自相矛盾；结论**不回写** spec，如需回写先执行 clarify |
-| `che-compound-grill-with-docs` | 产品侧，同上 | 深度澄清并沉淀跨特性知识：术语与主题文档落 `docs/domain_knowledge/`，符合记录门的决策归口 `docs/adr/`；planverify 的 ADR 决策边界因此更完整 |
+| `che-grill-me` | 产品侧，specify / clarify 之后 | 对 spec 执行追问式深度澄清，暴露隐含假设与自相矛盾；结论**不回写** spec，如需回写先执行 clarify |
+| `che-grill-with-docs` | 产品侧，同上 | 深度澄清并沉淀跨特性知识：术语与主题文档落 `docs/domain_knowledge/`，符合记录门的决策归口 `docs/adr/`；planverify 的 ADR 决策边界因此更完整 |
 | `che-adr-context` | 开发 plan 前 | 取 ADR 决策语料进上下文（只读），避免 plan 与既有决策冲突 |
-| `che-compound-analyze` | 开发 tasks 后 | spec / plan / tasks 跨制品一致性只读分析，尽早发现工件间的漂移 |
-| `che-compound-converge` | 实现之后 | 代码现状与工件有差距时，追加收敛任务进 tasks.md，避免差距持续累积 |
+| `che-analyze` | 开发 tasks 后 | spec / plan / tasks 跨制品一致性只读分析，尽早发现工件间的漂移 |
+| `che-converge` | 实现之后 | 代码现状与工件有差距时，追加收敛任务进 tasks.md，避免差距持续累积 |
 
 #### 辅助链（独立于主线，任意阶段可用）
 
@@ -275,6 +275,6 @@ bug 修复三步：
 
 1. **初始化（一次性）**：把 §1.1 第一段提示词发给 Agent → 复制骨架、安装技能包、接入 codegraph → 重启 Agent。
 2. **完善登记（一次性）**：发 §1.1 第二段提示词 → 验证索引、登记 `AGENTS.md` 布局、执行 `/che-project-init`。
-3. **架构画像（可选，一次性）**：跑 `/che-project-arch` → Agent 扫描 `services/`、`apps/` 等布局生成 `docs/architecture.md`（服务/应用清单 + mermaid 依赖图），确认后入库；此后每个特性会话 `/che-compound-load` 自动装载，架构变化时重跑对账。
+3. **架构画像（可选，一次性）**：跑 `/che-project-arch` → Agent 扫描 `services/`、`apps/` 等布局生成 `docs/architecture.md`（服务/应用清单 + mermaid 依赖图），确认后入库；此后每个特性会话 `/che-load` 自动装载，架构变化时重跑对账。
 4. **日常交付**：按角色进入 harness 主线（§3.2）；产品从 specify（含 intent 访谈与场景起草）开始，开发从 plan 开始；bug 使用修复链，线上问题使用排障技能。每会话 Agent 自动执行环境检查。
 5. **维护分工**：改骨架、初始化提示词、环境基线 → 直接改 monorepo-template 仓的 `README.md` 与 `AGENTS-TEMPLATE.md`（版本两处同步）；技能流程问题 → 去 harness 仓。

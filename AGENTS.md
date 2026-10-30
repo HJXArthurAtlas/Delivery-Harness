@@ -10,7 +10,7 @@
 
 | 路径 | 简要说明 |
 |---|---|
-| `skills/che-compound-*/` | 规格驱动开发主流程及 compound 扩展 |
+| `skills/che-{specify,clarify,design,plan,planverify,planverify-gate,implement,intentguard,grill-me,grill-with-docs,gapfill,analyze,converge,load,writeback,constitution,flow}/` | 规格驱动开发主流程及 compound 扩展 |
 | `skills/che-adr-*/` | ADR 检查、上下文和起草 |
 | `skills/che-pingcode-*/` | PingCode 初始化、建卡与同步 |
 | `skills/che-bug-*/` | Bug 评估、修复和验证 |
@@ -45,7 +45,7 @@ npm test
 
 ## 修改约束
 
-- `SKILL.md` frontmatter 仅含 `name`、`description`；`name` 必须等于目录名，技能名使用 kebab-case、至少三段且不超过 32 字符。
+- `SKILL.md` frontmatter 仅含 `name`、`description`；`name` 必须等于目录名，技能名使用 kebab-case、至少两段且不超过 32 字符。
 - `description` 非空且不超过 1024 字符；字面引用的 `references/`、`scripts/` 文件必须存在。
 - 仓内工具不新增 npm 依赖；外部 CLI 只从 PATH 调用。运行环境为 Node ≥ 22.18、bash 和 POSIX coreutils。
 - 上游技能的 pack fork 差异记录在对应技能中，上游升级时必须保留。

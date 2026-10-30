@@ -6,8 +6,8 @@
 # command contract, and scaffolding an empty record with no source artifact
 # would be the fabricated-success failure the extension exists to prevent.
 # But two other writers legitimately allocate records when the plan is not
-# the source at all: che-compound-grill-with-docs (pre-plan, source is the
-# settled interview) and che-compound-writeback (post-implement, source is a
+# the source at all: che-grill-with-docs (pre-plan, source is the
+# settled interview) and che-writeback (post-implement, source is a
 # session correction being elevated). Both need the same deterministic half
 # of draft.sh's job — allocate the next corpus id, write a schema-valid draft
 # at the right path — while the body stays the calling skill's judgment.

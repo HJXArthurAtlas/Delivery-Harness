@@ -309,7 +309,7 @@ export function resolveTask(
   if (tasks.length === 1) return tasks[0];
   if (tasks.length === 0) {
     throw new FeatureResolutionError(
-      'ERROR: No task directories found under specs/. Run /che-compound-specify or `che task create <slug>` first.',
+      'ERROR: No task directories found under specs/. Run /che-specify or `che task create <slug>` first.',
     );
   }
   throw new FeatureResolutionError(
@@ -350,8 +350,8 @@ export function getFeaturePaths(
 
 export function formatPackCommand(commandName: string): string {
   let name = commandName.replace(/^\/+/, '');
-  if (name.startsWith('che-compound-')) {
-    name = name.slice('che-compound-'.length);
+  if (name.startsWith('che-')) {
+    name = name.slice('che-'.length);
   }
-  return `/che-compound-${name}`;
+  return `/che-${name}`;
 }

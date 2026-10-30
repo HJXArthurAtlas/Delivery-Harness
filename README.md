@@ -75,7 +75,7 @@ omp 实测同时读项目级与全局级；OpenCode 官方支持同两个路径�
 
 ```bash
 npm config set @newchiwan:registry https://nexus.newchiwan.cn/repository/registry-npm/   # Nexus group（internal + 公网代理）
-npm install -g @newchiwan/che@latest        # 特性路径解析（compound / grill / adrkit 系技能）
+npm install -g @newchiwan/che@latest        # 特性路径解析（规格驱动 / grill / adrkit 系技能）
 npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 ```
 
@@ -105,6 +105,8 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 
 技能清单与触发语**以各 `skills/<name>/SKILL.md` frontmatter 的 `description` 为准**，本 README 不维护副本。
 
+0.4.0 起规格驱动技能由 `che-compound-*` 统一更名为 `che-*` 二段名（如 `/che-compound-plan` → `/che-plan`）。从旧版升级后，手动删除技能发现目录里残留的 `che-compound-*` 旧目录——技能安装同名不覆盖，不删会新旧双份并存。
+
 ## 运行时与外部 CLI（排除 init / flow）
 
 `che-adr-*` 依赖外部 `@adrkit/cli`；特性路径解析依赖外部 `che` CLI（`@newchiwan/che`）：
@@ -120,7 +122,7 @@ CLI 解析（`adrkit-lib.sh`）：只执行 PATH 上的 `adrkit` 与 `che`，不
 
 `planverify` / `intentguard` 的默认 `auto` 策略在没有跨模型 CLI 时使用原生 Tier 2/3 subagent；只有用户强制 `cross-model` 或 `cli:model` 才需要对应外部模型 CLI。
 
-**范围边界**：`che-compound-flow` 不属于自包含改造范围（保留 PingCode 卡流程依赖）。目标项目自身的 git / build / test / lint 工具链也不随 pack 内置。
+**范围边界**：`che-flow` 不属于自包含改造范围（保留 PingCode 卡流程依赖）。目标项目自身的 git / build / test / lint 工具链也不随 pack 内置。
 
 ## 开发
 
@@ -129,7 +131,7 @@ npm ci     # 安装钉版本的 @adrkit/cli，并把仓内 @newchiwan/che（file
 npm test   # 依次运行技能结构、che CLI 契约和技能运行时契约测试
 ```
 
-新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）；`npm test` 会把关。omp 插件按 `skills/` 目录自动发现，无需另行登记。命名格式 `che-{submodule}-action`（如 `che-pingcode-init`），全名 ≤32 字符。
+新增技能 = 在 `skills/` 下建目录 + `SKILL.md`（frontmatter 含 `name`、`description`≤1024 字符）；`npm test` 会把关。omp 插件按 `skills/` 目录自动发现，无需另行登记。命名格式 `che-<name>`（如 `che-plan`），至少两段，全名 ≤32 字符。
 
 提交信息格式：`<type>(<scope>): 中文主题`（不带工作项 ID），如 `refactor(skills): 技能更名`。type 取值：`feat` / `fix` / `refactor` / `docs` / `test` / `chore`。格式约定由 `/che-git-master` 技能在提交流程中执行，仓库不设强制 hook。
 

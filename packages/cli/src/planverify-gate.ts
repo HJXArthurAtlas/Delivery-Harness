@@ -1,6 +1,6 @@
 // Inlined planverify gate (was scripts/bash/planverify-gate.sh + planverify-lib.sh).
 //
-// Phase-boundary gate before /che-compound-implement. Two independent gate
+// Phase-boundary gate before /che-implement. Two independent gate
 // switches are read (env wins over .che/config.yml for each):
 //   - adr_gate (SKC_ADR_GATE / `adr_gate:`)   default block — the ADR
 //     mechanical layer: the planverify report must exist, carry
@@ -136,7 +136,7 @@ function missingReportMessage(slug: string): string {
     '\n' +
     `  ⚠  Gate is on but no planverify report exists for '${slug}'.\n` +
     '\n' +
-    `  Run /che-compound-planverify for '${slug}' before /che-compound-implement.\n` +
+    `  Run /che-planverify for '${slug}' before /che-implement.\n` +
     '\n'
   );
 }
@@ -147,7 +147,7 @@ function staleReportMessage(slug: string): string {
     `  ⚠  The planverify report for '${slug}' no longer matches the current\n` +
     '  spec/plan/tasks (recorded SHA-256 differs, or a hash is missing).\n' +
     '\n' +
-    '  The report is stale: re-run /che-compound-planverify to refresh it.\n' +
+    '  The report is stale: re-run /che-planverify to refresh it.\n' +
     '\n'
   );
 }
@@ -162,7 +162,7 @@ function adrNotCleanMessage(slug: string, adrStatus: string): string {
     `  ⛔ ADR gate is blocking '${slug}': ${reason}\n` +
     '\n' +
     '  Fix the plan, or record the decision change via /che-adr-draft and have\n' +
-    '  it ratified (adr accept), then re-run /che-compound-planverify. A draft\n' +
+    '  it ratified (adr accept), then re-run /che-planverify. A draft\n' +
     '  ADR alone does not clear the gate.\n' +
     '\n'
   );
@@ -174,7 +174,7 @@ function driftMessage(): string {
     '  ⛔ Plan verdict is BLOCKED_DRIFT.\n' +
     '\n' +
     '  The proposed plan drifts outside locked intent. Replan before\n' +
-    '  implementing: re-run /che-compound-plan, then /che-compound-planverify.\n' +
+    '  implementing: re-run /che-plan, then /che-planverify.\n' +
     '\n'
   );
 }
@@ -186,7 +186,7 @@ function blockedAdrMessage(): string {
     '\n' +
     '  The plan departs from a governing ADR, or the ADR mechanical layer\n' +
     '  reported errors. Fix the plan, or record the change via /che-adr-draft\n' +
-    '  and have it ratified, then re-run /che-compound-planverify.\n' +
+    '  and have it ratified, then re-run /che-planverify.\n' +
     '\n'
   );
 }
@@ -197,7 +197,7 @@ function unknownVerdictMessage(verdict: string): string {
     `  ⛔ Unrecognized planverify verdict '${verdict}'.\n` +
     '\n' +
     '  The gate fails closed on unknown verdicts. Re-run\n' +
-    '  /che-compound-planverify to produce a valid report.\n' +
+    '  /che-planverify to produce a valid report.\n' +
     '\n'
   );
 }
@@ -375,7 +375,7 @@ export function runPlanVerifyGate(argv: string[]): number {
 
   if (!values.json) {
     process.stdout.write(
-      `✓ planverify verdict for '${slug}': ${verdict} — /che-compound-implement may proceed.\n`,
+      `✓ planverify verdict for '${slug}': ${verdict} — /che-implement may proceed.\n`,
     );
   }
   return 0;

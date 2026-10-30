@@ -9,7 +9,7 @@ description: 生成并刷新项目架构画像 docs/architecture.md：扫描仓�
 
 为项目维护一份**架构画像**制品 `docs/architecture.md`：说明这个项目由哪些部分组成（services 下的后端、apps 下的前端、packages 下的共享库…）、各自的技术栈与入口、相互间的依赖与调用关系，配一张 mermaid 总览图。画像入库提交，供三类消费：
 
-- **agent 会话上下文**：`/che-compound-load` 每个特性会话开场装载，agent 全程知道「项目里有什么、东西放在哪」；
+- **agent 会话上下文**：`/che-load` 每个特性会话开场装载，agent 全程知道「项目里有什么、东西放在哪」；
 - **交接与排障**：新成员或 `/che-mturtle-troubleshooting` 排线上问题时按图定位服务；
 - **漂移对账**：架构变了重跑本技能，扫描现状与画像比对更新。
 
@@ -64,7 +64,7 @@ description: 生成并刷新项目架构画像 docs/architecture.md：扫描仓�
 ```
 
 - 建议提交入库（画像的消费者包括其他成员与会话装载）。
-- 提醒：`/che-compound-load` 会在每个特性会话开场把画像装进上下文；架构再变化时重跑本技能对账。
+- 提醒：`/che-load` 会在每个特性会话开场把画像装进上下文；架构再变化时重跑本技能对账。
 
 ## 画像模板
 

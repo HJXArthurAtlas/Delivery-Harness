@@ -35,10 +35,10 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     ok
   fi
 
-  # 2. name 与目录名一致；命名格式 che-{submodule}-action（至少三段 kebab），且简洁（≤32 字符）
+  # 2. name 与目录名一致；命名格式 che-<name>（至少两段 kebab），且简洁（≤32 字符）
   name="$(awk -F': *' '/^name:/{print $2; exit}' "$skill_md")"
   [ "$name" = "$skill" ] && ok || bad "$skill: name '$name' 与目录名不一致"
-  [[ "$skill" =~ ^che-[a-z0-9]+-[a-z0-9]+(-[a-z0-9]+)*$ ]] && ok || bad "$skill: 命名不符 che-{submodule}-action 格式"
+  [[ "$skill" =~ ^che-[a-z0-9]+(-[a-z0-9]+)*$ ]] && ok || bad "$skill: 命名不符 che-<name> 格式"
   [ "${#skill}" -le 32 ] && ok || bad "$skill: 命名过长（${#skill} chars，简洁上限 32）"
 
   # 3. description 非空、≤1024 字符
