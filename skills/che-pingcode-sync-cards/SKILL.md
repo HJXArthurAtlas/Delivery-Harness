@@ -17,7 +17,7 @@ description: 核对 specs/ 产物与 PingCode 卡片的一致性，按差异增�
 
 1. `pingcode` CLI 已安装且已认证（`pingcode auth status`）
 2. 统一登记存在且含该 spec 条目：`specs/pingcode-mapping.json`（无 → 提示先运行 `/che-pingcode-specstoissues`）
-3. `spec.md` 存在（`tasks.md` 仅在 `task_artifact` 已配置时需要）
+3. `intent.md` 存在（`tasks.md` 仅在 `task_artifact` 已配置时需要）
 
 ## 用户输入
 
@@ -44,7 +44,7 @@ description: 核对 specs/ 产物与 PingCode 卡片的一致性，按差异增�
 
 随后读取该条目（`mode`、`idea`、`ancestors`、`artifacts`）、配置 `.che/pingcode-config.yml`（映射/状态/优先级），环境自检：`pingcode auth status`；`context list` 偏好缺失时按 `/che-pingcode-specstoissues` 第 2 步补齐。
 
-**同步非当前分支的 spec 时**，spec.md/tasks.md 按该 spec 目录路径读取，不做分支切换；制品以磁盘上的现行内容为准。
+**同步非当前分支的 spec 时**，intent.md/tasks.md 按该 spec 目录路径读取，不做分支切换；制品以磁盘上的现行内容为准。
 
 ### 2. 解析当前制品（期望状态）
 

@@ -42,7 +42,7 @@ function trimTrailingSeparators(value: string): string {
   return text;
 }
 
-export function findSpecifyRoot(startDir: string): string | null {
+export function findIntendRoot(startDir: string): string | null {
   // Project-root marker is currently the .git directory; revisit when a
   // dedicated SDD marker is introduced.
   let current = realpathSync(startDir);
@@ -77,11 +77,11 @@ function resolveInitDir(): string {
 export function getRepoRoot(scriptDir?: string): string {
   if (process.env.CHE_INIT_DIR) return resolveInitDir();
 
-  const specifyRoot = findSpecifyRoot(process.cwd());
-  if (specifyRoot !== null) return specifyRoot;
+  const intendRoot = findIntendRoot(process.cwd());
+  if (intendRoot !== null) return intendRoot;
 
   if (scriptDir !== undefined) {
-    const scriptRoot = findSpecifyRoot(scriptDir);
+    const scriptRoot = findIntendRoot(scriptDir);
     if (scriptRoot !== null) return scriptRoot;
   }
 
@@ -161,7 +161,7 @@ export function listTaskDirs(repoRoot: string): TaskDir[] {
 export function deriveStage(taskDir: string): string {
   if (isFileIn(taskDir, 'tasks.md')) return 'tasks';
   if (isFileIn(taskDir, 'plan.md')) return 'plan';
-  if (isFileIn(taskDir, 'spec.md')) return 'specify';
+  if (isFileIn(taskDir, 'intent.md')) return 'intend';
   return 'created';
 }
 
@@ -309,7 +309,7 @@ export function resolveTask(
   if (tasks.length === 1) return tasks[0];
   if (tasks.length === 0) {
     throw new FeatureResolutionError(
-      'ERROR: No task directories found under specs/. Run /che-specify or `che task create <slug>` first.',
+      'ERROR: No task directories found under specs/. Run /che-intend or `che task create <slug>` first.',
     );
   }
   throw new FeatureResolutionError(
@@ -338,7 +338,7 @@ export function getFeaturePaths(
     repoRoot,
     currentBranch,
     featureDir,
-    featureSpec: join(featureDir, 'spec.md'),
+    featureSpec: join(featureDir, 'intent.md'),
     implPlan: join(featureDir, 'plan.md'),
     tasks: join(featureDir, 'tasks.md'),
     research: join(featureDir, 'research.md'),

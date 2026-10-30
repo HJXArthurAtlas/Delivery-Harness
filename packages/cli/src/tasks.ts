@@ -1,6 +1,6 @@
 // che task create <slug> / che task list
 //
-// create — the flow's first write, at specify time:
+// create — the flow's first write, at intend time:
 //   - allocates the next 3-digit zero-padded number across specs/ numeric
 //     prefixes (PingCode identifier dirs don't affect numbering)
 //   - enforces slug uniqueness across all task dirs

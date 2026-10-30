@@ -29,7 +29,7 @@ and commands read the constitution at runtime and are not modified here.
   making changes.
 - After completing the constitution update, include a `Next Actions` section for each deferred
   intent. List the original intent and suggest the appropriate follow-up command, such
-  as `/che-specify`, without invoking it.
+  as `/che-intend`, without invoking it.
 - If there are no non-governance intents, omit the `Next Actions` section.
 
 ## Outline

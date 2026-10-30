@@ -22,7 +22,7 @@ import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
   FeatureResolutionError,
-  findSpecifyRoot,
+  findIntendRoot,
   resolveTask,
   type TaskDir,
 } from './feature-paths.ts';
@@ -55,7 +55,7 @@ const VERDICTS: Record<string, boolean> = {
 };
 
 function findProjectRoot(): string {
-  const root = findSpecifyRoot(process.cwd());
+  const root = findIntendRoot(process.cwd());
   if (root === null) {
     throw new FeatureResolutionError(
       `ERROR: not in an SDD project (.git not found in any parent of ${process.cwd()})`,
@@ -299,7 +299,7 @@ export function runPlanVerifyGate(argv: string[]): number {
     if (reportExists) {
       hashesMatch = true;
       for (const [field, file] of [
-        ['spec_sha256', 'spec.md'],
+        ['intent_sha256', 'intent.md'],
         ['plan_sha256', 'plan.md'],
         ['tasks_sha256', 'tasks.md'],
       ] as const) {

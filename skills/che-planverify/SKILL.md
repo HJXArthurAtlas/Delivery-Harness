@@ -8,7 +8,7 @@ description: plan 独立校验（L3）：实现前由独立 checker（可跨模�
 # Plan Verify
 
 You are the **planverify orchestrator**. You judge the *proposed plan* before any
-code is written — the cheaper, earlier mirror of `intentguard`. You do **not** make
+code is written — the cheaper, earlier mirror of `intentverify`. You do **not** make
 the judgment yourself: you run surface analysis and the deterministic ADR query,
 seal a briefing, and hand it to an **independent checker** (a different model, or at
 minimum a fresh context that never saw the planning). The checker returns the
@@ -16,7 +16,7 @@ verdict; you compose and report it.
 
 ```
 planverify:  is the proposed PLAN drifting, before files are edited?
-intentguard: did the actual git DIFF drift, after implementation?
+intentverify: did the actual git DIFF drift, after implementation?
 ```
 
 The planner is the *worst* judge of its own plan — a plan is pure reasoning, the
@@ -49,7 +49,7 @@ Both `off` → no blocking. Invalid values fail closed (exit 1).
 
 ## The independence ladder
 
-Identical to intentguard. Climb to the highest available tier; always record the tier reached.
+Identical to intentverify. Climb to the highest available tier; always record the tier reached.
 
 | Tier | Checker | Independence | Dispatch |
 |------|---------|--------------|----------|
@@ -72,11 +72,11 @@ an explicit `cross-model` or `cli:model` policy requires an external model CLI.
 
 (`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR` — run `che paths --session "$CHE_SESSION_ID"` once, bare when no session id is available.)
 
-1. **Unified spec** `{task_dir}/spec.md` — read `## In scope`, `## Out of scope`, `## Constraints`, `## Failure conditions`; read the `**Acceptance Scenarios**` blocks and `### Edge Cases` for the scenarios (global stable `E#` IDs)
+1. **Unified spec** `{task_dir}/intent.md` — read `## In scope`, `## Out of scope`, `## Constraints`, `## Failure conditions`; read the `**Acceptance Scenarios**` blocks and `### Edge Cases` for the scenarios (global stable `E#` IDs)
 2. **Plan** `{task_dir}/plan.md` — the proposed plan, including any `requested_surface` blocks
 3. **Tasks** `{task_dir}/tasks.md` — the gapfilled task list
 
-If the spec is missing, stop and tell the user (a missing `spec.md` means `/che-specify` has not run). If the spec has no scenario content (neither Acceptance Scenarios nor Edge Cases), stop — scenarios are mandatory spec sections.
+If the spec is missing, stop and tell the user (a missing `intent.md` means `/che-intend` has not run). If the spec has no scenario content (neither Acceptance Scenarios nor Edge Cases), stop — scenarios are mandatory spec sections.
 
 ## Outputs you produce
 
@@ -149,7 +149,7 @@ Requirements:
 
 ### Phase 2 — Select the checker
 
-Identical to intentguard's checker selection: identify your own family, resolve
+Identical to intentverify's checker selection: identify your own family, resolve
 `SKC_CHECKER`, probe availability (`command -v codex` / `command -v gemini` for
 Tier 1; native subagent with `model: haiku` for Tier 2; default subagent for Tier 3).
 If policy is `cross-model` and no other-vendor CLI exists, stop and tell the user.
@@ -320,7 +320,7 @@ adr_governed: {N}
 adr_departures: {N}
 adr_corpus_errors: {N}
 adr_evaluator: not_configured | clean | escalation | returned
-spec_sha256: {sha256 of spec.md at run time}
+intent_sha256: {sha256 of intent.md at run time}
 plan_sha256: {sha256 of plan.md at run time}
 tasks_sha256: {sha256 of tasks.md at run time}
 ---
@@ -393,7 +393,7 @@ or tasks after the run invalidates the report — re-run planverify.
 - **Auto-patch the plan.** You report; the user replans. Validator, not fixer.
 - **Interpret tool failure as pass.** Exit 2, unreachable corpus, missing/unparseable JSON → stop, no verdict.
 - **Silently degrade tiers.** Record the tier actually achieved.
-- **Re-write the spec's locked sections.** They are locked — a locked-intent change means re-running `/che-specify` (update path), keeping existing `E#` IDs.
+- **Re-write the spec's locked sections.** They are locked — a locked-intent change means re-running `/che-intend` (update path), keeping existing `E#` IDs.
 
 ---
 

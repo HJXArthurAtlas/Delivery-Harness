@@ -100,7 +100,7 @@ status: active
 - **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
 
-*Mark unclear requirements inline; at most 3 markers survive specify (clarify clears them):*
+*Mark unclear requirements inline; at most 3 markers survive intend (clarify clears them):*
 
 - **FR-004**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified — email/password, SSO, OAuth?]
 

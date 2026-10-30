@@ -1,6 +1,6 @@
 ---
 name: che-clarify
-description: 规格澄清问答（产品澄清独占）：最多提 5 个高针对性的澄清问题，找出当前特性 spec 定义不足的区域，把结论直接合并进 spec.md 对应章节，并把 `[NEEDS CLARIFICATION]` 产品标记清零（specify 最多留 3 个明确标记，clarify 必须以零标记完成）。在 specify 之后、plan 之前使用。当用户运行或提到 /che-clarify，或说「澄清规格」「补全需求细节」「解决需求歧义」时使用——即使用户没提命令名，只要是对 spec 的澄清回写也用本 skill。
+description: 规格澄清问答（产品澄清独占）：最多提 5 个高针对性的澄清问题，找出当前特性 spec 定义不足的区域，把结论直接合并进 intent.md 对应章节，并把 `[NEEDS CLARIFICATION]` 产品标记清零（intend 最多留 3 个明确标记，clarify 必须以零标记完成）。在 intend 之后、plan 之前使用。当用户运行或提到 /che-clarify，或说「澄清规格」「补全需求细节」「解决需求歧义」时使用——即使用户没提命令名，只要是对 spec 的澄清回写也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -25,7 +25,7 @@ Execution steps:
    - `FEATURE_DIR`
    - `FEATURE_SPEC`
    - (Optionally capture `IMPL_PLAN`, `TASKS` for future chained flows.)
-   - If JSON parsing fails, abort and instruct user to re-run `/che-specify` or verify feature branch environment.
+   - If JSON parsing fails, abort and instruct user to re-run `/che-intend` or verify feature branch environment.
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
    - Record the runs timeline start: `che state start clarify --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available).
 
@@ -146,7 +146,7 @@ Execution steps:
     - Immediately apply the clarification to the most appropriate section(s):
        - Functional ambiguity → Update or add a bullet in Functional Requirements.
        - User interaction / actor distinction → Update User Stories with the clarified role, constraint, or scenario.
-       - **Acceptance Scenarios / Edge Cases**: if the answer changes or overturns a scenario, REPLACE that scenario's text in place, keeping its existing `E#` ID — never append a contradictory alternative and never renumber or reuse IDs. Only a genuinely NEW scenario gets the next unused `E#`. After any scenario change, re-run the scenario quality tests `SQ1–SQ4` (defined in `/che-specify`) and fix failures before saving.
+       - **Acceptance Scenarios / Edge Cases**: if the answer changes or overturns a scenario, REPLACE that scenario's text in place, keeping its existing `E#` ID — never append a contradictory alternative and never renumber or reuse IDs. Only a genuinely NEW scenario gets the next unused `E#`. After any scenario change, re-run the scenario quality tests `SQ1–SQ4` (defined in `/che-intend`) and fix failures before saving.
        - Data shape / entities → Update Key Entities (add fields, types, relationships) preserving ordering; note added constraints succinctly.
        - Non-functional constraint → Add/modify measurable criteria in Success Criteria > Measurable Outcomes (convert vague adjective to metric or explicit target).
        - Edge case / negative flow → Add or replace an entry under Edge Cases (new entries take the next unused `E#`).
@@ -170,7 +170,7 @@ Execution steps:
 Behavior rules:
 
 - If no meaningful ambiguities found (or all potential questions would be low-impact), respond: "No critical ambiguities detected worth formal clarification." and suggest proceeding.
-- If spec file missing, instruct user to run `/che-specify` first (do not create a new spec here).
+- If spec file missing, instruct user to run `/che-intend` first (do not create a new spec here).
 - `[NEEDS CLARIFICATION]` markers are clarify's exclusive domain: always sweep the spec for them (even when no new questions arise) and resolve or explicitly settle each one — completion with zero markers is mandatory.
 - Never exceed 5 total asked questions (clarification retries for a single question do not count as new questions).
 - Avoid speculative tech stack questions unless the absence blocks functional clarity.

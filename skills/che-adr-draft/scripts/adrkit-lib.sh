@@ -52,11 +52,11 @@ adrkit_feature_dir() {
 		adrkit_fail "che CLI not found on PATH; install it with 'npm install -g @newchiwan/che@latest', or set ADRKIT_FEATURE_DIR"
 
 	_adrkit_paths="$(che paths)" ||
-		adrkit_fail "che feature resolution failed — run /che-specify first, or set ADRKIT_FEATURE_DIR"
+		adrkit_fail "che feature resolution failed — run /che-intend first, or set ADRKIT_FEATURE_DIR"
 	_adrkit_feature="$(printf '%s\n' "$_adrkit_paths" | sed -n 's/^FEATURE_DIR: *//p' | head -n 1)"
 
 	[ -n "$_adrkit_feature" ] ||
-		adrkit_fail "Resolver returned no FEATURE_DIR — run /che-specify first, or set ADRKIT_FEATURE_DIR"
+		adrkit_fail "Resolver returned no FEATURE_DIR — run /che-intend first, or set ADRKIT_FEATURE_DIR"
 	[ -d "$_adrkit_feature" ] ||
 		adrkit_fail "Resolver returned FEATURE_DIR '$_adrkit_feature', but that directory does not exist"
 

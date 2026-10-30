@@ -20,7 +20,7 @@ Commands:
   task list [--json]                               Tasks at a glance: slug, stage, one-line summary
   state start|done <stage> / show [--json]         Task runs timeline (metadata.json; stage/next derived)
   paths [--json] [--feature <slug>] [--session <id>]  Resolve task paths
-  check [--json] [--require-spec] [--require-tasks] [--include-tasks]
+  check [--json] [--require-intent] [--require-tasks] [--include-tasks]
   planverify-gate [<slug>] [--json]                Gate /che-implement on the planverify verdict
   feature bind <slug> --session <id> | show [--json]  Manage session→task bindings (.che/feature.json, local)
   template <name> --references-dir <dir> [--json]  Resolve a bundled references/ template

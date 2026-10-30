@@ -22,7 +22,7 @@ Read `{task_dir}/intentguard.md` (`{task_dir}` = the task directory `che paths` 
 
 **2. Scan the session for writeback candidates:**
 
-**ADR candidates** — non-obvious architectural choices made during `/che-specify` or `/che-implement`:
+**ADR candidates** — non-obvious architectural choices made during `/che-intend` or `/che-implement`:
 - Library/framework selection that locks in a pattern
 - Storage / persistence approach decisions
 - API contract decisions
@@ -91,7 +91,7 @@ context: "{one line of background: the past mistake and why the rule exists}"
 {one-line rationale, often references an ADR}
 
 ## Examples in this repo
-- `{task_dir}/spec.md` (feature {slug})
+- `{task_dir}/intent.md` (feature {slug})
 - ...
 ```
 
@@ -111,7 +111,7 @@ Show each draft and ask (use AskUserQuestion per draft):
 
 **6. Update specification status.**
 
-In the corresponding `{task_dir}/spec.md`, change the frontmatter:
+In the corresponding `{task_dir}/intent.md`, change the frontmatter:
 ```yaml
 status: active   →   status: completed
 completed: {YYYY-MM-DD}
@@ -128,7 +128,7 @@ completed: {YYYY-MM-DD}
 - **Read** for scanning session history and intent guard verdict
 - **Bash** for the adrkit scaffold entry point and `.agents/skills/che-adr-draft/scripts/adr.sh lint`
 - **Write** for new compound files
-- **Edit** for updating specification status (spec.md frontmatter only)
+- **Edit** for updating specification status (intent.md frontmatter only)
 - **AskUserQuestion** for per-draft accept/edit/reject/defer
 
 ---

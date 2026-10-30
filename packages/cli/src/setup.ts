@@ -160,9 +160,9 @@ export function runSetupTasks(argv: string[]): number {
   }
 
   if (!isFile(paths.featureSpec)) {
-    process.stderr.write(`ERROR: spec.md not found in ${paths.featureDir}\n`);
+    process.stderr.write(`ERROR: intent.md not found in ${paths.featureDir}\n`);
     process.stderr.write(
-      `Run ${formatPackCommand('specify')} first to create the feature structure.\n`,
+      `Run ${formatPackCommand('intend')} first to create the feature structure.\n`,
     );
     return 1;
   }

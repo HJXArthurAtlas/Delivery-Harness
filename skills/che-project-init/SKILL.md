@@ -11,7 +11,7 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 langua
 
 职责边界（必须遵守）：
 
-- 写 `.che/config.yml` + 维护项目根 `.gitignore` 的 che 忽略规则（见步骤 6）；**绝不**读写 `.che/feature.json` 的内容（session→slug 绑定表，机器本地，由 specify 阶段 `che task create` 写入——本技能只负责让 git 忽略它）。
+- 写 `.che/config.yml` + 维护项目根 `.gitignore` 的 che 忽略规则（见步骤 6）；**绝不**读写 `.che/feature.json` 的内容（session→slug 绑定表，机器本地，由 intend 阶段 `che task create` 写入——本技能只负责让 git 忽略它）。
 - `.che/pingcode-config.yml` **绝不**由本技能直接生成——PingCode 接入链最后移交 `/che-pingcode-init` 完成。
 - 架构画像 `docs/architecture.md` 由 `/che-project-arch` 生成与刷新，本技能只在回显中提示缺失（见步骤 8）。
 - 本技能无 scripts：写盘由 agent 按本文件的模板完成。
@@ -51,7 +51,7 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 langua
 
 - 问法：「审查计划/实现的那个独立 AI 审查者，要挑多独立的？」选项用大白话讲：自动挑最独立的（默认）/ 必须用别家模型 / 钉死同家族便宜模型 / 钉死同款模型 / 你自己指定 CLI 和模型。
 
-planverify / intentguard 判定时**不让写计划/写代码的对话自己给自己打分**——判定外包给一个隔离的 checker。checker 按三级独立性阶梯选拔：跨厂商模型（Tier 1，如 codex / gemini）＞ 同家族便宜模型（Tier 2，subagent + haiku）＞ 同模型新上下文（Tier 3，subagent）。选项：
+planverify / intentverify 判定时**不让写计划/写代码的对话自己给自己打分**——判定外包给一个隔离的 checker。checker 按三级独立性阶梯选拔：跨厂商模型（Tier 1，如 codex / gemini）＞ 同家族便宜模型（Tier 2，subagent + haiku）＞ 同模型新上下文（Tier 3，subagent）。选项：
 
 - `auto`：能爬多高爬多高；机器上没有异厂商 CLI 就落到 Tier 2 / Tier 3，不报错。**默认，适合大多数项目**。
 - `cross-model`：硬性要求 Tier 1，找不到异厂商 CLI 就报错终止，绝不静默降级——适合对校验独立性要求高的项目。用户选它时必须先探测 `command -v codex` 与 `command -v gemini`，都没有要提醒用户（装任一 CLI 后才真正生效）并请其确认。
@@ -67,7 +67,7 @@ planverify / intentguard 判定时**不让写计划/写代码的对话自己给�
 - **off**：不接 PingCode，卡片流程全部留本地。
 - 用户选 on 时，本技能顺手把环境装好：CLI 检查 → 登录 → 移交 `/che-pingcode-init`（见下方步骤 5「PingCode 接入链」）。
 
-> 已退役键：`commit_story_id`（提交消息绑定故事卡 ID）与旧的 before_specify 门禁键（intent 访谈已并入 `/che-specify`，不再有需要单独开关的门禁）均已从本 pack 移除——提交消息不再携带工作项 ID（见 `/che-git-master`）；intent 捕获由 specify 一体化完成。旧项目 `.che/config.yml` 里残留的该键按「pack 不认识的键」原样保留、不再询问。
+> 已退役键：`commit_story_id`（提交消息绑定故事卡 ID）与旧的 before_intend 门禁键（intent 访谈已并入 `/che-intend`，不再有需要单独开关的门禁）均已从本 pack 移除——提交消息不再携带工作项 ID（见 `/che-git-master`）；intent 捕获由 intend 阶段一体化完成。旧项目 `.che/config.yml` 里残留的该键按「pack 不认识的键」原样保留、不再询问。
 
 ## 步骤
 
@@ -138,7 +138,7 @@ adr_gate: block
 # 语义 verdict 门禁：block 时实现前 planverify 裁决不得为 BLOCKED_DRIFT / BLOCKED_ADR（off 不拦截语义层）
 planverify_gate: off
 
-# planverify / intentguard 独立校验者策略（auto | cross-model | same-family | same-model | cli:<model>）
+# planverify / intentverify 独立校验者策略（auto | cross-model | same-family | same-model | cli:<model>）
 checker: auto
 
 # PingCode 集成总开关：on 表示已接入（配合 .che/pingcode-config.yml 生效）
@@ -162,7 +162,7 @@ pingcode_integration: off
    gitignore: <✓ 已忽略 .che/feature.json、.che/*.bak 或 +新增规则 或 用户拒绝跳过>
 ```
 
-- 开始第一个特性：`/che-specify`（意图访谈 + 统一 spec 一体完成；全流程总览见 `/che-flow`）。
+- 开始第一个特性：`/che-intend`（意图访谈 + 统一 spec 一体完成；全流程总览见 `/che-flow`）。
 - 项目尚无 `docs/architecture.md` → 移交 `/che-project-arch` 生成架构画像（服务/应用清单 + 依赖图），供 `/che-load` 每次会话装载。
 - 已接入 PingCode：spec 建卡走 `/che-pingcode-specstoissues`。
 

@@ -14,7 +14,7 @@ Three separate paradigms brought together. They are compatible but not the same 
 
 **What it actually is:**
 - A `specify` CLI that installs prompt template files into your project
-- Slash commands: `/che-constitution` → `/che-specify` → `/che-clarify` → `/che-plan` (plan + task breakdown in one command) → `/che-implement`
+- Slash commands: `/che-constitution` → `/che-intend` → `/che-clarify` → `/che-plan` (plan + task breakdown in one command) → `/che-implement`
 - These are markdown prompt files the agent reads and executes — no API surface, no library
 
 **What it does well:**
@@ -30,7 +30,7 @@ Three separate paradigms brought together. They are compatible but not the same 
 
 **Known limitations in the toolkit's own templates:**
 
-**P1. The auto-fill trap.** The `/che-specify` template instructs the agent to *"make informed guesses,"* use *"common patterns"* to *"fill gaps,"* and caps it at *"Maximum 3 [NEEDS CLARIFICATION] markers."* Where the description goes silent, the agent invents the goal — and the tool limits how often it has to admit it is guessing. This converts spec ambiguity directly into unsupervised model choices.
+**P1. The auto-fill trap.** The `/che-intend` template instructs the agent to *"make informed guesses,"* use *"common patterns"* to *"fill gaps,"* and caps it at *"Maximum 3 [NEEDS CLARIFICATION] markers."* Where the description goes silent, the agent invents the goal — and the tool limits how often it has to admit it is guessing. This converts spec ambiguity directly into unsupervised model choices.
 
 **P2. Internal contradictions across templates.** The toolkit's manifesto declares test-first development *"NON-NEGOTIABLE."* Its task template, shipped in the same repo in the same week, says *"Tests are OPTIONAL, only include them if explicitly requested."* Its implement template says *"Follow the TDD approach."* A goal-seeking model handed three contradictory rules picks one and improvises — the exact behavior the rigid method was supposed to prevent.
 
@@ -58,7 +58,7 @@ as done)
 ```
 
 **Intent** = the left side of the diagram. What you provide.
-**Scenarios** = also what you provide. The toolkit generates *task-level* expectations from your intent, but `/che-specify` captures the user-level "done" boundary — Acceptance Scenarios and Edge Cases with stable `E#` IDs — inside the same `spec.md` that carries the intent. The validator consumes them from there.
+**Scenarios** = also what you provide. The toolkit generates *task-level* expectations from your intent, but `/che-intend` captures the user-level "done" boundary — Acceptance Scenarios and Edge Cases with stable `E#` IDs — inside the same `intent.md` that carries the intent. The validator consumes them from there.
 **The harness** = runs the loop. Could be Claude Code, Copilot Workspace, Cursor, etc.
 
 **Alternative framing: ICE in IDSD.** Kapil Viren Ahuja's "Intent-Driven Software Development" (IDSD) frames this layer as **ICE — Intent, Context, Expectations**:
@@ -69,7 +69,7 @@ as done)
 | **Context** | The surround (stack, codebase, prior decisions), fed progressively | Harness |
 | **Expectations** | Success scenarios + boundary of done | Human |
 
-The IDSD compartmentation rule originally put success scenarios in a separate file so the builder could not read the validator's checks. **This pack no longer does that.** Scenarios live in `spec.md` next to the intent; the accepted tradeoff is that the validation criteria are not secret from the builder. What is preserved is *independent judgment*: the validator (`/che-intentguard`) still judges through a sealed briefing and an independent checker (fresh context, ideally a different model) that never saw the builder's reasoning — the firewall moved from the file system to the dispatch boundary.
+The IDSD compartmentation rule originally put success scenarios in a separate file so the builder could not read the validator's checks. **This pack no longer does that.** Scenarios live in `intent.md` next to the intent; the accepted tradeoff is that the validation criteria are not secret from the builder. What is preserved is *independent judgment*: the validator (`/che-intentguard`) still judges through a sealed briefing and an independent checker (fresh context, ideally a different model) that never saw the builder's reasoning — the firewall moved from the file system to the dispatch boundary.
 
 **The gap the base workflow leaves:**
 The base workflow asks "what do you want to build?" but doesn't structure:
@@ -81,9 +81,9 @@ The base workflow asks "what do you want to build?" but doesn't structure:
 These are the things that prevent AI overreach and define what "done" really means.
 
 **Our single committed requirement artifact** fills this gap:
-- `{task_dir}/spec.md` — goal, why now, in/out scope, constraints, failure conditions (the intent block) PLUS User Stories with prioritized Acceptance Scenarios, Edge Cases, Functional Requirements, Success Criteria — one requirement source of truth with a stable global `E#` ID sequence
+- `{task_dir}/intent.md` — goal, why now, in/out scope, constraints, failure conditions (the intent block) PLUS User Stories with prioritized Acceptance Scenarios, Edge Cases, Functional Requirements, Success Criteria — one requirement source of truth with a stable global `E#` ID sequence
 
-(It lives in the task directory — the `specs/NNN-{slug}/` directory that `che paths` reports as `FEATURE_DIR`.) The builder reads `spec.md`; the validator reads the same file through a sealed briefing.
+(It lives in the task directory — the `specs/NNN-{slug}/` directory that `che paths` reports as `FEATURE_DIR`.) The builder reads `intent.md`; the validator reads the same file through a sealed briefing.
 
 ---
 
@@ -131,8 +131,8 @@ They map onto specific parts of the Activated Thinker / ICE diagram:
 | Concept | Role in the loop |
 |---|---|
 | Compound store | `pull context` step — loaded before every loop iteration via `/che-load` |
-| Intent block (in unified spec.md) | `INTENT` node — what you provide on the left (goal + constraints + failure conditions) |
-| Spec scenarios (Acceptance + Edge, `E#` IDs, same spec.md) | `EXPECTATIONS` node — what you provide on the right |
+| Intent block (in unified intent.md) | `INTENT` node — what you provide on the left (goal + constraints + failure conditions) |
+| Spec scenarios (Acceptance + Edge, `E#` IDs, same intent.md) | `EXPECTATIONS` node — what you provide on the right |
 | Generated tasks | Task-level expectations the harness loops against |
 | `/che-implement` | The harness — runs work → validate → loop |
 | Intentguard | Validates the `met?` decision beyond just tests (L3) |
@@ -158,9 +158,9 @@ The toolkit and its harnesses store agent memory locally. This breaks across ses
 The compound store is version-controlled and committed: artifacts live in `docs/adr/`, `docs/corrections/`, and `docs/patterns/`, while metadata remains under `docs/compound/`. It is treated as a first-class repo artifact — because that is exactly what it is.
 
 ### One requirement artifact; independence at the dispatch boundary (supersedes the v0.2 file split)
-IDSD's original compartmentation principle kept success scenarios out of the artifact the builder reads, because LLMs reward-hack — the builder will optimize for the scenarios the validator checks. v0.2 shipped that as two files: `/che-specify` wrote `spec.md` (intent + generated specification) and a separate `/che-expectations` wrote the validator-only `expectations.md`.
+IDSD's original compartmentation principle kept success scenarios out of the artifact the builder reads, because LLMs reward-hack — the builder will optimize for the scenarios the validator checks. v0.2 shipped that as two files: `/che-intend` wrote `intent.md` (intent + generated specification) and a separate `/che-expectations` wrote the validator-only `expectations.md`.
 
-**Current design (single-artifact model):** the expectations phase is retired. `/che-specify` drafts the Acceptance Scenarios and Edge Cases in the same interview and writes them into `spec.md` with a global stable `E#` ID sequence (never renumbered, never reused). There is one requirement source of truth, one forward stage chain, and no second spec writer — `/che-clarify` is the only later writer, and it integrates answers directly into the spec sections.
+**Current design (single-artifact model):** the expectations phase is retired. `/che-intend` drafts the Acceptance Scenarios and Edge Cases in the same interview and writes them into `intent.md` with a global stable `E#` ID sequence (never renumbered, never reused). There is one requirement source of truth, one forward stage chain, and no second spec writer — `/che-clarify` is the only later writer, and it integrates answers directly into the spec sections.
 
 What the merge gives up — the validation criteria are no longer hidden from the builder — was an accepted tradeoff. What it keeps is **independent judgment**: `/che-intentguard` and `/che-planverify` still extract the locked intent, the scenarios, and the diff (or plan) into a sealed briefing and hand it to an independent checker (fresh context at minimum, a different model when available) that never saw the builder's or planner's reasoning. The compartmentation that remains real is the briefing firewall, not file visibility. Hard compartmentation (separate agents, encrypted evals) remains deferred until there is evidence the briefing firewall is being gamed.
 
@@ -237,7 +237,7 @@ Existing Friends entries for reference format:
 **What makes it novel:**
 - Intent Guard (L3 validation) — not done by any existing extension
 - Compound store as committed repo artifacts — solves the local-memory limitation
-- One requirement artifact (intent + scenarios with stable `E#` IDs in `spec.md`), with validator independence preserved by the sealed-briefing firewall — not file hiding
+- One requirement artifact (intent + scenarios with stable `E#` IDs in `intent.md`), with validator independence preserved by the sealed-briefing firewall — not file hiding
 - Gapfill driven by the spec's intent sections + scenarios — not generic, purpose-built
 
 ---
@@ -247,7 +247,7 @@ Existing Friends entries for reference format:
 | Command | Phase | What it does |
 |---|---|---|
 | `/che-constitution` | Init | Create project governing principles |
-| `/che-specify` | Spec | Capture intent (goal, constraints, failure conditions) + draft acceptance/edge scenarios (`E#` IDs) into one unified spec |
+| `/che-intend` | Spec | Capture intent (goal, constraints, failure conditions) + draft acceptance/edge scenarios (`E#` IDs) into one unified spec |
 | `/che-clarify` | Spec | Clarify underspecified areas |
 | `/che-plan` | Plan | Generate implementation plan + task breakdown in one command (= task-level expectations) |
 | `/che-implement` | Implement | Execute tasks via agentic loop |

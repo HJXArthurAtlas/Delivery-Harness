@@ -16,7 +16,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 ## Goal
 
 Close the gap between what a feature's specification, plan, and tasks call for and what the
-codebase currently implements. Read `spec.md`, `plan.md`, and `tasks.md` as the **sole
+codebase currently implements. Read `intent.md`, `plan.md`, and `tasks.md` as the **sole
 source of intent** (with the constitution as governing constraints), assess the current
 state of the code, determine which requirements, acceptance criteria, plan decisions, and
 existing tasks are unmet, incomplete, or only partially satisfied, and **append each piece
@@ -32,7 +32,7 @@ of the code relative to the feature's artifacts — no git, no branch comparison
 **APPEND-ONLY, NEVER REWRITE**: The command's **only** write is appending a new
 `## Phase N: Convergence` section to `tasks.md`. It MUST NOT:
 
-- modify `spec.md` or `plan.md` in any way;
+- modify `intent.md` or `plan.md` in any way;
 - rewrite, renumber, reorder, or delete any existing task (including tasks from a prior
   Convergence phase);
 - modify, create, or delete any application code — completing the appended tasks is the
@@ -50,14 +50,14 @@ skip constitution checks gracefully rather than failing.
 
 ### 1. Initialize Convergence Context
 
-Run `che check --json --require-spec --require-tasks --include-tasks` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`). Derive absolute paths:
+Run `che check --json --require-intent --require-tasks --include-tasks` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`). Derive absolute paths:
 
-- SPEC = FEATURE_DIR/spec.md
+- SPEC = FEATURE_DIR/intent.md
 - PLAN = FEATURE_DIR/plan.md
 - TASKS = FEATURE_DIR/tasks.md
 - CONSTITUTION = `docs/constitution/constitution.md` (if present)
-If `spec.md`, `plan.md`, or `tasks.md` is missing, STOP with a clear, actionable message naming the
-prerequisite command to run (`/che-specify` for a missing spec, `/che-plan` for a
+If `intent.md`, `plan.md`, or `tasks.md` is missing, STOP with a clear, actionable message naming the
+prerequisite command to run (`/che-intend` for a missing spec, `/che-plan` for a
 missing plan or tasks). Do not produce partial output.
 For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
@@ -65,7 +65,7 @@ For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot
 
 Load only the minimal necessary context from each artifact:
 
-**From spec.md:**
+**From intent.md:**
 
 - Functional Requirements (FR-###)
 - Success Criteria (SC-###) — include only items requiring buildable work; exclude

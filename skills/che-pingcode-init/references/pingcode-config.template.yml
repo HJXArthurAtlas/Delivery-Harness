@@ -25,11 +25,11 @@ sprint: ""
 # Phase 不建工作项,也不折叠进卡描述。
 # 类型名以项目实际配置为准,可用 /che-pingcode-discover-context 查询
 mapping:
-  # SPEC.md 整体映射的工作项类型,默认 "特性"(需求树第 2 层,挂所选史诗下)
+  # INTENT.md 整体映射的工作项类型,默认 "特性"(需求树第 2 层,挂所选史诗下)
   # 留空 "" = spec 不建卡(此时必须配置 story_artifact)
   spec_artifact: "特性"
 
-  # spec.md 的 `### User Story N` 章节映射的工作项类型,默认 "用户故事"(第 3 层,挂 spec 卡下)
+  # intent.md 的 `### User Story N` 章节映射的工作项类型,默认 "用户故事"(第 3 层,挂 spec 卡下)
   # 必须为 spec 的紧邻下一层;留空 "" = 章节不建卡,全文并入 spec 卡描述
   story_artifact: "用户故事"
 

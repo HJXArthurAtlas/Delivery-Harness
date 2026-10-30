@@ -159,13 +159,13 @@ your-repo/
 
 ### 3.2 主线流程
 
-主线链条（阶段数随角色取舍浮动，不按固定数字计）：**统一 specify（含 intent 访谈与场景起草）→ clarify → UI 设计明细 / 建卡 / 交接门禁 → plan → gapfill → planverify（含确定性 ADR 校验）→ implement 前对账 → implement → 卡片收尾**；另有独立辅助链：bug 修复三步（assess → fix → test）与线上问题排查（环境对号 → Loki 日志 → 数据库核事实）。
+主线链条（阶段数随角色取舍浮动，不按固定数字计）：**统一 intend（含 intent 访谈与场景起草）→ clarify → UI 设计明细 / 建卡 / 交接门禁 → plan → gapfill → planverify（含确定性 ADR 校验）→ implement 前对账 → implement → 卡片收尾**；另有独立辅助链：bug 修复三步（assess → fix → test）与线上问题排查（环境对号 → Loki 日志 → 数据库核事实）。
 
 ```mermaid
 flowchart TD
   subgraph PM["产品"]
     direction TB
-    SP["specify 意图访谈 + 场景起草 → 统一 spec.md"] --> CL["clarify 澄清（≤5 问，清零 NEEDS CLARIFICATION）"]
+    SP["intend 意图访谈 + 场景起草 → 统一 intent.md"] --> CL["clarify 澄清（≤5 问，清零 NEEDS CLARIFICATION）"]
     PC["建卡并登记 mapping（optional，交接前完成）"]
   end
   subgraph DS["UI 设计"]
@@ -187,8 +187,8 @@ flowchart TD
 
 进入时机：新特性从零开始。
 
-1. `/che-load` —— 装载 ADR 语料与经验（corrections / patterns）进上下文，每会话一次（specify 技能会提示）
-2. `/che-specify` —— 意图访谈式捕获目标、范围、约束、失败条件，起草 User Stories、Acceptance Scenarios 与 Edge Cases（全局稳定 `E#` ID），并生成统一特性规格 `spec.md`（意图块 + `### User Story N` 章节与 P1 / P2 / P3 优先级 + `### Edge Cases`）；结束时经 `che task create` 创建任务目录 `specs/NNN-{slug}/` 并绑定 session，任务由此诞生
+1. `/che-load` —— 装载 ADR 语料与经验（corrections / patterns）进上下文，每会话一次（intend 技能会提示）
+2. `/che-intend` —— 意图访谈式捕获目标、范围、约束、失败条件，起草 User Stories、Acceptance Scenarios 与 Edge Cases（全局稳定 `E#` ID），并生成统一特性规格 `intent.md`（意图块 + `### User Story N` 章节与 P1 / P2 / P3 优先级 + `### Edge Cases`）；结束时经 `che task create` 创建任务目录 `specs/NNN-{slug}/` 并绑定 session，任务由此诞生
 3. `/che-clarify` —— ≤5 个针对性问题澄清，结论**回写** spec 对应章节，并把 `[NEEDS CLARIFICATION]` 产品标记清零；场景改动保留既有 `E#` ID，只有真正新增的场景才分配新 ID
 4. 结束后可确认接续 `/che-pingcode-specstoissues` 建卡：spec 转需求树卡片（idea → epic → feature 规格卡 → story 卡），登记 `specs/pingcode-mapping.json`，任务目录改名 `{identifier}-{slug}`（slug 不变）；选择「否」时，按交接门禁要求在交接前补建
 5. 涉 UI 的特性可并行移交 UI 设计侧生成设计清单（见下）；它不阻塞建卡与交接，产物供开发 plan / implement 使用
@@ -247,7 +247,7 @@ UI 设计侧注意：
 
 | 技能 | 时机 | 作用 |
 |---|---|---|
-| `che-grill` | 产品侧，specify / clarify 之后 | 对 spec 执行追问式深度澄清，暴露隐含假设与自相矛盾；结论**不回写** spec，如需回写先执行 clarify |
+| `che-grill` | 产品侧，intend / clarify 之后 | 对 spec 执行追问式深度澄清，暴露隐含假设与自相矛盾；结论**不回写** spec，如需回写先执行 clarify |
 | `che-grill-with-docs` | 产品侧，同上 | 深度澄清并沉淀跨特性知识：术语与主题文档落 `docs/domain_knowledge/`，符合记录门的决策归口 `docs/adr/`；planverify 的 ADR 决策边界因此更完整 |
 | `che-adr-context` | 开发 plan 前 | 取 ADR 决策语料进上下文（只读），避免 plan 与既有决策冲突 |
 | `che-analyze` | 开发 tasks 后 | spec / plan / tasks 跨制品一致性只读分析，尽早发现工件间的漂移 |
@@ -269,12 +269,12 @@ bug 修复三步：
 
 ### 3.3 产出物结构
 
-每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`spec.md`（统一规格：意图块 + User Story / Acceptance / Edge / FR / SC，场景带全局稳定 `E#` ID）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单）、`planverify.md`（门禁报告，frontmatter 记录 verdict、`adr_status` 与 spec/plan/tasks SHA-256）、`planverify.adr.json`（adrkit 原始审计记录）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/domain_knowledge/`（跨特性术语与主题知识）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
+每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`intent.md`（统一规格：意图块 + User Story / Acceptance / Edge / FR / SC，场景带全局稳定 `E#` ID）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单）、`planverify.md`（门禁报告，frontmatter 记录 verdict、`adr_status` 与 intent/plan/tasks SHA-256）、`planverify.adr.json`（adrkit 原始审计记录）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/domain_knowledge/`（跨特性术语与主题知识）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
 
 ## 4. 使用路径：从初始化到日常交付
 
 1. **初始化（一次性）**：把 §1.1 第一段提示词发给 Agent → 复制骨架、安装技能包、接入 codegraph → 重启 Agent。
 2. **完善登记（一次性）**：发 §1.1 第二段提示词 → 验证索引、登记 `AGENTS.md` 布局、执行 `/che-project-init`。
 3. **架构画像（可选，一次性）**：跑 `/che-project-arch` → Agent 扫描 `services/`、`apps/` 等布局生成 `docs/architecture.md`（服务/应用清单 + mermaid 依赖图），确认后入库；此后每个特性会话 `/che-load` 自动装载，架构变化时重跑对账。
-4. **日常交付**：按角色进入 harness 主线（§3.2）；产品从 specify（含 intent 访谈与场景起草）开始，开发从 plan 开始；bug 使用修复链，线上问题使用排障技能。每会话 Agent 自动执行环境检查。
+4. **日常交付**：按角色进入 harness 主线（§3.2）；产品从 intend（含 intent 访谈与场景起草）开始，开发从 plan 开始；bug 使用修复链，线上问题使用排障技能。每会话 Agent 自动执行环境检查。
 5. **维护分工**：改骨架、初始化提示词、环境基线 → 直接改 monorepo-template 仓的 `README.md` 与 `AGENTS-TEMPLATE.md`（版本两处同步）；技能流程问题 → 去 harness 仓。

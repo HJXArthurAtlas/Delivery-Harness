@@ -7,11 +7,11 @@ description: 把 specs/ 下的 spec 转换为 PingCode 需求树卡片（spec �
 
 # 从 Spec 创建 PingCode 卡片层级
 
-> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.specstoissues` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 hook（after_specify/after_tasks）改接为 `/che-specify` / `/che-plan`（plan+tasks 合并产出）Handoff 块的可选目标（optional，`.che/pingcode-config.yml` 在位才提示，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约（`spec.md` 的 `### User Story N` 章节、`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记）与上游逐字一致。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
+> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.specstoissues` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 hook（after_intend/after_tasks）改接为 `/che-intend` / `/che-plan`（plan+tasks 合并产出）Handoff 块的可选目标（optional，`.che/pingcode-config.yml` 在位才提示，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约（`intent.md` 的 `### User Story N` 章节、`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记）与上游逐字一致。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
 
 本命令把 specs/ 产物转换为 PingCode 需求树卡片（通过 `pingcode` CLI，不依赖 MCP）：
 
-- **最多三级建卡**：spec.md 整体（`mapping.spec_artifact`）、`### User Story N` 章节（`mapping.story_artifact`）、任务行（`mapping.task_artifact`，可选）映射为工作项卡；各映射必须落在需求树**相邻层级**（不跳级），Phase 永不建卡
+- **最多三级建卡**：intent.md 整体（`mapping.spec_artifact`）、`### User Story N` 章节（`mapping.story_artifact`）、任务行（`mapping.task_artifact`，可选）映射为工作项卡；各映射必须落在需求树**相邻层级**（不跳级），Phase 永不建卡
 - **动态祖先关联**：设 spec 卡位于需求树第 n 层（史诗=1/特性=2/用户故事=3），第 1..n-1 层为未映射祖先——需求（idea）必问；中间工作项层**只从已有项中选择**，不代建；第 n 层以下永不询问
 - **任务双形态**：`task_artifact` 为空（默认）时任务仅是本地 checklist，不建卡也不进卡描述；配置后每个任务行建一张任务卡挂所属 story/spec 卡下，`tasks.md` 未生成时本轮跳过、生成后手动重跑本命令补建，勾选状态由 `/che-pingcode-sync-status` 按 `sync` 配置流转
 - **统一映射登记**：所有 spec 的映射集中登记在 `specs/pingcode-mapping.json`（制品生成状态、卡片 id、卡片状态），不再按 spec 分散存文件
@@ -24,7 +24,7 @@ description: 把 specs/ 下的 spec 转换为 PingCode 需求树卡片（spec �
 1. `pingcode` CLI 已安装且在 PATH 中（安装：`npm i -g @metaphorli/pingcode-cli`）
 2. 已完成认证：`pingcode auth status` 显示 `authenticated: true` 且 `token_valid: true`
 3. 配置文件存在：`.che/pingcode-config.yml`
-4. spec 目录存在且包含 `spec.md`（`tasks.md` 非必需，本命令不读取）
+4. spec 目录存在且包含 `intent.md`（`tasks.md` 非必需，本命令不读取）
 
 任何一项不满足 → 停止并按"故障排除"一节给出指引，不要继续。
 
@@ -51,7 +51,7 @@ description: 把 specs/ 下的 spec 转换为 PingCode 需求树卡片（spec �
 4. 当前目录位于 `specs/<name>/` 内
 5. `specs/` 下只有一个目录时直接使用
 
-验证目录内存在 `spec.md`，否则报错列出可用 spec。输出：`📂 使用 spec: <name>`。
+验证目录内存在 `intent.md`，否则报错列出可用 spec。输出：`📂 使用 spec: <name>`。
 
 ### 2. 环境自检
 
@@ -149,7 +149,7 @@ Phase     = 永不建卡
 
 祖先层类型（第 8 步用）：第 j 层的类型名 = `type_levels`/规范表中层级为 j 的名称；同层多个类型 → 列出让用户指认。
 
-### 6. 解析 SPEC.md
+### 6. 解析 INTENT.md
 
 spec 卡（spec_artifact 非空时）：
 
@@ -251,7 +251,7 @@ pingcode workitem list --type <第 j 层类型名> --project <project_id> --limi
 组装描述（来源注记 + spec 正文，无任务清单）：
 
 ```markdown
-> 来源: specs/<name>/spec.md
+> 来源: specs/<name>/intent.md
 > 来源需求: <idea identifier> <idea title>(关联需求时)
 
 <spec 正文;story_artifact 非空时剔除 User Story 章节正文>
@@ -466,7 +466,7 @@ Story 卡: <n> 张(spec-story 模式)
 
 | 上游 hook | 挂点 | optional | condition | 提示语 |
 |---|---|---|---|---|
-| `after_specify` | `/che-specify` Handoff 块「可选目标」 | true | `.che/pingcode-config.yml` 存在 | 「选择关联需求并创建 PingCode 卡片?」 |
+| `after_intend` | `/che-intend` Handoff 块「可选目标」 | true | `.che/pingcode-config.yml` 存在 | 「选择关联需求并创建 PingCode 卡片?」 |
 | `after_tasks` | `/che-plan` Handoff 块「可选目标」 | true | config 存在且 `mapping.task_artifact` 已设置 | 「根据 tasks.md 补建任务卡?」 |
 
 挂点以 Handoff 块「可选目标 + 条件 + 回退」表达（agent 按块指示询问用户，同意才运行本命令）；上游 `priority: 99`（排在本阶段其他 hook 之后）在 pack 内简化为「报告打印完再交接」。condition 不满足或用户拒绝 → 静默跳过，不阻塞主命令；建卡与否不改变交接门禁（不建卡则交接前手动补跑）。

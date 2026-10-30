@@ -11,7 +11,7 @@ description: 深度澄清 + 领域知识沉淀：与 che-grill 同样的穷尽�
 
 Purpose: Detect, reduce, and clarify ambiguities and unresolved decisions in the active feature specification, while synchronizing settled cross-feature knowledge to canonical Markdown documents.
 
-Following the "Interview discipline (applies to every round)" in this file, perform the same clarification role as the core `che-clarify` command, but without a question limit. Detect ambiguities in spec.md, ask **one question at a time in sequence while managing the questions that can be asked now (the frontier) as rounds**, immediately apply each answer to spec.md and persist any qualifying cross-feature knowledge, and repeat the rounds **until every decision point has reached one of the final statuses—Clear / Resolved / Outstanding / Deferred—and the user is satisfied**.
+Following the "Interview discipline (applies to every round)" in this file, perform the same clarification role as the core `che-clarify` command, but without a question limit. Detect ambiguities in intent.md, ask **one question at a time in sequence while managing the questions that can be asked now (the frontier) as rounds**, immediately apply each answer to intent.md and persist any qualifying cross-feature knowledge, and repeat the rounds **until every decision point has reached one of the final statuses—Clear / Resolved / Outstanding / Deferred—and the user is satisfied**.
 
 > **See the Glossary for terms such as design tree, question candidate pool, frontier, round, category, decision-point status, aggregate category status, and coverage map.**
 
@@ -21,7 +21,7 @@ This compatibility applies to **artifacts and side effects**. It does not mean t
 
 ## Language
 
-**Communicate in English unless the user requests another language.** Keep questions, explanations, progress updates, and spec.md in the same language.
+**Communicate in English unless the user requests another language.** Keep questions, explanations, progress updates, and intent.md in the same language.
 
 ## User Input
 
@@ -34,8 +34,8 @@ If non-empty, treat it as a request to prioritize the specified area for deeper 
 ## Prerequisites
 
 1. Confirm that the environment is macOS / Linux and that `bash` and the external `che` CLI are available on PATH (`@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest` if missing). If not, state that the environment is unsupported and stop. Do not substitute a project-local prerequisite script.
-2. From the repository root, run `che paths --json` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC`. If it does not return JSON, stop and recommend rerunning the agent-specific invocation of `che-specify` or checking the active feature environment.
-3. If spec.md does not exist, stop and recommend running the agent-specific invocation of `che-specify` first. Do not create a new specification here.
+2. From the repository root, run `che paths --json` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC`. If it does not return JSON, stop and recommend rerunning the agent-specific invocation of `che-intend` or checking the active feature environment.
+3. If intent.md does not exist, stop and recommend running the agent-specific invocation of `che-intend` first. Do not create a new specification here.
 4. Read `docs/constitution/constitution.md` (project principles) if it exists. In addition, inspect **only the existing materials relevant to the work at hand** using ordinary file search, file reading, and symbol search:
    - `README*` / `CONTEXT.md` / `CLAUDE.md` / `AGENTS.md` / `documents/**` / `docs/**` — domain terminology, stakeholders, business flows, and design decisions
    - Related existing specs / plans / ADRs — existing requirements, constraints, and accepted or rejected decisions
@@ -46,7 +46,7 @@ If non-empty, treat it as a request to prioritize the specified area for deeper 
 
 In addition to clarifying the feature specification, this command has one extra responsibility: **immediately persist canonical terminology settled during the interview, together with qualifying project-wide business-domain and technical-architecture decisions, to the canonical knowledge artifacts — terminology and topic documents under `KNOWLEDGE_ROOT`, and qualifying decisions as schema-valid ADR records in the adrkit corpus (`docs/adr/`).** Do not use Serena or `.serena/`, and do not assume either is available.
 
-This command may modify the domain-knowledge artifacts defined below in addition to spec.md. It never writes a `## Clarifications` Q&A history and never touches checklist files. The prohibition against changing plans, tasks, code, configuration, or unrelated files remains unchanged.
+This command may modify the domain-knowledge artifacts defined below in addition to intent.md. It never writes a `## Clarifications` Q&A history and never touches checklist files. The prohibition against changing plans, tasks, code, configuration, or unrelated files remains unchanged.
 
 ## Document location and initialization
 
@@ -196,7 +196,7 @@ Question candidates enter the pool through four paths.
 | **Follow-up question** | Re-ask the same decision until it is precise when an answer is ambiguous or contradictory. Confirmation of a conflict with a recorded decision also uses this form. |
 | **Drill-down** | Settle new decision points or boundary conditions created by a selected option, continuing until the user is satisfied. |
 | **Decision-derived check** | At the end of a round, compare every settled decision with investigated facts about its applicable scope (such as differences by target type or screen), and add overlooked inconsistencies or boundary conditions. |
-| **Rescan** (Step 5) | When no currently askable questions remain, reread the entire updated spec.md and create candidates from ambiguities newly exposed by the answers. |
+| **Rescan** (Step 5) | When no currently askable questions remain, reread the entire updated intent.md and create candidates from ambiguities newly exposed by the answers. |
 
 ### Frontier
 
@@ -276,7 +276,7 @@ A list associating the semantic identity of every decision point (category, deci
   6. Incorporate, save, and validate a conflict settled through user choice via Step 4A; handle an apparent conflict resolved solely by investigated facts via Step 4B. Only after completion, simultaneously settle the design-tree node, change its coverage status to Resolved, discard the preserved old value, and recalculate the aggregate category status. If it remains ambiguous, keep it Partial and continue with a follow-up.
 - **Follow up on ambiguous or contradictory answers.** Do not stop until the answer is precise. You may create hypothetical scenarios to probe boundaries, but explicitly label them "hypothetical" in the question. Until the user accepts them, do not treat them as project facts, requirements, or decisions and do not incorporate them into the spec. Add each follow-up to the question candidate pool and confirm it on a later frontier.
 - **Do not preview later questions.** Present only the current question. Do not reveal or list the remaining questions in the current round or any future round ahead of time.
-- **Do not act on a decision until shared understanding is confirmed.** Incorporate only into spec.md and the canonical domain-knowledge artifacts permitted by this command; do not begin plans, tasks, code, or configuration.
+- **Do not act on a decision until shared understanding is confirmed.** Incorporate only into intent.md and the canonical domain-knowledge artifacts permitted by this command; do not begin plans, tasks, code, or configuration.
 - **Respect interruption signals such as "stop," "that's enough," or "let's move on for now."** Stop presenting new questions immediately and enter the "Interrupted completion path." Ending the question loop does not mean skipping the completion report.
 
 ### Interrupted completion path
@@ -303,13 +303,13 @@ Present questions one at a time in sequence using the following format. Restart 
 - **Free-form** — Another answer, partial adoption, or a conditional answer (unlimited length)
 ```
 
-Vary the number of choices between one and three according to the situation, but always include the `**Free-form**` line. The user may answer the one currently presented question with a single label such as "A" or "B," with "recommended," or in free form. Accept "yes" only when its meaning is unambiguous in the current question. If the user says "skip" or "defer," carry the question into a later round and renumber it there. Also accept free-form text that addresses a question other than the one currently presented—such as an advance answer to a later question or an explicit revision to a settled decision—and incorporate each decision through Step 4A just like the answer to the current question. Recalculate the frontier only at the end of the round. Numbers are for reference within a round and are not recorded in spec.md; reference the affected spec section in Step 4A. When referring to a question from an earlier round, use "Round n, Qk (<question title or summary>)" and always restate the question content because the number alone is not memorable.
+Vary the number of choices between one and three according to the situation, but always include the `**Free-form**` line. The user may answer the one currently presented question with a single label such as "A" or "B," with "recommended," or in free form. Accept "yes" only when its meaning is unambiguous in the current question. If the user says "skip" or "defer," carry the question into a later round and renumber it there. Also accept free-form text that addresses a question other than the one currently presented—such as an advance answer to a later question or an explicit revision to a settled decision—and incorporate each decision through Step 4A just like the answer to the current question. Recalculate the frontier only at the end of the round. Numbers are for reference within a round and are not recorded in intent.md; reference the affected spec section in Step 4A. When referring to a question from an earlier round, use "Round n, Qk (<question title or summary>)" and always restate the question content because the number alone is not memorable.
 
 ## Workflow
 
 ### Step 1. Ambiguity scan
 
-Read the entire spec.md and create an internal coverage map assigning **Clear / Partial / Missing** to every decision point within all categories in the Glossary. Initialize the map only during the first scan. When returning from Step 5, do not recreate the map or reset every point to these three statuses; follow the reconciliation rules in Step 5. Do not assign a status directly to a category. Derive aggregate category status from per-point statuses.
+Read the entire intent.md and create an internal coverage map assigning **Clear / Partial / Missing** to every decision point within all categories in the Glossary. Initialize the map only during the first scan. When returning from Step 5, do not recreate the map or reset every point to these three statuses; follow the reconciliation rules in Step 5. Do not assign a status directly to a category. Derive aggregate category status from per-point statuses.
 
 Create a question candidate from every Partial / Missing decision point and collect them in the **question candidate pool**. Exclude only matters that "have no material effect on implementation or validation strategy" or "are appropriately deferred to the plan phase (retain them in an internal note)." Facts whose answers can be established are investigated and removed in Step 2, not excluded here. **Do not limit the number of questions.**
 
@@ -350,7 +350,7 @@ After each round—or if the frontier was empty during the initial Step 2—eval
    - After changing statuses, recalculate the design tree and aggregate category statuses.
 4. Proceed to Step 5 **only when the question candidate pool is empty, no factual research or blocked candidates remain, and every decision point is Clear / Resolved / Outstanding / Deferred**. If these conditions are not met and no actionable candidate can be restored, terminally classify the remaining in-progress points as Deferred with reasons, then evaluate this gate again.
 
-### Step 4. Incorporation procedure: update spec.md immediately
+### Step 4. Incorporation procedure: update intent.md immediately
 
 Step 4 does not run sequentially after Step 3. Invoke Step 4A from Step 3 whenever a user answer is settled, and invoke Step 4B from Step 2 whenever an investigated fact resolves ambiguity. Never mix the two paths.
 
@@ -373,13 +373,13 @@ Step 4 does not run sequentially after Step 3. Invoke Step 4A from Step 3 whenev
 1. Incorporate content into the best section:
    - Functional ambiguity → Functional Requirements
    - Actor or action distinctions → User Stories / Actors
-   - **Acceptance Scenarios / Edge Cases**: replace an overturned scenario's text in place, keeping its existing `E#` ID — never append contradictory alternatives, never renumber or reuse IDs; only genuinely new scenarios take the next unused `E#`. After any scenario change, re-run the scenario quality tests `SQ1–SQ4` (defined in `/che-specify`) and fix failures before saving.
+   - **Acceptance Scenarios / Edge Cases**: replace an overturned scenario's text in place, keeping its existing `E#` ID — never append contradictory alternatives, never renumber or reuse IDs; only genuinely new scenarios take the next unused `E#`. After any scenario change, re-run the scenario quality tests `SQ1–SQ4` (defined in `/che-intend`) and fix failures before saving.
    - Data shape → Data Model, preserving the existing field order and keeping constraints concise
    - Non-functional requirement → measurable form under Success Criteria; convert vague adjectives into metrics
    - Edge case → Edge Cases / Error Handling
    - Terminology → normalize to the canonical term throughout the spec; register new domain terms in the matching 域节 of `docs/GLOSSARY.md` and the canonical knowledge artifacts this command maintains; if needed, note `(formerly "X")` once
 2. If new content invalidates older ambiguous text, **replace** it rather than appending a duplicate. Leave no conflicting obsolete text.
-3. **Save spec.md after every incorporation.** Do not reorder unrelated sections or alter their heading hierarchy. Keep additions minimal and testable.
+3. **Save intent.md after every incorporation.** Do not reorder unrelated sections or alter their heading hierarchy. Keep additions minimal and testable.
 4. **Validate after every save**, and run one final full pass after the last round:
    - Ensure no ambiguous text or placeholder that the incorporation should resolve remains.
    - Ensure no invalidated option or conflicting obsolete text remains.
@@ -389,7 +389,7 @@ Step 4 does not run sequentially after Step 3. Invoke Step 4A from Step 3 whenev
 
 ### Step 5. Rescan loop
 
-Only after passing the Step 5 entry gate in Step 3, **repeat the Step 1 detection scan against the updated spec.md**, because answers can expose new ambiguities and derived decision points. Rescan **as strictly as the initial run and as though reading the updated spec for the first time**, but do not reset point statuses. Reconcile differences into the existing coverage map in this order:
+Only after passing the Step 5 entry gate in Step 3, **repeat the Step 1 detection scan against the updated intent.md**, because answers can expose new ambiguities and derived decision points. Rescan **as strictly as the initial run and as though reading the updated spec for the first time**, but do not reset point statuses. Reconcile differences into the existing coverage map in this order:
 
 1. Preserve semantic identity, current status, settled result or hold rationale, and dependencies for every point from before the rescan.
 2. Match every detected point to existing points by semantic identity. Treat different wording as the same point when it has the same decision target and applicable scope; do not recreate it as new.
@@ -441,11 +441,11 @@ Report:
 - This workflow is expected to finish **before** `che-plan`. If the user explicitly skips it and proceeds, comply after warning that the risk of downstream rework will increase.
 - If no significant ambiguity exists, report "No critical ambiguities detected," provide an aggregate category summary showing all points as Clear, and proceed to the Step 6 satisfaction gate. Do not invent questions.
 - Do not ask speculative questions about the technology stack unless they block functional clarification.
-- This command may modify only spec.md and the canonical domain-knowledge artifacts resolved under `KNOWLEDGE_ROOT`, `CONTEXT_FILE`, and `ADR_DIR`. Do not modify plans, tasks, code, configuration, or unrelated files. Never write a `## Clarifications` Q&A history.
+- This command may modify only intent.md and the canonical domain-knowledge artifacts resolved under `KNOWLEDGE_ROOT`, `CONTEXT_FILE`, and `ADR_DIR`. Do not modify plans, tasks, code, configuration, or unrelated files. Never write a `## Clarifications` Q&A history.
 
 ## Done When
 
-- [ ] Ambiguities in the spec have been identified, and settled answers and investigated facts have been incorporated and saved in spec.md through Step 4A / 4B respectively, with the final Step 4C validation pass complete.
+- [ ] Ambiguities in the spec have been identified, and settled answers and investigated facts have been incorporated and saved in intent.md through Step 4A / 4B respectively, with the final Step 4C validation pass complete.
 - [ ] The question candidate pool is empty, with no askable questions, unfinished factual research, or blocked candidates depending on unsettled parents. No question rests on an assumed premise, and no awaiting research or dependency cycle is abandoned. On interruption, every point corresponding to remaining questions and research is explicitly Deferred.
 - [ ] Design-tree node statuses match corresponding coverage statuses. No working-unresolved node retains a terminal status, and all unresolved nodes are terminally held upon interruption.
 - [ ] Current parent decisions and the applicability of all descendants agree. No child that became applicable again retains an obsolete non-applicable or parent-dependent terminal rationale.

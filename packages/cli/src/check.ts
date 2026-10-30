@@ -16,9 +16,9 @@ export const PATHS_USAGE = `Usage: che paths [--json] [--feature <slug>] [--sess
   --help            Show this help message
 `;
 
-export const CHECK_USAGE = `Usage: che check [--json] [--require-spec] [--require-tasks] [--include-tasks] [--feature <slug>] [--session <id>]
+export const CHECK_USAGE = `Usage: che check [--json] [--require-intent] [--require-tasks] [--include-tasks] [--feature <slug>] [--session <id>]
   --json           Output results in JSON format
-  --require-spec   Fail when spec.md is missing in the task directory
+  --require-intent Fail when intent.md is missing in the task directory
   --require-tasks  Fail when tasks.md is missing in the task directory
   --include-tasks  Include tasks.md in AVAILABLE_DOCS
   --feature <slug> Resolve this task explicitly (overrides session binding)
@@ -141,7 +141,7 @@ export function runCheck(argv: string[]): number {
   }
   const values = parseCommandArgs(argv, CHECK_USAGE, {
     json: { type: 'boolean' },
-    'require-spec': { type: 'boolean' },
+    'require-intent': { type: 'boolean' },
     'require-tasks': { type: 'boolean' },
     'include-tasks': { type: 'boolean' },
     feature: { type: 'string' },
@@ -162,7 +162,7 @@ export function runCheck(argv: string[]): number {
   if (!featureDirStat) {
     process.stderr.write(`ERROR: Feature directory not found: ${paths.featureDir}\n`);
     process.stderr.write(
-      `Run ${formatPackCommand('specify')} first to create the feature structure.\n`,
+      `Run ${formatPackCommand('intend')} first to create the feature structure.\n`,
     );
     return 1;
   }
@@ -175,10 +175,10 @@ export function runCheck(argv: string[]): number {
     return 1;
   }
 
-  if (values['require-spec'] && !isFile(paths.featureSpec)) {
-    process.stderr.write(`ERROR: spec.md not found in ${paths.featureDir}\n`);
+  if (values['require-intent'] && !isFile(paths.featureSpec)) {
+    process.stderr.write(`ERROR: intent.md not found in ${paths.featureDir}\n`);
     process.stderr.write(
-      `Run ${formatPackCommand('specify')} first to create the feature specification.\n`,
+      `Run ${formatPackCommand('intend')} first to create the feature specification.\n`,
     );
     return 1;
   }

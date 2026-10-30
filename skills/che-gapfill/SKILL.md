@@ -17,10 +17,10 @@ This is **not an interview**. It is automated analysis + diff review. The user's
 
 (`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR` — run `che paths --session "$CHE_SESSION_ID"` once, bare when no session id is available.)
 
-1. **Unified spec** at `{task_dir}/spec.md` — read the `## In scope`, `## Out of scope`, `## Constraints`, and `## Failure conditions` sections, plus the `**Acceptance Scenarios**` blocks (per user story) and `### Edge Cases` (both carry global stable `E#` IDs)
+1. **Unified spec** at `{task_dir}/intent.md` — read the `## In scope`, `## Out of scope`, `## Constraints`, and `## Failure conditions` sections, plus the `**Acceptance Scenarios**` blocks (per user story) and `### Edge Cases` (both carry global stable `E#` IDs)
 2. **Tasks file** at `{task_dir}/tasks.md` — the generated task list to augment
 
-If `spec.md` is missing, stop and tell the user to run `/che-specify` first. If the spec exists but has no scenario content at all (neither Acceptance Scenarios nor Edge Cases), stop — the scenario sections are mandatory spec sections; do not guess scenarios.
+If `intent.md` is missing, stop and tell the user to run `/che-intend` first. If the spec exists but has no scenario content at all (neither Acceptance Scenarios nor Edge Cases), stop — the scenario sections are mandatory spec sections; do not guess scenarios.
 
 ## Output you produce
 
@@ -90,7 +90,7 @@ Append accepted entries. Preserve the existing formatting. Add a section header 
 
 ```markdown
 ## Gap-filling tasks (from /che-gapfill)
-<!-- Generated: {YYYY-MM-DD}. Sources: {task_dir}/spec.md -->
+<!-- Generated: {YYYY-MM-DD}. Sources: {task_dir}/intent.md -->
 
 - [ ] {task description} <!-- gapfill: derived from C1 -->
 - [ ] {task description} <!-- gapfill: derived from F2 -->
@@ -112,12 +112,12 @@ Ask: *"Continue to /che-planverify? [yes / no]"*
 This command is mostly automated. Pushback fires only when the user tries to reject a **high-risk gap**:
 
 Define high-risk gaps as:
-- **Any out-of-scope regression check** — `/che-intentguard` L3 will block the merge if the OOS area was touched, and you'll have to re-add this task then. Cheaper to add now.
+- **Any out-of-scope regression check** — `/che-intentverify` L3 will block the merge if the OOS area was touched, and you'll have to re-add this task then. Cheaper to add now.
 - **Any failure condition with no covering task** — the failure condition was explicitly declared in the spec and is now untestable in CI.
 
 If the user rejects a high-risk gap addition, push back once:
 
-*"You're rejecting the {F1 / OOS} coverage. The intentguard at merge time will still flag the gap, and you'll have to re-add this then. Confirm reject?"*
+*"You're rejecting the {F1 / OOS} coverage. The intentverify at merge time will still flag the gap, and you'll have to re-add this then. Confirm reject?"*
 
 If they confirm, accept and move on.
 
@@ -145,7 +145,7 @@ If `docs/corrections/` exists, scan for past gap-misses that became bugs — pro
 - **Rewrite existing tasks** — only append
 - **Add tasks unrelated to the spec** — every addition must trace to a specific source (C, F, OOS, E, or a named cross-cutting concern)
 - **Run the tasks** — that's `/che-implement`
-- **Validate after the fact** — that's `/che-intentguard`
+- **Validate after the fact** — that's `/che-intentverify`
 
 ---
 

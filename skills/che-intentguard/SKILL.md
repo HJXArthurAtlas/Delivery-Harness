@@ -50,13 +50,13 @@ an explicit `cross-model` or `cli:model` policy requires an external model CLI.
 
 ## Inputs you must load
 
-First resolve the task directory: run `che paths --json` from the repo root **once** and use its `FEATURE_DIR` as `$TASK_DIR` (the `specs/NNN-{slug}/` directory created at specify time; `SLUG` is the directory name minus its prefix).
+First resolve the task directory: run `che paths --json` from the repo root **once** and use its `FEATURE_DIR` as `$TASK_DIR` (the `specs/NNN-{slug}/` directory created at intend time; `SLUG` is the directory name minus its prefix).
 
-1. **Unified spec** at `{TASK_DIR}/spec.md` — read `## Out of scope`, `## Constraints`, `## Failure conditions` for out-of-scope items, constraints, failure conditions; read the `**Acceptance Scenarios**` blocks and `### Edge Cases` for the scenarios (global stable `E#` IDs)
+1. **Unified spec** at `{TASK_DIR}/intent.md` — read `## Out of scope`, `## Constraints`, `## Failure conditions` for out-of-scope items, constraints, failure conditions; read the `**Acceptance Scenarios**` blocks and `### Edge Cases` for the scenarios (global stable `E#` IDs)
 2. **Tasks file** at `{TASK_DIR}/tasks.md` — including gapfill additions
 3. **Git diff** of the current branch vs the merge base — use `git diff $(git merge-base HEAD main)...HEAD`
 
-If the spec is missing, stop and tell the user (a missing `spec.md` means `/che-specify` has not run). If the spec has no scenario content (neither Acceptance Scenarios nor Edge Cases), stop — scenarios are mandatory spec sections.
+If the spec is missing, stop and tell the user (a missing `intent.md` means `/che-intend` has not run). If the spec has no scenario content (neither Acceptance Scenarios nor Edge Cases), stop — scenarios are mandatory spec sections.
 
 ## Output you produce
 
@@ -273,7 +273,7 @@ diff_files: {N}
 - **Silently degrade tiers.** If you cannot reach the requested tier, say so and record the tier actually achieved. Never claim a stronger check than happened.
 - **Auto-merge or auto-revert** — you only report. The human decides.
 - **Modify the diff** — you are a validator, not a fixer.
-- **Re-write the spec** — it is locked. If it needs to change, the user re-runs `/che-specify` (update path), keeping existing `E#` IDs.
+- **Re-write the spec** — it is locked. If it needs to change, the user re-runs `/che-intend` (update path), keeping existing `E#` IDs.
 
 ---
 

@@ -72,7 +72,7 @@ byte_equal() { # byte_equal <file> <file>
   cmp -s "$1" "$2"
 }
 
-# 1. No tasks yet → resolution error naming specify / task create.
+# 1. No tasks yet → resolution error naming intend / task create.
 run "$CHE_BIN" paths
 [ "$RC" -eq 1 ] && ok || bad "paths 无任务: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
@@ -135,7 +135,7 @@ json_matches "$OUT" '{"NUMBER":7,"SLUG":"bonus","BOUND":true}' \
 # 6. paths resolves via session binding: json + text contract (adrkit-lib parses).
 run "$CHE_BIN" paths --session s1 --json
 [ "$RC" -eq 0 ] && ok || bad "paths session --json: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"BRANCH\":\"001-demo\",\"SLUG\":\"demo\",\"FEATURE_DIR\":\"$PROJECT/specs/001-demo\",\"FEATURE_SPEC\":\"$PROJECT/specs/001-demo/spec.md\",\"IMPL_PLAN\":\"$PROJECT/specs/001-demo/plan.md\",\"TASKS\":\"$PROJECT/specs/001-demo/tasks.md\"}" \
+json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"BRANCH\":\"001-demo\",\"SLUG\":\"demo\",\"FEATURE_DIR\":\"$PROJECT/specs/001-demo\",\"FEATURE_SPEC\":\"$PROJECT/specs/001-demo/intent.md\",\"IMPL_PLAN\":\"$PROJECT/specs/001-demo/plan.md\",\"TASKS\":\"$PROJECT/specs/001-demo/tasks.md\"}" \
   && ok || bad "paths session --json: 路径不符：$OUT"
 run "$CHE_BIN" paths --session s1
 [ "$RC" -eq 0 ] && ok || bad "paths session text: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
@@ -256,7 +256,7 @@ run2 "$CHE_BIN" paths --json
   && ok || bad "project2 单任务自动解析: RC=$RC OUT=$OUT"
 
 # 15. check resolves via session; --require-tasks reports missing tasks.md.
-printf '# Demo\n' > "$PROJECT/specs/NCW-4921-demo/spec.md"
+printf '# Demo\n' > "$PROJECT/specs/NCW-4921-demo/intent.md"
 printf '# Plan\n' > "$PROJECT/specs/NCW-4921-demo/plan.md"
 run "$CHE_BIN" check --session s1 --json
 [ "$RC" -eq 0 ] && ok || bad "check session: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
@@ -348,7 +348,7 @@ write_full_report() {
     printf 'adr_departures: 0\n'
     printf 'adr_corpus_errors: 0\n'
     printf 'adr_evaluator: not_configured\n'
-    printf 'spec_sha256: %s\n' "$(shasum -a 256 "$DEMO_DIR/spec.md" | awk '{print $1}')"
+    printf 'intent_sha256: %s\n' "$(shasum -a 256 "$DEMO_DIR/intent.md" | awk '{print $1}')"
     printf 'plan_sha256: %s\n' "$(shasum -a 256 "$DEMO_DIR/plan.md" | awk '{print $1}')"
     printf 'tasks_sha256: %s\n' "$(shasum -a 256 "$DEMO_DIR/tasks.md" | awk '{print $1}')"
   } > "$PV_REPORT"
@@ -523,33 +523,33 @@ run "$CHE_BIN" planverify-gate --bogus
 [ "$RC" -eq 2 ] && ok || bad "planverify-gate 未知参数: 退出码 ${RC}，预期 2"
 
 # 20b. state: runs timeline in metadata.json; stage/next derived, never stored.
-run "$CHE_BIN" state start specify --session s1
-[ "$RC" -eq 0 ] && ok || bad "state start specify: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+run "$CHE_BIN" state start intend --session s1
+[ "$RC" -eq 0 ] && ok || bad "state start intend: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 _before="$(md5 -q "$PROJECT/specs/NCW-4921-demo/metadata.json")"
-run "$CHE_BIN" state start specify --session s1
+run "$CHE_BIN" state start intend --session s1
 [ "$RC" -eq 0 ] && [ "$(md5 -q "$PROJECT/specs/NCW-4921-demo/metadata.json")" = "$_before" ] \
   && ok || bad "state start 幂等: 已开启的 run 被改写"
-run "$CHE_BIN" state done specify --session s1
-[ "$RC" -eq 0 ] && ok || bad "state done specify: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-run "$CHE_BIN" state done specify --session s1
+run "$CHE_BIN" state done intend --session s1
+[ "$RC" -eq 0 ] && ok || bad "state done intend: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+run "$CHE_BIN" state done intend --session s1
 [ "$RC" -eq 1 ] && ok || bad "state done 双关: 退出码 ${RC}，预期 1"
 node -e '
   const fs = require("node:fs");
   const meta = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
-  const runs = meta.runs.specify;
+  const runs = meta.runs.intend;
   if (!Array.isArray(runs) || runs.length !== 1) process.exit(1);
   if (Number.isNaN(Date.parse(runs[0].start)) || Number.isNaN(Date.parse(runs[0].end))) process.exit(1);
   process.exit(0);
 ' "$PROJECT/specs/NCW-4921-demo/metadata.json" \
-  && ok || bad "state done: metadata.json runs.specify 结构不符"
+  && ok || bad "state done: metadata.json runs.intend 结构不符"
 run "$CHE_BIN" state show --session s1 --json
 [ "$RC" -eq 0 ] && ok || bad "state show --json: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-json_matches "$OUT" "{\"TASK_DIR\":\"$PROJECT/specs/NCW-4921-demo\",\"SLUG\":\"demo\",\"STAGE\":\"plan\",\"NEXT\":\"clarify\",\"DURATION_SECONDS\":{\"specify\":0}}" \
+json_matches "$OUT" "{\"TASK_DIR\":\"$PROJECT/specs/NCW-4921-demo\",\"SLUG\":\"demo\",\"STAGE\":\"plan\",\"NEXT\":\"clarify\",\"DURATION_SECONDS\":{\"intend\":0}}" \
   && ok || bad "state show --json: 输出不符：$OUT"
 run "$CHE_BIN" state show --session s1
 [ "$RC" -eq 0 ] && ok || bad "state show text: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 printf '%s\n' "$OUT" | grep -qx "NEXT: clarify" \
-  && ok || bad "state show text: specify 关闭后 NEXT 应为 clarify：$OUT"
+  && ok || bad "state show text: intend 关闭后 NEXT 应为 clarify：$OUT"
 run "$CHE_BIN" state start expectations --session s1
 [ "$RC" -eq 1 ] && ok || bad "state start expectations（已退役）: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
@@ -579,8 +579,8 @@ node -e '
   && ok || bad "state done expectations: legacy run 未被关闭"
 run "$CHE_BIN" state done expectations --session s1
 [ "$RC" -eq 1 ] && ok || bad "state done expectations（已闭环）: 退出码 ${RC}，预期 1"
-run "$CHE_BIN" state start intent --session s1
-[ "$RC" -eq 1 ] && ok || bad "state start intent: 退出码 ${RC}，预期 1（intent 阶段已移除）"
+run "$CHE_BIN" state start specify --session s1
+[ "$RC" -eq 1 ] && ok || bad "state start specify: 退出码 ${RC}，预期 1（specify 阶段已更名 intend）"
 run "$CHE_BIN" state start bogus --session s1
 [ "$RC" -eq 1 ] && ok || bad "state 未知阶段: 退出码 ${RC}，预期 1"
 run "$CHE_BIN" state show extra --session s1

@@ -65,7 +65,7 @@ Architecture profile (docs/architecture.md, project structure — place things w
 
 ## Notes for the rest of the session
 
-After loading, when the agent makes design decisions during `/che-specify`, `/che-implement`, `/che-intentguard`, etc., it should:
+After loading, when the agent makes design decisions during `/che-intend`, `/che-implement`, `/che-intentguard`, etc., it should:
 
 - **Reference relevant ADRs** when constraints are being chosen — don't propose a constraint that contradicts a settled ADR
 - **Avoid known correction patterns** — if the agent is about to do something that matches a correction note, stop and warn
@@ -106,5 +106,5 @@ If the session's context is compacted by the harness, the compound store summary
 
 > Pack fork (ncw), port on upstream upgrade.
 
-- **目标**：`/che-specify` —— 意图访谈 + 生成统一 spec.md（任务自此诞生）
-- **条件**：specify / plan / design 三个技能以 Handoff 前置方式 hook 本技能——执行前会话上下文无 `COMPOUND STORE LOADED` 摘要即先装载再继续；每个特性开始时装载一次，本次会话已装载过则隐式跳过；context 被压缩后可由用户手动重跑 load，绝不 unsolicited 重载
+- **目标**：`/che-intend` —— 意图访谈 + 生成统一 intent.md（任务自此诞生）
+- **条件**：intend / plan / design 三个技能以 Handoff 前置方式 hook 本技能——执行前会话上下文无 `COMPOUND STORE LOADED` 摘要即先装载再继续；每个特性开始时装载一次，本次会话已装载过则隐式跳过；context 被压缩后可由用户手动重跑 load，绝不 unsolicited 重载

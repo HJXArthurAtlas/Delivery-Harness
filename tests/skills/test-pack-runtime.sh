@@ -127,7 +127,7 @@ command -v che >/dev/null 2>&1 && ok || bad "fixture: 无法把真实 @newchiwan
 run che task create demo
 [ "$RC" -eq 0 ] && ok || bad "task create fixture: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 [ -f "$PROJECT/specs/001-demo/metadata.json" ] && ok || bad "task create fixture: metadata.json 未创建"
-printf '# Demo\n' > "$PROJECT/specs/001-demo/spec.md"
+printf '# Demo\n' > "$PROJECT/specs/001-demo/intent.md"
 cat > "$PROJECT/specs/001-demo/plan.md" <<'EOF'
 ---
 schemaVersion: 0.1.0
@@ -143,7 +143,7 @@ EOF
 # Feature resolution through the external che CLI.
 run che paths --json
 [ "$RC" -eq 0 ] && ok || bad "che paths: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"FEATURE_DIR\":\"$PROJECT/specs/001-demo\",\"FEATURE_SPEC\":\"$PROJECT/specs/001-demo/spec.md\"}" \
+json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"FEATURE_DIR\":\"$PROJECT/specs/001-demo\",\"FEATURE_SPEC\":\"$PROJECT/specs/001-demo/intent.md\"}" \
   && ok || bad "che paths: JSON 未返回活动 feature 路径：$OUT"
 
 # The planverify-gate wrapper delegates to `che planverify-gate`: both gates

@@ -1,6 +1,6 @@
 ---
-name: che-specify
-description: 意图与场景访谈 + 特性规格一体化：问答式锁定目标、范围、约束与失败条件（GQ/CQ/FQ 全过），生成 User Stories 与 Functional Requirements，起草 Acceptance Scenarios 与 Edge Cases（稳定 E# ID，SQ1–SQ4 全过），创建或更新任务并全部写入统一 spec.md（含 User Story 章节与优先级），spec 落 `che paths` 解析的任务目录；任务不存在时经 `che task create` 创建任务目录并绑定 session，是规格驱动流程的第一步（任务自此诞生）。当用户运行或提到 /che-specify，或说「出 spec」「写特性需求」「把这个需求转成规格」「先做 intent 访谈」「锁定目标与约束」「捕获失败条件」「补期望场景」「写 expectations」「捕获成功场景」「捕获边界场景」时使用——即使用户没提命令名，只要是动工前的意图捕获、场景捕获或特性规格的创建/更新也用本 skill。
+name: che-intend
+description: 意图与场景访谈 + 特性规格一体化：问答式锁定目标、范围、约束与失败条件（GQ/CQ/FQ 全过），生成 User Stories 与 Functional Requirements，起草 Acceptance Scenarios 与 Edge Cases（稳定 E# ID，SQ1–SQ4 全过），创建或更新任务并全部写入统一 intent.md（含 User Story 章节与优先级），intent.md 落 `che paths` 解析的任务目录；任务不存在时经 `che task create` 创建任务目录并绑定 session，是规格驱动流程的第一步（任务自此诞生）。当用户运行或提到 /che-intend，或说「出 spec」「写特性需求」「把这个需求转成规格」「先做 intent 访谈」「锁定目标与约束」「捕获失败条件」「补期望场景」「写 expectations」「捕获成功场景」「捕获边界场景」时使用——即使用户没提命令名，只要是动工前的意图捕获、场景捕获或特性规格的创建/更新也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -15,7 +15,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 # Intent + Scenario Interview → Unified Specification
 
-You are running one interview that locks the intent (goal, scope, constraints, failure conditions), drafts the user stories and scenarios, and writes the single requirement artifact `spec.md`. The validator (`/che-intentguard`) and the gap analysis (`/che-gapfill`) both read the scenarios from this file; `/che-clarify` is the only later writer that resolves `[NEEDS CLARIFICATION]` markers in it.
+You are running one interview that locks the intent (goal, scope, constraints, failure conditions), drafts the user stories and scenarios, and writes the single requirement artifact `intent.md`. The validator (`/che-intentverify`) and the gap analysis (`/che-gapfill`) both read the scenarios from this file; `/che-clarify` is the only later writer that resolves `[NEEDS CLARIFICATION]` markers in it.
 
 ---
 
@@ -40,7 +40,7 @@ cd "$PROJECT_ROOT"
 echo "Anchored to project root: $PROJECT_ROOT"
 ```
 
-Then construct file paths as `$TASK_DIR/spec.md`, where `$TASK_DIR` is the task directory `che task create` prints (`specs/NNN-{slug}/` under `$PROJECT_ROOT`). If any subsequent Bash command changes directory, re-anchor before the next file operation.
+Then construct file paths as `$TASK_DIR/intent.md`, where `$TASK_DIR` is the task directory `che task create` prints (`specs/NNN-{slug}/` under `$PROJECT_ROOT`). If any subsequent Bash command changes directory, re-anchor before the next file operation.
 
 ---
 
@@ -54,12 +54,12 @@ If the user tries to skip a phase, refuse politely and explain which specific te
 
 ## Inputs you have
 
-- The user's rough description of the outcome (provided in chat when `/che-specify` is invoked, or — only after the Phase 0 input gate passes — asked for as the first question)
+- The user's rough description of the outcome (provided in chat when `/che-intend` is invoked, or — only after the Phase 0 input gate passes — asked for as the first question)
 - The context loaded by `/che-load` — settled ADRs from the adrkit corpus (`docs/adr/`) plus corrections and patterns from `docs/corrections/` and `docs/patterns/`. Use them to inform pushback and to derive edge cases.
 
 ## Output you produce
 
-- One task directory (`specs/NNN-{slug}/`, created by `che task create` when no task resolves) holding one file written by this command: `spec.md` — the single requirement source of truth: intent block (Why now / In scope / Out of scope / Constraints / Failure conditions), User Stories with prioritized Acceptance Scenarios, Edge Cases, Functional Requirements, Success Criteria
+- One task directory (`specs/NNN-{slug}/`, created by `che task create` when no task resolves) holding one file written by this command: `intent.md` — the single requirement source of truth: intent block (Why now / In scope / Out of scope / Constraints / Failure conditions), User Stories with prioritized Acceptance Scenarios, Edge Cases, Functional Requirements, Success Criteria
 - Slug derived from the locked goal (3–5 words, lowercase, hyphenated) — it becomes part of the task directory name and the stable handle for the whole flow
 
 ---
@@ -75,7 +75,7 @@ If the user tries to skip a phase, refuse politely and explain which specific te
 
 判定纪律：
 
-- 纯触发词不算有效输入——「开始」「跑一下 specify」「继续」这类无主题内容的消息按无效处理。
+- 纯触发词不算有效输入——「开始」「跑一下 intend」「继续」这类无主题内容的消息按无效处理。
 - **两个来源都为空 → 必须中断**：不建任务、不推 slug、不从仓库猜主题。直接向用户明确提问，例如：
   > 我目前没有任何关于本次意图的上下文或输入。请说明需要澄清的意图是什么：用一句话描述期望的结果（解决什么问题、给谁带来什么），或给出相关讨论 / 文档 / issue 的指向。收到有效描述后我再开始访谈。
 
@@ -97,14 +97,14 @@ Before the interview: if the session context has no `COMPOUND STORE LOADED` summ
 1. Run `che paths --json --session "$CHE_SESSION_ID"` from the repository root (bare `che paths --json` when no session id is available; requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`). A missing `che` executable is an **installation error**, not "no task" — tell the user to install the CLI, do not fall through to task creation guessing.
 2. **Task resolved** (the command prints `FEATURE_DIR`):
    - Ask the user **update this task or create a new one** — default to **update**. Update reuses the resolved `FEATURE_DIR` and `SLUG` verbatim; do NOT regenerate the slug and do NOT invent a new directory.
-   - **Update with an existing `spec.md`**: only after the user's update confirmation, load the existing spec and edit it — never blindly copy the template over it. Replace only contradicted content. **Scenario IDs are immutable**: keep every still-valid `E#` verbatim, never renumber or reuse IDs; assign only genuinely new scenarios the next unused `E#`.
+   - **Update with an existing `intent.md`**: only after the user's update confirmation, load the existing spec and edit it — never blindly copy the template over it. Replace only contradicted content. **Scenario IDs are immutable**: keep every still-valid `E#` verbatim, never renumber or reuse IDs; assign only genuinely new scenarios the next unused `E#`.
    - **Legacy migration**: if `{TASK_DIR}/expectations.md` still exists (retired artifact), merge it into the spec in the same update: (1) match each old scenario to a spec scenario by semantics and attach the old `E#` ID to the matching spec scenario; (2) move scenarios missing from the spec into the matching User Story's Acceptance Scenarios or `### Edge Cases` under their original `E#`; (3) conflicting wording goes to the user (or a follow-up `/che-clarify`) — never keep two versions; (4) keep existing `derived from E#` references in `tasks.md` resolvable. Re-run the exit gate (Step 6) on the merged spec, then delete `expectations.md`. Never leave the file behind half-merged.
 3. **Ambiguous candidates** (multiple tasks, resolution fails listing them): let the user select a candidate (→ update flow) or choose to create a new one (→ step 4 of this procedure).
 4. **No task exists**: proceed to create new (step 3 of this procedure).
 
 ### Step 2 — Run the interview
 
-Interview in this exact order. The text the user typed after `/che-specify` **is** the feature description — assume you always have it available; do not ask the user to repeat it unless they provided an empty command.
+Interview in this exact order. The text the user typed after `/che-intend` **is** the feature description — assume you always have it available; do not ask the user to repeat it unless they provided an empty command.
 
 #### Phase 1 — Goal
 Ask the user for one rough sentence describing the outcome they want (or take it from `$ARGUMENTS` / the Phase 0 description).
@@ -124,7 +124,7 @@ Get a bullet list. Push back on items that look like implementation details (lib
 #### Phase 4 — Out of scope
 Ask: *"What is explicitly NOT in scope? What should the implementation NOT touch, even if tempted?"*
 
-This is the guard `/che-intentguard` will use later. Push back if the user can't name anything — every real feature has scope boundaries; "nothing" is almost always wrong and means the user hasn't thought about it.
+This is the guard `/che-intentverify` will use later. Push back if the user can't name anything — every real feature has scope boundaries; "nothing" is almost always wrong and means the user hasn't thought about it.
 
 #### Phase 5 — Constraints
 Ask one at a time. After each candidate, apply tests **CQ1–CQ5** and respond with verdicts.
@@ -190,16 +190,16 @@ When all interview phases pass (or, for update, after the update confirmation):
 Only after the task exists, start the run:
 
 ```bash
-che state start specify --session "$CHE_SESSION_ID"    # when a session id is available
-che state start specify --feature {slug}               # otherwise
+che state start intend --session "$CHE_SESSION_ID"    # when a session id is available
+che state start intend --feature {slug}               # otherwise
 ```
 
 The `--feature` fallback is **mandatory** after ambiguous/multi-task selection (no session binding) so `state start` cannot resolve a different task. Keep one feature per invocation. Branch creation/switching is outside this skill: if the user asks for a git branch, create or switch to it using their requested name before continuing; the task directory name and the branch name are independent.
 
 ### Step 5 — Write the unified spec
 
-1. Load this skill's own `references/spec-template.md` — the spec template; no project scaffolding and no override/preset/extension resolution stack.
-2. **Create-new**: copy the template to `{TASK_DIR}/spec.md` as the starting point. **Update**: edit the existing `{TASK_DIR}/spec.md` in place (never overwrite the template onto it); preserve still-valid content and scenario IDs, replace contradicted content.
+1. Load this skill's own `references/intent-template.md` — the intent template; no project scaffolding and no override/preset/extension resolution stack.
+2. **Create-new**: copy the template to `{TASK_DIR}/intent.md` as the starting point. **Update**: edit the existing `{TASK_DIR}/intent.md` in place (never overwrite the template onto it); preserve still-valid content and scenario IDs, replace contradicted content.
 3. **IF EXISTS**: Load `docs/constitution/constitution.md` for project principles and governance constraints.
 4. **Register glossary terms**: any new domain concept introduced by this feature is registered into the matching 域节 of `docs/GLOSSARY.md` before the spec references it as settled terminology, and the spec's `## 统一语言` section declares the domain section(s) it follows. If `docs/GLOSSARY.md` is missing, scaffold it first: create `docs/` if needed and write a minimal glossary — one section per project domain (域节) plus a 「使用规则」 section stating that spec terms must be registered in the matching 域节. Never overwrite an existing glossary.
 5. Fill the template, preserving section order and headings:
@@ -225,13 +225,13 @@ Run this in-line validation after writing; no separate checklist file is created
 6. **Failure handling**: list failing items, update the spec, re-validate — maximum **3 repair iterations**; if still failing, report the remaining issues and warn the user.
 7. If markers exist, present them batched (Q1–Qn option tables) so the user can resolve them now; whatever remains explicit stays for `/che-clarify`, which must end with zero markers.
 
-**Close the run**: after the final write/validation, record `che state done specify --session "$CHE_SESSION_ID"` (omit `--session` when unavailable; use `--feature {slug}` when there is no session id). Do **not** run `state done` while the exit gate still fails.
+**Close the run**: after the final write/validation, record `che state done intend --session "$CHE_SESSION_ID"` (omit `--session` when unavailable; use `--feature {slug}` when there is no session id). Do **not** run `state done` while the exit gate still fails.
 
 ### Step 7 — Completion Report
 
 Report completion to the user with:
 - `TASK_DIR` — the task directory path
-- `SPEC_FILE` — `{TASK_DIR}/spec.md`
+- `SPEC_FILE` — `{TASK_DIR}/intent.md`
 - Exit-gate results summary
 - Counts: goal ✓, {N} constraints (CQ1–CQ5), {N} failure conditions (FQ1–FQ4), {N} acceptance + {N} edge scenarios (SQ1–SQ4), {N} ADR refs, {N} remaining markers
 
@@ -324,9 +324,9 @@ If the compound store was loaded:
 
 - **Plain chat** for free-form prose (goal sentence, why now, constraint text, scenario drafts)
 - **AskUserQuestion** for discrete choices (update-or-new, accept/edit/reject scenario sets, slug override, yes/no/later for the chain handoff)
-- **Bash** for `che paths --json`, `che task create {slug} --summary "<locked goal>" --session "$CHE_SESSION_ID"`, and `che state start|done specify`
+- **Bash** for `che paths --json`, `che task create {slug} --summary "<locked goal>" --session "$CHE_SESSION_ID"`, and `che state start|done intend`
 - **Read** for an existing spec on the update path
-- **Write/Edit** for the final `{TASK_DIR}/spec.md` file and the glossary
+- **Write/Edit** for the final `{TASK_DIR}/intent.md` file and the glossary
 
 ---
 
@@ -358,8 +358,8 @@ When creating this spec from a user prompt:
 ## Done When
 
 - [ ] Interview complete: goal passes GQ1–GQ5, constraints pass CQ1–CQ5, failure conditions pass FQ1–FQ4, scenarios pass SQ1–SQ4 with global stable `E#` IDs
-- [ ] Task resolved (update) or created via `che task create` (create-new); runs timeline opened and closed for `specify`
-- [ ] Unified specification written to `{TASK_DIR}/spec.md` and the Step 6 exit gate passes (no separate checklist file)
+- [ ] Task resolved (update) or created via `che task create` (create-new); runs timeline opened and closed for `intend`
+- [ ] Unified specification written to `{TASK_DIR}/intent.md` and the Step 6 exit gate passes (no separate checklist file)
 - [ ] Completion reported to user with task directory, spec file path, exit-gate results, and counts
 
 ---
@@ -372,5 +372,5 @@ When creating this spec from a user prompt:
 - **条件**：
   - 入向输入门禁（Phase 0）：访谈之前无任何上下文且调用时无有效输入 → 中断，向用户明确提问需要澄清的意图，拿到有效描述后才开访谈
   - 前置装载（入向）：会话上下文无 `COMPOUND STORE LOADED` 摘要 → 先跑 `/che-load` 再开访谈；已有摘要（本会话已装载）→ 跳过
-  - 统一 `spec.md` 已写入（任务目录经 `che task create` 创建或经用户确认更新，session 已绑定/显式解析）且出口校验通过；AskUserQuestion 选 continue 直接链式调用 `/che-clarify`，stop/quit 由用户稍后手动跑
+  - 统一 `intent.md` 已写入（任务目录经 `che task create` 创建或经用户确认更新，session 已绑定/显式解析）且出口校验通过；AskUserQuestion 选 continue 直接链式调用 `/che-clarify`，stop/quit 由用户稍后手动跑
 - **回退**：无 config 或用户拒绝建卡时由交接门禁兜底；建卡（`/che-pingcode-specstoissues`）按流程在 clarify 之后进行
