@@ -109,7 +109,7 @@ Show each draft and ask (use AskUserQuestion per draft):
 - For corrections: write `docs/corrections/{YYYY-MM-DD}-{slug}.md`, prefixing the filename with the date. Always include the `paths:`/`match:`/`rule:`/`context:` frontmatter from the template above so the correction is enforceable — only fall back to a frontmatter-less body if the user explicitly wants a context-only note.
 - For patterns: write `docs/patterns/{slug}.md`, using the slug only as the filename.
 
-**6. Update specification status.**
+**6. Update intent status.**
 
 In the corresponding `{task_dir}/intent.md`, change the frontmatter:
 ```yaml
@@ -119,7 +119,7 @@ completed: {YYYY-MM-DD}
 
 **7. Summary**:
 
-*"Retro complete. {N} ADRs committed to the adrkit corpus (`docs/adr/`), {N} corrections committed to `docs/corrections/`, and {N} patterns committed to `docs/patterns/`. Specification `{slug}` marked completed. Corpus size: {N} ADRs; store size: {N} corrections / {N} patterns."*
+*"Retro complete. {N} ADRs committed to the adrkit corpus (`docs/adr/`), {N} corrections committed to `docs/corrections/`, and {N} patterns committed to `docs/patterns/`. Intent `{slug}` marked completed. Corpus size: {N} ADRs; store size: {N} corrections / {N} patterns."*
 
 ---
 
@@ -128,7 +128,7 @@ completed: {YYYY-MM-DD}
 - **Read** for scanning session history and intent verify verdict
 - **Bash** for the adrkit scaffold entry point and `.agents/skills/che-adr-draft/scripts/adr.sh lint`
 - **Write** for new compound files
-- **Edit** for updating specification status (intent.md frontmatter only)
+- **Edit** for updating intent status (intent.md frontmatter only)
 - **AskUserQuestion** for per-draft accept/edit/reject/defer
 
 ---

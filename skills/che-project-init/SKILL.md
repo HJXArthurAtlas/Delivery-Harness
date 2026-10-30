@@ -1,6 +1,6 @@
 ---
 name: che-project-init
-description: 交互式初始化项目 .che 配置：逐项讲解并确认 language（全 pack 输出语言）、adr_gate（ADR 机械层门禁）、planverify_gate（语义 verdict 门禁）、checker（独立校验者策略）、pingcode_integration（PingCode 集成开关）五个配置项，生成 .che/config.yml（幂等增量：已初始化项目重跑只补缺失或非法的新配置项，已有合法配置沿用不重问）；顺带自检并按需安装 che / adrkit CLI；选择接入 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 /che-pingcode-init。当用户要初始化 .che 配置、设置或切换输出语言、开启或关闭规格流程门禁、配置校验者策略、接入或首次配置本 pack、harness 升级后补装新增配置项、检查 che/adrkit 有没有装时使用——即使用户没提 skill 名，意图匹配也用本 skill。
+description: 交互式初始化项目 .che 配置：逐项讲解并确认 language（全 pack 输出语言）、adr_gate（ADR 机械层门禁）、planverify_gate（语义 verdict 门禁）、checker（独立校验者策略）、pingcode_integration（PingCode 集成开关）五个配置项，生成 .che/config.yml（幂等增量：已初始化项目重跑只补缺失或非法的新配置项，已有合法配置沿用不重问）；顺带自检并按需安装 che / adrkit CLI；选择接入 PingCode 时自检并安装最新 pingcode CLI、引导登录、移交 /che-pingcode-init。当用户要初始化 .che 配置、设置或切换输出语言、开启或关闭意图流程门禁、配置校验者策略、接入或首次配置本 pack、harness 升级后补装新增配置项、检查 che/adrkit 有没有装时使用——即使用户没提 skill 名，意图匹配也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -34,7 +34,7 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 langua
 ### 1. adr_gate（ADR 机械层门禁；默认 block；选项 block / off）
 
 - 问法：「要不要在实现前强制校验计划没有违反已落地的架构决策？开着会拦住越过 ADR 的实现，建议保持开启。」
-- **block**：进入 `/che-implement` 前，该特性的 planverify 报告必须在位、`adr_status: clean`，且报告记录的 spec/plan/tasks SHA-256 与当前文件一致——计划改了没重新校验、或 ADR 机械层（adrkit 查询 + P3e 判定）没过，一律拒绝动代码。缺 `adr_status` 的旧报告按「需要重跑」处理，绝不当作 clean 放行。
+- **block**：进入 `/che-implement` 前，该特性的 planverify 报告必须在位、`adr_status: clean`，且报告记录的 intent/plan/tasks SHA-256 与当前文件一致——计划改了没重新校验、或 ADR 机械层（adrkit 查询 + P3e 判定）没过，一律拒绝动代码。缺 `adr_status` 的旧报告按「需要重跑」处理，绝不当作 clean 放行。
 - **off**：不拦截 ADR 机械层（语义层的 `planverify_gate` 独立控制）。
 - **影响**：block 是默认且推荐——它挡的是「计划悄悄推翻已有决策」这类最贵的返工；ADR 语料为空或项目暂不接 ADR 流程时可 off。
 - 环境变量 `SKC_ADR_GATE` 优先于本配置。
@@ -132,7 +132,7 @@ language 需要问时**最先问**（本项固定中文提问，用户选定后�
 language: zh-cn
 
 # ADR 机械层门禁（默认 block）：block 时 planverify 报告必须在位、adr_status: clean、
-# 且 spec/plan/tasks 的 SHA-256 与报告记录一致，否则拒绝 /che-implement
+# 且 intent/plan/tasks 的 SHA-256 与报告记录一致，否则拒绝 /che-implement
 adr_gate: block
 
 # 语义 verdict 门禁：block 时实现前 planverify 裁决不得为 BLOCKED_DRIFT / BLOCKED_ADR（off 不拦截语义层）
@@ -162,7 +162,7 @@ pingcode_integration: off
    gitignore: <✓ 已忽略 .che/feature.json、.che/*.bak 或 +新增规则 或 用户拒绝跳过>
 ```
 
-- 开始第一个特性：`/che-intend`（意图访谈 + 统一 spec 一体完成）。
+- 开始第一个特性：`/che-intend`（意图访谈 + 统一 intent 一体完成）。
 - 项目尚无 `docs/architecture.md` → 移交 `/che-project-arch` 生成架构画像（服务/应用清单 + 依赖图），供 `/che-load` 每次会话装载。
 - 已接入 PingCode：spec 建卡走 `/che-pingcode-specstoissues`。
 

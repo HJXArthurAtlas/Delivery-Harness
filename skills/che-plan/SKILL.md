@@ -1,6 +1,6 @@
 ---
 name: che-plan
-description: 实现规划与任务拆解（单命令一次完成 plan→tasks）：按 plan 模板产出设计工件（research/data-model/contracts/quickstart 与 plan.md），随后按 spec 用户故事生成依赖有序、可执行的 tasks.md；存在 design-tasks.md 时必读并对齐 UX 约束，与 spec 冲突回用户裁决。当用户运行或提到 /che-plan，或说「出 plan」「做实现计划」「把 spec 转成实现规划」「出任务清单」「拆任务」「把 plan 拆成可执行任务」时使用——即使用户没提命令名，只要是 spec 之后的实现规划与任务拆解也用本 skill。
+description: 实现规划与任务拆解（单命令一次完成 plan→tasks）：按 plan 模板产出设计工件（research/data-model/contracts/quickstart 与 plan.md），随后按 intent 用户故事生成依赖有序、可执行的 tasks.md；存在 design-tasks.md 时必读并对齐 UX 约束，与 intent 冲突回用户裁决。当用户运行或提到 /che-plan，或说「出 plan」「做实现计划」「把 spec 转成实现规划」「出任务清单」「拆任务」「把 plan 拆成可执行任务」时使用——即使用户没提命令名，只要是 intent 之后的实现规划与任务拆解也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -38,11 +38,11 @@ Report branch, IMPL_PLAN path, generated design artifacts (research/data-model/c
 - Format validation: Confirm ALL tasks follow the checklist format (checkbox, ID, labels, file paths)
 - **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
   主流程:
-  - /che-gapfill: 对照 spec 意图块与场景补四类缺口任务（约束违反/失败条件/越界回归/边界）
+  - /che-gapfill: 对照 intent 意图块与场景补四类缺口任务（约束违反/失败条件/越界回归/边界）
   - /che-planverify: 独立校验者审 plan + tasks（含确定性 ADR 机械层与 P3e；正式实现前校验与门禁唯一入口）
   可选:
-  - /che-pingcode-specstoissues: [可选] 配了 mapping.task_artifact 时现在补建任务卡（implement 前 spec 有改动先跑 /che-pingcode-sync-cards 对账）
-  - /che-analyze: [可选] spec/plan/tasks 三工件一致性只读分析
+  - /che-pingcode-specstoissues: [可选] 配了 mapping.task_artifact 时现在补建任务卡（implement 前 intent 有改动先跑 /che-pingcode-sync-cards 对账）
+  - /che-analyze: [可选] intent/plan/tasks 三工件一致性只读分析
 
 The tasks.md should be immediately executable - each task must be specific enough that an LLM can complete it without additional context.
 
@@ -75,7 +75,7 @@ The tasks.md should be immediately executable - each task must be specific enoug
 
 **Prerequisites:** `research.md` complete
 
-1. **Extract entities from feature spec** → `data-model.md`:
+1. **Extract entities from the intent** → `data-model.md`:
    - Entity name, fields, relationships
    - Validation rules from requirements
    - State transitions if applicable
@@ -123,7 +123,7 @@ The tasks.md should be immediately executable - each task must be specific enoug
 
 **CRITICAL**: Tasks MUST be organized by user story to enable independent implementation and testing.
 
-**Tests are OPTIONAL**: Only generate test tasks if explicitly requested in the feature specification or if user requests TDD approach.
+**Tests are OPTIONAL**: Only generate test tasks if explicitly requested in the intent or if user requests TDD approach.
 
 ### Checklist Format (REQUIRED)
 

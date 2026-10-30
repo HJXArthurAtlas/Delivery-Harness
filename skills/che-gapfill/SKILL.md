@@ -1,13 +1,13 @@
 ---
 name: che-gapfill
-description: 任务缺口补全：把统一 spec（In scope / Out of scope / Constraints / Failure conditions 各节 + Acceptance Scenarios / Edge Cases）对照已生成的 tasks.md 交叉核对，追加缺失的四类测试任务（约束违反/失败条件/越界回归/边界场景）并带来源注释。当用户说「补任务缺口」「gapfill」「对照 spec 查任务覆盖」时使用——即使用户没提命令名，只要是 tasks 的覆盖缺口补全也用本 skill。
+description: 任务缺口补全：把统一 intent（In scope / Out of scope / Constraints / Failure conditions 各节 + Acceptance Scenarios / Edge Cases）对照已生成的 tasks.md 交叉核对，追加缺失的四类测试任务（约束违反/失败条件/越界回归/边界场景）并带来源注释。当用户说「补任务缺口」「gapfill」「对照 spec 查任务覆盖」时使用——即使用户没提命令名，只要是 tasks 的覆盖缺口补全也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 
 # Gap-Fill Analysis
 
-You are running a **gap-fill analysis**. Your job is to cross-reference the unified spec's intent sections and scenarios against the generated tasks list, identify coverage gaps, and append the missing tasks to `{task_dir}/tasks.md`.
+You are running a **gap-fill analysis**. Your job is to cross-reference the unified intent's intent sections and scenarios against the generated tasks list, identify coverage gaps, and append the missing tasks to `{task_dir}/tasks.md`.
 
 This is **not an interview**. It is automated analysis + diff review. The user's role is to approve, reject, or edit your proposed additions.
 
@@ -17,10 +17,10 @@ This is **not an interview**. It is automated analysis + diff review. The user's
 
 (`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR` — run `che paths --session "$CHE_SESSION_ID"` once, bare when no session id is available.)
 
-1. **Unified spec** at `{task_dir}/intent.md` — read the `## In scope`, `## Out of scope`, `## Constraints`, and `## Failure conditions` sections, plus the `**Acceptance Scenarios**` blocks (per user story) and `### Edge Cases` (both carry global stable `E#` IDs)
+1. **Unified intent** at `{task_dir}/intent.md` — read the `## In scope`, `## Out of scope`, `## Constraints`, and `## Failure conditions` sections, plus the `**Acceptance Scenarios**` blocks (per user story) and `### Edge Cases` (both carry global stable `E#` IDs)
 2. **Tasks file** at `{task_dir}/tasks.md` — the generated task list to augment
 
-If `intent.md` is missing, stop and tell the user to run `/che-intend` first. If the spec exists but has no scenario content at all (neither Acceptance Scenarios nor Edge Cases), stop — the scenario sections are mandatory spec sections; do not guess scenarios.
+If `intent.md` is missing, stop and tell the user to run `/che-intend` first. If the intent exists but has no scenario content at all (neither Acceptance Scenarios nor Edge Cases), stop — the scenario sections are mandatory intent sections; do not guess scenarios.
 
 ## Output you produce
 
@@ -34,10 +34,10 @@ If `intent.md` is missing, stop and tell the user to run `/che-intend` first. If
 
 ### Phase 0 — Load and parse both artifacts
 
-- Read the unified spec; extract lists of: constraints, failure conditions, in-scope items, out-of-scope items, acceptance scenarios (with `E#` IDs), edge scenarios (with `E#` IDs)
+- Read the unified intent; extract lists of: constraints, failure conditions, in-scope items, out-of-scope items, acceptance scenarios (with `E#` IDs), edge scenarios (with `E#` IDs)
 - Read tasks.md; extract existing tasks. Match the existing formatting conventions (likely markdown checkboxes with brief descriptions).
 
-Confirm to user: *"Loaded spec ({Nc} constraints, {Nf} failure conditions, {No} out-of-scope items, {Na} acceptance + {Ne} edge scenarios) and {Nt} existing tasks. Analyzing coverage..."*
+Confirm to user: *"Loaded intent ({Nc} constraints, {Nf} failure conditions, {No} out-of-scope items, {Na} acceptance + {Ne} edge scenarios) and {Nt} existing tasks. Analyzing coverage..."*
 
 ### Phase 1 — Build the coverage matrix
 
@@ -70,7 +70,7 @@ For each GAP, draft a candidate task entry matching the existing tasks.md format
 - **Failure-condition checks** — automated checks that fire on the named failure condition
 - **Out-of-scope regression checks** — automated checks (or manual review items) that confirm the named out-of-scope area was not touched
 - **Negative / edge path tests** — tests that exercise the named edge scenario
-- **Cross-cutting concerns** — added independent of the spec: analytics fires on key user actions, accessibility audit baseline, empty-state coverage, error-state coverage
+- **Cross-cutting concerns** — added independent of the intent: analytics fires on key user actions, accessibility audit baseline, empty-state coverage, error-state coverage
 
 ### Phase 3 — Diff preview and review
 
@@ -113,7 +113,7 @@ This command is mostly automated. Pushback fires only when the user tries to rej
 
 Define high-risk gaps as:
 - **Any out-of-scope regression check** — `/che-intentverify` L3 will block the merge if the OOS area was touched, and you'll have to re-add this task then. Cheaper to add now.
-- **Any failure condition with no covering task** — the failure condition was explicitly declared in the spec and is now untestable in CI.
+- **Any failure condition with no covering task** — the failure condition was explicitly declared in the intent and is now untestable in CI.
 
 If the user rejects a high-risk gap addition, push back once:
 
@@ -143,7 +143,7 @@ If `docs/corrections/` exists, scan for past gap-misses that became bugs — pro
 ## What you do NOT do
 
 - **Rewrite existing tasks** — only append
-- **Add tasks unrelated to the spec** — every addition must trace to a specific source (C, F, OOS, E, or a named cross-cutting concern)
+- **Add tasks unrelated to the intent** — every addition must trace to a specific source (C, F, OOS, E, or a named cross-cutting concern)
 - **Run the tasks** — that's `/che-implement`
 - **Validate after the fact** — that's `/che-intentverify`
 

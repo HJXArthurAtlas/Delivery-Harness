@@ -1,6 +1,6 @@
 ---
 name: che-clarify
-description: 规格澄清问答（产品澄清独占）：最多提 5 个高针对性的澄清问题，找出当前特性 spec 定义不足的区域，把结论直接合并进 intent.md 对应章节，并把 `[NEEDS CLARIFICATION]` 产品标记清零（intend 最多留 3 个明确标记，clarify 必须以零标记完成）。在 intend 之后、plan 之前使用。当用户运行或提到 /che-clarify，或说「澄清规格」「补全需求细节」「解决需求歧义」时使用——即使用户没提命令名，只要是对 spec 的澄清回写也用本 skill。
+description: 意图澄清问答（产品澄清独占）：最多提 5 个高针对性的澄清问题，找出当前特性 intent 定义不足的区域，把结论直接合并进 intent.md 对应章节，并把 `[NEEDS CLARIFICATION]` 产品标记清零（intend 最多留 3 个明确标记，clarify 必须以零标记完成）。在 intend 之后、plan 之前使用。当用户运行或提到 /che-clarify，或说「澄清规格」「补全需求细节」「解决需求歧义」时使用——即使用户没提命令名，只要是对 intent 的澄清回写也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -15,7 +15,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
-Goal: Detect and reduce ambiguity or missing decision points in the active feature specification and record the clarifications directly in the spec file.
+Goal: Detect and reduce ambiguity or missing decision points in the active feature intent and record the clarifications directly in the intent file.
 
 Note: This clarification workflow is expected to run (and be completed) BEFORE invoking `/che-plan`. If the user explicitly states they are skipping clarification (e.g., exploratory spike), you may proceed, but must warn that downstream rework risk increases.
 
@@ -31,7 +31,7 @@ Execution steps:
 
 2. **IF EXISTS**: Load `docs/constitution/constitution.md` for project principles and governance constraints.
 
-3. Load the current spec file. Perform a structured ambiguity & coverage scan using this taxonomy. For each category, mark status: Clear / Partial / Missing. Produce an internal coverage map used for prioritization (do not output raw map unless no questions will be asked).
+3. Load the current intent file. Perform a structured ambiguity & coverage scan using this taxonomy. For each category, mark status: Clear / Partial / Missing. Produce an internal coverage map used for prioritization (do not output raw map unless no questions will be asked).
 
    Functional Scope & Behavior:
    - Core user goals & success criteria
@@ -111,7 +111,7 @@ Execution steps:
           - Best practices for the project type
           - Common patterns in similar implementations
           - Risk reduction (security, performance, maintainability)
-          - Alignment with any explicit project goals or constraints visible in the spec
+          - Alignment with any explicit project goals or constraints visible in the intent
        - Present your **recommended option prominently** at the top with clear reasoning (1-2 sentences explaining why this is the best choice).
        - Format as: `**Recommended:** Option [X] - <reasoning>`
        - Then render all options as a Markdown table:
@@ -141,8 +141,8 @@ Execution steps:
     - If no valid questions exist at start, immediately report no critical ambiguities.
 
 6. Integration after EACH accepted answer (incremental update approach):
-    - Maintain in-memory representation of the spec (loaded once at start) plus the raw file contents.
-    - Do NOT write a `## Clarifications` Q&A history — the accepted answer is recorded only by integrating it into the affected spec sections.
+    - Maintain in-memory representation of the intent (loaded once at start) plus the raw file contents.
+    - Do NOT write a `## Clarifications` Q&A history — the accepted answer is recorded only by integrating it into the affected intent sections.
     - Immediately apply the clarification to the most appropriate section(s):
        - Functional ambiguity → Update or add a bullet in Functional Requirements.
        - User interaction / actor distinction → Update User Stories with the clarified role, constraint, or scenario.
@@ -150,9 +150,9 @@ Execution steps:
        - Data shape / entities → Update Key Entities (add fields, types, relationships) preserving ordering; note added constraints succinctly.
        - Non-functional constraint → Add/modify measurable criteria in Success Criteria > Measurable Outcomes (convert vague adjective to metric or explicit target).
        - Edge case / negative flow → Add or replace an entry under Edge Cases (new entries take the next unused `E#`).
-       - Terminology conflict → Normalize term across spec; retain original only if necessary by adding `(formerly referred to as "X")` once. New domain terms are registered into the matching 域节 of `docs/GLOSSARY.md`.
+       - Terminology conflict → Normalize term across intent; retain original only if necessary by adding `(formerly referred to as "X")` once. New domain terms are registered into the matching 域节 of `docs/GLOSSARY.md`.
     - If the clarification invalidates an earlier ambiguous statement, replace that statement instead of duplicating; leave no obsolete contradictory text.
-    - Save the spec file AFTER each integration to minimize risk of context loss (atomic overwrite).
+    - Save the intent file AFTER each integration to minimize risk of context loss (atomic overwrite).
     - Preserve formatting: do not reorder unrelated sections; keep heading hierarchy intact.
     - Keep each inserted clarification minimal and testable (avoid narrative drift).
 
@@ -163,15 +163,15 @@ Execution steps:
    - Markdown structure valid; no new top-level sections added beyond integration into existing ones (no `## Clarifications`).
    - Terminology consistency: same canonical term used across all updated sections.
 
-8. Write the updated spec back to `FEATURE_SPEC`.
+8. Write the updated intent back to `FEATURE_SPEC`.
 
-9. **Final marker sweep**: confirm zero `[NEEDS CLARIFICATION]` markers remain in the spec — clarify is the only writer allowed to resolve them, and it must end with none (specify may leave at most 3 explicit markers; they are resolved here).
+9. **Final marker sweep**: confirm zero `[NEEDS CLARIFICATION]` markers remain in the intent — clarify is the only writer allowed to resolve them, and it must end with none (intend may leave at most 3 explicit markers; they are resolved here).
 
 Behavior rules:
 
 - If no meaningful ambiguities found (or all potential questions would be low-impact), respond: "No critical ambiguities detected worth formal clarification." and suggest proceeding.
-- If spec file missing, instruct user to run `/che-intend` first (do not create a new spec here).
-- `[NEEDS CLARIFICATION]` markers are clarify's exclusive domain: always sweep the spec for them (even when no new questions arise) and resolve or explicitly settle each one — completion with zero markers is mandatory.
+- If intent file missing, instruct user to run `/che-intend` first (do not create a new intent here).
+- `[NEEDS CLARIFICATION]` markers are clarify's exclusive domain: always sweep the intent for them (even when no new questions arise) and resolve or explicitly settle each one — completion with zero markers is mandatory.
 - Never exceed 5 total asked questions (clarification retries for a single question do not count as new questions).
 - Avoid speculative tech stack questions unless the absence blocks functional clarity.
 - Respect user early termination signals ("stop", "done", "proceed").
@@ -184,7 +184,7 @@ Context for prioritization: $ARGUMENTS
 
 Record the runs timeline completion: `che state done clarify --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available). Then report completion (after questioning loop ends or early termination):
 - Number of questions asked & answered.
-- Path to updated spec.
+- Path to updated intent.
 - Sections touched (list names).
 - Scenario changes: replaced in place (with their kept `E#` IDs) vs newly added (`E#`), and confirmation that changed scenarios re-pass `SQ1–SQ4`.
 - Remaining `[NEEDS CLARIFICATION]` markers: must be zero.
@@ -201,8 +201,8 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
 
 ## Done When
 
-- [ ] Spec ambiguities identified and clarifications integrated directly into the affected spec sections (no `## Clarifications` history written)
-- [ ] Zero `[NEEDS CLARIFICATION]` markers remain in the spec
+- [ ] Intent ambiguities identified and clarifications integrated directly into the affected intent sections (no `## Clarifications` history written)
+- [ ] Zero `[NEEDS CLARIFICATION]` markers remain in the intent
 - [ ] Scenario `E#` IDs preserved for replaced scenarios; only genuinely new scenarios took new IDs; changed scenarios re-pass `SQ1–SQ4`
 - [ ] Completion reported to user with questions answered, sections touched, scenario changes, and coverage summary
 
@@ -214,6 +214,6 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
 
 - **目标**：`/che-design`（涉 UI）或 `/che-plan`（无 UI，交接门禁通过后）
 - **条件**：
-  - 澄清结论已回写 spec
+  - 澄清结论已回写 intent
   - 可选 `/che-grill` 继续追问
-  - 交接门禁（spec 章节齐备 + pingcode-mapping.json 登记）通过后才进 plan
+  - 交接门禁（intent 章节齐备 + pingcode-mapping.json 登记）通过后才进 plan

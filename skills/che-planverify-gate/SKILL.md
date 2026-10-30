@@ -1,6 +1,6 @@
 ---
 name: che-planverify-gate
-description: implement 前门禁（双 gate）：adr_gate 默认 block——planverify 报告缺失、adr_status 缺失或非 clean、或 spec/plan/tasks 的 SHA-256 与报告记录不匹配即拒绝；planverify_gate（默认 off）为 block 时再拒绝 BLOCKED_DRIFT / BLOCKED_ADR 裁决；未知 verdict 一律 fail-closed；两者均 off 才静默放行。手动或 agent 在 implement 边界前调用。当用户说「过一遍 implement 门禁」「检查 planverify 放行了没」时使用——即使用户没提命令名，只要是实现前的门禁检查也用本 skill。
+description: implement 前门禁（双 gate）：adr_gate 默认 block——planverify 报告缺失、adr_status 缺失或非 clean、或 intent/plan/tasks 的 SHA-256 与报告记录不匹配即拒绝；planverify_gate（默认 off）为 block 时再拒绝 BLOCKED_DRIFT / BLOCKED_ADR 裁决；未知 verdict 一律 fail-closed；两者均 off 才静默放行。手动或 agent 在 implement 边界前调用。当用户说「过一遍 implement 门禁」「检查 planverify 放行了没」时使用——即使用户没提命令名，只要是实现前的门禁检查也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -45,7 +45,7 @@ The command:
      - No planverify report → exits 1 (run `/che-planverify` for that feature first)
      - `adr_status` missing or not `clean` → exits 1 (a pre-ADR report counts as *needs re-run*,
        never as clean; a blocked ADR layer needs a plan fix or a ratified superseding ADR)
-     - Any recorded spec/plan/tasks SHA-256 missing or differing from the artifacts on disk
+     - Any recorded intent/plan/tasks SHA-256 missing or differing from the artifacts on disk
        → exits 1 (the report is stale; re-run planverify to refresh it)
    - **Verdict layer (`planverify_gate`, default `off`)**:
      - `BLOCKED_DRIFT` → exits 1 (replan first)
@@ -61,7 +61,7 @@ the message to the user — the recovery path depends on the rejection:
 
 > *"planverify gate is ON and the plan is not cleared. Run `/che-planverify` first."* (missing report)
 
-> *"The planverify report is stale — spec/plan/tasks changed after it was written. Re-run `/che-planverify`."* (hash mismatch)
+> *"The planverify report is stale — intent/plan/tasks changed after it was written. Re-run `/che-planverify`."* (hash mismatch)
 
 > *"Verdict is BLOCKED_DRIFT / BLOCKED_ADR. Replan via `/che-plan` (then gapfill + planverify), or record the decision change via `/che-adr-draft` and have it ratified before re-running planverify."* (blocked verdict)
 

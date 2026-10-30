@@ -1,6 +1,6 @@
 ---
 name: che-planverify
-description: plan 独立校验（L3）：实现前由独立 checker（可跨模型）对照统一 spec 锁定的范围/约束/失败条件 + 场景（Acceptance/Edge `E#`）审查 plan 与补全后的 tasks；机械层先跑确定性 ADR 查询（共用 che-adr-check 的 check.sh，产出 planverify.adr.json 与报告 hash），再密封 briefing（含 adrkit 返回的 governing ADR 全文）派发（绝不含规划者的上下文），返回 PASS / REPLAN_ALLOWED / BLOCKED_DRIFT / BLOCKED_ADR。当用户说「验证 plan」「planverify」「实现前审一遍计划」时使用——即使用户没提命令名，只要是实现前的计划独立校验也用本 skill。
+description: plan 独立校验（L3）：实现前由独立 checker（可跨模型）对照统一 intent 锁定的范围/约束/失败条件 + 场景（Acceptance/Edge `E#`）审查 plan 与补全后的 tasks；机械层先跑确定性 ADR 查询（共用 che-adr-check 的 check.sh，产出 planverify.adr.json 与报告 hash），再密封 briefing（含 adrkit 返回的 governing ADR 全文）派发（绝不含规划者的上下文），返回 PASS / REPLAN_ALLOWED / BLOCKED_DRIFT / BLOCKED_ADR。当用户说「验证 plan」「planverify」「实现前审一遍计划」时使用——即使用户没提命令名，只要是实现前的计划独立校验也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -38,7 +38,7 @@ Before `/che-implement`, run `/che-planverify-gate` (it executes
 
 - **`adr_gate`** (`SKC_ADR_GATE` env, else `adr_gate:` in `.che/config.yml`,
   default **`block`**): the report must exist, carry `adr_status: clean`, and its
-  recorded spec/plan/tasks SHA-256 hashes must match the artifacts on disk. A stale
+  recorded intent/plan/tasks SHA-256 hashes must match the artifacts on disk. A stale
   or pre-ADR report is rejected — never read as clean.
 - **`planverify_gate`** (`SKC_PLANVERIFY_GATE` env, else `planverify_gate:`,
   default `off`): additionally refuses `BLOCKED_DRIFT` and `BLOCKED_ADR` verdicts.
@@ -72,15 +72,15 @@ an explicit `cross-model` or `cli:model` policy requires an external model CLI.
 
 (`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR` — run `che paths --session "$CHE_SESSION_ID"` once, bare when no session id is available.)
 
-1. **Unified spec** `{task_dir}/intent.md` — read `## In scope`, `## Out of scope`, `## Constraints`, `## Failure conditions`; read the `**Acceptance Scenarios**` blocks and `### Edge Cases` for the scenarios (global stable `E#` IDs)
+1. **Unified intent** `{task_dir}/intent.md` — read `## In scope`, `## Out of scope`, `## Constraints`, `## Failure conditions`; read the `**Acceptance Scenarios**` blocks and `### Edge Cases` for the scenarios (global stable `E#` IDs)
 2. **Plan** `{task_dir}/plan.md` — the proposed plan, including any `requested_surface` blocks
 3. **Tasks** `{task_dir}/tasks.md` — the gapfilled task list
 
-If the spec is missing, stop and tell the user (a missing `intent.md` means `/che-intend` has not run). If the spec has no scenario content (neither Acceptance Scenarios nor Edge Cases), stop — scenarios are mandatory spec sections.
+If the intent is missing, stop and tell the user (a missing `intent.md` means `/che-intend` has not run). If the intent has no scenario content (neither Acceptance Scenarios nor Edge Cases), stop — scenarios are mandatory intent sections.
 
 ## Outputs you produce
 
-- `{task_dir}/planverify.md` — verdict report (records `checked_by`, `independence_tier`, `gate_mode`, ADR mechanical fields, spec/plan/tasks SHA-256)
+- `{task_dir}/planverify.md` — verdict report (records `checked_by`, `independence_tier`, `gate_mode`, ADR mechanical fields, intent/plan/tasks SHA-256)
 - `{task_dir}/planverify.adr.json` — the adrkit raw facts: command, exit code, raw stdout/stderr (audit record of the mechanical layer)
 - `{task_dir}/planverify.briefing.md` — the sealed briefing (auditable proof of the firewall)
 - `{task_dir}/planverify.checker.txt` — the checker's raw response
@@ -94,7 +94,7 @@ If the spec is missing, stop and tell the user (a missing `intent.md` means `/ch
 
 Read all three sources. Compute: number of constraints, failure conditions, OOS items; number of acceptance + edge scenarios (`E#`); number of tasks.
 
-Confirm: *"Loaded spec ({Nc} constraints, {Nf} failure conditions, {No} OOS, {Na}+{Ne} scenarios), plan, and {Nt} tasks. Running surface analysis and the ADR mechanical layer here, then dispatching plan judgment to an independent checker."*
+Confirm: *"Loaded intent ({Nc} constraints, {Nf} failure conditions, {No} OOS, {Na}+{Ne} scenarios), plan, and {Nt} tasks. Running surface analysis and the ADR mechanical layer here, then dispatching plan judgment to an independent checker."*
 
 ### Phase 1a — Surface analysis *(you run this — the mechanical layer)*
 
@@ -103,7 +103,7 @@ There is nothing built, so there are no L1/L2 mechanical checks. Instead:
 1. Extract the **proposed surface** — every file/path the plan intends to touch.
    Gather from: plan.md prose, every `requested_surface:` block, and file paths
    referenced in tasks.md.
-2. Read the spec's declared **in-scope** and **out-of-scope** lists (`## In scope` / `## Out of scope`).
+2. Read the intent's declared **in-scope** and **out-of-scope** lists (`## In scope` / `## Out of scope`).
 3. For each proposed path, classify: `in-scope` / `out-of-scope` / `undeclared`.
 4. A proposed path that is out-of-scope or undeclared is a **drift candidate**.
    Note for each whether a matching `requested_surface` block exists (`requested`)
@@ -159,8 +159,8 @@ Announce: *"Independent checker: {name} (Tier {N} — {cross-model | cross-tier 
 
 Write `{task_dir}/planverify.briefing.md` containing **only**:
 - The goal sentence
-- **Locked intent** (from the unified spec): full out-of-scope list, every constraint (with IDs), every failure condition — verbatim
-- **Locked scenarios** (from the unified spec): every Acceptance Scenario and Edge Case, with their `E#` IDs — verbatim
+- **Locked intent** (from the unified intent): full out-of-scope list, every constraint (with IDs), every failure condition — verbatim
+- **Locked scenarios** (from the unified intent): every Acceptance Scenario and Edge Case, with their `E#` IDs — verbatim
 - **The plan**: full `{task_dir}/plan.md`
 - **The tasks**: full `{task_dir}/tasks.md`
 - **Surface analysis**: the drift-candidate list from Phase 1a (path, classification, requested/unrequested) as plain facts
@@ -230,7 +230,7 @@ Departure disposition (for the report's recommendations and chat):
 
 If you disagree with the checker, add a one-line meta-note — the checker's verdict
 stands. Write `{task_dir}/planverify.md` using the format below; compute the
-SHA-256 of spec/plan/tasks (`shasum -a 256`) into the frontmatter.
+SHA-256 of intent/plan/tasks (`shasum -a 256`) into the frontmatter.
 
 ### Phase 6 — Communicate verdict
 
@@ -373,14 +373,14 @@ then re-run planverify) — a draft ADR alone does not clear the gate}
 ```
 
 **Report freshness**: the frontmatter hashes are load-bearing. The gate refuses a
-report whose hashes do not match the current spec/plan/tasks, and treats a report
-without `adr_status` as requiring a re-run (never as clean). Any edit to spec, plan,
+report whose hashes do not match the current intent/plan/tasks, and treats a report
+without `adr_status` as requiring a re-run (never as clean). Any edit to intent, plan,
 or tasks after the run invalidates the report — re-run planverify.
 
 ---
 
 ## Tool choices
-- **Read** for the three artifacts (spec, plan, tasks), the governing ADRs adrkit reports, and the check output
+- **Read** for the three artifacts (intent, plan, tasks), the governing ADRs adrkit reports, and the check output
 - **Bash** for CLI detection (`command -v`), the Phase 1b shared script, SHA-256 (`shasum -a 256`), Tier-1 dispatch, reading config
 - **Agent/Task** for Tier-2/Tier-3 native subagent dispatch (`model: haiku` for Tier 2)
 - **Write** for the briefing, the adrkit audit JSON, captured checker response, and the `planverify.md` report
@@ -393,7 +393,7 @@ or tasks after the run invalidates the report — re-run planverify.
 - **Auto-patch the plan.** You report; the user replans. Validator, not fixer.
 - **Interpret tool failure as pass.** Exit 2, unreachable corpus, missing/unparseable JSON → stop, no verdict.
 - **Silently degrade tiers.** Record the tier actually achieved.
-- **Re-write the spec's locked sections.** They are locked — a locked-intent change means re-running `/che-intend` (update path), keeping existing `E#` IDs.
+- **Re-write the intent's locked sections.** They are locked — a locked-intent change means re-running `/che-intend` (update path), keeping existing `E#` IDs.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: che-design
-description: 需求澄清与设计明细产出（design 命令）：按四盲区问句库逐项澄清需求，按设计规约与设计自检对方案做七域走查，产出页面级设计明细 design-tasks.md 到当前特性目录。依赖活动特性（intent.md）才能执行；澄清结论不回写 spec。当用户运行或提到 /che-design，或说「出设计明细」「design-tasks」「把这份 spec 转成设计明细」「设计走查这份需求」，或要在 spec 之后、开发之前做设计层澄清与设计明细产出时使用本 skill——即使用户没提「che-design」命令名，只要是规格之后的设计澄清与设计明细转化意图也用本 skill。
+description: 需求澄清与设计明细产出（design 命令）：按四盲区问句库逐项澄清需求，按设计规约与设计自检对方案做七域走查，产出页面级设计明细 design-tasks.md 到当前特性目录。依赖活动特性（intent.md）才能执行；澄清结论不回写 intent。当用户运行或提到 /che-design，或说「出设计明细」「design-tasks」「把这份 spec 转成设计明细」「设计走查这份需求」，或要在 intent 之后、开发之前做设计层澄清与设计明细产出时使用本 skill——即使用户没提「che-design」命令名，只要是 intent 之后的设计澄清与设计明细转化意图也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -9,7 +9,7 @@ description: 需求澄清与设计明细产出（design 命令）：按四盲区
 
 本 skill 只产出设计明细（`design-tasks.md`），绝不产出视觉稿、原型或代码；绝不代替用户拍板业务口径。
 
-与 `che-clarify` 的分工：clarify 把澄清结论回写 intent.md（≤5 问）；本 skill 的澄清是设计层，结论落设计明细，绝不修改 intent.md。顺序上先 clarify 后 design（本 skill 消化的是 spec 之外的设计层歧义）。
+与 `che-clarify` 的分工：clarify 把澄清结论回写 intent.md（≤5 问）；本 skill 的澄清是设计层，结论落设计明细，绝不修改 intent.md。顺序上先 clarify 后 design（本 skill 消化的是 intent 之外的设计层歧义）。
 
 ## User Input
 
@@ -23,15 +23,15 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ### 段一：确定功能语境
 
-1. 确定功能名称与所属迭代：优先取自活动特性 spec 或用户输入；缺什么向用户问什么。
+1. 确定功能名称与所属迭代：优先取自活动特性 intent 或用户输入；缺什么向用户问什么。
 2. 故事卡号不盲问：先查 `specs/pingcode-mapping.json` 中当前特性的登记条目，有则带出卡片 id；没有登记（建卡是 optional 步骤）再问用户，用户不知道就留空，绝不阻塞。
 
 ### 段二：解析当前特性（硬性前置，与其他 speckit 命令同惯例）
 
 1. 确认环境是 macOS / Linux 且外部 `che` CLI 在 PATH 上可用（`@newchiwan/che`，要求 Node ≥ 22.18；缺失则 `npm install -g @newchiwan/che@latest`）。不可用则声明环境不受支持并停止。绝不退回项目内其他脚本——pack 契约是只经由 PATH 上的 `che` 解析。
 2. 从仓库根运行 `che paths --json` **恰好一次**，解析 JSON 取 `FEATURE_DIR` / `FEATURE_SPEC`。
-3. 校验 `$FEATURE_DIR/intent.md` 存在：脚本失败或 spec 缺失时停止，提示先运行 `/che-intend`，绝不凭空继续。
-4. 本 skill 依赖一个具体的 spec 才能执行：后续澄清以该 spec 为需求材料，设计明细最终落到 `$FEATURE_DIR/design-tasks.md`（特性目录本身即唯一标识）。
+3. 校验 `$FEATURE_DIR/intent.md` 存在：脚本失败或 intent 缺失时停止，提示先运行 `/che-intend`，绝不凭空继续。
+4. 本 skill 依赖一个具体的 intent 才能执行：后续澄清以该 intent 为需求材料，设计明细最终落到 `$FEATURE_DIR/design-tasks.md`（特性目录本身即唯一标识）。
 5. 首个写盘动作前记录 runs 时间线开始：`che state start design --session "$CHE_SESSION_ID"`（无 session id 时省略 --session）。Pack fork (ncw)，上游升级时移植。
 
 ### 段三：四盲区澄清
@@ -87,4 +87,4 @@ You **MUST** consider the user input before proceeding (if not empty).
   - 前置装载（入向，design 开始时）：会话上下文无 `COMPOUND STORE LOADED` 摘要 → 先跑 `/che-load` 再进执行步骤；已有摘要（本会话已装载）→ 跳过
   - `design-tasks.md` 已产出
   - 它不是交接门禁项，不阻塞交接
-  - 与 spec 冲突回产品/设计裁决，绝不自行解决
+  - 与 intent 冲突回产品/设计裁决，绝不自行解决

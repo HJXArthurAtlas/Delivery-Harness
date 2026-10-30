@@ -1,6 +1,6 @@
 ---
 name: che-intend
-description: 意图与场景访谈 + 特性规格一体化：问答式锁定目标、范围、约束与失败条件（GQ/CQ/FQ 全过），生成 User Stories 与 Functional Requirements，起草 Acceptance Scenarios 与 Edge Cases（稳定 E# ID，SQ1–SQ4 全过），创建或更新任务并全部写入统一 intent.md（含 User Story 章节与优先级），intent.md 落 `che paths` 解析的任务目录；任务不存在时经 `che task create` 创建任务目录并绑定 session，是规格驱动流程的第一步（任务自此诞生）。当用户运行或提到 /che-intend，或说「出 spec」「写特性需求」「把这个需求转成规格」「先做 intent 访谈」「锁定目标与约束」「捕获失败条件」「补期望场景」「写 expectations」「捕获成功场景」「捕获边界场景」时使用——即使用户没提命令名，只要是动工前的意图捕获、场景捕获或特性规格的创建/更新也用本 skill。
+description: 意图与场景访谈 + 特性意图一体化：问答式锁定目标、范围、约束与失败条件（GQ/CQ/FQ 全过），生成 User Stories 与 Functional Requirements，起草 Acceptance Scenarios 与 Edge Cases（稳定 E# ID，SQ1–SQ4 全过），创建或更新任务并全部写入统一 intent.md（含 User Story 章节与优先级），intent.md 落 `che paths` 解析的任务目录；任务不存在时经 `che task create` 创建任务目录并绑定 session，是意图驱动流程的第一步（任务自此诞生）。当用户运行或提到 /che-intend，或说「出 spec」「写特性需求」「把这个需求转成规格」「先做 intent 访谈」「锁定目标与约束」「捕获失败条件」「补期望场景」「写 expectations」「捕获成功场景」「捕获边界场景」时使用——即使用户没提命令名，只要是动工前的意图捕获、场景捕获或特性意图的创建/更新也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -13,7 +13,7 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
-# Intent + Scenario Interview → Unified Specification
+# Intent + Scenario Interview → Unified Intent
 
 You are running one interview that locks the intent (goal, scope, constraints, failure conditions), drafts the user stories and scenarios, and writes the single requirement artifact `intent.md`. The validator (`/che-intentverify`) and the gap analysis (`/che-gapfill`) both read the scenarios from this file; `/che-clarify` is the only later writer that resolves `[NEEDS CLARIFICATION]` markers in it.
 
@@ -46,7 +46,7 @@ Then construct file paths as `$TASK_DIR/intent.md`, where `$TASK_DIR` is the tas
 
 ## The non-negotiable rule
 
-**Do not terminate this interview until the spec content is complete, every GQ/CQ/FQ/SQ test passes, and the exit gate (Step 6) holds.**
+**Do not terminate this interview until the intent content is complete, every GQ/CQ/FQ/SQ test passes, and the exit gate (Step 6) holds.**
 
 If the user tries to skip a phase, refuse politely and explain which specific test would fail. If the user is stuck, brainstorm with them — do not punt back with "good luck."
 
@@ -97,8 +97,8 @@ Before the interview: if the session context has no `COMPOUND STORE LOADED` summ
 1. Run `che paths --json --session "$CHE_SESSION_ID"` from the repository root (bare `che paths --json` when no session id is available; requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`). A missing `che` executable is an **installation error**, not "no task" — tell the user to install the CLI, do not fall through to task creation guessing.
 2. **Task resolved** (the command prints `FEATURE_DIR`):
    - Ask the user **update this task or create a new one** — default to **update**. Update reuses the resolved `FEATURE_DIR` and `SLUG` verbatim; do NOT regenerate the slug and do NOT invent a new directory.
-   - **Update with an existing `intent.md`**: only after the user's update confirmation, load the existing spec and edit it — never blindly copy the template over it. Replace only contradicted content. **Scenario IDs are immutable**: keep every still-valid `E#` verbatim, never renumber or reuse IDs; assign only genuinely new scenarios the next unused `E#`.
-   - **Legacy migration**: if `{TASK_DIR}/expectations.md` still exists (retired artifact), merge it into the spec in the same update: (1) match each old scenario to a spec scenario by semantics and attach the old `E#` ID to the matching spec scenario; (2) move scenarios missing from the spec into the matching User Story's Acceptance Scenarios or `### Edge Cases` under their original `E#`; (3) conflicting wording goes to the user (or a follow-up `/che-clarify`) — never keep two versions; (4) keep existing `derived from E#` references in `tasks.md` resolvable. Re-run the exit gate (Step 6) on the merged spec, then delete `expectations.md`. Never leave the file behind half-merged.
+   - **Update with an existing `intent.md`**: only after the user's update confirmation, load the existing intent and edit it — never blindly copy the template over it. Replace only contradicted content. **Scenario IDs are immutable**: keep every still-valid `E#` verbatim, never renumber or reuse IDs; assign only genuinely new scenarios the next unused `E#`.
+   - **Legacy migration**: if `{TASK_DIR}/expectations.md` still exists (retired artifact), merge it into the intent in the same update: (1) match each old scenario to an intent scenario by semantics and attach the old `E#` ID to the matching intent scenario; (2) move scenarios missing from the intent into the matching User Story's Acceptance Scenarios or `### Edge Cases` under their original `E#`; (3) conflicting wording goes to the user (or a follow-up `/che-clarify`) — never keep two versions; (4) keep existing `derived from E#` references in `tasks.md` resolvable. Re-run the exit gate (Step 6) on the merged intent, then delete `expectations.md`. Never leave the file behind half-merged.
 3. **Ambiguous candidates** (multiple tasks, resolution fails listing them): let the user select a candidate (→ update flow) or choose to create a new one (→ step 4 of this procedure).
 4. **No task exists**: proceed to create new (step 3 of this procedure).
 
@@ -170,7 +170,7 @@ Coverage — not counts — decides when drafting is done:
 - Every relevant boundary (out-of-scope, failure condition, correction) has edge coverage.
 - Every scenario is observable and unambiguous (SQ1–SQ4).
 
-No fixed scenario quota exists; do not pad. Do not add a separate `## Expectations` section — scenarios live in the user stories and `### Edge Cases` of the spec body.
+No fixed scenario quota exists; do not pad. Do not add a separate `## Expectations` section — scenarios live in the user stories and `### Edge Cases` of the intent body.
 
 ### Step 3 — Create the task (create-new only)
 
@@ -196,21 +196,21 @@ che state start intend --feature {slug}               # otherwise
 
 The `--feature` fallback is **mandatory** after ambiguous/multi-task selection (no session binding) so `state start` cannot resolve a different task. Keep one feature per invocation. Branch creation/switching is outside this skill: if the user asks for a git branch, create or switch to it using their requested name before continuing; the task directory name and the branch name are independent.
 
-### Step 5 — Write the unified spec
+### Step 5 — Write the unified intent
 
 1. Load this skill's own `references/intent-template.md` — the intent template; no project scaffolding and no override/preset/extension resolution stack.
 2. **Create-new**: copy the template to `{TASK_DIR}/intent.md` as the starting point. **Update**: edit the existing `{TASK_DIR}/intent.md` in place (never overwrite the template onto it); preserve still-valid content and scenario IDs, replace contradicted content.
 3. **IF EXISTS**: Load `docs/constitution/constitution.md` for project principles and governance constraints.
-4. **Register glossary terms**: any new domain concept introduced by this feature is registered into the matching 域节 of `docs/GLOSSARY.md` before the spec references it as settled terminology, and the spec's `## 统一语言` section declares the domain section(s) it follows. If `docs/GLOSSARY.md` is missing, scaffold it first: create `docs/` if needed and write a minimal glossary — one section per project domain (域节) plus a 「使用规则」 section stating that spec terms must be registered in the matching 域节. Never overwrite an existing glossary.
+4. **Register glossary terms**: any new domain concept introduced by this feature is registered into the matching 域节 of `docs/GLOSSARY.md` before the intent references it as settled terminology, and the intent's `## 统一语言` section declares the domain section(s) it follows. If `docs/GLOSSARY.md` is missing, scaffold it first: create `docs/` if needed and write a minimal glossary — one section per project domain (域节) plus a 「使用规则」 section stating that intent terms must be registered in the matching 域节. Never overwrite an existing glossary.
 5. Fill the template, preserving section order and headings:
    - Every section marked *(mandatory)* must be populated. When an optional section doesn't apply, remove it entirely (don't leave as "N/A"); the mandatory intent block (Why now / In scope / Out of scope / Constraints / Failure conditions) is always populated from the interview.
    - Frontmatter: only `status: active`.
    - **Why now / In scope / Out of scope**: the Phase 2–4 narrative and lists.
    - **Constraints / Failure conditions**: the CQ/FQ-locked items with their `C#`/`F#` IDs.
-   - **统一语言**: the glossary declaration — domain section(s) in `docs/GLOSSARY.md` this spec follows, with new domain concepts already registered.
+   - **统一语言**: the glossary declaration — domain section(s) in `docs/GLOSSARY.md` this intent follows, with new domain concepts already registered.
    - **User Stories + Acceptance Scenarios + Edge Cases**: the Phase 7 locked sets with global `E#` IDs and `Validates:` lines.
    - **Functional Requirements** (`FR-###`), **Success Criteria** (`SC-###`, measurable, technology-agnostic, user-focused, verifiable), optional **Key Entities**.
-   - **References** (optional): ADRs respected, corrections applied — no other compound-store record is kept in the spec.
+   - **References** (optional): ADRs respected, corrections applied — no other compound-store record is kept in the intent.
    - Markers: for unclear aspects make informed guesses based on context and industry standards; only mark `[NEEDS CLARIFICATION: specific question]` when the choice significantly impacts scope or UX, multiple reasonable interpretations exist, and no reasonable default exists. **LIMIT: maximum 3 markers total**, prioritized scope > security/privacy > UX > technical details. These are product questions — `/che-clarify` owns resolving them.
 
 ### Step 6 — Exit gate, then close the run
@@ -222,7 +222,7 @@ Run this in-line validation after writing; no separate checklist file is created
 3. **Coverage**: every major story has ≥1 acceptance scenario; every relevant boundary (out-of-scope, failure condition, correction) has ≥1 edge scenario; no orphan scenario (`Validates:` cites existing `FR-###`).
 4. **IDs**: one global `E#` sequence, unique, no gaps introduced by edits; `C#`/`F#`/`FR-###`/`SC-###` unique.
 5. **Markers**: at most 3 `[NEEDS CLARIFICATION]` markers, each explicit and product-level.
-6. **Failure handling**: list failing items, update the spec, re-validate — maximum **3 repair iterations**; if still failing, report the remaining issues and warn the user.
+6. **Failure handling**: list failing items, update the intent, re-validate — maximum **3 repair iterations**; if still failing, report the remaining issues and warn the user.
 7. If markers exist, present them batched (Q1–Qn option tables) so the user can resolve them now; whatever remains explicit stays for `/che-clarify`, which must end with zero markers.
 
 **Close the run**: after the final write/validation, record `che state done intend --session "$CHE_SESSION_ID"` (omit `--session` when unavailable; use `--feature {slug}` when there is no session id). Do **not** run `state done` while the exit gate still fails.
@@ -305,7 +305,7 @@ The boundary: if a non-technical user could read it aloud and understand what is
 - **Explain WHY** in one short sentence.
 - **Offer a concrete reword** or specific clarifying question.
 - **Do not advance** until the user accepts a fix or provides a valid alternative.
-- Keep tone collaborative, not pedantic. You are helping the user write better specs, not grading them.
+- Keep tone collaborative, not pedantic. You are helping the user write better intents, not grading them.
 
 ---
 
@@ -325,7 +325,7 @@ If the compound store was loaded:
 - **Plain chat** for free-form prose (goal sentence, why now, constraint text, scenario drafts)
 - **AskUserQuestion** for discrete choices (update-or-new, accept/edit/reject scenario sets, slug override, yes/no/later for the chain handoff)
 - **Bash** for `che paths --json`, `che task create {slug} --summary "<locked goal>" --session "$CHE_SESSION_ID"`, and `che state start|done intend`
-- **Read** for an existing spec on the update path
+- **Read** for an existing intent on the update path
 - **Write/Edit** for the final `{TASK_DIR}/intent.md` file and the glossary
 
 ---
@@ -334,11 +334,11 @@ If the compound store was loaded:
 
 - **Tech stack choices** — these go into `/che-plan` later. If the user names a stack, ask whether it's a hard constraint (in which case it's a CQ-failing constraint that probably belongs in Context) or just a preference (defer to /che-plan).
 - **Task breakdown** — that's `/che-plan`'s task generation. Don't pre-decompose work here.
-- **Clarification Q&A history** — do not write a `## Clarifications` section; `/che-clarify` integrates resolved answers directly into the spec sections.
+- **Clarification Q&A history** — do not write a `## Clarifications` section; `/che-clarify` integrates resolved answers directly into the intent sections.
 
 ### For AI Generation
 
-When creating this spec from a user prompt:
+When creating this intent from a user prompt:
 
 1. **Make informed guesses**: Use context, industry standards, and common patterns to fill gaps
 2. **Document assumptions**: Record reasonable defaults in the Assumptions section
@@ -359,8 +359,8 @@ When creating this spec from a user prompt:
 
 - [ ] Interview complete: goal passes GQ1–GQ5, constraints pass CQ1–CQ5, failure conditions pass FQ1–FQ4, scenarios pass SQ1–SQ4 with global stable `E#` IDs
 - [ ] Task resolved (update) or created via `che task create` (create-new); runs timeline opened and closed for `intend`
-- [ ] Unified specification written to `{TASK_DIR}/intent.md` and the Step 6 exit gate passes (no separate checklist file)
-- [ ] Completion reported to user with task directory, spec file path, exit-gate results, and counts
+- [ ] Unified intent written to `{TASK_DIR}/intent.md` and the Step 6 exit gate passes (no separate checklist file)
+- [ ] Completion reported to user with task directory, intent file path, exit-gate results, and counts
 
 ---
 
@@ -368,7 +368,7 @@ When creating this spec from a user prompt:
 
 > Pack fork (ncw), port on upstream upgrade.
 
-- **目标**：`/che-clarify` —— 澄清并清零 spec 中的 `[NEEDS CLARIFICATION]` 产品标记，结论回写 spec（含场景，保留既有 `E#` ID）
+- **目标**：`/che-clarify` —— 澄清并清零 intent 中的 `[NEEDS CLARIFICATION]` 产品标记，结论回写 intent（含场景，保留既有 `E#` ID）
 - **条件**：
   - 入向输入门禁（Phase 0）：访谈之前无任何上下文且调用时无有效输入 → 中断，向用户明确提问需要澄清的意图，拿到有效描述后才开访谈
   - 前置装载（入向）：会话上下文无 `COMPOUND STORE LOADED` 摘要 → 先跑 `/che-load` 再开访谈；已有摘要（本会话已装载）→ 跳过

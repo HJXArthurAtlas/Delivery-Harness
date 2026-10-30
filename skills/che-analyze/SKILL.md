@@ -1,6 +1,6 @@
 ---
 name: che-analyze
-description: spec/plan/tasks 跨工件一致性只读分析（tasks 生成后、实现前）：交叉核对三份工件，找矛盾、缺失与需求覆盖缺口，只报告不修改任何文件。当用户运行或提到 /che-analyze，或说「分析 spec/plan/tasks 一致性」「找工件之间的矛盾」「实现前查一遍覆盖」时使用——即使用户没提命令名，只要是跨工件一致性分析也用本 skill。
+description: intent/plan/tasks 跨工件一致性只读分析（tasks 生成后、实现前）：交叉核对三份工件，找矛盾、缺失与需求覆盖缺口，只报告不修改任何文件。当用户运行或提到 /che-analyze，或说「分析 spec/plan/tasks 一致性」「找工件之间的矛盾」「实现前查一遍覆盖」时使用——即使用户没提命令名，只要是跨工件一致性分析也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -21,7 +21,7 @@ Identify inconsistencies, duplications, ambiguities, and underspecified items ac
 
 **STRICTLY READ-ONLY**: Do **not** modify any files. Output a structured analysis report. Offer an optional remediation plan (user must explicitly approve before any follow-up editing commands would be invoked manually).
 
-**Constitution Authority**: The project constitution (`docs/constitution/constitution.md`) is **non-negotiable** within this analysis scope. Constitution conflicts are automatically CRITICAL and require adjustment of the spec, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/che-analyze`.
+**Constitution Authority**: The project constitution (`docs/constitution/constitution.md`) is **non-negotiable** within this analysis scope. Constitution conflicts are automatically CRITICAL and require adjustment of the intent, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/che-analyze`.
 
 ## Execution Steps
 
@@ -29,7 +29,7 @@ Identify inconsistencies, duplications, ambiguities, and underspecified items ac
 
 Run `che check --json --require-intent --require-tasks --include-tasks` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`). Derive absolute paths:
 
-- SPEC = FEATURE_DIR/intent.md
+- INTENT = FEATURE_DIR/intent.md
 - PLAN = FEATURE_DIR/plan.md
 - TASKS = FEATURE_DIR/tasks.md
 
@@ -94,7 +94,7 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
 
 - Requirements with verbs but missing object or measurable outcome
 - User stories missing acceptance criteria alignment
-- Tasks referencing files or components not defined in spec/plan
+- Tasks referencing files or components not defined in intent/plan
 
 #### D. Constitution Alignment
 
@@ -110,7 +110,7 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
 #### F. Inconsistency
 
 - Terminology drift (same concept named differently across files)
-- Data entities referenced in plan but absent in spec (or vice versa)
+- Data entities referenced in plan but absent in intent (or vice versa)
 - Task ordering contradictions (e.g., integration tasks before foundational setup tasks without dependency note)
 - Conflicting requirements (e.g., one requires Next.js while other specifies Vue)
 
@@ -118,7 +118,7 @@ Focus on high-signal findings. Limit to 50 findings total; aggregate remainder i
 
 Use this heuristic to prioritize findings:
 
-- **CRITICAL**: Violates constitution MUST, missing core spec artifact, or requirement with zero coverage that blocks baseline functionality
+- **CRITICAL**: Violates constitution MUST, missing core intent artifact, or requirement with zero coverage that blocks baseline functionality
 - **HIGH**: Duplicate or conflicting requirement, ambiguous security/performance attribute, untestable acceptance criterion
 - **MEDIUM**: Terminology drift, missing non-functional task coverage, underspecified edge case
 - **LOW**: Style/wording improvements, minor redundancy not affecting execution order
@@ -127,7 +127,7 @@ Use this heuristic to prioritize findings:
 
 Output a Markdown report (no file writes) with the following structure:
 
-## Specification Analysis Report
+## Intent Analysis Report
 
 | ID | Category | Severity | Location(s) | Summary | Recommendation |
 |----|----------|----------|-------------|---------|----------------|

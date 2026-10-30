@@ -1,6 +1,6 @@
 ---
 name: che-converge
-description: 差距收敛：对照 spec/plan/tasks 审查代码现状，把尚未实现的工作追加为新任务写进 tasks.md，让 implement 能完整收口。当用户运行或提到 /che-converge，或说「收敛剩余工作」「补齐没实现的需求」「对照工件找差距」时使用——即使用户没提命令名，只要是工件与代码差距的收敛也用本 skill。
+description: 差距收敛：对照 intent/plan/tasks 审查代码现状，把尚未实现的工作追加为新任务写进 tasks.md，让 implement 能完整收口。当用户运行或提到 /che-converge，或说「收敛剩余工作」「补齐没实现的需求」「对照工件找差距」时使用——即使用户没提命令名，只要是工件与代码差距的收敛也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -15,7 +15,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Goal
 
-Close the gap between what a feature's specification, plan, and tasks call for and what the
+Close the gap between what a feature's intent, plan, and tasks call for and what the
 codebase currently implements. Read `intent.md`, `plan.md`, and `tasks.md` as the **sole
 source of intent** (with the constitution as governing constraints), assess the current
 state of the code, determine which requirements, acceptance criteria, plan decisions, and
@@ -52,12 +52,12 @@ skip constitution checks gracefully rather than failing.
 
 Run `che check --json --require-intent --require-tasks --include-tasks` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`). Derive absolute paths:
 
-- SPEC = FEATURE_DIR/intent.md
+- INTENT = FEATURE_DIR/intent.md
 - PLAN = FEATURE_DIR/plan.md
 - TASKS = FEATURE_DIR/tasks.md
 - CONSTITUTION = `docs/constitution/constitution.md` (if present)
 If `intent.md`, `plan.md`, or `tasks.md` is missing, STOP with a clear, actionable message naming the
-prerequisite command to run (`/che-intend` for a missing spec, `/che-plan` for a
+prerequisite command to run (`/che-intend` for a missing intent, `/che-plan` for a
 missing plan or tasks). Do not produce partial output.
 For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
@@ -105,7 +105,7 @@ Create an internal model (do not echo raw artifacts):
 
 Include every existing task in the intent inventory, regardless of checkbox state or
 Convergence phase: completion claims are not evidence. Verify current behavior against
-the spec, plan, tasks, and constitution; for corrective task chains, assess the resulting
+the intent, plan, tasks, and constitution; for corrective task chains, assess the resulting
 behavior, not superseded implementation details. Check both unmet obligations and
 implementation that contradicts, exceeds, or falls outside the stated intent.
 
@@ -117,7 +117,7 @@ For each item in the intent inventory, inspect the current code in scope and pro
   acceptance criterion / plan decision.
 - **`contradicts`**: the code does something that conflicts with stated intent or a
   constitution MUST principle.
-- **`unrequested`**: the code contains work not called for by the spec, plan, or tasks
+- **`unrequested`**: the code contains work not called for by the intent, plan, or tasks
   (surfaced for awareness — converge does **not** delete code, it only appends a task to
   review/justify or remove it).
 
@@ -187,7 +187,7 @@ Append to the **end** of `tasks.md`, per the append contract:
 **If there are no actionable findings** (`converged` outcome):
 
 - Do **not** modify `tasks.md` at all — no empty phase header.
-- Report: **"✅ Converged — the implementation satisfies the spec, plan, and tasks."**
+- Report: **"✅ Converged — the implementation satisfies the intent, plan, and tasks."**
 - Include the summary counts of what was checked.
 
 ### 8. Provide Next Actions (Handoff)

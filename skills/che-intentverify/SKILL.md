@@ -17,7 +17,7 @@ This is the command that makes the headline claim literally true: **the builder 
 
 - **L1** — tests pass, build clean, lint clean. *(Mechanical, you run it via Bash.)*
 - **L2** — output matches the augmented task list. *(Mechanical: tasks.md completion + diff evidence — you run it.)*
-- **L3** — implementation stayed within intent scope and constraints; the spec's scenarios are satisfied. *(LLM judgment over the diff — the **independent checker** runs it, not you.)*
+- **L3** — implementation stayed within intent scope and constraints; the intent's scenarios are satisfied. *(LLM judgment over the diff — the **independent checker** runs it, not you.)*
 
 L1/L2 are objective, so the orchestrator does them. L3 is judgment, so it is **delegated** — that delegation is the whole point of this command.
 
@@ -52,11 +52,11 @@ an explicit `cross-model` or `cli:model` policy requires an external model CLI.
 
 First resolve the task directory: run `che paths --json` from the repo root **once** and use its `FEATURE_DIR` as `$TASK_DIR` (the `specs/NNN-{slug}/` directory created at intend time; `SLUG` is the directory name minus its prefix).
 
-1. **Unified spec** at `{TASK_DIR}/intent.md` — read `## Out of scope`, `## Constraints`, `## Failure conditions` for out-of-scope items, constraints, failure conditions; read the `**Acceptance Scenarios**` blocks and `### Edge Cases` for the scenarios (global stable `E#` IDs)
+1. **Unified intent** at `{TASK_DIR}/intent.md` — read `## Out of scope`, `## Constraints`, `## Failure conditions` for out-of-scope items, constraints, failure conditions; read the `**Acceptance Scenarios**` blocks and `### Edge Cases` for the scenarios (global stable `E#` IDs)
 2. **Tasks file** at `{TASK_DIR}/tasks.md` — including gapfill additions
 3. **Git diff** of the current branch vs the merge base — use `git diff $(git merge-base HEAD main)...HEAD`
 
-If the spec is missing, stop and tell the user (a missing `intent.md` means `/che-intend` has not run). If the spec has no scenario content (neither Acceptance Scenarios nor Edge Cases), stop — scenarios are mandatory spec sections.
+If the intent is missing, stop and tell the user (a missing `intent.md` means `/che-intend` has not run). If the intent has no scenario content (neither Acceptance Scenarios nor Edge Cases), stop — scenarios are mandatory intent sections.
 
 ## Output you produce
 
@@ -73,7 +73,7 @@ If the spec is missing, stop and tell the user (a missing `intent.md` means `/ch
 
 Read all three sources. Compute basic stats: lines changed in diff, files touched in diff, number of tasks marked complete.
 
-Confirm to user: *"Loaded spec ({N} acceptance + {N} edge scenarios, {N} constraints, {N} failure conditions), tasks ({N} of {M} complete), and diff ({N} lines across {M} files). Running L1/L2 here, then dispatching L3 to an independent checker."*
+Confirm to user: *"Loaded intent ({N} acceptance + {N} edge scenarios, {N} constraints, {N} failure conditions), tasks ({N} of {M} complete), and diff ({N} lines across {M} files). Running L1/L2 here, then dispatching L3 to an independent checker."*
 
 ### Phase 1 — L1: Mechanical checks *(you run these)*
 
@@ -257,7 +257,7 @@ diff_files: {N}
 
 ## Tool choices
 
-- **Read** for the three artifacts (spec, tasks; diff via Bash)
+- **Read** for the three artifacts (intent, tasks; diff via Bash)
 - **Bash** for `git diff` / `git merge-base`, the L1 build/test/lint, CLI detection (`command -v`), and Tier-1 cross-model dispatch (`codex exec` / `gemini -p` / `claude -p`)
 - **Agent/Task** for Tier-2/Tier-3 native-subagent dispatch (`model: haiku` for Tier 2)
 - **Write** for the briefing, the captured checker response, and the `.intentverify.md` report
@@ -273,7 +273,7 @@ diff_files: {N}
 - **Silently degrade tiers.** If you cannot reach the requested tier, say so and record the tier actually achieved. Never claim a stronger check than happened.
 - **Auto-merge or auto-revert** — you only report. The human decides.
 - **Modify the diff** — you are a validator, not a fixer.
-- **Re-write the spec** — it is locked. If it needs to change, the user re-runs `/che-intend` (update path), keeping existing `E#` IDs.
+- **Re-write the intent** — it is locked. If it needs to change, the user re-runs `/che-intend` (update path), keeping existing `E#` IDs.
 
 ---
 
