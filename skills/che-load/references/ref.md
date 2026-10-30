@@ -120,7 +120,7 @@ Over time: fewer loop iterations, fewer corrections, faster merge.
 
 In v0.2 we expose this as two separate commands (the extension system does not support subactions):
 - `/che-load` — pull store into agent context at the start of a feature
-- `/che-writeback` — persist learnings after intentverify passes
+- `/che-retro` — persist learnings after intentverify passes
 
 ---
 
@@ -136,7 +136,7 @@ They map onto specific parts of the Activated Thinker / ICE diagram:
 | Generated tasks | Task-level expectations the harness loops against |
 | `/che-implement` | The harness — runs work → validate → loop |
 | Intentverify | Validates the `met?` decision beyond just tests (L3) |
-| Compound writeback | Updates compound store after loop exits, via `/che-writeback` |
+| Compound retro | Updates compound store after loop exits, via `/che-retro` |
 
 **The summary in one sentence:**
 We are automating the SDD workflow with a smarter single input (intent + scenarios in one spec), making its outputs more complete (gapfill), and making the whole system compound over time (compound engineering store).
@@ -167,8 +167,8 @@ What the merge gives up — the validation criteria are no longer hidden from th
 ### Plan and tasks are one command (artifacts stay separate)
 v0.2 shipped plan→tasks as two commands with the adr-check gate between them. The gate was never a compartmentation requirement — plan and tasks are both dev-side outputs and no firewall exists between them — so the split only bought a resumable checkpoint at the cost of an extra command trigger and a full context reload. The merged `/che-plan` generates `plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`, **and** `tasks.md` in one run (Phase 0 research → Phase 1 design → Phase 2 task generation); the artifacts remain separate files with unchanged templates and state stages. The ADR gate moved into `/che-planverify`: its deterministic mechanical layer runs the shared `che-adr-check/scripts/check.sh` against the gapfilled plan/tasks surface and seals the governing ADRs into the briefing as facts for the checker's P3e judgment. `/che-adr-check` remains as an on-demand read-only diagnostic with no gate effect; the machine-enforced `adr_gate` (default block) consumes the planverify report (`adr_status` + spec/plan/tasks SHA-256). Independent judgment is unaffected: it lives in planverify (semantic + P3e) and intentverify, not in the plan→tasks boundary.
 
-### Compound load and writeback are two separate commands (extension-system convention)
-v0.1 drafts considered a single `compound` command with `load` and `writeback` subactions, matching Every's `/ce-compound` shape. When we ran the first live install test in v0.2, we discovered the extension system does not support subactions — each slash command must be its own file (the bundled git extension exposes its `commit`, `feature`, `initialize`, `remote`, and `validate` commands as five separate files, not one with subactions). We split accordingly: `/che-load` and `/che-writeback` are two halves of one mechanism, registered separately. The compartmentation and semantics are unchanged; only the surface shape differs.
+### Compound load and retro are two separate commands (extension-system convention)
+v0.1 drafts considered a single `compound` command with `load` and `retro` subactions, matching Every's `/ce-compound` shape. When we ran the first live install test in v0.2, we discovered the extension system does not support subactions — each slash command must be its own file (the bundled git extension exposes its `commit`, `feature`, `initialize`, `remote`, and `validate` commands as five separate files, not one with subactions). We split accordingly: `/che-load` and `/che-retro` are two halves of one mechanism, registered separately. The compartmentation and semantics are unchanged; only the surface shape differs.
 
 ### The unified spec (intent sections + scenarios) is the gapfill input
 The toolkit generates tasks (task-level expectations) from a feature description. But it generates primarily happy-path tasks.
@@ -255,7 +255,7 @@ Existing Friends entries for reference format:
 | quality-checklist generation | Optional | Generate quality checklists (not shipped in this pack) |
 | tasks-to-issues conversion | Optional | Convert tasks to GitHub issues (not shipped in this pack) |
 | `/che-load` | **Extension** | Load ADRs, corrections, patterns into context (this extension) |
-| `/che-writeback` | **Extension** | Persist learnings back to compound store (this extension) |
+| `/che-retro` | **Extension** | Persist learnings back to compound store (this extension) |
 | `/che-gapfill` | **Extension** | Fill generated-task gaps with constraint/negative tests (this extension) |
 | `/che-intentverify` | **Extension** | L3 scope and constraint validation (this extension) |
 

@@ -162,7 +162,7 @@ Write `{TASK_DIR}/intentverify.md` using the format below.
 
 ### Phase 7 — Communicate verdict
 
-- **PASS**: *"Verdict: PASS (checked by {checker}, Tier {N}). Safe to merge. Run `/che-writeback` to persist learnings before merging."*
+- **PASS**: *"Verdict: PASS (checked by {checker}, Tier {N}). Safe to merge. Run `/che-retro` to persist learnings before merging."*
 - **REVIEW NEEDED**: *"Verdict: REVIEW NEEDED (checked by {checker}). {N} items need human review (see `{TASK_DIR}/intentverify.md`). Do not merge until reviewed."*
 - **BLOCKED**: *"Verdict: BLOCKED (checked by {checker}). {N} violations:"* — list each with the required fix.
 
@@ -241,7 +241,7 @@ diff_files: {N}
 ## Recommendations
 {If BLOCKED: list specific violations and the required fix for each}
 {If REVIEW: list ambiguous items needing human eyes}
-{If PASS: confirm safe to merge; recommend /che-writeback before merge}
+{If PASS: confirm safe to merge; recommend /che-retro before merge}
 
 ## Orchestrator meta-notes (optional)
 {Any disagreement with the checker — advisory only; the checker's L3 verdict stands.}
@@ -281,6 +281,6 @@ diff_files: {N}
 
 > Pack fork (ncw), port on upstream upgrade.
 
-- **目标**：`/che-writeback` —— 把本特性的 ADR/修正/模式回写 compound store
-- **条件**：判定 PASS 直接交接；REVIEW NEEDED 须人工逐条清除后才可 writeback
-- **回退**：BLOCKED → 回到 implement 修复违规项后重跑 intentverify，writeback 被拒绝
+- **目标**：`/che-retro` —— 把本特性的 ADR/修正/模式回写 compound store
+- **条件**：判定 PASS 直接交接；REVIEW NEEDED 须人工逐条清除后才可 retro
+- **回退**：BLOCKED → 回到 implement 修复违规项后重跑 intentverify，retro 被拒绝

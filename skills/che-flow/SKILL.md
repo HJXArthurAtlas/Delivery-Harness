@@ -27,7 +27,7 @@ description: 团队基于 规格驱动开发 + PingCode 的 AI native 开发流�
 
 ## 任务与 slug 单一事实源
 
-全流程（intend（含 intent 访谈与场景起草）→ clarify/design → plan（含 tasks 生成）→ gapfill → planverify → intentverify → writeback）围绕**任务目录**展开：`/che-intend` 用 `che task create {slug} --session <id>` 创建 `specs/NNN-{slug}/`（任务自此诞生，session 绑定落 `.che/feature.json`，机器本地不入库），后续所有制品都落这个目录。slug 是任务的全流程稳定句柄：目录名剥 `NNN-` 数字前缀（推送 PingCode 后为 `NCW-x` identifier 前缀）即得，`che paths --json` 的 `SLUG` 字段即该值。
+全流程（intend（含 intent 访谈与场景起草）→ clarify/design → plan（含 tasks 生成）→ gapfill → planverify → intentverify → retro）围绕**任务目录**展开：`/che-intend` 用 `che task create {slug} --session <id>` 创建 `specs/NNN-{slug}/`（任务自此诞生，session 绑定落 `.che/feature.json`，机器本地不入库），后续所有制品都落这个目录。slug 是任务的全流程稳定句柄：目录名剥 `NNN-` 数字前缀（推送 PingCode 后为 `NCW-x` identifier 前缀）即得，`che paths --json` 的 `SLUG` 字段即该值。
 
 - 下游各技能取 slug/目录一律从 `che paths`（带 `--session` 或在单任务时裸跑）读，不各自拼猜；链式调用（如 intend → clarify）直接沿用上游技能选定的 `TASK_DIR`/`SLUG`，不在多任务间重新解析；intend / planverify / intentverify 产物按 `{任务目录}/intent.md`、`{任务目录}/planverify.md` 等落盘。
 - spec 推送 PingCode 后 `/che-pingcode-specstoissues` 把目录改名为 `{pingcode-identifier}-{slug}`（如 `NCW-4921-demo`）——slug 不变，session 绑定与后续解析不受影响。

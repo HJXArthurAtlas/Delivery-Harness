@@ -26,7 +26,7 @@ Commands:
   che state show            Stage, next step, and per-stage durations
 
 Stages (in flow order): intend, clarify, design, plan,
-tasks, gapfill, planverify, intentverify, writeback, implement.
+tasks, gapfill, planverify, intentverify, retro, implement.
 Retired stage \`expectations\` is rejected by \`state start\`; legacy runs in
 existing metadata.json files still decode, display, and can be closed with
 \`state done expectations\`.
@@ -48,7 +48,7 @@ const STAGES = [
   'gapfill',
   'planverify',
   'intentverify',
-  'writeback',
+  'retro',
   'implement',
 ] as const;
 

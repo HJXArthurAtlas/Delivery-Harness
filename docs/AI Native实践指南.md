@@ -231,7 +231,7 @@ UI 设计侧注意：
 5. `/che-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；先过 `/che-planverify-gate`——`adr_gate` 默认 block（报告缺失、`adr_status` 非 clean、或 spec/plan/tasks 改动后 hash 不匹配即拒绝），`planverify_gate` 为 block 时再拒 BLOCKED_DRIFT / BLOCKED_ADR。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): 中文消息` + `Co-Authored-By` 页脚（消息不带工作项 ID），小步拆分、精确暂存、排除敏感文件
 6. `/che-intentverify` —— 独立校验者审实现 vs 锁定意图：PASS 交接，REVIEW 人工复核后放行，BLOCKED 回退至 implement 修复
 7. `/che-pingcode-sync-status` —— 本地任务全部 `[x]` 后卡片单向流转完成态
-8. `/che-writeback` —— 把新经验（ADR / corrections / patterns）沉淀回 compound store，供后续特性复用
+8. `/che-retro` —— 把新经验（ADR / corrections / patterns）沉淀回 compound store，供后续特性复用
 
 开发侧纪律：
 

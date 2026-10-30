@@ -1,11 +1,11 @@
 ---
-name: che-writeback
-description: 经验沉淀：intentverify PASS 后把本次特性的新经验写回 compound store（docs/corrections/、docs/patterns/），耐久纠偏升格为 ADR 进 docs/adr/。当用户说「writeback 本次经验」「把这次的教训沉淀下来」时使用——即使用户没提命令名，只要是特性完成后的经验回写也用本 skill。
+name: che-retro
+description: 经验沉淀：intentverify PASS 后把本次特性的新经验写回 compound store（docs/corrections/、docs/patterns/），耐久纠偏升格为 ADR 进 docs/adr/。当用户说「retro 本次经验」「把这次的教训沉淀下来」时使用——即使用户没提命令名，只要是特性完成后的经验回写也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 
-# Writeback to Compound Store
+# Retro to Compound Store
 
 After `/che-intentverify` returns PASS (or REVIEW NEEDED that a human has cleared), you persist the learnings of this feature back into the compound store. This is what makes the system compound — every feature contributes to the next.
 
@@ -16,11 +16,11 @@ After `/che-intentverify` returns PASS (or REVIEW NEEDED that a human has cleare
 **1. Verify intent verify passed.**
 
 Read `{task_dir}/intentverify.md` (`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR`). If verdict is:
-- **BLOCKED**: refuse — *"Intent verify verdict is BLOCKED. Resolve violations before writeback."*
+- **BLOCKED**: refuse — *"Intent verify verdict is BLOCKED. Resolve violations before retro."*
 - **REVIEW NEEDED**: ask the user — *"Verdict is REVIEW NEEDED. Has a human reviewed the {N} items? [yes / no]"* Refuse if no.
 - **PASS**: proceed.
 
-**2. Scan the session for writeback candidates:**
+**2. Scan the session for retro candidates:**
 
 **ADR candidates** — non-obvious architectural choices made during `/che-intend` or `/che-implement`:
 - Library/framework selection that locks in a pattern
@@ -119,7 +119,7 @@ completed: {YYYY-MM-DD}
 
 **7. Summary**:
 
-*"Writeback complete. {N} ADRs committed to the adrkit corpus (`docs/adr/`), {N} corrections committed to `docs/corrections/`, and {N} patterns committed to `docs/patterns/`. Specification `{slug}` marked completed. Corpus size: {N} ADRs; store size: {N} corrections / {N} patterns."*
+*"Retro complete. {N} ADRs committed to the adrkit corpus (`docs/adr/`), {N} corrections committed to `docs/corrections/`, and {N} patterns committed to `docs/patterns/`. Specification `{slug}` marked completed. Corpus size: {N} ADRs; store size: {N} corrections / {N} patterns."*
 
 ---
 

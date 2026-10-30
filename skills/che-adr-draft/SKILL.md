@@ -63,7 +63,7 @@ $ARGUMENTS
   target path is already taken it refuses rather than overwriting (exit 1).
 - Single corpus: since the ADR-unification cutover, `docs/adr/` (or
   `$ADRKIT_DIR`) is the project's only ADR corpus. `che-grill-with-docs`
-  and `che-writeback` allocate their records here too, through this
+  and `che-retro` allocate their records here too, through this
   skill's `scripts/scaffold.sh` — the plan-less variant of this command's
   deterministic half (same CLI, same id allocation, no plan required). All
   writers share one numbering sequence; never hand-number.

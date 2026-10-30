@@ -50,7 +50,7 @@ $ARGUMENTS
 - Read-only. This command never writes to `docs/adr/**` or anything else.
 - The corpus directory defaults to `docs/adr/` and is overridable with
   `ADRKIT_DIR`. Since the ADR-unification cutover this is the project's only
-  ADR corpus: che-grill-with-docs and che-writeback allocate
+  ADR corpus: che-grill-with-docs and che-retro allocate
   their records here through the scaffold entry point at
   `.agents/skills/che-adr-draft/scripts/scaffold.sh`, so this
   command sees every ADR written anywhere in the workflow.
