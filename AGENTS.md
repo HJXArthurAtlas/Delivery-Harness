@@ -10,7 +10,7 @@
 
 | 路径 | 简要说明 |
 |---|---|
-| `skills/che-{specify,clarify,design,plan,planverify,planverify-gate,implement,intentguard,grill-me,grill-with-docs,gapfill,analyze,converge,load,writeback,constitution,flow}/` | 规格驱动开发主流程及 compound 扩展 |
+| `skills/che-{specify,clarify,design,plan,planverify,planverify-gate,implement,intentguard,grill,grill-with-docs,gapfill,analyze,converge,load,writeback,constitution,flow}/` | 规格驱动开发主流程及 compound 扩展 |
 | `skills/che-adr-*/` | ADR 检查、上下文和起草 |
 | `skills/che-pingcode-*/` | PingCode 初始化、建卡与同步 |
 | `skills/che-bug-*/` | Bug 评估、修复和验证 |

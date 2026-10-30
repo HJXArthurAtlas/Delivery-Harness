@@ -196,7 +196,7 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
   - /che-design: 出设计明细 design-tasks.md（涉 UI 必跑，先于 plan）
   - /che-plan: 交接门禁通过后开发侧出实现计划
   可选:
-  - /che-grill-me: [可选] 决策点仍有歧义时的深度澄清
+  - /che-grill: [可选] 决策点仍有歧义时的深度澄清
   - /che-pingcode-specstoissues: [可选] 建卡并登记 mapping.json（不建则交接前补跑）
 
 ## Done When
@@ -215,5 +215,5 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
 - **目标**：`/che-design`（涉 UI）或 `/che-plan`（无 UI，交接门禁通过后）
 - **条件**：
   - 澄清结论已回写 spec
-  - 可选 `/che-grill-me` 继续追问
+  - 可选 `/che-grill` 继续追问
   - 交接门禁（spec 章节齐备 + pingcode-mapping.json 登记）通过后才进 plan

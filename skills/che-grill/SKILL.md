@@ -1,5 +1,5 @@
 ---
-name: che-grill-me
+name: che-grill
 description: 规划前的无上限深度澄清访谈（clarify 的深化替代，结论不回写 spec）：把 spec.md 的歧义与决策点逐轮推进到 Clear/Resolved/Outstanding/Deferred。当用户说「深度澄清这份 spec」「grill me」「把规格歧义全部清掉」时使用——即使用户没提命令名，只要是规划前的穷尽式规格澄清也用本 skill。
 ---
 
