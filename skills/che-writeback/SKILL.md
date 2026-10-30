@@ -1,22 +1,22 @@
 ---
 name: che-writeback
-description: 经验沉淀：intentguard PASS 后把本次特性的新经验写回 compound store（docs/corrections/、docs/patterns/），耐久纠偏升格为 ADR 进 docs/adr/。当用户说「writeback 本次经验」「把这次的教训沉淀下来」时使用——即使用户没提命令名，只要是特性完成后的经验回写也用本 skill。
+description: 经验沉淀：intentverify PASS 后把本次特性的新经验写回 compound store（docs/corrections/、docs/patterns/），耐久纠偏升格为 ADR 进 docs/adr/。当用户说「writeback 本次经验」「把这次的教训沉淀下来」时使用——即使用户没提命令名，只要是特性完成后的经验回写也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 
 # Writeback to Compound Store
 
-After `/che-intentguard` returns PASS (or REVIEW NEEDED that a human has cleared), you persist the learnings of this feature back into the compound store. This is what makes the system compound — every feature contributes to the next.
+After `/che-intentverify` returns PASS (or REVIEW NEEDED that a human has cleared), you persist the learnings of this feature back into the compound store. This is what makes the system compound — every feature contributes to the next.
 
 ---
 
 ## What to do
 
-**1. Verify intent guard passed.**
+**1. Verify intent verify passed.**
 
-Read `{task_dir}/intentguard.md` (`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR`). If verdict is:
-- **BLOCKED**: refuse — *"Intent guard verdict is BLOCKED. Resolve violations before writeback."*
+Read `{task_dir}/intentverify.md` (`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR`). If verdict is:
+- **BLOCKED**: refuse — *"Intent verify verdict is BLOCKED. Resolve violations before writeback."*
 - **REVIEW NEEDED**: ask the user — *"Verdict is REVIEW NEEDED. Has a human reviewed the {N} items? [yes / no]"* Refuse if no.
 - **PASS**: proceed.
 
@@ -125,7 +125,7 @@ completed: {YYYY-MM-DD}
 
 ## Tool choices
 
-- **Read** for scanning session history and intent guard verdict
+- **Read** for scanning session history and intent verify verdict
 - **Bash** for the adrkit scaffold entry point and `.agents/skills/che-adr-draft/scripts/adr.sh lint`
 - **Write** for new compound files
 - **Edit** for updating specification status (intent.md frontmatter only)
@@ -138,7 +138,7 @@ completed: {YYYY-MM-DD}
 - **Auto-create ADRs without user approval** — every ADR draft must be approved
 - **Auto-elevate patterns** — patterns require explicit user approval; corrections can auto-capture without approval if the correction was made by the user mid-session
 - **Modify existing ADRs** — if a decision changes, create a new ADR in the adrkit corpus (`docs/adr/`) that supersedes the old one (don't edit the old; the historical record matters)
-- **Write back if intent guard is BLOCKED** — failure modes don't contribute to compound learning until resolved
+- **Write back if intent verify is BLOCKED** — failure modes don't contribute to compound learning until resolved
 
 ---
 
@@ -147,4 +147,4 @@ completed: {YYYY-MM-DD}
 > Pack fork (ncw), port on upstream upgrade.
 
 - **目标**：无 —— 链终点；产物落 `docs/adr/`、`docs/corrections/`、`docs/patterns/`
-- **条件**：仅在 intentguard PASS（或 REVIEW NEEDED 经人工确认）后执行；BLOCKED 必须拒绝
+- **条件**：仅在 intentverify PASS（或 REVIEW NEEDED 经人工确认）后执行；BLOCKED 必须拒绝

@@ -65,7 +65,7 @@ Architecture profile (docs/architecture.md, project structure — place things w
 
 ## Notes for the rest of the session
 
-After loading, when the agent makes design decisions during `/che-intend`, `/che-implement`, `/che-intentguard`, etc., it should:
+After loading, when the agent makes design decisions during `/che-intend`, `/che-implement`, `/che-intentverify`, etc., it should:
 
 - **Reference relevant ADRs** when constraints are being chosen — don't propose a constraint that contradicts a settled ADR
 - **Avoid known correction patterns** — if the agent is about to do something that matches a correction note, stop and warn
@@ -90,7 +90,7 @@ If the session's context is compacted by the harness, the compound store summary
 ## Bundled references
 
 - `references/compound-store-README.md` — the scaffold README copied into `docs/compound/README.md` when the store is first created
-- `references/ref.md` — conceptual reference for the whole compound workflow (ICE slots, why compartmentation defeats reward-hacking, planverify vs intentguard). Read it when the user asks *why* the workflow is designed this way; it is background, not a procedure.
+- `references/ref.md` — conceptual reference for the whole compound workflow (ICE slots, why compartmentation defeats reward-hacking, planverify vs intentverify). Read it when the user asks *why* the workflow is designed this way; it is background, not a procedure.
 
 ---
 

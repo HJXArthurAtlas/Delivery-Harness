@@ -55,13 +55,13 @@ Patterns require explicit user approval at writeback; they are the most opiniona
 /che-load                  →  reads the adrkit corpus + this store, injects into agent context
                                             (at the start of every feature)
 
-[feature work happens — intend, plan, implement, intentguard]
+[feature work happens — intend, plan, implement, intentverify]
 
 /che-writeback             →  drafts new corrections/patterns from the session
                                             (and elevates durable corrections into ADRs in the
                                             adrkit corpus); user approves each, accepted ones land
                                             in place (at the end of every feature, after
-                                            intentguard PASS)
+                                            intentverify PASS)
 ```
 
 ---

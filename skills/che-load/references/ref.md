@@ -69,7 +69,7 @@ as done)
 | **Context** | The surround (stack, codebase, prior decisions), fed progressively | Harness |
 | **Expectations** | Success scenarios + boundary of done | Human |
 
-The IDSD compartmentation rule originally put success scenarios in a separate file so the builder could not read the validator's checks. **This pack no longer does that.** Scenarios live in `intent.md` next to the intent; the accepted tradeoff is that the validation criteria are not secret from the builder. What is preserved is *independent judgment*: the validator (`/che-intentguard`) still judges through a sealed briefing and an independent checker (fresh context, ideally a different model) that never saw the builder's reasoning — the firewall moved from the file system to the dispatch boundary.
+The IDSD compartmentation rule originally put success scenarios in a separate file so the builder could not read the validator's checks. **This pack no longer does that.** Scenarios live in `intent.md` next to the intent; the accepted tradeoff is that the validation criteria are not secret from the builder. What is preserved is *independent judgment*: the validator (`/che-intentverify`) still judges through a sealed briefing and an independent checker (fresh context, ideally a different model) that never saw the builder's reasoning — the firewall moved from the file system to the dispatch boundary.
 
 **The gap the base workflow leaves:**
 The base workflow asks "what do you want to build?" but doesn't structure:
@@ -120,7 +120,7 @@ Over time: fewer loop iterations, fewer corrections, faster merge.
 
 In v0.2 we expose this as two separate commands (the extension system does not support subactions):
 - `/che-load` — pull store into agent context at the start of a feature
-- `/che-writeback` — persist learnings after intentguard passes
+- `/che-writeback` — persist learnings after intentverify passes
 
 ---
 
@@ -135,7 +135,7 @@ They map onto specific parts of the Activated Thinker / ICE diagram:
 | Spec scenarios (Acceptance + Edge, `E#` IDs, same intent.md) | `EXPECTATIONS` node — what you provide on the right |
 | Generated tasks | Task-level expectations the harness loops against |
 | `/che-implement` | The harness — runs work → validate → loop |
-| Intentguard | Validates the `met?` decision beyond just tests (L3) |
+| Intentverify | Validates the `met?` decision beyond just tests (L3) |
 | Compound writeback | Updates compound store after loop exits, via `/che-writeback` |
 
 **The summary in one sentence:**
@@ -162,10 +162,10 @@ IDSD's original compartmentation principle kept success scenarios out of the art
 
 **Current design (single-artifact model):** the expectations phase is retired. `/che-intend` drafts the Acceptance Scenarios and Edge Cases in the same interview and writes them into `intent.md` with a global stable `E#` ID sequence (never renumbered, never reused). There is one requirement source of truth, one forward stage chain, and no second spec writer — `/che-clarify` is the only later writer, and it integrates answers directly into the spec sections.
 
-What the merge gives up — the validation criteria are no longer hidden from the builder — was an accepted tradeoff. What it keeps is **independent judgment**: `/che-intentguard` and `/che-planverify` still extract the locked intent, the scenarios, and the diff (or plan) into a sealed briefing and hand it to an independent checker (fresh context at minimum, a different model when available) that never saw the builder's or planner's reasoning. The compartmentation that remains real is the briefing firewall, not file visibility. Hard compartmentation (separate agents, encrypted evals) remains deferred until there is evidence the briefing firewall is being gamed.
+What the merge gives up — the validation criteria are no longer hidden from the builder — was an accepted tradeoff. What it keeps is **independent judgment**: `/che-intentverify` and `/che-planverify` still extract the locked intent, the scenarios, and the diff (or plan) into a sealed briefing and hand it to an independent checker (fresh context at minimum, a different model when available) that never saw the builder's or planner's reasoning. The compartmentation that remains real is the briefing firewall, not file visibility. Hard compartmentation (separate agents, encrypted evals) remains deferred until there is evidence the briefing firewall is being gamed.
 
 ### Plan and tasks are one command (artifacts stay separate)
-v0.2 shipped plan→tasks as two commands with the adr-check gate between them. The gate was never a compartmentation requirement — plan and tasks are both dev-side outputs and no firewall exists between them — so the split only bought a resumable checkpoint at the cost of an extra command trigger and a full context reload. The merged `/che-plan` generates `plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`, **and** `tasks.md` in one run (Phase 0 research → Phase 1 design → Phase 2 task generation); the artifacts remain separate files with unchanged templates and state stages. The ADR gate moved into `/che-planverify`: its deterministic mechanical layer runs the shared `che-adr-check/scripts/check.sh` against the gapfilled plan/tasks surface and seals the governing ADRs into the briefing as facts for the checker's P3e judgment. `/che-adr-check` remains as an on-demand read-only diagnostic with no gate effect; the machine-enforced `adr_gate` (default block) consumes the planverify report (`adr_status` + spec/plan/tasks SHA-256). Independent judgment is unaffected: it lives in planverify (semantic + P3e) and intentguard, not in the plan→tasks boundary.
+v0.2 shipped plan→tasks as two commands with the adr-check gate between them. The gate was never a compartmentation requirement — plan and tasks are both dev-side outputs and no firewall exists between them — so the split only bought a resumable checkpoint at the cost of an extra command trigger and a full context reload. The merged `/che-plan` generates `plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`, **and** `tasks.md` in one run (Phase 0 research → Phase 1 design → Phase 2 task generation); the artifacts remain separate files with unchanged templates and state stages. The ADR gate moved into `/che-planverify`: its deterministic mechanical layer runs the shared `che-adr-check/scripts/check.sh` against the gapfilled plan/tasks surface and seals the governing ADRs into the briefing as facts for the checker's P3e judgment. `/che-adr-check` remains as an on-demand read-only diagnostic with no gate effect; the machine-enforced `adr_gate` (default block) consumes the planverify report (`adr_status` + spec/plan/tasks SHA-256). Independent judgment is unaffected: it lives in planverify (semantic + P3e) and intentverify, not in the plan→tasks boundary.
 
 ### Compound load and writeback are two separate commands (extension-system convention)
 v0.1 drafts considered a single `compound` command with `load` and `writeback` subactions, matching Every's `/ce-compound` shape. When we ran the first live install test in v0.2, we discovered the extension system does not support subactions — each slash command must be its own file (the bundled git extension exposes its `commit`, `feature`, `initialize`, `remote`, and `validate` commands as five separate files, not one with subactions). We split accordingly: `/che-load` and `/che-writeback` are two halves of one mechanism, registered separately. The compartmentation and semantics are unchanged; only the surface shape differs.
@@ -177,7 +177,7 @@ The unified spec's **out-of-scope** and **constraints** sections, plus the **Edg
 
 Without these sections, gapfill has no reference to know what constraints exist, what's out of scope, or which `E#` scenarios still lack a task.
 
-### Validation Level 3 (Intent Guard)
+### Validation Level 3 (Intent Verify)
 Most harnesses validate at:
 - L1: Tests pass, build is clean
 - L2: Output matches the spec
@@ -186,7 +186,7 @@ L3 is new: did the implementation **stay within the unified spec's declared scop
 
 This requires comparing the git diff against the spec's out-of-scope and constraints sections, and against the spec's `E#` scenarios — something that requires a separate LLM call, not just test execution.
 
-The intentguard prompt specifically checks:
+The intentverify prompt specifically checks:
 1. Were any out-of-scope items touched? (BLOCKED if yes)
 2. Were any constraints violated? (BLOCKED if yes)
 3. Were any failure conditions tripped? (BLOCKED if yes)
@@ -226,7 +226,7 @@ Existing Friends entries for reference format:
 ## Positioning and content angle
 
 **One-line description:**
-"A compound-engineering extension that adds intent-driven scoping (ICE), compound engineering memory, and intent guard validation to the SDD workflow."
+"A compound-engineering extension that adds intent-driven scoping (ICE), compound engineering memory, and intent verify validation to the SDD workflow."
 
 **The story for GDE content:**
 - The base workflow generates task-level expectations but misses intent (scope, constraints, non-goals) and user-level scenarios
@@ -235,7 +235,7 @@ Existing Friends entries for reference format:
 - This extension wires all three together as a publishable extension
 
 **What makes it novel:**
-- Intent Guard (L3 validation) — not done by any existing extension
+- Intent Verify (L3 validation) — not done by any existing extension
 - Compound store as committed repo artifacts — solves the local-memory limitation
 - One requirement artifact (intent + scenarios with stable `E#` IDs in `intent.md`), with validator independence preserved by the sealed-briefing firewall — not file hiding
 - Gapfill driven by the spec's intent sections + scenarios — not generic, purpose-built
@@ -257,7 +257,7 @@ Existing Friends entries for reference format:
 | `/che-load` | **Extension** | Load ADRs, corrections, patterns into context (this extension) |
 | `/che-writeback` | **Extension** | Persist learnings back to compound store (this extension) |
 | `/che-gapfill` | **Extension** | Fill generated-task gaps with constraint/negative tests (this extension) |
-| `/che-intentguard` | **Extension** | L3 scope and constraint validation (this extension) |
+| `/che-intentverify` | **Extension** | L3 scope and constraint validation (this extension) |
 
 ---
 
