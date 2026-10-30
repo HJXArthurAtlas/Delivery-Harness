@@ -26,7 +26,6 @@
 ### 命令名 `/che-specify` → `/che-intend`
 
 - che-analyze L162；che-clarify L28/L149/L173；che-constitution L32；che-converge L60；che-design L33
-- che-flow L3/L18/L30/L32（注意 L37-39 是 `/che-pingcode-specstoissues`，勿误改）
 - che-grill L37/L38/L262；che-grill-with-docs L37/L38/L376
 - che-intentverify L59/L276；che-load L68/L109；che-planverify L79/L396
 - che-project-init L70/L165；che-writeback L25
@@ -40,7 +39,7 @@
 - che-grill（13 处）、che-grill-with-docs（14 处）、che-intentverify（2 处）
 - che-planverify（3 处，含 L323 `spec_sha256` 哈希契约行）、che-plan（5 处 + plan-template.md + tasks-template.md）
 - che-pingcode-specstoissues（5 处）、che-pingcode-sync-cards（2 处）、che-pingcode-init 模板注释
-- che-writeback（3 处）、che-load + ref.md、che-flow（4 处）
+- che-writeback（3 处）、che-load + ref.md
 
 ### 配置键
 
@@ -107,7 +106,6 @@
 - che-load L30（scaffold 提示语）、L99（禁忌清单）；`references/compound-store-README.md` L5/L24（「writeback shape」）/L36/L48（「at writeback (time)」）/L60；`references/ref.md` L123/L139/L170/L258
 - che-adr-context L53；che-adr-draft L65-66；`che-adr-draft/scripts/scaffold.sh` L10（「compound writeback」→「compound retro」）
 - che-grill-with-docs L66/L124（「compound writeback」→「compound retro」）
-- che-flow L30（全流程链「intentverify → writeback」）
 
 ## 阶段 R3：CLI 源码
 
@@ -168,7 +166,6 @@
 - che-writeback L3/L10/L18-19/L150（含 `intentverify.md` 产物读取路径，**同提交**）
 - che-implement L165（Handoff 目标）
 - che-gapfill L115/L120/L148
-- che-flow L30（全流程链）/L32（产物落盘列举）
 - che-load L68；`references/compound-store-README.md` L58/L64；`references/ref.md` L72/L123/L165/L168/L189-192/L260
 - che-planverify L11/L19/L52/L152（概念互引，含「mirror of intentverify」）
 - che-project-init L54/L141（checker 策略配置注释）

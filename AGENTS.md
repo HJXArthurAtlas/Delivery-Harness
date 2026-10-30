@@ -10,13 +10,13 @@
 
 | 路径 | 简要说明 |
 |---|---|
-| `skills/che-{intend,clarify,design,plan,planverify,planverify-gate,implement,intentverify,grill,grill-with-docs,gapfill,analyze,converge,load,retro,constitution,flow}/` | 规格驱动开发主流程及 compound 扩展 |
+| `skills/che-{intend,clarify,design,plan,planverify,planverify-gate,implement,intentverify,grill,grill-with-docs,gapfill,analyze,converge,load,retro,constitution}/` | 规格驱动开发主流程及 compound 扩展 |
 | `skills/che-adr-*/` | ADR 检查、上下文和起草 |
 | `skills/che-pingcode-*/` | PingCode 初始化、建卡与同步 |
 | `skills/che-bug-*/` | Bug 评估、修复和验证 |
+| `skills/che-git-master/` | git 提交规范流程（消息格式、拆分、暂存边界） |
 | `skills/che-project-init/` | 项目接入与基础配置 |
 | `skills/che-project-arch/` | 项目架构画像生成与对账（docs/architecture.md） |
-| `skills/che-mturtle-troubleshooting/` | 线上问题排查知识 |
 | `packages/cli/` | `@newchiwan/che` 源码与发布脚本 |
 | `tests/skills/` | 技能结构、CLI 和技能运行时测试 |
 | `.omp-plugin/marketplace.json` | omp 插件 catalog |

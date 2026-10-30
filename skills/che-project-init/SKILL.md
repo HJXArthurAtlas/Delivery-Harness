@@ -162,7 +162,7 @@ pingcode_integration: off
    gitignore: <✓ 已忽略 .che/feature.json、.che/*.bak 或 +新增规则 或 用户拒绝跳过>
 ```
 
-- 开始第一个特性：`/che-intend`（意图访谈 + 统一 spec 一体完成；全流程总览见 `/che-flow`）。
+- 开始第一个特性：`/che-intend`（意图访谈 + 统一 spec 一体完成）。
 - 项目尚无 `docs/architecture.md` → 移交 `/che-project-arch` 生成架构画像（服务/应用清单 + 依赖图），供 `/che-load` 每次会话装载。
 - 已接入 PingCode：spec 建卡走 `/che-pingcode-specstoissues`。
 

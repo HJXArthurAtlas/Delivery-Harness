@@ -18,7 +18,7 @@
 | 了解交付必须遵守的原则，或需要修订宪法 | [§2.4](#24-基础宪法) |
 | 环境检查不通过、缺工具或版本不符 | [§2.5](#25-工具链基线与每会话环境检查) |
 | 确认技能包装在哪、运行时依赖哪些 CLI | [§3.1](#31-定位与依赖) |
-| 走日常开发流程：产品 / UI 设计 / 开发各侧顺序、交接门禁、自动行为、质量环节、bug 修复、线上排障 | [§3.2](#32-主线流程) |
+| 走日常开发流程：产品 / UI 设计 / 开发各侧顺序、交接门禁、自动行为、质量环节、bug 修复 | [§3.2](#32-主线流程) |
 | 找某个流程产物（spec、tasks、mapping.json 等）的位置 | [§3.3](#33-产出物结构) |
 | 从零开始按顺序操作，或需要修改模板 / 技能包 | [§4](#4-使用路径从初始化到日常交付) |
 
@@ -27,7 +27,7 @@
 | 组成 | 仓库 | 职责 | 承载位置 |
 |---|---|---|---|
 | monorepo-template | `council/monorepo-template` | 定义**项目内包含什么**：目录骨架、治理文件、环境基线、门禁 | 你的项目仓库 |
-| ncw-delivery-harness | `council/ncw-delivery-harness` | 定义 **Agent 执行什么**：规格驱动开发主线、PingCode 建卡收尾、bug 修复、线上排障 | 你的 AI Agent |
+| ncw-delivery-harness | `council/ncw-delivery-harness` | 定义 **Agent 执行什么**：规格驱动开发主线、PingCode 建卡收尾、bug 修复 | 你的 AI Agent |
 
 ```mermaid
 flowchart LR
@@ -159,7 +159,7 @@ your-repo/
 
 ### 3.2 主线流程
 
-主线链条（阶段数随角色取舍浮动，不按固定数字计）：**统一 intend（含 intent 访谈与场景起草）→ clarify → UI 设计明细 / 建卡 / 交接门禁 → plan → gapfill → planverify（含确定性 ADR 校验）→ implement 前对账 → implement → 卡片收尾**；另有独立辅助链：bug 修复三步（assess → fix → test）与线上问题排查（环境对号 → Loki 日志 → 数据库核事实）。
+主线链条（阶段数随角色取舍浮动，不按固定数字计）：**统一 intend（含 intent 访谈与场景起草）→ clarify → UI 设计明细 / 建卡 / 交接门禁 → plan → gapfill → planverify（含确定性 ADR 校验）→ implement 前对账 → implement → 卡片收尾**；另有独立辅助链：bug 修复三步（assess → fix → test）。
 
 ```mermaid
 flowchart TD
@@ -263,8 +263,6 @@ bug 修复三步：
 | 2 | `/che-bug-fix slug=<slug>` | 按评估实施修复 → `fix.md` | status 为 `applied` / `partial` |
 | 3 | `/che-bug-test slug=<slug>` | 验证修复 → `test.md` | `verified` 收口；`failed` 时携带新证据重新执行 assess |
 
-线上问题排查：`/che-mturtle-troubleshooting` —— 以系统名称为入口定位 → 环境（生产 / UAT / stg / 漳州）→ Loki namespace / app → 数据库对应关系；通过业务单号 / trace_id 追踪日志，并与数据库中的事实互相印证；证据全部来自线上 MCP 数据源，不依赖本地工作目录。
-
 > 本节由 harness 仓流程规范转换而来；技能的权威触发描述以各 `skills/<name>/SKILL.md` frontmatter 为准，harness 侧流程变更需回同步本节。
 
 ### 3.3 产出物结构
@@ -276,5 +274,5 @@ bug 修复三步：
 1. **初始化（一次性）**：把 §1.1 第一段提示词发给 Agent → 复制骨架、安装技能包、接入 codegraph → 重启 Agent。
 2. **完善登记（一次性）**：发 §1.1 第二段提示词 → 验证索引、登记 `AGENTS.md` 布局、执行 `/che-project-init`。
 3. **架构画像（可选，一次性）**：跑 `/che-project-arch` → Agent 扫描 `services/`、`apps/` 等布局生成 `docs/architecture.md`（服务/应用清单 + mermaid 依赖图），确认后入库；此后每个特性会话 `/che-load` 自动装载，架构变化时重跑对账。
-4. **日常交付**：按角色进入 harness 主线（§3.2）；产品从 intend（含 intent 访谈与场景起草）开始，开发从 plan 开始；bug 使用修复链，线上问题使用排障技能。每会话 Agent 自动执行环境检查。
+4. **日常交付**：按角色进入 harness 主线（§3.2）；产品从 intend（含 intent 访谈与场景起草）开始，开发从 plan 开始；bug 使用修复链。每会话 Agent 自动执行环境检查。
 5. **维护分工**：改骨架、初始化提示词、环境基线 → 直接改 monorepo-template 仓的 `README.md` 与 `AGENTS-TEMPLATE.md`（版本两处同步）；技能流程问题 → 去 harness 仓。

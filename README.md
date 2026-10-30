@@ -2,7 +2,7 @@
 
 赤湾东方自建软件交付 Harness：把团队 AI native 交付方法做成跨端 agent skill pack，可在 DSH / OpenCode / omp 等端安装。方法底座三条：
 
-- **知识工程**——把团队知识落盘为机器可装载的资产：宪法 `docs/constitution/`、ADR 语料 `docs/adr/`、领域知识库 `docs/domain_knowledge/`、compound store（`docs/corrections/`、`docs/patterns/`）与线上排障知识；会话开场装载（load），交付后回写（retro）。
+- **知识工程**——把团队知识落盘为机器可装载的资产：宪法 `docs/constitution/`、ADR 语料 `docs/adr/`、领域知识库 `docs/domain_knowledge/`、compound store（`docs/corrections/`、`docs/patterns/`）；会话开场装载（load），交付后回写（retro）。
 - **Intent Driven Development**——规格是唯一意图来源：specify → clarify/grill → plan → tasks → implement，以宪法与 ADR 为治理约束，planverify 门禁与 intentverify 独立校验实现不越出意图。
 - **Compound Engineering**——每次交付让下次更快：新经验写回 store、耐久纠偏升格为 ADR，bug 走 assess → fix → test 闭环沉淀回归，组织经验随交付复利。
 
@@ -107,7 +107,7 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 
 0.4.0 起规格驱动技能由 `che-compound-*` 统一更名为 `che-*` 二段名（如 `/che-compound-plan` → `/che-plan`）。从旧版升级后，手动删除技能发现目录里残留的 `che-compound-*` 旧目录——技能安装同名不覆盖，不删会新旧双份并存。
 
-## 运行时与外部 CLI（排除 init / flow）
+## 运行时与外部 CLI（排除 init）
 
 `che-adr-*` 依赖外部 `@adrkit/cli`；特性路径解析依赖外部 `che` CLI（`@newchiwan/che`）：
 
@@ -122,7 +122,7 @@ CLI 解析（`adrkit-lib.sh`）：只执行 PATH 上的 `adrkit` 与 `che`，不
 
 `planverify` / `intentverify` 的默认 `auto` 策略在没有跨模型 CLI 时使用原生 Tier 2/3 subagent；只有用户强制 `cross-model` 或 `cli:model` 才需要对应外部模型 CLI。
 
-**范围边界**：`che-flow` 不属于自包含改造范围（保留 PingCode 卡流程依赖）。目标项目自身的 git / build / test / lint 工具链也不随 pack 内置。
+**范围边界**：目标项目自身的 git / build / test / lint 工具链不随 pack 内置。
 
 ## 开发
 
