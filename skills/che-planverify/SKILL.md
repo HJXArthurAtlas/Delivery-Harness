@@ -1,6 +1,6 @@
 ---
 name: che-planverify
-description: plan 独立校验（L3）：实现前由独立 checker（可跨模型）对照统一 intent 锁定的范围/约束/失败条件 + 场景（Acceptance/Edge `E#`）审查 plan 与补全后的 tasks；机械层先跑确定性 ADR 查询（共用 che-adr-check 的 check.sh，产出 planverify.adr.json 与报告 hash），再密封 briefing（含 adrkit 返回的 governing ADR 全文）派发（绝不含规划者的上下文），返回 PASS / REPLAN_ALLOWED / BLOCKED_DRIFT / BLOCKED_ADR。当用户说「验证 plan」「planverify」「实现前审一遍计划」时使用——即使用户没提命令名，只要是实现前的计划独立校验也用本 skill。
+description: plan 独立校验（L3）：实现前由独立 checker（固定为同模型新上下文的原生子代理）对照统一 intent 锁定的范围/约束/失败条件 + 场景（Acceptance/Edge `E#`）审查 plan 与补全后的 tasks；机械层先跑确定性 ADR 查询（共用 che-adr-check 的 check.sh，产出 planverify.adr.json 与报告 hash），再密封 briefing（含 adrkit 返回的 governing ADR 全文）派发（绝不含规划者的上下文），返回 PASS / REPLAN_ALLOWED / BLOCKED_DRIFT / BLOCKED_ADR。当用户说「验证 plan」「planverify」「实现前审一遍计划」时使用——即使用户没提命令名，只要是实现前的计划独立校验也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -10,8 +10,8 @@ description: plan 独立校验（L3）：实现前由独立 checker（可跨模�
 You are the **planverify orchestrator**. You judge the *proposed plan* before any
 code is written — the cheaper, earlier mirror of `intentverify`. You do **not** make
 the judgment yourself: you run surface analysis and the deterministic ADR query,
-seal a briefing, and hand it to an **independent checker** (a different model, or at
-minimum a fresh context that never saw the planning). The checker returns the
+seal a briefing, and hand it to an **independent checker** (a fresh-context
+native subagent — same model as you, in a context that never saw the planning). The checker returns the
 verdict; you compose and report it.
 
 ```
@@ -47,24 +47,13 @@ Both `off` → no blocking. Invalid values fail closed (exit 1).
 
 ---
 
-## The independence ladder
+## The checker
 
-Identical to intentverify. Climb to the highest available tier; always record the tier reached.
-
-| Tier | Checker | Independence | Dispatch |
-|------|---------|--------------|----------|
-| **1 — cross-model** | Different-vendor model (`codex`/`gemini`; or `claude` if you are Codex) | Different weights + fresh context + different vendor priors | Shell out via Bash, headless |
-| **2 — cross-tier** | Cheaper sibling (Opus → Haiku) | Different weights + fresh context | Native subagent (Agent/Task) with `model: haiku` |
-| **3 — same-model, fresh context** | Same model, new agent | Fresh context only | Native subagent (Agent/Task), default model |
-
-**Config (`SKC_CHECKER`, default `auto`):** `auto` climbs to highest; `cross-model`
-requires Tier 1 or fails loudly; `same-family` forces Tier 2; `same-model` forces
-Tier 3; `cli:model` is explicit. Read from `SKC_CHECKER` env, else a `checker:` line
-in `.che/config.yml`.
-
-Tier 1 is optional. Without a cross-model CLI, `auto` continues through native
-Tier 2 / Tier 3; a fresh default-model subagent is the pack-local baseline. Only
-an explicit `cross-model` or `cli:model` policy requires an external model CLI.
+Fixed, not selected: a **native subagent (Agent/Task tool) with the default
+model and a fresh context** — the same model as this orchestrator, in a
+brand-new context that never saw the planning. There is no checker policy, no
+`SKC_CHECKER` / `checker:` config, no tier probing, and no external model CLI
+requirement. The firewall is the sealed briefing plus the fresh context.
 
 ---
 
@@ -80,7 +69,7 @@ If the intent is missing, stop and tell the user (a missing `intent.md` means `/
 
 ## Outputs you produce
 
-- `{task_dir}/planverify.md` — verdict report (records `checked_by`, `independence_tier`, `gate_mode`, ADR mechanical fields, intent/plan/tasks SHA-256)
+- `{task_dir}/planverify.md` — verdict report (records `checked_by`, `checker`, `gate_mode`, ADR mechanical fields, intent/plan/tasks SHA-256)
 - `{task_dir}/planverify.adr.json` — the adrkit raw facts: command, exit code, raw stdout/stderr (audit record of the mechanical layer)
 - `{task_dir}/planverify.briefing.md` — the sealed briefing (auditable proof of the firewall)
 - `{task_dir}/planverify.checker.txt` — the checker's raw response
@@ -147,13 +136,11 @@ Requirements:
 | snapshot not configured | report `adr_evaluator: not_configured`; never claim a deterministic evaluator pass |
 | governing ADRs returned normally | sealed verbatim into the briefing as facts for the checker's P3e |
 
-### Phase 2 — Select the checker
+### Phase 2 — The dispatch boundary
 
-Identical to intentverify's checker selection: identify your own family, resolve
-`SKC_CHECKER`, probe availability (`command -v codex` / `command -v gemini` for
-Tier 1; native subagent with `model: haiku` for Tier 2; default subagent for Tier 3).
-If policy is `cross-model` and no other-vendor CLI exists, stop and tell the user.
-Announce: *"Independent checker: {name} (Tier {N} — {cross-model | cross-tier | same-model fresh-context})."*
+No selection, no probing: the checker is always a fresh-context native subagent
+with the default model. Announce: *"Independent checker: native subagent
+(same-model, fresh context)."*
 
 ### Phase 3 — Seal the briefing *(the firewall)*
 
@@ -176,22 +163,10 @@ framing, or any hint of what you *intended*.
 
 ### Phase 4 — Dispatch the independent checker
 
-**Tier 1 (cross-model):** shell out via Bash, feeding the sealed briefing on stdin,
-capturing stdout to the checker file (keep stderr separate):
-
-```bash
-codex exec - < {task_dir}/planverify.briefing.md \
-  >  {task_dir}/planverify.checker.txt \
-  2> {task_dir}/planverify.checker.log
-# gemini: gemini -p "$(cat {task_dir}/planverify.briefing.md)"
-# claude-as-checker: claude -p "$(cat …briefing.md)" --model <id>
-# Parse the LAST ```json block in checker.txt as the verdict.
-```
-
-**Tier 2 / Tier 3 (native subagent):** dispatch the Agent/Task tool with a
-read-only-capable agent (Read + Bash to inspect referenced files; MUST NOT
-Edit/Write), passing the sealed briefing as the entire prompt. `model: haiku` for
-Tier 2; omit for Tier 3. Save returned JSON to the checker file.
+Dispatch the Agent/Task tool with a read-only-capable agent (Read + Bash to
+inspect referenced files; MUST NOT Edit/Write), passing the sealed briefing as
+the entire prompt — default model, no override. Save returned JSON to the
+checker file.
 
 The checker performs all judgment internally:
 - **P3a — Surface drift** *(blocking)*: for each drift candidate, is the path truly out-of-scope? Clear out-of-scope match → BLOCKED_DRIFT.
@@ -203,8 +178,9 @@ The checker performs all judgment internally:
   evidence per ADR. Any **departure** → BLOCKED_ADR. `not_applicable` requires
   evidence that the ADR's scope does not cover this plan's surface.
 
-**If dispatch fails** (CLI error, timeout, unparseable): fall one tier down,
-re-dispatch, record the actual tier. Never claim a higher tier than achieved.
+**If dispatch fails** (agent error, timeout, unparseable response): stop and
+report the failure — there is no lower tier to fall to and no verdict may be
+fabricated.
 
 ### Phase 5 — Compose the verdict *(you run this; you do not re-judge)*
 
@@ -237,7 +213,7 @@ SHA-256 of intent/plan/tasks (`shasum -a 256`) into the frontmatter.
 Read both gate modes (`SKC_ADR_GATE` / `adr_gate:` default `block`; `SKC_PLANVERIFY_GATE` /
 `planverify_gate:` default `off`) and record them in the report frontmatter.
 
-- **PASS**: *"Verdict: PASS (checked by {checker}, Tier {N}). Plan is in scope, ADR-conformant, and complete. Safe to run `/che-implement`."*
+- **PASS**: *"Verdict: PASS (checked by {checker}). Plan is in scope, ADR-conformant, and complete. Safe to run `/che-implement`."*
 - **REPLAN_ALLOWED**: *"Verdict: REPLAN_ALLOWED (checked by {checker}). {N} items to address (see `{task_dir}/planverify.md`). Fix via `/che-plan` — re-running it regenerates plan and tasks together, and manual plan edits also need a re-run so `tasks.md` stays in sync — then re-run `/che-planverify`."* (planverify does not patch the plan for you.)
 - **BLOCKED_DRIFT**: *"Verdict: BLOCKED_DRIFT (checked by {checker}). {N} unjustified expansions:"* — list each with the bounded alternative. Replan before implementing.
 - **BLOCKED_ADR**: *"Verdict: BLOCKED_ADR (checked by {checker}). {N} departures from governing ADRs:"* — list each with evidence. Fix the plan, or draft a superseding ADR via `/che-adr-draft` and have it ratified (`adr accept`), then re-run planverify. With the default `adr_gate: block`, `/che-implement` is refused until a clean, hash-fresh report exists.
@@ -273,7 +249,7 @@ requested_surface:
 
 ```json
 {
-  "checked_by": "e.g. Codex (gpt-5.x) | Haiku 4.5 | Opus 4.8 (fresh context)",
+  "checked_by": "e.g. {model} (fresh context)",
   "p3a_surface_drift": [
     {"path": "src/auth/mw.ts", "classification": "out-of-scope|undeclared", "requested": false, "verdict": "PASS|BLOCKED_DRIFT"}
   ],
@@ -308,8 +284,8 @@ requested_surface:
 ---
 slug: {slug}
 verdict: PASS | REPLAN_ALLOWED | BLOCKED_DRIFT | BLOCKED_ADR
-checked_by: {e.g. "Codex (gpt-5.x)"}
-independence_tier: {1 cross-model | 2 cross-tier | 3 same-model fresh-context}
+checked_by: {e.g. "{model} (fresh context)"}
+checker: native subagent (same-model fresh-context)
 gate_mode: {off | block}
 adr_gate: {off | block}
 run: {YYYY-MM-DD HH:MM}
@@ -329,7 +305,7 @@ tasks_sha256: {sha256 of tasks.md at run time}
 
 ## Verdict: **{PASS | REPLAN_ALLOWED | BLOCKED_DRIFT | BLOCKED_ADR}**
 
-> **Checked by {checker} — Tier {N} ({cross-model | cross-tier | same-model fresh-context}).**
+> **Checked by {checker} — same-model, fresh-context subagent.**
 > The checker received only the locked intent, locked scenarios, the plan, the
 > tasks, the surface analysis, and the adrkit governing-ADR facts (see
 > `…planverify.briefing.md`). It did not see the planning.
@@ -381,8 +357,8 @@ or tasks after the run invalidates the report — re-run planverify.
 
 ## Tool choices
 - **Read** for the three artifacts (intent, plan, tasks), the governing ADRs adrkit reports, and the check output
-- **Bash** for CLI detection (`command -v`), the Phase 1b shared script, SHA-256 (`shasum -a 256`), Tier-1 dispatch, reading config
-- **Agent/Task** for Tier-2/Tier-3 native subagent dispatch (`model: haiku` for Tier 2)
+- **Bash** for the Phase 1b shared script, SHA-256 (`shasum -a 256`), reading config
+- **Agent/Task** for the checker dispatch (default model, fresh context)
 - **Write** for the briefing, the adrkit audit JSON, captured checker response, and the `planverify.md` report
 
 ## What you do NOT do
@@ -392,7 +368,6 @@ or tasks after the run invalidates the report — re-run planverify.
 - **Override the checker's verdict.** Disagreement goes in a meta-note only.
 - **Auto-patch the plan.** You report; the user replans. Validator, not fixer.
 - **Interpret tool failure as pass.** Exit 2, unreachable corpus, missing/unparseable JSON → stop, no verdict.
-- **Silently degrade tiers.** Record the tier actually achieved.
 - **Re-write the intent's locked sections.** They are locked — a locked-intent change means re-running `/che-intend` (update path), keeping existing `E#` IDs.
 
 ---
