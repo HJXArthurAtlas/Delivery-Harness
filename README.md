@@ -120,7 +120,7 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 
 CLI 解析（`adrkit-lib.sh`）：只执行 PATH 上的 `adrkit` 与 `che`，不使用其他二进制路径或回退。不可用时退出并提示上述 npm 安装命令。
 
-`planverify` / `intentverify` 的默认 `auto` 策略在没有跨模型 CLI 时使用原生 Tier 2/3 subagent；只有用户强制 `cross-model` 或 `cli:model` 才需要对应外部模型 CLI。
+`intentverify` 的 checker 按 `auto` 策略选级，没有跨模型 CLI 时落到原生 Tier 2/3 subagent，仅强制 `cross-model` / `cli:model` 时需要外部模型 CLI；`planverify` 的 checker 固定为同模型新上下文的原生子代理，不需要任何外部模型 CLI。
 
 **范围边界**：目标项目自身的 git / build / test / lint 工具链不随 pack 内置。
 

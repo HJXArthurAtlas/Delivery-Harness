@@ -146,7 +146,7 @@ your-repo/
 | che CLI（`@newchiwan/che`） | 特性路径解析与任务模型，公司 Nexus 独发 |
 | adr（adrkit CLI） | adrkit 系技能的运行时 |
 | pingcode CLI（条件） | 仅接入 PingCode 的项目检查，卡操作依赖 |
-| 跨模型 CLI：codex / gemini / claude（条件） | 仅 checker 策略强制 `cross-model` / `cli:model` 时需要在 PATH，默认不装不查 |
+| 跨模型 CLI：codex / gemini / claude（条件） | 仅 intentverify checker 策略强制 `cross-model` / `cli:model` 时需要在 PATH，默认不装不查（planverify checker 固定同模型新上下文子代理，无需外部模型） |
 | codegraph（+ 项目级索引） | 代码知识图谱 MCP：一次查询返回符号源码、调用路径与影响面 |
 
 版本号不写在本文——**单一事实源**是 monorepo-template 仓的 `AGENTS-TEMPLATE.md`（巡检基线）与 `README.md`（初始化基线），两处同步修改。

@@ -47,11 +47,11 @@ description: 交互式初始化项目 .che 配置：逐项讲解并确认 langua
 - **影响**：block 多一道实现前的独立语义校验关卡，更稳但流程更长。新项目建议先 off 跑顺流程，再按需开。
 - 环境变量 `SKC_PLANVERIFY_GATE` 优先于本配置。
 
-### 3. checker（独立校验者策略；默认 auto）
+### 3. checker（intentverify 独立校验者策略；默认 auto）
 
-- 问法：「审查计划/实现的那个独立 AI 审查者，要挑多独立的？」选项用大白话讲：自动挑最独立的（默认）/ 必须用别家模型 / 钉死同家族便宜模型 / 钉死同款模型 / 你自己指定 CLI 和模型。
+- 问法：「审查实现的那个独立 AI 审查者，要挑多独立的？」选项用大白话讲：自动挑最独立的（默认）/ 必须用别家模型 / 钉死同家族便宜模型 / 钉死同款模型 / 你自己指定 CLI 和模型。
 
-planverify / intentverify 判定时**不让写计划/写代码的对话自己给自己打分**——判定外包给一个隔离的 checker。checker 按三级独立性阶梯选拔：跨厂商模型（Tier 1，如 codex / gemini）＞ 同家族便宜模型（Tier 2，subagent + haiku）＞ 同模型新上下文（Tier 3，subagent）。选项：
+intentverify 判定时**不让写代码的对话自己给自己打分**——判定外包给一个隔离的 checker。checker 按三级独立性阶梯选拔：跨厂商模型（Tier 1，如 codex / gemini）＞ 同家族便宜模型（Tier 2，subagent + haiku）＞ 同模型新上下文（Tier 3，subagent）。planverify 的 checker **不读本配置**——固定为同模型新上下文的原生子代理，无需任何外部模型 CLI。选项：
 
 - `auto`：能爬多高爬多高；机器上没有异厂商 CLI 就落到 Tier 2 / Tier 3，不报错。**默认，适合大多数项目**。
 - `cross-model`：硬性要求 Tier 1，找不到异厂商 CLI 就报错终止，绝不静默降级——适合对校验独立性要求高的项目。用户选它时必须先探测 `command -v codex` 与 `command -v gemini`，都没有要提醒用户（装任一 CLI 后才真正生效）并请其确认。
@@ -138,7 +138,7 @@ adr_gate: block
 # 语义 verdict 门禁：block 时实现前 planverify 裁决不得为 BLOCKED_DRIFT / BLOCKED_ADR（off 不拦截语义层）
 planverify_gate: off
 
-# planverify / intentverify 独立校验者策略（auto | cross-model | same-family | same-model | cli:<model>）
+# intentverify 独立校验者策略（auto | cross-model | same-family | same-model | cli:<model>）；planverify 的 checker 固定同模型新上下文子代理，不读本键
 checker: auto
 
 # PingCode 集成总开关：on 表示已接入（配合 .che/pingcode-config.yml 生效）
