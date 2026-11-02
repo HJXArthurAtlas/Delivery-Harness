@@ -110,7 +110,7 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 
 技能清单与触发语**以各 `skills/<name>/SKILL.md` frontmatter 的 `description` 为准**，本 README 不维护副本。
 
-0.4.0 起意图驱动技能由 `che-compound-*` 统一更名为 `che-*` 二段名（如 `/che-compound-plan` → `/che-plan`）。从旧版升级后，手动删除技能发现目录里残留的 `che-compound-*` 旧目录——技能安装同名不覆盖，不删会新旧双份并存。
+0.4.0 起意图驱动技能由 `che-compound-*` 统一更名为 `che-*` 二段名（如 `/che-compound-plan` → `/che-plan`）。1.0.0 起 `che-specify` / `che-grill-me` / `che-intentguard` / `che-writeback` 更名为 `che-intend` / `che-grill` / `che-intentverify` / `che-retro`，`che-flow` / `che-mturtle-troubleshooting` / `che-project-arch` 删除（架构画像并入 `/che-project-init`）。从旧版升级后，手动删除技能发现目录里的全部残留旧目录——技能安装同名不覆盖，不删会新旧双份并存。
 
 ## 运行时与外部 CLI（排除 init）
 
