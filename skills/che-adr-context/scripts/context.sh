@@ -7,7 +7,8 @@
 set -eu
 . "$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)/adrkit-lib.sh"
 
-adrkit_corpus="$(adrkit_corpus_dir)"
+adrkit_resolve_readonly_corpus
+adrkit_corpus="$ADRKIT_CORPUS"
 
 if [ "$#" -gt 0 ]; then
 	adrkit_cli check "$@" --dir "$adrkit_corpus" --json

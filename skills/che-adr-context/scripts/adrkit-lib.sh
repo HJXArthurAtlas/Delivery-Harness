@@ -30,12 +30,37 @@ adrkit_cli() {
 
 # The ADR corpus. Absent is an error, not an empty corpus: a governance check
 # that silently reports "0 decisions govern this" because it was looking in the
-# wrong directory is exactly the failure ADR-0016 was written about.
+# wrong directory is exactly the failure ADR-0016 was written about. Read-only
+# callers that need "no corpus yet" to mean an empty corpus use
+# adrkit_resolve_readonly_corpus below instead.
 adrkit_corpus_dir() {
 	_adrkit_corpus="${ADRKIT_DIR:-docs/adr}"
 	[ -d "$_adrkit_corpus" ] ||
 		adrkit_fail "no ADR corpus at '$_adrkit_corpus' — point ADRKIT_DIR at the corpus directory, or create the first record with /che-adr-draft"
 	printf '%s' "$_adrkit_corpus"
+}
+
+# Resolve the corpus for a read-only query (check.sh, context.sh) into the
+# ADRKIT_CORPUS variable. Unlike adrkit_corpus_dir, a missing *default* corpus
+# (docs/adr) resolves to a private empty stand-in directory instead of an
+# error: a project that has not drafted its first ADR yet is in the normal
+# fresh state, and the honest query result is "0 decisions govern this" — not
+# a broken mechanical layer. The result still comes from the real CLI run
+# against the stand-in, never from a hand-written payload; the stand-in is
+# removed when the caller exits. Sets a variable instead of printing so the
+# EXIT trap lives in the caller's shell — a command substitution would run it
+# in a subshell and delete the directory immediately. An explicitly set
+# ADRKIT_DIR that does not exist remains an error: "0 decisions" from a wrong
+# configured path is the ADR-0016 failure mode.
+adrkit_resolve_readonly_corpus() {
+	if [ -z "${ADRKIT_DIR:-}" ] && [ ! -d docs/adr ]; then
+		ADRKIT_CORPUS="$(mktemp -d "${TMPDIR:-/tmp}/adrkit-empty-corpus.XXXXXX")" ||
+			adrkit_fail "cannot create an empty-corpus stand-in under ${TMPDIR:-/tmp}"
+		trap 'rm -rf "$ADRKIT_CORPUS"' EXIT
+		printf "adrkit: no corpus at 'docs/adr' yet — querying an empty stand-in corpus (0 decisions govern this); the first /che-adr-draft creates the real corpus\n" >&2
+	else
+		ADRKIT_CORPUS="$(adrkit_corpus_dir)"
+	fi
 }
 
 # The current feature directory. Resolve through the external `che` CLI on

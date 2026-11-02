@@ -17,7 +17,8 @@
 set -eu
 . "$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)/adrkit-lib.sh"
 
-adrkit_corpus="$(adrkit_corpus_dir)"
+adrkit_resolve_readonly_corpus
+adrkit_corpus="$ADRKIT_CORPUS"
 adrkit_plan="$(adrkit_plan_path)"
 
 # Arguments are the paths the plan intends to touch. With none, fall back to the

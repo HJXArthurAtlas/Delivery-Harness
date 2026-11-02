@@ -52,7 +52,7 @@ printf '%s' '{"schemaVersion":"adrkit.pass0.snapshot/v1"}' > "$TMP/snapshot.json
 # @adrkit/cli is added after exercising the missing-CLI contract; jq and git
 # remain absent.
 mkdir -p "$TMP/bin"
-for tool in node dirname mkdir sed head date cat ln; do
+for tool in node dirname mkdir sed head date cat ln mktemp rm; do
   source="$(command -v "$tool")"
   ln -s "$source" "$TMP/bin/$tool"
 done
@@ -176,6 +176,29 @@ RC=$?
 EXPECTED_VERSION="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).dependencies["@adrkit/cli"]' "$REPO_ROOT/package.json")"
 run "$SKILLS/che-adr-draft/scripts/adr.sh" --version
 [ "$RC" -eq 0 ] && [ "$OUT" = "$EXPECTED_VERSION" ] && ok || bad "adr version: RC=$RC output=$OUT expected=$EXPECTED_VERSION"
+
+# Missing-corpus contract (read-only): a fresh project with no docs/adr queries
+# as an empty corpus (exit 0, ok, 0 governing) with the stand-in stated on
+# stderr and nothing written; an explicitly set but absent ADRKIT_DIR stays a
+# hard error (the ADR-0016 wrong-directory guard).
+rm -rf "$PROJECT/docs/adr"
+run "$SKILLS/che-adr-check/scripts/check.sh" specs/001-demo/plan.md
+[ "$RC" -eq 0 ] && ok || bad "check 无语料: 退出码 ${RC}，预期 0：$(<"$TMP/stderr")"
+CHECK_JSON="${OUT#*==> adrkit:check}"
+CHECK_JSON="${CHECK_JSON#$'\n'}"
+json_matches "$CHECK_JSON" '{"ok":true,"governing":[]}' && ok || bad "check 无语料: 未按空语料返回 ok：$OUT"
+case "$(<"$TMP/stderr")" in *"empty stand-in corpus"*) ok ;; *) bad "check 无语料: 未声明空语料替身：$(<"$TMP/stderr")" ;; esac
+[ -d "$PROJECT/docs/adr" ] && bad "check 无语料: 只读契约被破坏（创建了 docs/adr）" || ok
+
+run "$SKILLS/che-adr-context/scripts/context.sh" specs/001-demo/plan.md
+[ "$RC" -eq 0 ] && ok || bad "context 无语料: 退出码 ${RC}，预期 0：$(<"$TMP/stderr")"
+json_matches "$OUT" '{"ok":true}' && ok || bad "context 无语料: 非 ok：$OUT"
+
+OUT="$(cd "$PROJECT" && ADRKIT_DIR=no-such-corpus "$SKILLS/che-adr-check/scripts/check.sh" specs/001-demo/plan.md 2>"$TMP/stderr")"
+RC=$?
+[ "$RC" -eq 1 ] && ok || bad "check 显式 ADRKIT_DIR 缺失: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in *"no ADR corpus at 'no-such-corpus'"*) ok ;; *) bad "check 显式 ADRKIT_DIR 缺失: 错误信息不符：$(<"$TMP/stderr")" ;; esac
+mkdir "$PROJECT/docs/adr"
 
 run "$SKILLS/che-adr-draft/scripts/scaffold.sh" Adopt npm ADR runtime
 [ "$RC" -eq 0 ] && ok || bad "scaffold: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
