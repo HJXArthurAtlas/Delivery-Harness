@@ -221,6 +221,25 @@ const engines = pkg.engines || {};
 if (typeof engines.dsh !== "string" || !engines.dsh.trim()) {
   msgs.push("FAIL package.json engines.dsh 必须声明 DSH 兼容范围（安装时 fail-closed）");
 }
+if (typeof engines.che !== "string" || !/^>=\d+\.\d+\.\d+$/.test(engines.che.trim())) {
+  msgs.push("FAIL package.json engines.che 必须声明 pack 所需 che CLI 最低版本（形如 >=x.y.z；che pack 安装时抄入 .che/pack.json）");
+} else {
+  // engines.che 引用的 CLI 版本必须已存在于 packages/cli（未发布也会在下次 publish 时兑现）。
+  const repoRoot = process.argv[1].replace(/[\\/][^\\/]*$/, "");
+  let cliPkg = null;
+  try { cliPkg = JSON.parse(fs.readFileSync(repoRoot + "/packages/cli/package.json", "utf8")); } catch {}
+  if (!cliPkg || typeof cliPkg.version !== "string") {
+    msgs.push("FAIL packages/cli/package.json 缺失或无 version");
+  } else {
+    const required = engines.che.trim().replace(/^>=/, "");
+    const parts = (v) => v.split(".").map((x) => Number.parseInt(x, 10) || 0);
+    const [aR, bR, cR] = parts(required), [aC, bC, cC] = parts(cliPkg.version);
+    const cmp = (aR - aC) || (bR - bC) || (cR - cC);
+    if (cmp > 0) {
+      msgs.push(`FAIL engines.che (${engines.che}) 高于 packages/cli 当前版本 ${cliPkg.version}——先 bump 并发布 CLI`);
+    }
+  }
+}
 if (hasEntry) {
   const entry = fs.readFileSync(entryPath, "utf8");
   if (!entry.includes("registerProvider") || !/export function apply/.test(entry)) {
