@@ -50,6 +50,7 @@ npm test
 - 上游技能的 pack fork 差异记录在对应技能中，上游升级时必须保留。
 - 每个 `SKILL.md` 顶部带语言规则块：读项目根 `.che/config.yml` 的 `language:`（缺省 `zh-cn`）决定全 pack 输出语言（含思考）；新增技能必须携带，`/che-project-init` 负责写入该键。
 - 技能写盘遵循同名不覆盖；版本号以仓内登记文件为准，不凭记忆填写。
+- 基础宪法与种子 ADR 的内容上游是 council/monorepo-template（`docs/constitution/`、`docs/adr/`）：上游变更时逐字同步复制进 `skills/che-constitution/references/seed-constitution.md` 与 `skills/che-adr-draft/references/seed-adr/`，不就地改动副本。
 
 ## 发布
 

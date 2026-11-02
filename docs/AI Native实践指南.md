@@ -123,7 +123,7 @@ your-repo/
 
 ### 2.4 基础宪法
 
-`docs/constitution/constitution.md` 是团队通用底版，随骨架携带。五个核心原则：
+`docs/constitution/constitution.md` 是团队通用底版，随骨架携带。六个核心原则：
 
 | 原则 | 含义 |
 |---|---|
@@ -132,8 +132,9 @@ your-repo/
 | III. 测试验证的质量门禁 | 生产行为变更必须带可执行测试；bug 修复必须从失败测试开始并留作回归守卫 |
 | IV. 治理工件独立 | 宪法、ADR、技能、指南各自在自己的范围内自足并直接约束 Agent，不搞引用链 |
 | V. 简单与无聊技术 | 正确性优先，其次六个月后的可维护性；拒绝无谓抽象与投机性建设 |
+| VI. 项目边界与外部 API 契约 | 设计/实现范围以本项目为界，跨边界交互只走显式暴露的外部 API（双向）；边界在设计期划定，以架构画像 `docs/architecture.md` 为事实清单 |
 
-跨域不变量（安全 / 性能与集成 / 工具链 / 语言）直接绑定：授权只在后端、日志与返回不得泄漏敏感字段、SQL 必须参数化、远程调用必须有超时与有界重试、工具链版本以锁文件为准、**所有输出用简体中文**。项目专属不变量追加到 Cross-Domain Invariants，不得削弱基础条款；修订走 `che-constitution`。
+跨域不变量（安全 / 性能与集成 / 工具链 / 语言）直接绑定：授权只在后端、日志与返回不得泄漏敏感字段、SQL 必须参数化、远程调用必须有超时与有界重试、工具链版本以锁文件为准、**所有输出用简体中文**。项目专属不变量追加到 Cross-Domain Invariants，不得削弱基础条款；首次实例化（替换 `[PROJECT_NAME]`、逐条确认取舍）由 `/che-project-init` 接入时移交 `/che-constitution` 完成，后续修订也走 `che-constitution`。
 
 ### 2.5 工具链基线与每会话环境检查
 
@@ -155,7 +156,7 @@ your-repo/
 
 ### 3.1 定位与依赖
 
-29 个 agent skill，承载「意图驱动开发 + PingCode」的流程：**产品出意图建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加项目架构画像（`/che-project-init` 接入时先判定仓库属已有代码还是纯新仓库，仅已有代码仓库生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / 手动拷贝到 `~/.agents/skills/` 三路任一）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
+29 个 agent skill，承载「意图驱动开发 + PingCode」的流程：**产品出意图建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加治理资产与项目架构画像的接入初始化（`/che-project-init`：宪法缺失移交 `/che-constitution` 实例化、基础 ADR 缺失移交 `/che-adr-draft` 导入；架构画像先判定仓库属已有代码还是纯新仓库，仅已有代码仓库生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / 手动拷贝到 `~/.agents/skills/` 三路任一）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
 
 ### 3.2 主线流程
 
@@ -272,7 +273,7 @@ bug 修复三步：
 ## 4. 使用路径：从初始化到日常交付
 
 1. **初始化（一次性）**：把 §1.1 第一段提示词发给 Agent → 复制骨架、安装技能包、接入 codegraph → 重启 Agent。
-2. **完善登记（一次性）**：发 §1.1 第二段提示词 → 验证索引、登记 `AGENTS.md` 布局、执行 `/che-project-init`。
+2. **完善登记（一次性）**：发 §1.1 第二段提示词 → 验证索引、登记 `AGENTS.md` 布局、执行 `/che-project-init`——除配置外还会移交治理资产种子：宪法缺失走 `/che-constitution` 逐条确认实例化、基础 ADR 缺失走 `/che-adr-draft` 逐条确认导入。
 3. **架构画像（已有代码仓库，一次性）**：`/che-project-init` 自带新旧仓库判定——纯新仓库（无提交且无任何 manifest/源码）跳过；已有代码的仓库由 Agent 扫描 `services/`、`apps/` 等布局生成 `docs/architecture.md`（服务/应用清单 + mermaid 依赖图），确认后入库；此后每个特性会话 `/che-load` 自动装载，架构变化时重跑 `/che-project-init` 对账。
 4. **日常交付**：按角色进入 harness 主线（§3.2）；产品从 intend（含 intent 访谈与场景起草）开始，开发从 plan 开始；bug 使用修复链。每会话 Agent 自动执行环境检查。
 5. **维护分工**：改骨架、初始化提示词、环境基线 → 直接改 monorepo-template 仓的 `README.md` 与 `AGENTS-TEMPLATE.md`（版本两处同步）；技能流程问题 → 去 harness 仓。

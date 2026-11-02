@@ -1,6 +1,6 @@
 ---
 name: che-constitution
-description: 创建或更新项目章程 docs/constitution/constitution.md（交互收集或按给定原则输入），作为后续 intent/plan 的治理约束来源。当用户运行或提到 /che-constitution，或说「立章程」「修订治理原则」「建项目宪章」时使用——即使用户没提命令名，只要是项目治理原则的建立或修订也用本 skill。
+description: 创建或更新项目章程 docs/constitution/constitution.md，作为后续 intent/plan 的治理约束来源。两个模式按工件状态判定（与调用方无关）——实例化模式（宪法不存在时）：先讲宪法是什么维度、再讲团队基础宪法整体（references/seed-constitution.md，源自 monorepo-template），逐条确认保留/去掉/改措辞，收集项目专属条款后落盘 1.0.0，/che-project-init 在宪法缺失时移交本模式；修订模式（宪法已在位）：既有流程，无讲解环节。当用户运行或提到 /che-constitution，或说「立章程」「初始化宪法」「修订治理原则」「建项目宪章」时使用——即使用户没提命令名，只要是项目治理原则的建立或修订也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -12,6 +12,18 @@ $ARGUMENTS
 ```
 
 You **MUST** consider the user input before proceeding (if not empty).
+
+## Modes
+
+Resolve the mode from the artifact state, not the caller — a
+`/che-project-init` handoff and a direct user invocation behave identically:
+
+- `docs/constitution/constitution.md` does **not** exist → **Instantiation
+  mode** (see "Instantiation mode" below): the project has no constitution
+  yet; seed from the team base with per-principle confirmation.
+- It exists → **Amendment mode**: the Outline flow below, unchanged. No
+  base-constitution explanation or per-principle walk-through happens here —
+  amendments assume a ratified constitution.
 
 ## Scope Guard
 
@@ -87,6 +99,49 @@ Follow this execution flow:
    - Suggested commit message (e.g., `docs: amend constitution to vX.Y.Z (principle additions + governance update)`).
    - A `Next Actions` section for any deferred non-governance intents.
 
+## Instantiation mode
+
+First instantiation seeds from the team base constitution bundled with this
+skill (`references/seed-constitution.md` — verbatim copy of the team
+monorepo-template's base constitution). Execute these steps in order; steps 1
+and 2 are mandatory explanations and MUST NOT be skipped even if the user
+pushes to move fast:
+
+1. **Explain what a constitution is**: the project's governance charter —
+   the dimension it covers (long-lived, cross-feature mandatory rules:
+   workflow discipline, technology red lines, collaboration conventions) and
+   how it binds later intent / plan / implement work (gates and checkers read
+   it).
+2. **Introduce the team base** from the seed file's actual text: six Core
+   Principles (subproject scope discipline, convention reuse, test-verified
+   quality gates, governance artifact independence, simplicity & boring
+   technology, project boundary & external API contract) plus Cross-Domain
+   Invariants (security / performance & integration / toolchain / language)
+   and the Governance section.
+3. **Per-principle confirmation**, one question at a time (never batched):
+   for each principle state what it mandates, what behavior it constrains,
+   and what becomes unguarded if dropped — the seed's Rationale lines are
+   the material, do not invent consequences. Ask 保留 / 去掉 / 改措辞; a
+   rewording MUST keep the principle declarative and testable. Confirm the
+   Cross-Domain Invariants groups the same way (per group, not per bullet —
+   unless the user asks to go bullet-by-bullet).
+4. **Collect project-specific additions**: explain the dimension from the
+   addition angle first — what projects typically add (commit discipline,
+   review gates, banned frameworks or patterns, environment conventions) —
+   then ask what to add; additions may be none. Additions extend Cross-Domain
+   Invariants or become new numbered principles; they MUST NOT weaken a base
+   clause that was kept.
+5. **Write the instantiation**: replace every `[PROJECT_NAME]` (ask the user
+   for the project name or infer it from the repository), set the effective
+   dates to today (YYYY-MM-DD), assemble the document from the kept (possibly
+   reworded) principles plus additions, version it 1.0.0 with an Amendment
+   Log entry recording provenance ("Instantiated from team base v1.1.0;
+   kept / dropped / added: ..."), and write it to
+   `docs/constitution/constitution.md`. The Outline flow's validation rules
+   (no unexplained bracket tokens, ISO dates, declarative wording) apply
+   unchanged; keep the seed's structure and heading levels. The Sync Impact
+   Report is not needed for a first instantiation.
+
 Formatting & Style Requirements:
 
 - Use Markdown headings exactly as in the template (do not demote/promote levels).
@@ -98,4 +153,4 @@ If the user supplies partial updates (e.g., only one principle revision), still 
 
 If critical info missing (e.g., ratification date truly unknown), insert `TODO(<FIELD_NAME>): explanation` and include in the Sync Impact Report under deferred items.
 
-Write only `docs/constitution/constitution.md`; do not create or modify template source files.
+Write only `docs/constitution/constitution.md`; do not create or modify template or seed source files.
