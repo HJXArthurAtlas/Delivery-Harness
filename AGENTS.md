@@ -51,6 +51,10 @@ npm test
 - 每个 `SKILL.md` 顶部带语言规则块：读项目根 `.che/config.yml` 的 `language:`（缺省 `zh-cn`）决定全 pack 输出语言（含思考）；新增技能必须携带，`/che-project-init` 负责写入该键。
 - 技能写盘遵循同名不覆盖；版本号以仓内登记文件为准，不凭记忆填写。
 
+## 发布
+
+用户说「发布 / 发版 / 升版本 / 打 tag / 出新版本」时，一律执行 `.agents/commands/release.md`，绝不手工 bump + push。要点：根 `package.json#version` 是 pack 唯一版本源，git tag `vX.Y.Z` 是 che 安装通道的发布原语（没打 tag = che 通道没发版）。
+
 ## 验证与提交
 
 - 修改技能、CLI 或分发配置后必须运行 `npm test`；三个测试脚本分别覆盖技能结构、che CLI 契约和技能运行时行为，具体契约以测试脚本为准。
