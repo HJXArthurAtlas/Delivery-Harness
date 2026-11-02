@@ -33,7 +33,7 @@
 flowchart LR
   subgraph base["团队底座（两个仓库）"]
     T["monorepo-template<br/>项目骨架"]
-    H["ncw-delivery-harness<br/>流程技能包（34 技能）"]
+    H["ncw-delivery-harness<br/>流程技能包（30 技能）"]
   end
   T -->|"一键开始提示词：复制骨架<br/>实例化宪法 · 环境基线"| P["你的项目仓库<br/>services/ · apps/ · docs/ · AGENTS.md"]
   H -->|"插件安装 / 手动拷贝<br/>+ che · adrkit · pingcode CLI"| A["你的 AI Agent"]
@@ -155,7 +155,7 @@ your-repo/
 
 ### 3.1 定位与依赖
 
-33 个 agent skill，承载「意图驱动开发 + PingCode」的流程：**产品出意图建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加项目架构画像（`/che-project-arch` 生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / 手动拷贝到 `~/.agents/skills/` 三路任一）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
+29 个 agent skill，承载「意图驱动开发 + PingCode」的流程：**产品出意图建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加项目架构画像（`/che-project-init` 接入时先判定仓库属已有代码还是纯新仓库，仅已有代码仓库生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / 手动拷贝到 `~/.agents/skills/` 三路任一）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
 
 ### 3.2 主线流程
 
@@ -273,6 +273,6 @@ bug 修复三步：
 
 1. **初始化（一次性）**：把 §1.1 第一段提示词发给 Agent → 复制骨架、安装技能包、接入 codegraph → 重启 Agent。
 2. **完善登记（一次性）**：发 §1.1 第二段提示词 → 验证索引、登记 `AGENTS.md` 布局、执行 `/che-project-init`。
-3. **架构画像（可选，一次性）**：跑 `/che-project-arch` → Agent 扫描 `services/`、`apps/` 等布局生成 `docs/architecture.md`（服务/应用清单 + mermaid 依赖图），确认后入库；此后每个特性会话 `/che-load` 自动装载，架构变化时重跑对账。
+3. **架构画像（已有代码仓库，一次性）**：`/che-project-init` 自带新旧仓库判定——纯新仓库（无提交且无任何 manifest/源码）跳过；已有代码的仓库由 Agent 扫描 `services/`、`apps/` 等布局生成 `docs/architecture.md`（服务/应用清单 + mermaid 依赖图），确认后入库；此后每个特性会话 `/che-load` 自动装载，架构变化时重跑 `/che-project-init` 对账。
 4. **日常交付**：按角色进入 harness 主线（§3.2）；产品从 intend（含 intent 访谈与场景起草）开始，开发从 plan 开始；bug 使用修复链。每会话 Agent 自动执行环境检查。
 5. **维护分工**：改骨架、初始化提示词、环境基线 → 直接改 monorepo-template 仓的 `README.md` 与 `AGENTS-TEMPLATE.md`（版本两处同步）；技能流程问题 → 去 harness 仓。
