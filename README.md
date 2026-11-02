@@ -34,7 +34,7 @@ https://git.newchiwan.com/council/ncw-delivery-harness）。按步骤执行，�
    npm install -g @adrkit/cli@0.20.0
 
 3. 验证并逐项汇报结果：
-   - che --version（应 ≥ 0.1.0）
+   - che --version（应 ≥ 0.3.0）
    - command -v adrkit 与 command -v che
    - 技能发现：omp 用 omp plugin list；手动拷贝方式确认 ~/.agents/skills/ 下的技能目录已就位
 
@@ -58,9 +58,10 @@ dsh plugin --profile <name> add git+https://git.newchiwan.com/council/ncw-delive
 dsh plugin --profile <name> update ncw-delivery-harness   # 升级到 main 最新
 dsh plugin --profile <name> remove ncw-delivery-harness
 
-# 其他端（OpenCode 等）：把 skills/<name>/ 拷入对应 skill 发现目录即可
-git clone https://git.newchiwan.com/council/ncw-delivery-harness.git
-cp -R ncw-delivery-harness/skills/<name> <发现目录>/skills/
+# che CLI（项目级安装 + 版本管理；先把 che 装到全局 PATH，见下节）
+che pack init                    # 装到当前项目 .agents/skills/，记录版本到 .che/pack.json（默认装最新 vX.Y.Z tag）
+che pack status                  # 已装版本 vs 最新 tag vs main；探测发版漏 tag（CHANNEL_DRIFT）
+che pack update                  # 按 manifest 同步（--dry-run 先看计划；--ref 可钉 tag/分支/commit）
 ```
 
 | 目标目录 | 生效端 |
@@ -68,6 +69,8 @@ cp -R ncw-delivery-harness/skills/<name> <发现目录>/skills/
 | `.agents/skills/`（项目）或 `~/.agents/skills/`（全局） | DSH / OpenCode / omp |
 
 omp 实测同时读项目级与全局级；OpenCode 官方支持同两个路径；DSH 同样官方支持手动拷贝（skill 是「被扫描的文件」，拷贝即安装、免重启热加载），原生插件安装见下文「DSH 插件」小节。
+
+**che CLI 通道说明**：`che pack init` 默认解析仓内最新 `vX.Y.Z` tag（git tag 即发布锚点），技能装进项目 `.agents/skills/`，版本记录在 `.che/pack.json`（建议随项目提交，`che pack update` 会产生可 review 的 diff）；升级走 `che pack update`（manifest 驱动：加新、更托管、删上游移除，防新旧双份）。目标目录里非 che 装的同名技能目录视为手工资产，不加 `--force` 不会被覆盖；手工改坏托管技能时 `che pack update --force` 会整目录重装、恢复为上游版本（普通 update 在同版本下不动本地文件，`--force` 是唯一修复路径）。首次安装后仍需 `/che-project-init` 写 `.che/config.yml`。无 che 时的兜底仍是手工拷贝（`git clone` 后把 `skills/<name>/` 拷入发现目录），无版本管理、同名不覆盖。
 
 ### npm 运行时 CLI（`che` / `adrkit`，所有安装路径通用）
 
@@ -80,6 +83,8 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 ```
 
 或直接运行 `/che-project-init`——它自检并代装这两个 CLI，che 安装 404 时会提示上面的 scope 配置。
+
+升级 che：全局安装的直接 `che self-update`（`--check` 只查不装；开发仓 `file:` 链接的 che 会被拒绝，走 git pull）。
 
 ### omp 插件补充（更新与坑）
 
@@ -137,7 +142,11 @@ npm test   # 依次运行技能结构、che CLI 契约和技能运行时契约�
 
 ## 发布
 
-只有 `@newchiwan/che` 发布到公司 Nexus（`internal-npm` hosted；安装侧走 `registry-npm` group）。**根包（即整个 pack）不发 npm**（`package.json` 已 `private: true` 防误发）——它的分发就是 omp 插件与 DSH 插件两条插件路径，推到 main 即发布：
+**版本声明点**：根 `package.json#version` 是 pack 唯一版本源——omp 插件版本（`.omp-plugin/marketplace.json`，`npm test` 强制同步）与 DSH bundle 版本（原生读取）都从它推导；git tag `vX.Y.Z` 是 che 安装通道（`che pack init/status/update`）的发布锚点；根 `engines.che` 声明 pack 所需的 che CLI 最低版本（安装时抄进 `.che/pack.json`）。CLI 版本独立演进（`packages/cli/package.json` + `src/version.ts` 的 `CLI_VERSION`，`test-che-cli.sh` 强制一致）。
+
+**发版一律走 `/release`**（流程见 `.agents/commands/release.md`）：定版本号 → 本版含 CLI 变更先发 Nexus → bump 根版本 + 同步 marketplace → `npm test` 全绿 → `chore(release)` 单提交 → `git push origin main vX.Y.Z` 原子推送 → `git ls-remote` postcondition 验证 tag 生效。没打 tag = che 通道没发版；漏 tag 会被任何项目里的 `che pack status` 探测为 `CHANNEL_DRIFT`。
+
+只有 `@newchiwan/che` 发布到公司 Nexus（`internal-npm` hosted；安装侧走 `registry-npm` group）。**根包（即整个 pack）不发 npm**（`package.json` 已 `private: true` 防误发）——它的分发就是 omp / DSH 插件与 che 安装通道：
 
 ```bash
 # @newchiwan/che（bun 打包 dist/cli.js 单文件——Node 不剥 node_modules 内类型，纯 TS tarball 经 npm -g 装出来跑不了；需本机有 bun）
@@ -145,5 +154,4 @@ bash packages/cli/scripts/publish.sh
 ```
 
 - npm 认证写**用户级** `~/.npmrc`（`//nexus.newchiwan.cn/repository/internal-npm/:_auth` = base64(user:pass)，npm 按 registry URI 精确匹配凭据；devops 账号），绝不入仓库。
-- 根包版本改动后同步 `.omp-plugin/marketplace.json` 的 plugin `version`（`npm test` 强制一致）；`@newchiwan/che` 版本须与 `src/index.ts` 的 `CLI_VERSION` 一致（`test-che-cli.sh` 校验）。
 - 消费端（内网机器）的一次性 scope 配置见「安装 → npm 运行时 CLI」。
