@@ -1,0 +1,171 @@
+// che self-update — upgrade the globally installed @newchiwan/che via npm.
+//
+// The CLI is published to the company Nexus; self-update shells out to npm
+// (`npm view` for the latest version, `npm install -g` to swap the files).
+// Replacing files of the running process is safe on unix: the current
+// process has the old bundle loaded and picks up the new one next run.
+//
+// Guards, in order: dev checkouts (repo file: link) are refused — upgrading
+// those means git pull, not npm; npm must exist; the @newchiwan scope
+// registry must be configured (public npm serves 404 for this package).
+
+import { parseArgs } from 'node:util';
+import { execFileSync } from 'node:child_process';
+import { realpathSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { isRecord } from './type-guard.ts';
+import { CLI_VERSION } from './version.ts';
+import { compareVersions } from './pack.ts';
+
+export const SELF_UPDATE_USAGE = `Usage: che self-update [--version <x>] [--check] [--json]
+
+Update the globally installed @newchiwan/che from the company Nexus.
+
+  --version <x>  Install this exact version instead of the latest
+  --check        Only report current vs latest; install nothing
+  --json         Output results in JSON format
+  --help         Show this help message
+
+Exit 0 when current (or updated), 1 when --check finds a newer version,
+2 on usage or environment errors (dev checkout, npm/registry missing).
+`;
+
+/** Thrown with a message that already starts with "ERROR: ". */
+class SelfUpdateError extends Error {}
+
+function npmCapture(args: string[]): string {
+  try {
+    return execFileSync('npm', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  } catch (err) {
+    const detail = isRecord(err) && 'stderr' in err && typeof err.stderr === 'string' ? err.stderr.trim() : '';
+    throw new SelfUpdateError(`ERROR: npm ${args.join(' ')} failed${detail ? `: ${detail}` : ''}`);
+  }
+}
+
+/** True when the running module lives inside an npm-managed install. */
+function isNpmManagedInstall(): boolean {
+  const here = realpathSync(fileURLToPath(import.meta.url));
+  return /[\\/]node_modules[\\/]@newchiwan[\\/]che[\\/]/.test(here);
+}
+
+function requireNpmManagedInstall(): void {
+  if (isNpmManagedInstall()) return;
+  throw new SelfUpdateError(
+    'ERROR: this che runs from a development checkout (repo file: link), not an npm install; ' +
+      'self-update only manages global npm installs — upgrade the dev copy via git pull',
+  );
+}
+
+function requireNpm(): void {
+  try {
+    execFileSync('npm', ['--version'], { stdio: 'ignore' });
+  } catch {
+    throw new SelfUpdateError(
+      'ERROR: npm is required for self-update but was not found on PATH; ' +
+        'install Node.js >= 22.18 or run: npm install -g @newchiwan/che@latest',
+    );
+  }
+}
+
+function requireScopeRegistry(): void {
+  let registry: string;
+  try {
+    registry = npmCapture(['config', 'get', '@newchiwan:registry']);
+  } catch (err) {
+    throw err instanceof SelfUpdateError ? err : new SelfUpdateError(String(err));
+  }
+  if (registry === '' || registry === 'null' || registry === 'undefined') {
+    throw new SelfUpdateError(
+      'ERROR: the @newchiwan scope registry is not configured; the package only exists on the company Nexus. ' +
+        'Run: npm config set @newchiwan:registry https://nexus.newchiwan.cn/repository/registry-npm/',
+    );
+  }
+}
+
+function latestPublishedVersion(): string {
+  const latest = npmCapture(['view', '@newchiwan/che', 'version']);
+  if (latest === '') {
+    throw new SelfUpdateError('ERROR: npm view returned no version for @newchiwan/che');
+  }
+  return latest;
+}
+
+export function runSelfUpdate(argv: string[]): number {
+  if (argv.includes('--help') || argv.includes('-h')) {
+    process.stdout.write(SELF_UPDATE_USAGE);
+    return 0;
+  }
+  let values: Record<string, unknown>;
+  try {
+    const parsed = parseArgs({
+      args: argv,
+      options: { version: { type: 'string' }, check: { type: 'boolean' }, json: { type: 'boolean' } },
+      allowPositionals: true,
+      strict: true,
+    });
+    values = parsed.values;
+    if (parsed.positionals.length > 0) {
+      throw new SelfUpdateError(`ERROR: self-update takes no positional arguments (got '${parsed.positionals[0]}')`);
+    }
+  } catch (err) {
+    process.stderr.write((err instanceof Error ? err.message : String(err)) + '\n');
+    process.stderr.write(SELF_UPDATE_USAGE);
+    return 2;
+  }
+
+  try {
+    requireNpmManagedInstall();
+    requireNpm();
+    requireScopeRegistry();
+
+    const current = CLI_VERSION;
+    const target =
+      typeof values.version === 'string' && values.version !== ''
+        ? values.version
+        : latestPublishedVersion();
+    const outdated = compareVersions(target, current) > 0;
+
+    if (values.check === true) {
+      if (values.json) {
+        process.stdout.write(JSON.stringify({ CURRENT: current, LATEST: target, OUTDATED: outdated }) + '\n');
+      } else {
+        process.stdout.write(`CURRENT: ${current}\nLATEST: ${target}\n`);
+        process.stdout.write(outdated ? `STATUS: OUTDATED — run 'che self-update'\n` : 'STATUS: CURRENT\n');
+      }
+      return outdated ? 1 : 0;
+    }
+
+    if (!outdated) {
+      if (values.json) {
+        process.stdout.write(JSON.stringify({ CURRENT: current, LATEST: target, UPDATED: false }) + '\n');
+      } else {
+        process.stdout.write(`ALREADY_UP_TO_DATE: @newchiwan/che@${current}\n`);
+      }
+      return 0;
+    }
+
+    try {
+      execFileSync('npm', ['install', '-g', `@newchiwan/che@${target}`], { stdio: 'inherit' });
+    } catch (err) {
+      const detail = isRecord(err) && 'stderr' in err && typeof err.stderr === 'string' ? err.stderr.trim() : '';
+      throw new SelfUpdateError(
+        `ERROR: npm install -g @newchiwan/che@${target} failed${detail ? `: ${detail}` : ''}; ` +
+          `install by hand with: npm install -g @newchiwan/che@${target}`,
+      );
+    }
+
+    if (values.json) {
+      process.stdout.write(JSON.stringify({ CURRENT: current, LATEST: target, UPDATED: true }) + '\n');
+    } else {
+      process.stdout.write(`SELF_UPDATED: @newchiwan/che ${current} -> ${target}\n`);
+      process.stdout.write('VERIFY: che --version (takes effect on the next run)\n');
+    }
+    return 0;
+  } catch (err) {
+    if (err instanceof SelfUpdateError) {
+      process.stderr.write(err.message + '\n');
+      return 2;
+    }
+    throw err;
+  }
+}

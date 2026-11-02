@@ -588,6 +588,173 @@ run "$CHE_BIN" state show extra --session s1
 run "$CHE_BIN" state --help
 [ "$RC" -eq 0 ] && ok || bad "state --help: 退出码 ${RC}"
 
+# 20b. pack lifecycle against a local fixture repo (git + file:// transport).
+# Fixture timeline: tag v0.5.0 (skills alpha,beta; engines.che >=0.3.0) then an
+# untagged main bump to 0.6.0 (adds skill delta; engines.che >=99.0.0) so
+# CHANNEL_DRIFT and the minCli guard are both reachable.
+if ! command -v git >/dev/null 2>&1; then
+  printf '[SKIP] pack 契约: 本机无 git，无法构建 fixture 仓\n'
+else
+unset CHE_PACK_REPO
+FIXTURE="$TMP/packrepo"
+PACKPROJ="$TMP/packproj"
+mkdir -p "$PACKPROJ/.git"
+runp() { # runp <command...>; same as run() but in PACKPROJ
+  OUT="$(cd "$PACKPROJ" && "$@" 2>"$TMP/stderr")"
+  RC=$?
+}
+git init -q -b main "$FIXTURE"
+mkdir -p "$FIXTURE/skills/alpha" "$FIXTURE/skills/beta"
+printf 'name: alpha\n' > "$FIXTURE/skills/alpha/SKILL.md"
+printf 'name: beta\n' > "$FIXTURE/skills/beta/SKILL.md"
+printf '{"name":"ncw-delivery-harness","version":"0.5.0","engines":{"che":">=0.3.0"}}' > "$FIXTURE/package.json"
+git -C "$FIXTURE" add -A
+git -C "$FIXTURE" -c user.email=test@local -c user.name=test commit -qm 'v0.5.0 fixture'
+git -C "$FIXTURE" tag v0.5.0
+git -C "$FIXTURE" config uploadpack.allowReachableSHA1InWant true
+
+# init: installs skills, writes the manifest, prints the project-init hint.
+runp "$CHE_BIN" pack init --from "file://$FIXTURE"
+[ "$RC" -eq 0 ] && ok || bad "pack init: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+[ -f "$PACKPROJ/.agents/skills/alpha/SKILL.md" ] && ok || bad "pack init: alpha 未安装"
+node -e '
+  const m = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8"));
+  const ok = m.schema === 1 && m.pack === "ncw-delivery-harness" && m.packVersion === "0.5.0" &&
+    m.ref === "v0.5.0" && m.target === ".agents/skills" && m.minCliVersion === ">=0.3.0" &&
+    JSON.stringify(m.skills) === JSON.stringify(["alpha", "beta"]) && !Number.isNaN(Date.parse(m.updatedAt));
+  process.exit(ok ? 0 : 1);
+' "$PACKPROJ/.che/pack.json" && ok || bad "pack init: manifest 字段不符：$(cat "$PACKPROJ/.che/pack.json")"
+case "$OUT" in
+  *"/che-project-init"*) ok ;;
+  *) bad "pack init: stdout 未提示 /che-project-init：$OUT" ;;
+esac
+
+# init again without --force → points at update; --force reinstalls in place.
+runp "$CHE_BIN" pack init --from "file://$FIXTURE"
+[ "$RC" -eq 1 ] && ok || bad "pack init 二次: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"che pack update"*) ok ;;
+  *) bad "pack init 二次: stderr 未指向 che pack update：$(<"$TMP/stderr")" ;;
+esac
+runp "$CHE_BIN" pack init --from "file://$FIXTURE" --force --json
+json_matches "$OUT" '{"INSTALLED":{"packVersion":"0.5.0","ref":"v0.5.0"},"ACTION":"reinstall"}' \
+  && ok || bad "pack init --force --json: $OUT"
+
+# unmanaged same-name dirs block a fresh init until --force (同名不覆盖).
+FRESH="$TMP/packfresh"
+mkdir -p "$FRESH/.git" "$FRESH/.agents/skills/alpha"
+printf 'local edit\n' > "$FRESH/.agents/skills/alpha/SKILL.md"
+OUT="$(cd "$FRESH" && "$CHE_BIN" pack init --from "file://$FIXTURE" 2>"$TMP/stderr")"; RC=$?
+[ "$RC" -eq 1 ] && ok || bad "pack init 冲突: 退出码 ${RC}，预期 1"
+case "$(<"$TMP/stderr")" in
+  *"unmanaged"*"alpha"*) ok ;;
+  *) bad "pack init 冲突: stderr 未列出 alpha：$(<"$TMP/stderr")" ;;
+esac
+OUT="$(cd "$FRESH" && "$CHE_BIN" pack init --from "file://$FIXTURE" --force 2>"$TMP/stderr")"; RC=$?
+[ "$RC" -eq 0 ] && ok || bad "pack init --force: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+byte_equal "$FRESH/.agents/skills/alpha/SKILL.md" "$FIXTURE/skills/alpha/SKILL.md" \
+  && ok || bad "pack init --force: 未以上游内容覆盖本地 alpha"
+
+# update is idempotent on the same commit (updatedAt must not churn).
+runp "$CHE_BIN" pack update
+[ "$RC" -eq 0 ] && ok || bad "pack update 幂等前: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+runp "$CHE_BIN" pack update
+[ "$RC" -eq 0 ] && ok || bad "pack update 幂等: 退出码 ${RC}"
+case "$OUT" in
+  *"ALREADY_UP_TO_DATE"*) ok ;;
+  *) bad "pack update 幂等: 未报 ALREADY_UP_TO_DATE：$OUT" ;;
+esac
+UPDATED_AT_1="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1],"utf8")).updatedAt' "$PACKPROJ/.che/pack.json")"
+runp "$CHE_BIN" pack update --dry-run
+[ "$RC" -eq 0 ] && ok || bad "pack update --dry-run: 退出码 ${RC}"
+UPDATED_AT_2="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1],"utf8")).updatedAt' "$PACKPROJ/.che/pack.json")"
+[ "$UPDATED_AT_1" = "$UPDATED_AT_2" ] && ok || bad "pack update 幂等: updatedAt 被 churn（$UPDATED_AT_1 → $UPDATED_AT_2）"
+
+# Hand-broken managed skill: plain update keeps local edits (same commit),
+# --force is the repair path that reinstalls from upstream.
+printf 'broken by hand\n' > "$PACKPROJ/.agents/skills/alpha/SKILL.md"
+runp "$CHE_BIN" pack update
+case "$OUT" in
+  *"ALREADY_UP_TO_DATE"*) ok ;;
+  *) bad "pack update 改坏场景: 未报 ALREADY_UP_TO_DATE：$OUT" ;;
+esac
+[ "$(cat "$PACKPROJ/.agents/skills/alpha/SKILL.md")" = "broken by hand" ] \
+  && ok || bad "pack update 改坏场景: 同 commit 下不应改写本地文件"
+runp "$CHE_BIN" pack update --force
+[ "$RC" -eq 0 ] && ok || bad "pack update --force 修复: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+byte_equal "$PACKPROJ/.agents/skills/alpha/SKILL.md" "$FIXTURE/skills/alpha/SKILL.md" \
+  && ok || bad "pack update --force 修复: 未恢复为上游内容"
+
+# untagged main bump: drift detection + dry-run plan against main + minCli guard.
+mkdir -p "$FIXTURE/skills/delta"
+printf 'name: delta\n' > "$FIXTURE/skills/delta/SKILL.md"
+printf '{"name":"ncw-delivery-harness","version":"0.6.0","engines":{"che":">=99.0.0"}}' > "$FIXTURE/package.json"
+git -C "$FIXTURE" add -A
+git -C "$FIXTURE" -c user.email=test@local -c user.name=test commit -qm 'v0.6.0 untagged fixture'
+MAIN_SHA="$(git -C "$FIXTURE" rev-parse main)"
+
+runp "$CHE_BIN" pack status
+[ "$RC" -eq 1 ] && ok || bad "pack status 漂移: 退出码 ${RC}，预期 1"
+case "$OUT" in
+  *"CHANNEL_DRIFT"*"0.6.0"*) ok ;;
+  *) bad "pack status 漂移: 未报 CHANNEL_DRIFT：$OUT" ;;
+esac
+
+runp "$CHE_BIN" pack update --ref main --dry-run
+[ "$RC" -eq 0 ] && ok || bad "pack update --dry-run(main): 退出码 ${RC}"
+case "$OUT" in
+  *"DRY-RUN: no changes written"*) ok ;;
+  *) bad "pack update --dry-run(main): 未声明不落盘：$OUT" ;;
+esac
+[ ! -d "$PACKPROJ/.agents/skills/delta" ] && ok || bad "pack update --dry-run(main): 落盘了 delta"
+
+runp "$CHE_BIN" pack update --ref main
+[ "$RC" -eq 0 ] && ok || bad "pack update(main): 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+case "$(<"$TMP/stderr")" in
+  *"requires che >=99.0.0"*) ok ;;
+  *) bad "pack update(main): stderr 未警告 minCli：$(<"$TMP/stderr")" ;;
+esac
+[ -f "$PACKPROJ/.agents/skills/delta/SKILL.md" ] && ok || bad "pack update(main): delta 未安装"
+
+runp "$CHE_BIN" pack status --json
+json_matches "$OUT" '{"INSTALLED":{"packVersion":"0.6.0","ref":"main"},"UPDATE_AVAILABLE":false,"SKILLS":{"managed":3,"missing":[],"extra":[]},"CLI":{"minRequired":">=99.0.0","ok":false}}' \
+  && ok || bad "pack status --json(minCli): $OUT"
+[ "$RC" -eq 1 ] && ok || bad "pack status minCli 不达标: 退出码 ${RC}，预期 1"
+
+# update by raw commit SHA (fetch-by-SHA path; releases should pin tags).
+runp "$CHE_BIN" pack update --ref "$MAIN_SHA"
+[ "$RC" -eq 0 ] && ok || bad "pack update(sha): 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+node -e '
+  const m = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8"));
+  process.exit(m.ref === process.argv[2] ? 0 : 1);
+' "$PACKPROJ/.che/pack.json" "$MAIN_SHA" && ok || bad "pack update(sha): manifest.ref 未记录 sha"
+
+# no manifest → environment error; bogus ref → network/usage error (exit 2).
+rm "$PACKPROJ/.che/pack.json"
+runp "$CHE_BIN" pack status
+[ "$RC" -eq 2 ] && ok || bad "pack status 无 manifest: 退出码 ${RC}，预期 2"
+case "$(<"$TMP/stderr")" in
+  *"che pack init"*) ok ;;
+  *) bad "pack status 无 manifest: stderr 未指向 che pack init：$(<"$TMP/stderr")" ;;
+esac
+runp "$CHE_BIN" pack update --ref no-such-tag
+[ "$RC" -eq 2 ] && ok || bad "pack update 未知 ref: 退出码 ${RC}，预期 2"
+runp "$CHE_BIN" pack bogus
+[ "$RC" -eq 2 ] && ok || bad "pack 未知子命令: 退出码 ${RC}，预期 2"
+fi
+
+# 20c. self-update guards (dev checkout refusal is deterministic in this tree).
+run "$CHE_BIN" self-update --help
+[ "$RC" -eq 0 ] && ok || bad "self-update --help: 退出码 ${RC}"
+run "$CHE_BIN" self-update
+[ "$RC" -eq 2 ] && ok || bad "self-update 开发链: 退出码 ${RC}，预期 2"
+case "$(<"$TMP/stderr")" in
+  *"development checkout"*) ok ;;
+  *) bad "self-update 开发链: stderr 未说明开发链拒绝：$(<"$TMP/stderr")" ;;
+esac
+run "$CHE_BIN" self-update --no-such-flag
+[ "$RC" -eq 2 ] && ok || bad "self-update 未知 flag: 退出码 ${RC}，预期 2"
+
 # 21. version parity, help, unknown command.
 EXPECTED_VERSION="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).version' "$REPO_ROOT/packages/cli/package.json")"
 run "$CHE_BIN" --version
