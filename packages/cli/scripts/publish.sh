@@ -6,7 +6,13 @@
 # realpath escapes node_modules) cannot be shipped verbatim. The published
 # tarball therefore carries a single bun-bundled dist/cli.js and nothing else.
 #
-# Usage: bash scripts/publish.sh [--registry <url>] [extra npm publish flags]
+# Publish target: the internal-npm HOSTED repo. Scoped packages resolve their
+# registry via `@newchiwan:registry` (typically set to the registry-npm GROUP
+# for installs), and that config beats `npm publish --registry` — so publish
+# must override the scoped key itself (CHE_PUBLISH_REGISTRY to override).
+# Deploying to a group is a Nexus PRO feature and fails with 403.
+#
+# Usage: bash scripts/publish.sh [extra npm publish flags]
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -28,4 +34,4 @@ node -e '
   copyFileSync("dist/cli.js", stage + "/cli.js");
 ' "$stage"
 
-npm publish "$stage" "$@"
+npm publish "$stage" --@newchiwan:registry="${CHE_PUBLISH_REGISTRY:-https://nexus.newchiwan.cn/repository/internal-npm/}" "$@"
