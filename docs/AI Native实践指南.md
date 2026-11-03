@@ -1,6 +1,8 @@
 # AI Native 开发指南
 
-面向新项目成员与项目负责人。团队的 AI native 开发底座由两个仓库组成：[**monorepo-template**](https://git.newchiwan.com/council/monorepo-template/-/blob/main/README.md)（项目骨架）与 [**ncw-delivery-harness**](https://git.newchiwan.com/council/ncw-delivery-harness/-/blob/main/README.md)（流程技能包）。本文说明二者的职责、项目初始化后获得的内容，以及从初始化到日常交付的完整路径。
+ 面向新项目成员与项目负责人。团队的 AI native 开发底座由两个仓库组成：[**monorepo-template**](https://git.newchiwan.com/council/monorepo-template/-/blob/main/README.md)（项目骨架）与 [**ncw-delivery-harness**](https://git.newchiwan.com/council/ncw-delivery-harness/-/blob/main/README.md)（流程技能包）。本文说明二者的职责、项目初始化后获得的内容，以及从初始化到日常交付的完整路径。
+
+> **版本对齐**：本文技能清单、CLI 能力与安装路径的描述对齐 `ncw-delivery-harness` **v1.1.0**（发版时随 `.agents/commands/release.md` 步骤 3 同步更新本行）；内嵌的 monorepo-template 提示词为副本，以彼仓 `README.md` 为准。
 
 > **谁读什么**
 > - **项目负责人 / 初始化者**：读全文——初始化、骨架与规则、技能包接入、维护分工都在这里。
@@ -12,11 +14,12 @@
 |---|---|
 | 了解这套底座由什么组成、两者如何分工 | [§1](#1-总览两个仓库如何协同) |
 | 直接开始初始化一个新项目（两段提示词全文） | [§1.1](#11-直接开始) |
+| 存量项目接入技能包与环境检查（不引入 monorepo 骨架） | [§1.2](#12-直接开始存量项目) |
 | 了解初始化各步骤做了什么 | [§2.1](#21-一键初始化) |
 | 弄清项目里某个文件 / 目录的作用 | [§2.2](#22-骨架内容) |
 | 新建子项目、决定代码放哪、能否共享代码、CI 流水线如何划分 | [§2.3](#23-monorepo-布局规则) |
 | 了解交付必须遵守的原则，或需要修订宪法 | [§2.4](#24-基础宪法) |
-| 环境检查不通过、缺工具或版本不符 | [§2.5](#25-工具链基线与每会话环境检查) |
+| 环境检查不通过、缺工具或版本不符 | [§2.5](#25-工具链基线与环境检查) |
 | 确认技能包装在哪、运行时依赖哪些 CLI | [§3.1](#31-定位与依赖) |
 | 走日常开发流程：产品 / UI 设计 / 开发各侧顺序、交接门禁、自动行为、质量环节、bug 修复 | [§3.2](#32-主线流程) |
 | 找某个流程产物（spec、tasks、mapping.json 等）的位置 | [§3.3](#33-产出物结构) |
@@ -33,7 +36,7 @@
 flowchart LR
   subgraph base["团队底座（两个仓库）"]
     T["monorepo-template<br/>项目骨架"]
-    H["ncw-delivery-harness<br/>流程技能包（30 技能）"]
+    H["ncw-delivery-harness<br/>流程技能包（29 技能）"]
   end
   T -->|"一键开始提示词：复制骨架<br/>实例化宪法 · 环境基线"| P["你的项目仓库<br/>services/ · apps/ · docs/ · AGENTS.md"]
   H -->|"插件安装 / 手动拷贝<br/>+ che · adrkit · pingcode CLI"| A["你的 AI Agent"]
@@ -51,7 +54,7 @@ monorepo-template 项目地址：https://git.newchiwan.com/council/monorepo-temp
 
 这是我们团队的标准 monorepo 框架，请把我的项目按它初始化：
 1. 克隆 monorepo-template 到临时目录，把骨架（AGENTS-TEMPLATE.md、docs/adr/、docs/constitution/、services/、apps/、Makefile、.gitignore）复制进我当前项目根目录：AGENTS-TEMPLATE.md 复制后改名为 AGENTS.md；docs/constitution/constitution.md 是基础宪法，把其中的 [PROJECT_NAME] 全部替换为我的项目名，Ratified / Last Amended 的 TODO 日期填为今天（Cross-Domain Invariants 之后由项目按需追加，不削弱基础条款）；不复制 README.md，空目录补 .gitkeep，同名文件不覆盖、列出来问我
-2. 环境就绪（缺了才装）：Node.js ≥ 22.18（第 3 步技能包的硬性要求）用本机包管理器装 LTS 或从 nodejs.org 装
+2. 环境就绪（缺了才装）：Node.js ≥ 22.18（第 3 步技能包的硬性要求）按系统装 LTS：macOS 用 brew / nvm，Windows 用 winget / choco，Linux 用 apt / dnf（本机有多个包管理器时问用户选哪个）；都没有则从 nodejs.org 装 LTS
 3. 安装团队交付技能包 ncw-delivery-harness：克隆 https://git.newchiwan.com/council/ncw-delivery-harness.git 到临时目录，读其 README.md 的「一键安装（For Agent）」章节，把该章节内嵌的安装提示词当作指令完整执行——它自动识别 omp / DSH / 手动拷贝三路安装方式、先配 @newchiwan 的 Nexus registry 再装 che 与 adrkit 运行时 CLI、并逐项验证汇报。执行完删除临时克隆。
 4. 接入 codegraph：npm i -g @colbymchenry/codegraph@1.6.2；只为当前宿主写项目级 MCP 配置，不要为其他检测到的 agent 写 .claude/ 之类目录：宿主在其支持列表内用 codegraph install -l local -t <宿主id> -y，不在就手写 .mcp.json：{"mcpServers":{"codegraph":{"type":"stdio","command":"codegraph","args":["serve","--mcp"]}}}；再 codegraph init 建索引（.codegraph/ 不提交，新 MCP 工具重启后才生效）
 5. 删除 init 产生的 *.backup.*，按 AGENTS.md 的提交规范提交本次变更（含认知资产），然后停下提示我重启 Agent；索引和 AGENTS.md 章节完善等重启后再做
@@ -67,6 +70,31 @@ monorepo-template 项目地址：https://git.newchiwan.com/council/monorepo-temp
 
 > 前提：Agent 所在环境能访问 `git.newchiwan.com` 与 `github.com`；内网装 `@newchiwan/che` 需要公司 Nexus（初始化提示词与 `/che-project-init` 会处理 scope 配置）。
 
+### 1.2 直接开始（存量项目）
+
+项目已经是 monorepo、或完全不需要 monorepo 架构？只安装团队交付技能包（harness），并给项目接上 `AGENTS.md` 的「环境检查」章节。提示词副本同步自 monorepo-template 仓 `README.md`「一键开始（存量项目）」，改动以彼处为准：
+
+```text
+monorepo-template 项目地址：https://git.newchiwan.com/council/monorepo-template.git
+ncw-delivery-harness 项目地址：https://git.newchiwan.com/council/ncw-delivery-harness.git
+
+这是存量项目，不要引入 monorepo 架构，只做两件事：装团队技能包、给 AGENTS.md 接上环境检查：
+1. 环境就绪（缺了才装）：Node.js ≥ 22.18（第 2 步技能包的硬性要求）按系统装 LTS：macOS 用 brew / nvm，Windows 用 winget / choco，Linux 用 apt / dnf（本机有多个包管理器时问用户选哪个）；都没有则从 nodejs.org 装 LTS
+2. 安装团队交付技能包 ncw-delivery-harness：克隆其仓库到临时目录，读其 README.md 的「一键安装（For Agent）」章节，把该章节内嵌的安装提示词当作指令完整执行——它自动识别 omp / DSH / 手动拷贝三路安装方式、先配 @newchiwan 的 Nexus registry 再装 che 与 adrkit 运行时 CLI、并逐项验证汇报。执行完删除临时克隆
+3. 接上环境检查章节：克隆 monorepo-template 到临时目录，只提取 AGENTS-TEMPLATE.md 里「环境检查（仅用户明确要求时执行）」整节（触发说明段落 + 表格 + 表格上方注释）；不复制该文件其他章节，也不复制 services/、apps/、docs/、Makefile、.gitignore 等任何骨架文件。我的项目根目录已有 AGENTS.md：把该节插入合适位置，不动既有内容；若已有同名或近似的环境检查章节，逐项比对表格后列出差异问我，经我确认再合并。没有 AGENTS.md：新建最小 AGENTS.md，一句话说明 + 该节，仅此而已。执行完删除临时克隆
+4. 按我的项目现有提交规范提交本次变更（无规范则用 type(scope): 中文消息），然后停下提示我重启 Agent
+
+不要顺手新建业务代码，不要改写我既有文件，也不要复制 monorepo 骨架。
+```
+
+重启 Agent 之后再发这一段：
+
+```text
+先确认 ncw-delivery-harness 已生效（列出已装插件/技能能看到它）；然后运行 /che-project-init 做项目级配置（.che/config.yml + 可选 PingCode 接入），按我的答复执行；完成后按根目录 AGENTS.md「环境检查」章节做一次全量环境检查作为初始化验证：逐项汇报结果，不符合项经我确认后才按「安装 / 升级」列处理——其中 codegraph 及其项目索引存量项目未必需要，装不装先问我；确认不适用的检查行（如不接 codegraph）直接在我项目 AGENTS.md 该行标注不适用，之后检查跳过；最后按提交规范提交本次变更。
+```
+
+> **pack v1.1.0 起的简化**：第 3 步可整步省略——`/che-project-init` 已内置环境检查节种子（逐字同步自 monorepo-template，幂等补缺、只补不删用户内容，见 §3.1），装完技能包直接跑第二段提示词即可。
+
 ## 2. monorepo-template：项目骨架
 
 ### 2.1 一键初始化
@@ -75,7 +103,7 @@ monorepo-template 项目地址：https://git.newchiwan.com/council/monorepo-temp
 
 1. 把骨架复制进你的项目根目录（同名文件不覆盖，遇冲突时中断并询问）；
 2. 检查并补齐环境（Node.js ≥ 22.18 等）；
-3. 安装团队技能包 ncw-delivery-harness（自动识别 omp / DSH / 手动拷贝三路）；
+3. 安装团队技能包 ncw-delivery-harness（自动识别 omp / DSH / 手动拷贝；另支持 `che pack init` 项目级安装，见 §3.1）；
 4. 接入 codegraph（代码知识图谱 MCP）并建立索引；
 5. 按提交规范提交本次变更，然后提示你**重启 Agent**。
 
@@ -136,9 +164,9 @@ your-repo/
 
 跨域不变量（安全 / 性能与集成 / 工具链 / 语言）直接绑定：授权只在后端、日志与返回不得泄漏敏感字段、SQL 必须参数化、远程调用必须有超时与有界重试、工具链版本以锁文件为准、**所有输出用简体中文**。项目专属不变量追加到 Cross-Domain Invariants，不得削弱基础条款；首次实例化（替换 `[PROJECT_NAME]`、逐条确认取舍）由 `/che-project-init` 接入时移交 `/che-constitution` 完成，后续修订也走 `che-constitution`。
 
-### 2.5 工具链基线与每会话环境检查
+### 2.5 工具链基线与环境检查
 
-初始化后你的项目 `AGENTS.md` 会带一张**环境检查表**，Agent 每次会话先全量核对一遍，不符合项经你确认才安装/升级。依赖面以 ncw-delivery-harness 为准，清单里的工具及其用途：
+初始化后你的项目 `AGENTS.md` 会带一张**环境检查表**（仅用户明确要求时执行：全量核对一遍，不符合项经确认才安装/升级，绝不随会话自动触发）。依赖面以 ncw-delivery-harness 为准，清单里的工具及其用途：
 
 | 工具 | 用途 |
 |---|---|
@@ -156,7 +184,7 @@ your-repo/
 
 ### 3.1 定位与依赖
 
-29 个 agent skill，承载「意图驱动开发 + PingCode」的流程：**产品出意图建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加治理资产与项目架构画像的接入初始化（`/che-project-init`：宪法缺失移交 `/che-constitution` 实例化、基础 ADR 缺失移交 `/che-adr-draft` 导入；架构画像先判定仓库属已有代码还是纯新仓库，仅已有代码仓库生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / `che pack init` 项目级安装且版本受管 / 手动拷贝到 `~/.agents/skills/`，四路任一）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
+29 个 agent skill，承载「意图驱动开发 + PingCode」的流程：**产品出意图建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加治理资产、AGENTS 环境检查段落与项目架构画像的接入初始化（`/che-project-init`：宪法缺失移交 `/che-constitution` 实例化、基础 ADR 缺失移交 `/che-adr-draft` 导入；AGENTS「环境检查」节幂等补缺、只补不删；架构画像先判定仓库属已有代码还是纯新仓库，仅已有代码仓库生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / `che pack init` 项目级安装且版本受管 / 手动拷贝到 `~/.agents/skills/`，四路任一）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
 
 ### 3.2 主线流程
 
