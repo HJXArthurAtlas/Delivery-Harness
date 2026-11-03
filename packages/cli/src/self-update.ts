@@ -12,8 +12,9 @@
 import { parseArgs } from 'node:util';
 import { execFileSync } from 'node:child_process';
 import { realpathSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { isRecord } from './type-guard.ts';
+ import { fileURLToPath } from 'node:url';
+import { ANSI_GRAY, ANSI_ORANGE, paint } from './colors.ts';
+ import { isRecord } from './type-guard.ts';
 import { CLI_VERSION } from './version.ts';
 import { compareVersions } from './pack.ts';
 
@@ -129,8 +130,12 @@ export function runSelfUpdate(argv: string[]): number {
       if (values.json) {
         process.stdout.write(JSON.stringify({ CURRENT: current, LATEST: target, OUTDATED: outdated }) + '\n');
       } else {
-        process.stdout.write(`CURRENT: ${current}\nLATEST: ${target}\n`);
-        process.stdout.write(outdated ? `STATUS: OUTDATED — run 'che self-update'\n` : 'STATUS: CURRENT\n');
+        process.stdout.write(paint(ANSI_GRAY, `CLI 当前版本： ${current}\n`));
+        if (outdated) {
+          process.stdout.write(paint(ANSI_GRAY, `发现新版本： ${target}\n`));
+        } else {
+          process.stdout.write(paint(ANSI_ORANGE, '✓ 已是最新版本\n'));
+        }
       }
       return outdated ? 1 : 0;
     }
@@ -139,13 +144,22 @@ export function runSelfUpdate(argv: string[]): number {
       if (values.json) {
         process.stdout.write(JSON.stringify({ CURRENT: current, LATEST: target, UPDATED: false }) + '\n');
       } else {
-        process.stdout.write(`ALREADY_UP_TO_DATE: @newchiwan/che@${current}\n`);
+        process.stdout.write(paint(ANSI_GRAY, `CLI 当前版本： ${current}\n`));
+        process.stdout.write(paint(ANSI_ORANGE, '✓ 已是最新版本\n'));
       }
       return 0;
     }
 
+    if (values.json !== true) {
+      process.stdout.write(paint(ANSI_GRAY, `CLI 当前版本： ${current}\n`));
+      process.stdout.write(paint(ANSI_GRAY, `发现新版本： ${target}\n`));
+      process.stdout.write(paint(ANSI_GRAY, '正在安装新版本……\n\n'));
+    }
+
     try {
-      execFileSync('npm', ['install', '-g', `@newchiwan/che@${target}`], { stdio: 'inherit' });
+      // stdio piped (not inherit) so npm's own progress never pollutes the banner;
+      // stderr is captured for the failure message below.
+      execFileSync('npm', ['install', '-g', `@newchiwan/che@${target}`], { stdio: ['ignore', 'pipe', 'pipe'] });
     } catch (err) {
       const detail = isRecord(err) && 'stderr' in err && typeof err.stderr === 'string' ? err.stderr.trim() : '';
       throw new SelfUpdateError(
@@ -157,8 +171,7 @@ export function runSelfUpdate(argv: string[]): number {
     if (values.json) {
       process.stdout.write(JSON.stringify({ CURRENT: current, LATEST: target, UPDATED: true }) + '\n');
     } else {
-      process.stdout.write(`SELF_UPDATED: @newchiwan/che ${current} -> ${target}\n`);
-      process.stdout.write('VERIFY: che --version (takes effect on the next run)\n');
+      process.stdout.write(paint(ANSI_ORANGE, `✓ 成功更新到 ${target}\n`));
     }
     return 0;
   } catch (err) {

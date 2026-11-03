@@ -660,10 +660,10 @@ runp "$CHE_BIN" pack update
 [ "$RC" -eq 0 ] && ok || bad "pack update 幂等前: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 runp "$CHE_BIN" pack update
 [ "$RC" -eq 0 ] && ok || bad "pack update 幂等: 退出码 ${RC}"
-case "$OUT" in
-  *"ALREADY_UP_TO_DATE"*) ok ;;
-  *) bad "pack update 幂等: 未报 ALREADY_UP_TO_DATE：$OUT" ;;
-esac
+ case "$OUT" in
+  *"NCW Delivery Harness 当前版本： 0.5.0"*"✓ 已是最新版本"*) ok ;;
+  *) bad "pack update 幂等: 横幅不符：$OUT" ;;
+ esac
 UPDATED_AT_1="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1],"utf8")).updatedAt' "$PACKPROJ/.che/pack.json")"
 runp "$CHE_BIN" pack update --dry-run
 [ "$RC" -eq 0 ] && ok || bad "pack update --dry-run: 退出码 ${RC}"
@@ -674,10 +674,10 @@ UPDATED_AT_2="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv
 # --force is the repair path that reinstalls from upstream.
 printf 'broken by hand\n' > "$PACKPROJ/.agents/skills/alpha/SKILL.md"
 runp "$CHE_BIN" pack update
-case "$OUT" in
-  *"ALREADY_UP_TO_DATE"*) ok ;;
-  *) bad "pack update 改坏场景: 未报 ALREADY_UP_TO_DATE：$OUT" ;;
-esac
+ case "$OUT" in
+  *"NCW Delivery Harness 当前版本： 0.5.0"*"✓ 已是最新版本"*) ok ;;
+  *) bad "pack update 改坏场景: 横幅不符：$OUT" ;;
+ esac
 [ "$(cat "$PACKPROJ/.agents/skills/alpha/SKILL.md")" = "broken by hand" ] \
   && ok || bad "pack update 改坏场景: 同 commit 下不应改写本地文件"
 runp "$CHE_BIN" pack update --force
@@ -708,7 +708,11 @@ case "$OUT" in
 esac
 [ ! -d "$PACKPROJ/.agents/skills/delta" ] && ok || bad "pack update --dry-run(main): 落盘了 delta"
 
-runp "$CHE_BIN" pack update --ref main
+ runp "$CHE_BIN" pack update --ref main
+case "$OUT" in
+  *"NCW Delivery Harness 当前版本： 0.5.0"*"发现新版本： main"*"正在安装新版本……"*"✓ 成功更新到 0.6.0"*"开启新对话 或 在当前对话Reload Skills以使用新版本"*) ok ;;
+  *) bad "pack update(main): 横幅不符：$OUT" ;;
+esac
 [ "$RC" -eq 0 ] && ok || bad "pack update(main): 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 case "$(<"$TMP/stderr")" in
   *"requires che >=99.0.0"*) ok ;;

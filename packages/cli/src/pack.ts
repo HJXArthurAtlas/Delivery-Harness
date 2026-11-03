@@ -27,9 +27,10 @@ import { homedir, tmpdir } from 'node:os';
 import { join, resolve as resolvePath } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { parseArgs } from 'node:util';
-import { findIntendRoot } from './feature-paths.ts';
-import { isRecord } from './type-guard.ts';
-import { CLI_VERSION } from './version.ts';
+ import { findIntendRoot } from './feature-paths.ts';
+import { ANSI_GRAY, ANSI_GREEN, ANSI_ORANGE, paint } from './colors.ts';
+ import { isRecord } from './type-guard.ts';
+ import { CLI_VERSION } from './version.ts';
 
 export const PACK_USAGE = `Usage: che pack <command> [options]
 
@@ -56,22 +57,6 @@ Options:
   --help          Show this help message
 `;
 
-// Terminal colors for the pack init banner. Sampled from the design
-// references: orange (233,158,76) and gray (110,113,122) → nearest xterm-256.
-// macOS Terminal.app has no truecolor, so 256-color is the safe denominator.
-
-const ANSI_ORANGE = 179;
-const ANSI_GRAY = 243;
-// Checkmark green: bright cluster (170,179,100) of the reference (which is
-// low-res and dark-compressed; the bright core matches the demo's look).
-const ANSI_GREEN = 143;
-
-function paint(colorCode: number, text: string): string {
-  if (process.stdout.isTTY !== true || process.env.NO_COLOR || process.env.TERM === 'dumb') {
-    return text;
-  }
-  return `\x1b[38;5;${colorCode}m${text}\x1b[0m`;
-}
 
 /** Thrown with a message that already starts with "ERROR: ". */
 export class PackError extends Error {}
@@ -550,7 +535,7 @@ export function runPackInit(argv: string[]): number {
               `(${plan.added.length}个新增, ${plan.updated.length}个更新, ${plan.removed.length}个删除)\n`,
           ),
        );
-      process.stdout.write(paint(ANSI_GRAY, '下一步:\n'));
+      process.stdout.write(paint(ANSI_GRAY, '\n下一步:\n'));
       process.stdout.write(paint(ANSI_ORANGE, '  - 在工作目录打开新的Session 或 Reload当前Session\n'));
       process.stdout.write(paint(ANSI_ORANGE, '  - 执行 /che-project-init\n'));
        return 0;
@@ -591,9 +576,17 @@ export function runPackUpdate(argv: string[]): number {
   try {
     ensureGit();
     const base = resolveBase(values);
-    const { manifest, manifestPath, targetDir } = readManifest(base);
+    const { manifest, targetDir } = readManifest(base);
     const sourceUrl = typeof values.from === 'string' && values.from !== '' ? values.from : manifest.source;
-    const ref = resolveRef(sourceUrl, values.ref);
+     const ref = resolveRef(sourceUrl, values.ref);
+    const banner = values.json !== true && values['dry-run'] !== true;
+    if (banner) {
+      const targetDisplay = VERSION_TAG_PATTERN.test(ref) ? ref.replace(/^v/, '') : ref;
+      process.stdout.write(paint(ANSI_GRAY, `NCW Delivery Harness 当前版本： ${manifest.packVersion}\n`));
+      if (targetDisplay !== manifest.packVersion) {
+        process.stdout.write(paint(ANSI_GRAY, `发现新版本： ${targetDisplay}\n`));
+      }
+    }
     const targetSkills = listSkillsDir(targetDir);
 
     const source = checkoutPack(sourceUrl, ref);
@@ -622,7 +615,7 @@ export function runPackUpdate(argv: string[]): number {
             DRY_RUN: values['dry-run'] === true,
           }) + '\n',
         );
-      } else {
+      } else if (values['dry-run'] === true) {
         printPlan(plan);
       }
       if (plan.conflicts.length > 0) {
@@ -638,12 +631,12 @@ export function runPackUpdate(argv: string[]): number {
       }
       if (unchanged) {
         if (!values.json) {
-          process.stdout.write(
-            `ALREADY_UP_TO_DATE: ${manifest.pack} ${manifest.packVersion} (ref ${manifest.ref})\n`,
-          );
+          process.stdout.write(paint(ANSI_ORANGE, '✓ 已是最新版本\n'));
         }
         return 0;
       }
+
+      if (banner) process.stdout.write(paint(ANSI_GRAY, '正在安装新版本……\n\n'));
 
       applyPlan(source, targetDir, plan);
       const next: PackManifest = {
@@ -659,11 +652,8 @@ export function runPackUpdate(argv: string[]): number {
       warnIfCliTooOld(source.minCliVersion);
 
       if (!values.json) {
-        process.stdout.write(
-          `PACK_UPDATED: ${manifest.pack} ${manifest.packVersion} -> ${next.packVersion} ` +
-            `(ref ${ref}, commit ${next.commit.slice(0, 12)})\n`,
-        );
-        process.stdout.write(`MANIFEST: ${manifestPath}\n`);
+        process.stdout.write(paint(ANSI_ORANGE, `✓ 成功更新到 ${next.packVersion}\n`));
+        process.stdout.write(paint(ANSI_GRAY, '开启新对话 或 在当前对话Reload Skills以使用新版本\n'));
       }
       return 0;
     } finally {
