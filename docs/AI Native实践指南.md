@@ -72,7 +72,7 @@ monorepo-template 项目地址：https://git.newchiwan.com/council/monorepo-temp
 
 ### 1.2 直接开始（存量项目）
 
-项目已经是 monorepo、或完全不需要 monorepo 架构？只安装团队交付技能包（harness），并给项目接上 `AGENTS.md` 的「环境检查」章节。提示词副本同步自 monorepo-template 仓 `README.md`「一键开始（存量项目）」，改动以彼处为准：
+项目已经是 monorepo、或完全不需要 monorepo 架构？用这段：只安装团队交付技能包（harness），并给项目接上 `AGENTS.md` 的「环境检查」章节；做完提示重启 Agent，重启后发第二段收尾。提示词副本同步自 monorepo-template 仓 `README.md`「一键开始（存量项目）」，改动以彼处为准：
 
 ```text
 monorepo-template 项目地址：https://git.newchiwan.com/council/monorepo-template.git
