@@ -22,7 +22,9 @@
     "@adrkit/cli": "0.20.0",
     "@newchiwan/che": "file:packages/cli"
   },
-  "omp": {},
+  "omp": {
+    "extensions": ["./omp-update-check.ts"]
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"

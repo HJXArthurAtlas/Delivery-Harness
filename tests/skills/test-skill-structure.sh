@@ -164,6 +164,70 @@ else
   ok
 fi
 
+# 8b. omp 启动更新检查扩展：package.json omp.extensions 必须声明 omp-update-check.ts 且文件存在；
+#     行为冒烟（mock pi/ctx + 新鲜缓存，不连网）：远端更新则 notify、已是最新则静默
+if command -v node >/dev/null 2>&1; then
+  node -e 'process.exit(process.features.typescript ? 0 : 1)' 2>/dev/null || {
+    # 无 type stripping 时仅做声明校验
+    node -e '
+      const fs = require("node:fs");
+      const pkg = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+      const entries = pkg?.omp?.extensions;
+      const good = Array.isArray(entries) && entries.length > 0 &&
+        entries.every((e) => fs.existsSync(require("node:path").join(process.argv[2], e)));
+      process.exit(good ? 0 : 1);
+    ' "$REPO_ROOT/package.json" "$REPO_ROOT" && ok || bad "omp.extensions 声明缺失或入口文件不存在"
+  }
+  if node -e 'process.exit(process.features.typescript ? 0 : 1)' 2>/dev/null; then
+    SMOKE_TMP="$(mktemp -d)"
+    TMP_STDERR_8B="$SMOKE_TMP/stderr"
+    XDG_CACHE_HOME="$SMOKE_TMP" node --input-type=module -e '
+      import { pathToFileURL } from "node:url";
+      import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
+      const root = process.argv[1];
+      const mod = await import(pathToFileURL(root + "/omp-update-check.ts").href);
+      let handler = null;
+      mod.default({ on: (event, h) => { if (event === "session_start") handler = h; } });
+      if (typeof handler !== "function") { console.error("FAIL session_start 未注册"); process.exit(1); }
+      const installed = JSON.parse(readFileSync(root + "/package.json", "utf8")).version;
+      const cacheDir = process.env.XDG_CACHE_HOME + "/ncw-delivery-harness";
+      const scenario = process.argv[2];
+      mkdirSync(cacheDir, { recursive: true });
+      const latest = scenario === "newer" ? "v999.0.0" : "v0.0.1";
+      writeFileSync(cacheDir + "/omp-update-check.json", JSON.stringify({ latest, checkedAt: Date.now() }));
+      const notes = [];
+      await handler({}, { hasUI: true, ui: { notify: (m) => notes.push(m) } });
+      const wantNotify = scenario === "newer";
+      if (wantNotify) {
+        const ok = notes.length === 1 && notes[0].includes("v999.0.0") && notes[0].includes(installed) &&
+          notes[0].includes("omp plugin upgrade ncw-delivery@ncw-delivery-harness");
+        if (!ok) { console.error("FAIL 更新通知不符: " + JSON.stringify(notes)); process.exit(1); }
+      } else if (notes.length !== 0) {
+        console.error("FAIL 已是最新不应通知: " + JSON.stringify(notes)); process.exit(1);
+      }
+      console.log("OK");
+    ' "$REPO_ROOT" newer >/dev/null 2>"$TMP_STDERR_8B" && ok || bad "omp 更新检查冒烟(有新版): $(cat "$TMP_STDERR_8B" 2>/dev/null)"
+    XDG_CACHE_HOME="$SMOKE_TMP" node --input-type=module -e '
+      import { pathToFileURL } from "node:url";
+      import { mkdirSync, writeFileSync } from "node:fs";
+      const root = process.argv[1];
+      const mod = await import(pathToFileURL(root + "/omp-update-check.ts").href);
+      let handler = null;
+      mod.default({ on: (event, h) => { if (event === "session_start") handler = h; } });
+      const cacheDir = process.env.XDG_CACHE_HOME + "/ncw-delivery-harness";
+      mkdirSync(cacheDir, { recursive: true });
+      writeFileSync(cacheDir + "/omp-update-check.json", JSON.stringify({ latest: "v0.0.1", checkedAt: Date.now() }));
+      const notes = [];
+      await handler({}, { hasUI: true, ui: { notify: (m) => notes.push(m) } });
+      if (notes.length !== 0) { console.error("FAIL 已是最新不应通知"); process.exit(1); }
+      console.log("OK");
+    ' "$REPO_ROOT" >/dev/null 2>"$TMP_STDERR_8B" && ok || bad "omp 更新检查冒烟(已最新): $(cat "$TMP_STDERR_8B" 2>/dev/null)"
+    rm -rf "$SMOKE_TMP"
+  fi
+else
+  bad "omp 扩展校验需要 node"
+fi
+
 # 9. @adrkit/cli 运行时依赖：必须钉精确版本，且 omp manifest 存在；分发包 private（不发 npm——发布面只有 omp/DSH 插件与 @newchiwan/che）
 if command -v node >/dev/null 2>&1; then
   while IFS= read -r line; do

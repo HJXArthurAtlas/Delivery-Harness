@@ -88,6 +88,7 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 
 ### omp 插件补充（更新与坑）
 
+- 插件自带**启动更新检查**（`omp.extensions` 扩展，1.2.0 起）：每次会话启动对比远端最新 `vX.Y.Z` tag，有新版则 TUI 通知升级命令（24h 缓存、失败静默、`--no-extensions` 可退）。
 - 更新：`omp plugin upgrade ncw-delivery@ncw-delivery-harness`，装完 `/reload-plugins` 或开新会话生效；`marketplace.autoUpdate` 默认 `notify` 只写 debug log，要自动更新执行 `omp config set marketplace.autoUpdate auto`。
 - 插件**只含 skills**（`.agents/commands/` 是本仓维护者工具，不经插件分发）。
 - **marketplace 安装不解析 npm 依赖**——`che` / `adrkit` 按上节装到全局 PATH。
