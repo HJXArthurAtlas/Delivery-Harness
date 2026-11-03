@@ -625,8 +625,8 @@ node -e '
   process.exit(ok ? 0 : 1);
 ' "$PACKPROJ/.che/pack.json" && ok || bad "pack init: manifest 字段不符：$(cat "$PACKPROJ/.che/pack.json")"
 case "$OUT" in
-  *"/che-project-init"*) ok ;;
-  *) bad "pack init: stdout 未提示 /che-project-init：$OUT" ;;
+  *"正在安装 NCW Delivery Harness 0.5.0 ..."*"安装完成 0.5.0."*"安装2个 (2个新增"*"下一步:"*"执行 /che-project-init"*) ok ;;
+  *) bad "pack init: 输出格式不符：$OUT" ;;
 esac
 
 # init again without --force → points at update; --force reinstalls in place.

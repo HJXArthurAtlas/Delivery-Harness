@@ -56,6 +56,23 @@ Options:
   --help          Show this help message
 `;
 
+// Terminal colors for the pack init banner. Sampled from the design
+// references: orange (233,158,76) and gray (110,113,122) → nearest xterm-256.
+// macOS Terminal.app has no truecolor, so 256-color is the safe denominator.
+
+const ANSI_ORANGE = 179;
+const ANSI_GRAY = 243;
+// Checkmark green: bright cluster (170,179,100) of the reference (which is
+// low-res and dark-compressed; the bright core matches the demo's look).
+const ANSI_GREEN = 143;
+
+function paint(colorCode: number, text: string): string {
+  if (process.stdout.isTTY !== true || process.env.NO_COLOR || process.env.TERM === 'dumb') {
+    return text;
+  }
+  return `\x1b[38;5;${colorCode}m${text}\x1b[0m`;
+}
+
 /** Thrown with a message that already starts with "ERROR: ". */
 export class PackError extends Error {}
 
@@ -494,7 +511,11 @@ export function runPackInit(argv: string[]): number {
       installedCommit = existing.manifest.commit;
     }
 
-    const source = checkoutPack(sourceUrl, ref);
+    if (values.json !== true) {
+      const display = VERSION_TAG_PATTERN.test(ref) ? ref.replace(/^v/, '') : ref;
+      process.stdout.write(paint(ANSI_ORANGE, `正在安装 NCW Delivery Harness ${display} ...\n\n`));
+    }
+       const source = checkoutPack(sourceUrl, ref);
     try {
       const sourceSkills = listSkillsDir(source.skillsDir);
       const plan = planSync(
@@ -522,21 +543,17 @@ export function runPackInit(argv: string[]): number {
         return 0;
       }
       process.stdout.write(
-        `PACK_INSTALLED: ${manifest.pack} ${manifest.packVersion} (ref ${ref}, commit ${manifest.commit.slice(0, 12)})\n`,
-      );
-      process.stdout.write(`TARGET: ${targetDir}\n`);
-      process.stdout.write(
-        `SKILLS: ${sourceSkills.length} installed ` +
-          `(${plan.added.length} added, ${plan.updated.length} updated, ${plan.removed.length} removed)\n`,
-      );
-      process.stdout.write(`MANIFEST: ${manifestPath}\n`);
-      if (!reinstall) {
-        process.stdout.write(
-          'GITIGNORE_HINT: keep .agents/skills/ and .che/pack.json committed for team-wide installs\n',
-        );
-        process.stdout.write('NEXT: run /che-project-init in this project to finish .che/config.yml setup\n');
-      }
-      return 0;
+        paint(ANSI_GREEN, '✓') +
+          paint(
+            ANSI_GRAY,
+            ` 安装完成 ${manifest.packVersion}. SKILLS: 安装${sourceSkills.length}个 ` +
+              `(${plan.added.length}个新增, ${plan.updated.length}个更新, ${plan.removed.length}个删除)\n`,
+          ),
+       );
+      process.stdout.write(paint(ANSI_GRAY, '下一步:\n'));
+      process.stdout.write(paint(ANSI_ORANGE, '  - 在工作目录打开新的Session 或 Reload当前Session\n'));
+      process.stdout.write(paint(ANSI_ORANGE, '  - 执行 /che-project-init\n'));
+       return 0;
     } finally {
       cleanupPackSource(source);
     }
