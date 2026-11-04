@@ -4,14 +4,14 @@ description: 刷新 README 的项目信息与用户手册——glab 取 GitLab �
 
 # readme-refresh
 
-更新本仓 `README.md` 的项目信息与 `docs/AI Native实践指南.md` 使用指南。事实一律现查，不凭记忆。
+更新本仓 `README.md` 的项目信息与 `docs/guides/` 用户手册（`AI Native实践指南.md` 使用指南、`校验技能对比.md` 校验技能分工对比）。事实一律现查，不凭记忆。
 
 ## 触发条件
 
 以下变化后必须执行本命令：
 
 - 分发模型或安装方式变化；
-- 技能新增、删除、更名或用途变化；
+- 技能新增、删除、更名、用途或行为变化——校验技能（`che-gapfill` / `che-planverify` / `che-converge` / `che-intentverify`）的判定集、checker 独立性策略、机械层或产出物变化时，必须同步 `docs/guides/校验技能对比.md`；
 - 开发命令、发布方式或测试规则变化；
 - 用户使用流程变化。
 
@@ -22,8 +22,9 @@ description: 刷新 README 的项目信息与用户手册——glab 取 GitLab �
    - 分发与安装：与 `package.json`、`.omp-plugin/marketplace.json`、`dsh-entry.js`、`cordis.patch.yml` 一致；`npx` / `git clone` 的 URL 必须等于 `http_url_to_repo`；
    - 技能清单：与 `skills/` 逐一对应核对技能名、用途和触发语，权威描述以各 `skills/<name>/SKILL.md` frontmatter 的 `description` 为准；
    - 开发节：命令与 `package.json` 一致，测试说明与 `tests/skills/` 一致。
-2. **控制同步范围**：上述事实变化时更新 `README.md`；用户使用流程变化时，同步更新 `docs/AI Native实践指南.md`。
-3. **处理文档冲突**：不改 `skills/` 内技能内容本身；发现技能文档与 README 冲突时，以技能为准修改 README，并在汇报中列出冲突点。
+2. **控制同步范围**：上述事实变化时更新 `README.md`；用户使用流程变化时，同步更新 `docs/guides/AI Native实践指南.md`（含 §3.2 主线 mermaid 与 §3.3 产出物清单）。
+3. **同步校验技能对比**：`docs/guides/校验技能对比.md` 的事实源是 `skills/che-gapfill/`、`che-planverify/`、`che-converge/`、`che-intentverify/` 四份 SKILL.md。2×2 框架（事前/事后 × 补任务/独立判定）与维度清单固定为：时机、输入、判断主体、机械层、产出物、判定集、检查维度、ADR/宪法、新鲜度、交互、失败语义、下游；表格内容逐格对照 SKILL.md 现查刷新，漂移以技能为准改文档并在汇报列出。
+4. **处理文档冲突**：不改 `skills/` 内技能内容本身；发现技能文档与 README / `docs/guides/` 冲突时，以技能为准修改文档，并在汇报中列出冲突点。
 
 ## 完成标准
 

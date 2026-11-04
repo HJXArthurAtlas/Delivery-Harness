@@ -3,7 +3,7 @@
 赤湾东方自建软件交付 Harness：把团队 AI native 交付方法做成跨端 agent skill pack，可在 DSH / OpenCode / omp 等端安装。方法底座三条：
 
 - **知识工程**——把团队知识落盘为机器可装载的资产：宪法 `docs/constitution/`、ADR 语料 `docs/adr/`、领域知识库 `docs/domain_knowledge/`、compound store（`docs/corrections/`、`docs/patterns/`）；会话开场装载（load），交付后回写（retro）。
-- **Intent Driven Development**——规格是唯一意图来源：specify → clarify/grill → plan → tasks → implement，以宪法与 ADR 为治理约束，planverify 门禁与 intentverify 独立校验实现不越出意图。
+- **Intent Driven Development**——规格是唯一意图来源：intend → clarify/grill → plan → gapfill 补验证任务 → planverify 门禁 → implement → converge 补实现差距 → intentverify 独立校验不越出意图，以宪法与 ADR 为治理约束。四个校验技能的分工见 [docs/guides/校验技能对比.md](docs/guides/校验技能对比.md)。
 - **Compound Engineering**——每次交付让下次更快：新经验写回 store、耐久纠偏升格为 ADR，bug 走 assess → fix → test 闭环沉淀回归，组织经验随交付复利。
 
 流程与 PingCode 打通：产品出规格建卡 → 开发接规格规划实现 → 卡片随实现收尾。GitLab 项目：[Tech Council / ncw-delivery-harness](https://git.newchiwan.com/council/ncw-delivery-harness)（内部仓，默认分支 `main`）。
@@ -108,7 +108,7 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 
 ## 使用指南
 
-完整使用指南见 **[docs/AI Native实践指南.md](docs/AI%20Native实践指南.md)**：两仓底座总览与分工、项目初始化与 monorepo 骨架规则、主线流程（产品 / UI 设计 / 开发各侧顺序、交接门禁、质量环节、辅助链）、产物结构与从初始化到日常交付的完整路径。
+完整使用指南见 **[docs/guides/AI Native实践指南.md](docs/guides/AI%20Native实践指南.md)**：两仓底座总览与分工、项目初始化与 monorepo 骨架规则、主线流程（产品 / UI 设计 / 开发各侧顺序、交接门禁、质量环节、辅助链）、产物结构与从初始化到日常交付的完整路径。校验技能分工对比见 **[docs/guides/校验技能对比.md](docs/guides/校验技能对比.md)**。
 
 ## Pack 内容
 

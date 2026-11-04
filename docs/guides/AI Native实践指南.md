@@ -188,7 +188,7 @@ your-repo/
 
 ### 3.2 主线流程
 
-主线链条（阶段数随角色取舍浮动，不按固定数字计）：**统一 intend（含 intent 访谈与场景起草）→ clarify → UI 设计明细 / 建卡 / 交接门禁 → plan → gapfill → planverify（含确定性 ADR 校验）→ implement 前对账 → implement → 卡片收尾**；另有独立辅助链：bug 修复三步（assess → fix → test）。
+主线链条（阶段数随角色取舍浮动，不按固定数字计）：**统一 intend（含 intent 访谈与场景起草）→ clarify → UI 设计明细 / 建卡 / 交接门禁 → plan → gapfill → planverify（含确定性 ADR 校验）→ implement 前对账 → implement → converge 收敛差距 → intentverify 独立校验 → 卡片收尾**；另有独立辅助链：bug 修复三步（assess → fix → test）。四个校验技能的分工对比见 [校验技能对比](校验技能对比.md)。
 
 ```mermaid
 flowchart TD
@@ -201,7 +201,9 @@ flowchart TD
     DE["design 设计清单 design-tasks.md（涉 UI，澄清后与建卡并行）"]
   end
   subgraph DV["开发"]
-    PL["plan 实现规划 + tasks 任务清单"] --> GF["gapfill 缺口补全"] --> PV["planverify 独立校验（含 ADR 机械层 + P3e）"] --> IM["implement 实现"] --> ST["sync-status 卡片收尾"]
+    PL["plan 实现规划 + tasks 任务清单"] --> GF["gapfill 缺口补全"] --> PV["planverify 独立校验（含 ADR 机械层 + P3e）"] --> IM["implement 实现"] --> CV["converge 收敛差距"] --> IV["intentverify 独立校验"] --> ST["sync-status 卡片收尾"]
+    CV -->|有差距，追加任务| IM
+    IV -->|BLOCKED| IM
   end
   SP --> PC
   CL --> DE
@@ -296,7 +298,7 @@ bug 修复三步：
 
 ### 3.3 产出物结构
 
-每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`intent.md`（统一规格：意图块 + User Story / Acceptance / Edge / FR / SC，场景带全局稳定 `E#` ID）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单）、`planverify.md`（门禁报告，frontmatter 记录 verdict、`adr_status` 与 intent/plan/tasks SHA-256）、`planverify.adr.json`（adrkit 原始审计记录）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/domain_knowledge/`（统一语言入口 `CONTEXT.md` + 跨特性主题知识）、`docs/GLOSSARY.md`（legacy 只读快照，用户自行迁移）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
+每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`intent.md`（统一规格：意图块 + User Story / Acceptance / Edge / FR / SC，场景带全局稳定 `E#` ID）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单，gapfill 追加 `## Gap-filling tasks` 节、converge 追加 `## Phase N: Convergence` 节）、`planverify.md`（门禁报告，frontmatter 记录 verdict、`adr_status` 与 intent/plan/tasks SHA-256）、`planverify.adr.json`（adrkit 原始审计记录）、`intentverify.md`（实现后独立校验报告，记录 `checked_by` 与独立性 Tier）、`intentverify.briefing.md` 与 `intentverify.checker.txt`（密封 briefing 与 checker 原文，独立性防火墙的审计证据）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/domain_knowledge/`（统一语言入口 `CONTEXT.md` + 跨特性主题知识）、`docs/GLOSSARY.md`（legacy 只读快照，用户自行迁移）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
 
 ## 4. 使用路径：从初始化到日常交付
 

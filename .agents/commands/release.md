@@ -20,7 +20,7 @@ description: 发版流程——统一版本源、双版本 bump、原子打 tag 
 
 1. **定版本号**：按上表口径确定 `X.Y.Z`；先 `git log --oneline <上个tag>..HEAD` 核对本版内容再定。
 2. **本版含 CLI 变更时**：bump `packages/cli/package.json` 与 `packages/cli/src/version.ts` 的 `CLI_VERSION`（两者不一致会被 `test-che-cli.sh` 拦下）→ `bash packages/cli/scripts/publish.sh` 发布 Nexus（需 devops 认证，见 README「发布」）。**先发 CLI 再 bump pack**——`engines.che` 引用已存在的版本。
-3. **bump pack**：根 `package.json#version` = `X.Y.Z`，同步 `.omp-plugin/marketplace.json` 的 plugin `version`（不一致被 `test-skill-structure.sh` 拦下）与 `docs/AI Native实践指南.md` 顶部「版本对齐」行（pack 版本 + 本版对应的 CLI 版本）。
+3. **bump pack**：根 `package.json#version` = `X.Y.Z`，同步 `.omp-plugin/marketplace.json` 的 plugin `version`（不一致被 `test-skill-structure.sh` 拦下）与 `docs/guides/AI Native实践指南.md` 顶部「版本对齐」行（pack 版本 + 本版对应的 CLI 版本）。
 4. **质量门**：`npm test` 必须全绿（三个脚本依次跑）。
 5. **单提交**：`chore(release): 发布 X.Y.Z`，只含根 `package.json`、`.omp-plugin/marketplace.json`（及本版动过的 `packages/cli` 两文件）。
 6. **原子发布**：一条命令同时推 main 与 tag，不存在「先推 main、tag 下次补」的中间态：
