@@ -7,7 +7,7 @@ description: 把 specs/ 下的 spec 转换为 PingCode 需求树卡片（spec �
 
 # 从 Spec 创建 PingCode 卡片层级
 
-> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.specstoissues` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 hook（after_intend/after_tasks）改接为澄清阶段（`after_intend` 挂 `/che-clarify` / `/che-grill` / `/che-grill-with-docs`，clarify 的可选替代追问路径）与 `/che-plan`（plan+tasks 合并产出）Handoff 块的可选目标（optional，`.che/pingcode-config.yml` 在位才提示，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约（`intent.md` 的 `### User Story N` 章节、`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记）与上游逐字一致；未认证时经项目级登录脚本 `.che/pingcode-login.sh` 自动登录（上游为提示用户手动登录后终止）。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
+> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.specstoissues` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 hook（after_intend/after_tasks）改接为澄清阶段（`after_intend` 挂 `/che-clarify` / `/che-grill` / `/che-grill-with-docs`，clarify 的可选替代追问路径）与 `/che-plan`（plan+tasks 合并产出）Handoff 块的可选目标（optional，`.che/pingcode-config.yml` 在位才提示，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约（`intent.md` 的 `### User Story N` 章节、`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记）与上游逐字一致；未认证时经项目级登录脚本 `.che/pingcode-login.sh` 自动登录（上游为提示用户手动登录后终止）。前置依赖：`pingcode` CLI ≥ 0.15.0（`npm i -g @metaphorli/pingcode-cli`）。
 
 本命令把 specs/ 产物转换为 PingCode 需求树卡片（通过 `pingcode` CLI，不依赖 MCP）：
 
@@ -257,13 +257,9 @@ pingcode workitem list --type <第 j 层类型名> --project <project_id> --limi
 <spec 正文;story_artifact 非空时剔除 User Story 章节正文>
 ```
 
-长文本通过变量传递，避免 shell 转义问题：
+**描述传递硬规则（步骤 9–11 通用）**：含换行的描述必须先用写文件工具落盘为 UTF-8 文本文件，再经 `--description-file` 传给 CLI，创建成功后立即删除临时文件；只有单行短文本才允许内联 `--description`。禁止把多行文本内联进命令行参数，禁止写临时脚本绕过 CLI 传描述——Windows cmd 单命令行上限 8191 字符，且 shell 会改写参数中的换行（换行被压成字面 `\n` 会产出整卡无排版的错误描述，实测翻车点）。临时文件放 `.pingcode/`（gitignore 目录）：spec 卡 `desc-spec.md`、story 卡 `desc-US<N>.md`、任务卡 `desc-<task_id>.md`。
 
 ```bash
-desc=$(cat <<'DESC_EOF'
-<上面组装的完整描述>
-DESC_EOF
-)
 pingcode workitem create \
   --title "<spec 标题>" \
   --type <spec_type_id 或名称> \
@@ -271,7 +267,7 @@ pingcode workitem create \
   --sprint <sprint_id> \
   --priority "<config.defaults.spec.priority>" \
   --parent <最深祖先工作项 id,第 8 步解析结果> \
-  --description "$desc"
+  --description-file .pingcode/desc-spec.md
 ```
 
 （`--priority`/`--sprint`/`--parent` 按解析结果省略可选项；无工作项父级时省略 `--parent`。spec_artifact 为空 → 跳过本步，章节卡直接挂最深祖先。）
@@ -285,7 +281,7 @@ pingcode workitem create \
 
 ### 10. 创建章节卡（story_artifact 非空时）
 
-对每个 `### User Story N` 章节，挂到 spec 卡（第 9 步，若有）或最深祖先下：
+对每个 `### User Story N` 章节，挂到 spec 卡（第 9 步，若有）或最深祖先下。章节描述先写入 `.pingcode/desc-US<N>.md`，再经 `--description-file` 传递（硬规则见第 9 步）：
 
 ```bash
 pingcode workitem create \
@@ -295,10 +291,16 @@ pingcode workitem create \
   --sprint <sprint_id> \
   --priority "<章节优先级,解析链见下>" \
   --parent <spec_card_id 或最深祖先> \
-  --description "Story from spec: <name>
+  --description-file .pingcode/desc-US<N>.md
+```
+
+描述文件内容：
+
+```markdown
+Story from spec: <name>
 US: US<N> - <章节标题>
 
-<章节全文,含验收场景>"
+<章节全文,含验收场景>
 ```
 
 章节卡描述为来源注记 + 章节全文，无任务清单；任务进度由 `/che-pingcode-sync-status` 从本地 `tasks.md` 解析。
@@ -316,7 +318,7 @@ story_artifact 为空 → 跳过本步，章节全文已随 spec 卡描述折叠
 - Phase：`## ` 标题；任务行：`- [x]/[~]/[ ] T001 描述`（保留原始标记；编号 `T\d+` 提取，无编号行按标题文本去重）
 - 归属：优先任务行 `[US\d+]` 标记，其次 Phase 标题含 `User Story <N>`，都没有 → spec 级（sync-status 复用同一归属规则）
 
-对每个任务行，挂到归属链上最深的一张**已存在**卡（story 卡 → spec 卡 → 最深祖先）：
+对每个任务行，挂到归属链上最深的一张**已存在**卡（story 卡 → spec 卡 → 最深祖先）。两行描述写入 `.pingcode/desc-<task_id>.md` 后经 `--description-file` 传递（硬规则见第 9 步）：
 
 ```bash
 pingcode workitem create \
@@ -325,8 +327,14 @@ pingcode workitem create \
   --project <project_id> \
   --sprint <sprint_id> \
   --parent <归属卡 id> \
-  --description "> 来源: specs/<name>/tasks.md T001
-归属: US1 - <章节标题>"
+  --description-file .pingcode/desc-T001.md
+```
+
+描述文件内容：
+
+```markdown
+> 来源: specs/<name>/tasks.md T001
+归属: US1 - <章节标题>
 ```
 
 - 幂等：统一登记 `artifacts.tasks[]` 中已有同 `task_id` 且 `status: created` 的跳过
@@ -458,6 +466,7 @@ Story 卡: <n> 张(spec-story 模式)
 | 需求列表为空 | 核对 `--product`/config `product`；产品下确无需求时先在 PingCode 创建需求 |
 | 史诗（中间层）列表为空 | 先在 PingCode 创建史诗后重跑，或选择跳过关联（spec 卡上浮为顶层） |
 | 任务卡没建 | 初次建卡时 tasks.md 尚未生成：本地任务清单生成后手动重跑本命令补建 |
+| 卡片描述变成一行、出现字面 `\n` 或 Markdown 不渲染 | 描述被内联进命令行参数且换行被 shell 压平：违反第 9 步硬规则。含换行的描述一律走 `--description-file`（CLI ≥ 0.15.0），按该机制重新推送描述即可恢复 |
 | 状态名不识别 | 用缓存字典里的真实状态名；或按 `state_type` 兜底 |
 | HTTP 429 | 等待 `x-pc-retry-after` 秒后重试 |
 | 项目下无进行中迭代 | 询问用户指定迭代或不挂迭代 |

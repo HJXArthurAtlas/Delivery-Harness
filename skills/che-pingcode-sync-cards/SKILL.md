@@ -7,7 +7,7 @@ description: 核对 specs/ 产物与 PingCode 卡片的一致性，按差异增�
 
 # 核对 spec 制品与 PingCode 卡片一致
 
-> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.sync-cards` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 before_implement hook 改接为 `/che-implement` Handoff 块的前置对账条件（optional，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约与上游逐字一致。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
+> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.sync-cards` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 before_implement hook 改接为 `/che-implement` Handoff 块的前置对账条件（optional，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约与上游逐字一致。前置依赖：`pingcode` CLI ≥ 0.15.0（`npm i -g @metaphorli/pingcode-cli`）。
 
 在开始实现之前运行：建卡之后、动代码之前，spec 制品可能又被修改过——本命令把差异同步到 PingCode，保证卡片与制品一致。
 
@@ -67,7 +67,7 @@ pingcode workitem get <identifier> --compact
 | 动作 | 判定 | 处理 |
 |---|---|---|
 | **删除** | 登记有卡，但 spec/tasks.md 中制品已不存在 | `pingcode workitem delete <identifier>` |
-| **更新** | 制品仍在，标题或描述与现算内容不一致 | `pingcode workitem update <identifier> --title ... --description ...`（字段级，只改有差异的字段） |
+| **更新** | 制品仍在，标题或描述与现算内容不一致 | `pingcode workitem update <identifier> --title ... --description-file <临时文件>`——含换行的描述先写 `.pingcode/` 下临时文件再引用，创建/更新成功后删除（硬规则同 `/che-pingcode-specstoissues` 第 9 步）。字段级，只改有差异的字段 |
 | **新建** | 制品存在但登记无卡或 `status: failed` | 按 `/che-pingcode-specstoissues` 第 9/10/11 步规则创建并挂接 |
 
 - 描述对比 = 现"期望描述全文"与远端 `description` 不一致即视为有差异（描述由制品确定性生成）
