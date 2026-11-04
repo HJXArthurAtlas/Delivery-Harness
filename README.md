@@ -53,6 +53,9 @@ omp 与 DSH 走各自的原生插件安装（见下），手动拷贝全靠文�
 omp plugin marketplace add https://git.newchiwan.com/council/ncw-delivery-harness.git
 omp plugin install ncw-delivery@ncw-delivery-harness
 
+# 可选：omp 插件全自动升级（默认只启动通知、手动升级）
+omp config set marketplace.autoUpdate auto
+
 # DSH 插件（根包兼作 DSH bundle；默认跟踪 main 最新，升级走 update）
 dsh plugin --profile <name> add git+https://git.newchiwan.com/council/ncw-delivery-harness.git
 dsh plugin --profile <name> update ncw-delivery-harness   # 升级到 main 最新
@@ -89,7 +92,7 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 ### omp 插件补充（更新与坑）
 
 - 插件自带**启动更新检查**（`omp.extensions` 扩展，1.2.0 起）：每次会话启动对比远端最新 `vX.Y.Z` tag，有新版则 TUI 通知升级命令（24h 缓存、失败静默、`--no-extensions` 可退）。
-- 更新：`omp plugin upgrade ncw-delivery@ncw-delivery-harness`，装完 `/reload-plugins` 或开新会话生效；`marketplace.autoUpdate` 默认 `notify` 只写 debug log，要自动更新执行 `omp config set marketplace.autoUpdate auto`。
+- 更新两档：默认**启动通知 + 手动升级**（`omp plugin upgrade ncw-delivery@ncw-delivery-harness`，装完 `/reload-plugins` 或开新会话生效）；要**全自动**执行 `omp config set marketplace.autoUpdate auto`（`marketplace.autoUpdate` 默认 `notify` 只写 debug log——可见的通知由上面的插件自带扩展补齐）。
 - 插件**只含 skills**（`.agents/commands/` 是本仓维护者工具，不经插件分发）。
 - **marketplace 安装不解析 npm 依赖**——`che` / `adrkit` 按上节装到全局 PATH。
 - `git+` 前缀只用于 `omp plugin install`（会剥掉并改用 bun 装 `package.json#dependencies`）；`marketplace add` 必须写裸 `https://…`。
