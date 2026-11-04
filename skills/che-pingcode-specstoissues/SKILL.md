@@ -7,7 +7,7 @@ description: 把 specs/ 下的 spec 转换为 PingCode 需求树卡片（spec �
 
 # 从 Spec 创建 PingCode 卡片层级
 
-> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.specstoissues` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 hook（after_intend/after_tasks）改接为澄清阶段（`after_intend` 挂 `/che-clarify` / `/che-grill` / `/che-grill-with-docs`，clarify 的可选替代追问路径）与 `/che-plan`（plan+tasks 合并产出）Handoff 块的可选目标（optional，`.che/pingcode-config.yml` 在位才提示，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约（`intent.md` 的 `### User Story N` 章节、`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记）与上游逐字一致；未认证时经 che-pingcode-init 技能的登录包装脚本自动登录（上游为提示用户手动登录后终止）。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
+> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.specstoissues` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 hook（after_intend/after_tasks）改接为澄清阶段（`after_intend` 挂 `/che-clarify` / `/che-grill` / `/che-grill-with-docs`，clarify 的可选替代追问路径）与 `/che-plan`（plan+tasks 合并产出）Handoff 块的可选目标（optional，`.che/pingcode-config.yml` 在位才提示，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约（`intent.md` 的 `### User Story N` 章节、`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记）与上游逐字一致；未认证时经项目级登录脚本 `.che/pingcode-login.sh` 自动登录（上游为提示用户手动登录后终止）。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
 
 本命令把 specs/ 产物转换为 PingCode 需求树卡片（通过 `pingcode` CLI，不依赖 MCP）：
 
@@ -26,7 +26,7 @@ description: 把 specs/ 下的 spec 转换为 PingCode 需求树卡片（spec �
 3. 配置文件存在：`.che/pingcode-config.yml`
 4. spec 目录存在且包含 `intent.md`（`tasks.md` 非必需，本命令不读取）
 
-CLI 缺失、配置或 spec 缺失 → 停止并按"故障排除"一节给出指引，不要继续。未认证 → **不终止**：告知用户「即将打开浏览器完成 PingCode 授权，完成后自动继续」后，执行 che-pingcode-init 技能自带的登录包装（项目内路径 `.agents/skills/che-pingcode-init/scripts/pingcode-login.sh`，omp/dsh 宿主在 che-pingcode-init 技能目录下同名路径）——脚本已认证则直接通过，未认证自动开浏览器并阻塞等授权回调（挂起属正常，给足 ≥300 秒，命令退出即完成，无需轮询）；远程/无浏览器走 `login --dry-run` 取授权 URL + `login --code <授权码>` 兜底。成功后复检 `auth status` 再继续，登录失败或用户放弃才终止。
+CLI 缺失、配置或 spec 缺失 → 停止并按"故障排除"一节给出指引，不要继续。未认证 → **不终止**：告知用户「即将打开浏览器完成 PingCode 授权，完成后自动继续」后，执行项目级登录包装脚本 `bash .che/pingcode-login.sh`（由 `/che-project-init` 接入链放置，缺失先重跑补放）——已认证直接通过；未认证自动开浏览器并阻塞等授权回调（挂起属正常，给足 ≥300 秒，命令退出即完成，无需轮询）；远程/无浏览器走 `login --dry-run` 取授权 URL + `login --code <授权码>` 兜底。成功后复检 `auth status` 再继续，登录失败或用户放弃才终止。
 
 ## 用户输入
 
@@ -59,7 +59,7 @@ CLI 缺失、配置或 spec 缺失 → 停止并按"故障排除"一节给出指
 
 ```bash
 command -v pingcode              # 缺失 → 提示安装 CLI，终止
-pingcode auth status             # authenticated/token_valid 不为 true → 用 che-pingcode-init 登录包装自动登录（见前置条件），失败才终止
+pingcode auth status             # authenticated/token_valid 不为 true → 跑 .che/pingcode-login.sh 自动登录（见前置条件），失败才终止
 pingcode context list            # 查看字典与偏好
 ```
 
@@ -450,7 +450,7 @@ Story 卡: <n> 张(spec-story 模式)
 | 症状 | 处理 |
 |---|---|
 | `command not found: pingcode` | `npm i -g @metaphorli/pingcode-cli` 安装 CLI |
-| `authenticated: false` | 自动登录：`bash .agents/skills/che-pingcode-init/scripts/pingcode-login.sh`（阻塞等浏览器回调属正常，给足 ≥300 秒；远程/无浏览器走 `login --dry-run` 取授权 URL + `login --code <授权码>`），或设置 `PINGCODE_CLIENT_ID`/`PINGCODE_CLIENT_SECRET` |
+| `authenticated: false` | 自动登录：`bash .che/pingcode-login.sh`（缺失先重跑 `/che-project-init` 补放；阻塞等浏览器回调属正常，给足 ≥300 秒；远程/无浏览器走 `login --dry-run` 取授权 URL + `login --code <授权码>`），或设置 `PINGCODE_CLIENT_ID`/`PINGCODE_CLIENT_SECRET` |
 | workspace context 报错 | 运行 `pingcode context set-current-project "<项目名>"` |
 | 仓库子目录里执行命令后上下文丢失 | CLI 已将相对缓存路径锚定到 git 仓库根（metaphor/pingcode-cli bd4977f 起）；旧版 CLI 需在仓库根执行，或将 `PINGCODE_WORKSPACE_CACHE` 设为绝对路径 |
 | 类型名匹配失败 | 运行 `/che-pingcode-discover-context` 查看实际类型名 |

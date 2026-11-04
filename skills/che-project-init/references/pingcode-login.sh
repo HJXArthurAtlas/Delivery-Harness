@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# PingCode OAuth 登录包装（che-pingcode-init 技能自带，随技能包分发）。
-# 封装 OAuth client 凭据，使其不落入消费项目文件；供本技能、
-# /che-project-init 步骤 5 与项目 AGENTS.md 环境检查复用。
+# PingCode OAuth 登录包装。本文件是 /che-project-init 技能自带模板（references/），
+# 由其接入链复制落盘为项目级脚本 .che/pingcode-login.sh（项目共享、随仓库提交）；
+# 封装 OAuth client 凭据，避免散落于 AGENTS.md / 配置文档。消费方：/che-project-init
+# 步骤 5、/che-pingcode-init 与 /che-pingcode-specstoissues 前置检查、项目 AGENTS.md 环境检查。
 #
 # 用法:
 #   pingcode-login.sh status             只检查：退出码 0 = 已认证且 token 有效，1 = 否
