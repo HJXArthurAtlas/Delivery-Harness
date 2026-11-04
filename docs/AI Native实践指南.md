@@ -2,7 +2,7 @@
 
  面向新项目成员与项目负责人。团队的 AI native 开发底座由两个仓库组成：[**monorepo-template**](https://git.newchiwan.com/council/monorepo-template/-/blob/main/README.md)（项目骨架）与 [**ncw-delivery-harness**](https://git.newchiwan.com/council/ncw-delivery-harness/-/blob/main/README.md)（流程技能包）。本文说明二者的职责、项目初始化后获得的内容，以及从初始化到日常交付的完整路径。
 
-> **版本对齐**：Skill pack `ncw-delivery-harness` **v1.2.0**；CLI `@newchiwan/che` **0.4.0**。
+> **版本对齐**：Skill pack `ncw-delivery-harness` **v1.3.0**；CLI `@newchiwan/che` **0.4.0**。
 
 > **谁读什么**
 > - **项目负责人 / 初始化者**：读全文——初始化、骨架与规则、技能包接入、维护分工都在这里。
