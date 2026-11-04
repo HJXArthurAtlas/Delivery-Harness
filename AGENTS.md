@@ -40,7 +40,7 @@ npm ci
 npm test
 ```
 
-根包不发布 npm（`private: true`），推送 `main` 即发布 omp 与 DSH 插件；仅 `@newchiwan/che` 通过 `bash packages/cli/scripts/publish.sh` 发布到公司 Nexus。npm 认证只写用户级 `~/.npmrc`，绝不入库。
+根包不发布 npm（`private: true`），推送 `main` 即发布 omp 与 DSH 插件；仅 `@newchiwan/che` 通过根 `release.sh` 发布到公司 Nexus（内部委托 `packages/cli/scripts/publish.sh` 打包推送）。npm 认证只写用户级 `~/.npmrc`，绝不入库。
 
 ## 修改约束
 

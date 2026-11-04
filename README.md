@@ -154,7 +154,9 @@ npm test   # 依次运行技能结构、che CLI 契约和技能运行时契约�
 
 ```bash
 # @newchiwan/che（bun 打包 dist/cli.js 单文件——Node 不剥 node_modules 内类型，纯 TS tarball 经 npm -g 装出来跑不了；需本机有 bun）
-bash packages/cli/scripts/publish.sh
+bash release.sh              # 发布 packages/cli 当前版本，发布前自动核对 Nexus 最新版
+bash release.sh 0.5.0        # 先回写版本到 package.json + src/version.ts，再发布
+bash release.sh --check      # 只核对版本是否比线上新，不发布
 ```
 
 - npm 认证写**用户级** `~/.npmrc`（`//nexus.newchiwan.cn/repository/internal-npm/:_auth` = base64(user:pass)，npm 按 registry URI 精确匹配凭据；devops 账号），绝不入仓库。
