@@ -201,13 +201,13 @@ The `--feature` fallback is **mandatory** after ambiguous/multi-task selection (
 1. Load this skill's own `references/intent-template.md` — the intent template; no project scaffolding and no override/preset/extension resolution stack.
 2. **Create-new**: copy the template to `{TASK_DIR}/intent.md` as the starting point. **Update**: edit the existing `{TASK_DIR}/intent.md` in place (never overwrite the template onto it); preserve still-valid content and scenario IDs, replace contradicted content.
 3. **IF EXISTS**: Load `docs/constitution/constitution.md` for project principles and governance constraints.
-4. **Register glossary terms**: any new domain concept introduced by this feature is registered into the matching 域节 of `docs/GLOSSARY.md` before the intent references it as settled terminology, and the intent's `## 统一语言` section declares the domain section(s) it follows. If `docs/GLOSSARY.md` is missing, scaffold it first: create `docs/` if needed and write a minimal glossary — one section per project domain (域节) plus a 「使用规则」 section stating that intent terms must be registered in the matching 域节. Never overwrite an existing glossary.
+4. **Register terms in the knowledge file**: run `che knowledge paths --json` once from the repository root to resolve `CONTEXT_FILE` and `GLOSSARY_FILE` (if the subcommand is unavailable, stop and recommend `npm install -g @newchiwan/che@latest`; on a non-zero exit, stop and report its stderr). Any new domain concept introduced by this feature is registered into the matching 域节 of `CONTEXT_FILE` before the intent references it as settled terminology, and the intent's `## 统一语言` section declares that file and the domain section(s) it follows. If `CONTEXT_FILE` is missing, scaffold it first: create its parent directory if needed and write a minimal file — a 「使用规则」 section, one 域节 per project domain known so far (at least the domain this feature belongs to), and a topic-document index. The rules state that intent terms must be registered in the matching 域节 and that `docs/GLOSSARY.md`, when present, is a read-only legacy snapshot. Never overwrite an existing file, and never create or modify `docs/GLOSSARY.md`.
 5. Fill the template, preserving section order and headings:
    - Every section marked *(mandatory)* must be populated. When an optional section doesn't apply, remove it entirely (don't leave as "N/A"); the mandatory intent block (Why now / In scope / Out of scope / Constraints / Failure conditions) is always populated from the interview.
    - Frontmatter: only `status: active`.
    - **Why now / In scope / Out of scope**: the Phase 2–4 narrative and lists.
    - **Constraints / Failure conditions**: the CQ/FQ-locked items with their `C#`/`F#` IDs.
-   - **统一语言**: the glossary declaration — domain section(s) in `docs/GLOSSARY.md` this intent follows, with new domain concepts already registered.
+   - **统一语言**: the glossary declaration — the resolved `CONTEXT_FILE` path and the domain section(s) in it this intent follows, with new domain concepts already registered.
    - **User Stories + Acceptance Scenarios + Edge Cases**: the Phase 7 locked sets with global `E#` IDs and `Validates:` lines.
    - **Functional Requirements** (`FR-###`), **Success Criteria** (`SC-###`, measurable, technology-agnostic, user-focused, verifiable), optional **Key Entities**.
    - **References** (optional): ADRs respected, corrections applied — no other compound-store record is kept in the intent.
@@ -326,7 +326,7 @@ If the compound store was loaded:
 - **AskUserQuestion** for discrete choices (update-or-new, accept/edit/reject scenario sets, slug override, yes/no/later for the chain handoff)
 - **Bash** for `che paths --json`, `che task create {slug} --summary "<locked goal>" --session "$CHE_SESSION_ID"`, and `che state start|done intend`
 - **Read** for an existing intent on the update path
-- **Write/Edit** for the final `{TASK_DIR}/intent.md` file and the glossary
+- **Write/Edit** for the final `{TASK_DIR}/intent.md` file and the resolved `CONTEXT_FILE`
 
 ---
 

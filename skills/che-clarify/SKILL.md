@@ -21,9 +21,10 @@ Note: This clarification workflow is expected to run (and be completed) BEFORE i
 
 Execution steps:
 
-1. Run `che paths --json` from repo root **once** (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`). Parse minimal JSON payload fields:
+1. Run `che paths --json` from repo root **once** (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`), and `che knowledge paths --json` **once** to resolve the knowledge location. Parse minimal JSON payload fields:
    - `FEATURE_DIR`
    - `FEATURE_SPEC`
+   - `CONTEXT_FILE` / `GLOSSARY_FILE` (knowledge resolution; if the subcommand is unavailable, stop and recommend upgrading `@newchiwan/che`)
    - (Optionally capture `IMPL_PLAN`, `TASKS` for future chained flows.)
    - If JSON parsing fails, abort and instruct user to re-run `/che-intend` or verify feature branch environment.
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
@@ -150,7 +151,7 @@ Execution steps:
        - Data shape / entities → Update Key Entities (add fields, types, relationships) preserving ordering; note added constraints succinctly.
        - Non-functional constraint → Add/modify measurable criteria in Success Criteria > Measurable Outcomes (convert vague adjective to metric or explicit target).
        - Edge case / negative flow → Add or replace an entry under Edge Cases (new entries take the next unused `E#`).
-       - Terminology conflict → Normalize term across intent; retain original only if necessary by adding `(formerly referred to as "X")` once. New domain terms are registered into the matching 域节 of `docs/GLOSSARY.md`.
+       - Terminology conflict → Normalize term across intent; retain original only if necessary by adding `(formerly referred to as "X")` once. New domain terms are registered into the matching 域节 of the resolved `CONTEXT_FILE`; `docs/GLOSSARY.md`, when present, is a read-only legacy snapshot and must not be modified.
     - If the clarification invalidates an earlier ambiguous statement, replace that statement instead of duplicating; leave no obsolete contradictory text.
     - Save the intent file AFTER each integration to minimize risk of context loss (atomic overwrite).
     - Preserve formatting: do not reorder unrelated sections; keep heading hierarchy intact.

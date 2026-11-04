@@ -2,7 +2,7 @@
 
  面向新项目成员与项目负责人。团队的 AI native 开发底座由两个仓库组成：[**monorepo-template**](https://git.newchiwan.com/council/monorepo-template/-/blob/main/README.md)（项目骨架）与 [**ncw-delivery-harness**](https://git.newchiwan.com/council/ncw-delivery-harness/-/blob/main/README.md)（流程技能包）。本文说明二者的职责、项目初始化后获得的内容，以及从初始化到日常交付的完整路径。
 
-> **版本对齐**：Skill pack `ncw-delivery-harness` **v1.2.0**；CLI `@newchiwan/che` **0.3.2**。
+> **版本对齐**：Skill pack `ncw-delivery-harness` **v1.2.0**；CLI `@newchiwan/che` **0.4.0**。
 
 > **谁读什么**
 > - **项目负责人 / 初始化者**：读全文——初始化、骨架与规则、技能包接入、维护分工都在这里。
@@ -172,7 +172,7 @@ your-repo/
 |---|---|
 | Node.js ≥ 22.18 | che 与技能包的硬性要求 |
 | ncw-delivery-harness 技能包 | 流程技能本体（按宿主检测：omp / DSH / che pack init / 手动拷贝） |
-| che CLI（`@newchiwan/che`） | 特性路径解析、任务模型与技能包安装升级（`pack init/status/update`、`self-update`），公司 Nexus 独发 |
+| che CLI（`@newchiwan/che`） | 特性路径解析、知识库根解析（`che knowledge paths`）、任务模型与技能包安装升级（`pack init/status/update`、`self-update`），公司 Nexus 独发 |
 | adr（adrkit CLI） | adrkit 系技能的运行时 |
 | pingcode CLI（条件） | 仅接入 PingCode 的项目检查，卡操作依赖 |
 | 跨模型 CLI：codex / gemini / claude（条件） | 仅 intentverify checker 策略强制 `cross-model` / `cli:model` 时需要在 PATH，默认不装不查（planverify checker 固定同模型新上下文子代理，无需外部模型） |
@@ -277,7 +277,7 @@ UI 设计侧注意：
 | 技能 | 时机 | 作用 |
 |---|---|---|
 | `che-grill` | 产品侧，intend / clarify 之后 | 对 spec 执行追问式深度澄清，暴露隐含假设与自相矛盾；结论**不回写** spec，如需回写先执行 clarify |
-| `che-grill-with-docs` | 产品侧，同上 | 深度澄清并沉淀跨特性知识：术语与主题文档落 `docs/domain_knowledge/`，符合记录门的决策归口 `docs/adr/`；planverify 的 ADR 决策边界因此更完整 |
+| `che-grill-with-docs` | 产品侧，同上 | 深度澄清并沉淀跨特性知识：术语与概念边界写入知识入口（默认 `docs/domain_knowledge/CONTEXT.md`，位置由 `che knowledge paths --json` 解析），长规则落主题文档；旧 `docs/GLOSSARY.md` 只读共存，由用户自行迁移；符合记录门的决策归口 `docs/adr/` |
 | `che-adr-context` | 开发 plan 前 | 取 ADR 决策语料进上下文（只读），避免 plan 与既有决策冲突 |
 | `che-analyze` | 开发 tasks 后 | spec / plan / tasks 跨制品一致性只读分析，尽早发现工件间的漂移 |
 | `che-converge` | 实现之后 | 代码现状与工件有差距时，追加收敛任务进 tasks.md，避免差距持续累积 |
@@ -296,7 +296,7 @@ bug 修复三步：
 
 ### 3.3 产出物结构
 
-每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`intent.md`（统一规格：意图块 + User Story / Acceptance / Edge / FR / SC，场景带全局稳定 `E#` ID）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单）、`planverify.md`（门禁报告，frontmatter 记录 verdict、`adr_status` 与 intent/plan/tasks SHA-256）、`planverify.adr.json`（adrkit 原始审计记录）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/domain_knowledge/`（跨特性术语与主题知识）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
+每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`intent.md`（统一规格：意图块 + User Story / Acceptance / Edge / FR / SC，场景带全局稳定 `E#` ID）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单）、`planverify.md`（门禁报告，frontmatter 记录 verdict、`adr_status` 与 intent/plan/tasks SHA-256）、`planverify.adr.json`（adrkit 原始审计记录）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/domain_knowledge/`（统一语言入口 `CONTEXT.md` + 跨特性主题知识）、`docs/GLOSSARY.md`（legacy 只读快照，用户自行迁移）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
 
 ## 4. 使用路径：从初始化到日常交付
 

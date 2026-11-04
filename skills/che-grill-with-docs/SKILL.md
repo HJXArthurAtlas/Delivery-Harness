@@ -1,6 +1,6 @@
 ---
 name: che-grill-with-docs
-description: 深度澄清 + 领域知识沉淀：与 che-grill 同样的穷尽澄清，另把敲定的跨特性术语/领域知识即时落盘 docs/domain_knowledge/（CONTEXT.md + 主题文档）；过三条件记录门的决策经 adrkit scaffold 归口为 ADR（docs/adr/）。当用户说「澄清并沉淀领域知识」「把这块业务规则沉淀下来」时使用——即使用户没提命令名，只要是澄清兼领域知识落盘也用本 skill。
+description: 深度澄清 + 领域知识沉淀：与 che-grill 同样的穷尽澄清，另把敲定的术语与概念边界写入知识入口（`che knowledge paths --json` 解析的 CONTEXT_FILE，默认 docs/domain_knowledge/CONTEXT.md），长规则落对应主题文档；旧 docs/GLOSSARY.md 仅作只读 legacy 快照；过三条件记录门的决策经 adrkit scaffold 归口为 ADR（docs/adr/）。当用户说「澄清并沉淀领域知识」「把这块业务规则沉淀下来」时使用——即使用户没提命令名，只要是澄清兼领域知识落盘也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -34,7 +34,7 @@ If non-empty, treat it as a request to prioritize the specified area for deeper 
 ## Prerequisites
 
 1. Confirm that the environment is macOS / Linux and that `bash` and the external `che` CLI are available on PATH (`@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest` if missing). If not, state that the environment is unsupported and stop. Do not substitute a project-local prerequisite script.
-2. From the repository root, run `che paths --json` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC`. If it does not return JSON, stop and recommend rerunning the agent-specific invocation of `che-intend` or checking the active feature environment.
+2. From the repository root, run `che paths --json` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC`, and `che knowledge paths --json` **exactly once** to obtain `CONTEXT_FILE` / `GLOSSARY_FILE` / `ADR_DIR`. If either does not return JSON, stop: for `che paths`, recommend rerunning the agent-specific invocation of `che-intend` or checking the active feature environment; for `che knowledge`, report the command's error and recommend upgrading `@newchiwan/che` when the subcommand is unknown.
 3. If intent.md does not exist, stop and recommend running the agent-specific invocation of `che-intend` first. Do not create a new intent here.
 4. Read `docs/constitution/constitution.md` (project principles) if it exists. In addition, inspect **only the existing materials relevant to the work at hand** using ordinary file search, file reading, and symbol search:
    - `README*` / `CONTEXT.md` / `CLAUDE.md` / `AGENTS.md` / `documents/**` / `docs/**` — domain terminology, stakeholders, business flows, and design decisions
@@ -44,30 +44,32 @@ If non-empty, treat it as a request to prioritize the specified area for deeper 
 
 ## Domain-knowledge persistence
 
-In addition to clarifying the feature intent, this command has one extra responsibility: **immediately persist canonical terminology settled during the interview, together with qualifying project-wide business-domain and technical-architecture decisions, to the canonical knowledge artifacts — terminology and topic documents under `KNOWLEDGE_ROOT`, and qualifying decisions as schema-valid ADR records in the adrkit corpus (`docs/adr/`).** Do not use Serena or `.serena/`, and do not assume either is available.
+In addition to clarifying the feature intent, this command has one extra responsibility: **immediately persist canonical terminology and concept boundaries settled during the interview into `CONTEXT_FILE`, long rules into topic documents under `KNOWLEDGE_ROOT`, and qualifying project-wide business-domain and technical-architecture decisions as schema-valid ADR records in `ADR_DIR`.** `docs/GLOSSARY.md`, when present, is a legacy read-only snapshot kept for older intents: read it, never modify it. Do not use Serena or `.serena/`, and do not assume either is available.
 
-This command may modify the domain-knowledge artifacts defined below in addition to intent.md. It never writes a `## Clarifications` Q&A history and never touches checklist files. The prohibition against changing plans, tasks, code, configuration, or unrelated files remains unchanged.
+This command may modify `CONTEXT_FILE`, topic documents under `KNOWLEDGE_ROOT`, and `ADR_DIR` in addition to intent.md. It never writes `docs/GLOSSARY.md`, never writes a `## Clarifications` Q&A history, and never touches checklist files. The prohibition against changing plans, tasks, code, configuration, or unrelated files remains unchanged.
 
 ## Document location and initialization
 
-Applicable higher-priority execution instructions and the constitution are non-overridable constraints. Within those constraints, determine the canonical storage location in this order:
+Applicable higher-priority execution instructions and the constitution are non-overridable constraints. Within those constraints, resolve the canonical knowledge location **once** per session by running, from the repository root:
 
-1. A storage location explicitly specified by the user in the current session
-2. A storage location explicitly specified by agent-facing instructions that apply to the target path, such as `AGENTS.md` or `CLAUDE.md`
-3. A location explicitly designated as canonical by project documentation such as a README, CONTEXT file, or documentation convention
-4. The default `docs/domain_knowledge/`
+```bash
+che knowledge paths --json
+```
 
-If instructions at the same priority conflict, prefer the instruction that is more specific to the target feature or stored subject. If that still does not produce a unique location, do not guess or create files; show the conflicting candidates and their evidence, then ask the user.
+It returns `REPO_ROOT`, `KNOWLEDGE_ROOT`, `CONTEXT_FILE`, `GLOSSARY_FILE`, `GLOSSARY_EXISTS`, `ADR_DIR`, and `SOURCE`. Use those values for the rest of the session; do not reimplement the resolution rules in this skill.
 
-After resolving the canonical location, establish these logical path names for the session. They are labels used by this workflow, not shell environment variables:
+- If the command is unavailable, stop and recommend `npm install -g @newchiwan/che@latest`. Do not fall back to a default path.
+- If it exits non-zero, stop and report its stderr. Exit 2 means conflicting `knowledge_root` declarations at the same priority; exit 3 means the path is outside the repository or no repository root was found. Do not guess, do not create files, and do not write to more than one location.
+- The command applies this order: explicit `--root` (the user's in-session choice) → `AGENTS.md`/`CLAUDE.md` `knowledge_root:` declaration → `README.md`/repo-root `CONTEXT.md` `knowledge_root:` declaration → `docs/domain_knowledge/`. It is read-only and never creates directories.
 
-- `KNOWLEDGE_ROOT` — the resolved canonical knowledge directory. If the winning instruction identifies a context file rather than a directory, use that file's parent directory.
-- `CONTEXT_FILE` — the existing entry-point file explicitly designated by the winning instruction or established project convention; otherwise `<KNOWLEDGE_ROOT>/CONTEXT.md`. If the winning instruction identifies a context file, use that file directly.
-- `ADR_DIR` — always the adrkit corpus: `docs/adr/`, overridable only via `ADRKIT_DIR`. ADR records are allocated through the adrkit scaffold entry point (see the initialization rules below), so they share one schema, one numbering sequence, and one validation discipline with `/che-adr-draft` and compound retro. Never create a separate ADR directory under `KNOWLEDGE_ROOT`.
+The logical labels used below map to the command's output:
 
-Resolve these locations once before writing and use the same values throughout the session. If an existing convention yields multiple possible context files and the authority rules do not select one, stop and ask rather than writing to more than one location.
+- `KNOWLEDGE_ROOT` — the directory holding topic documents.
+- `CONTEXT_FILE` — the single canonical entry point and term registry.
+- `GLOSSARY_FILE` — a legacy read-only snapshot; it may not exist.
+- `ADR_DIR` — the adrkit corpus. Allocate ADRs through the adrkit scaffold entry point so they share one schema, numbering sequence, and validation discipline with `/che-adr-draft` and compound retro. Never create a separate ADR directory under `KNOWLEDGE_ROOT`.
 
-When no alternate canonical storage location is specified, use:
+When no declaration exists, the command resolves to:
 
 ```text
 docs/domain_knowledge/
@@ -75,19 +77,21 @@ docs/domain_knowledge/
 └── <domain-topic>.md
 ```
 
-ADR records do not live here — they are allocated in the adrkit corpus (`docs/adr/`, see `ADR_DIR` above).
+`docs/GLOSSARY.md`, when present, sits outside this tree and is never updated.
 
-- Treat `CONTEXT_FILE` as the canonical entry point to the knowledge base. Keep concise project-specific canonical terms, concept meanings and boundaries, and synonyms to avoid there. Do not put implementation details, feature specifications, working notes, or the history of technical choices there.
+- Treat `CONTEXT_FILE` as both the canonical entry point and the project's only term registry. Keep the 「使用规则」 section, one 域节 per project domain, term entries with `_Avoid_` synonyms and short boundaries, a domain-boundaries section, and the topic-document index there. Do not put implementation details, feature specifications, working notes, or the history of technical choices there.
 - If `CONTEXT_FILE` already exists, preserve its structure and document language and update only the relevant part.
 - Create `KNOWLEDGE_ROOT` or `CONTEXT_FILE` only when the first recordable item is settled. Do not pre-create an empty knowledge base.
-- A new `CONTEXT_FILE` must use the project's documentation language and contain sections equivalent in meaning to a document title, canonical terms and key concepts, domain boundaries, and related documents. Match headings to the project's documentation language and heading conventions. Keep each term definition to one or two sentences and define what the concept is rather than what it does.
-- When one concept has multiple names, choose one canonical term and record the others as `_Avoid_: <synonyms to avoid>`. Do not add general programming vocabulary; include only concepts specific to this project's domain.
-- Create `<KNOWLEDGE_ROOT>/<kebab-case-domain-topic>.md` only when the glossary in `CONTEXT_FILE` cannot accurately preserve the relevant boundaries or business rules. A separate document is warranted only when one concept group requires several boundaries, invariants, or business rules whose meaning would be lost in a one- or two-sentence definition in `CONTEXT_FILE`. When in doubt, keep the content in `CONTEXT_FILE`; do not split files merely for the sake of splitting them.
-- After creating a topic document, add a relative link and a one-sentence description to the related-documents list in `CONTEXT_FILE`. Do not write broken links, nonexistent evidence, or guessed paths.
+- A new `CONTEXT_FILE` must use the project's documentation language and contain sections equivalent in meaning to a document title, a 「使用规则」 section, one 域节 per project domain, a domain-boundaries section, and a topic-document index. Match headings to the project's documentation language and heading conventions. Keep each term definition to one or two sentences describing what the concept is, not what it does.
+- A term record is `### <term>` inside exactly one 域节, followed by the definition, `_Avoid_: <synonyms>`, and optionally a `**边界**` list of at most three invariants or exceptions. A term heading must be globally unique in `CONTEXT_FILE`; when a concept group needs more detail, use a topic document.
+- When one concept has multiple names, choose one canonical term and record the others as `_Avoid_: <synonyms to avoid>` in its entry. Do not add general programming vocabulary; include only concepts specific to this project's domain.
+- Create `<KNOWLEDGE_ROOT>/<kebab-case-domain-topic>.md` only when `CONTEXT_FILE` cannot accurately preserve the relevant boundaries or business rules. A separate document is warranted only when one concept group requires several boundaries, invariants, or business rules whose meaning would be lost in a one- or two-sentence entry. When in doubt, keep the content in `CONTEXT_FILE`; do not split files merely for the sake of splitting them. Topic documents cite terms by their canonical spelling from `CONTEXT_FILE` and never redefine them.
+- After creating a topic document, add a relative link and a one-sentence description to the topic-document index in `CONTEXT_FILE`. Do not write broken links, nonexistent evidence, or guessed paths.
+- Legacy glossary: when `GLOSSARY_EXISTS` is true, read `GLOSSARY_FILE` for terminology written before this merge, but never modify, reformat, add a banner to, or delete it. When the new intent adopts a legacy term whose meaning is unchanged, copy the entry into the matching 域节 of `CONTEXT_FILE` and leave `GLOSSARY_FILE` untouched. If the new decision changes a legacy term's meaning or scope, run the conflict-confirmation discipline once, then write only `CONTEXT_FILE`. After any knowledge write, verify `git diff --stat -- <GLOSSARY_FILE>` is empty; a non-empty diff is a failed write to roll back.
 - Write decisions that pass the recording gate as ADR records in `ADR_DIR` (the adrkit corpus): run the scaffold entry point `.agents/skills/che-adr-draft/scripts/scaffold.sh <decision title>` (global install: `~/.agents/skills/che-adr-draft/scripts/scaffold.sh`). It allocates the next corpus id and writes a schema-valid draft at the right path, printing `{ "id", "path" }`, and creates `docs/adr/` on first use. Fill the scaffolded body from the settled interview content, then run `.agents/skills/che-adr-draft/scripts/adr.sh lint` on the record and resolve its findings before read-back. For a global install, substitute `~/.agents/skills` for `.agents/skills` in every `adr.sh` invocation.
 - If `KNOWLEDGE_ROOT` already uses a different structure or naming convention, preserve it. Do not move, rename, or reorganize unrelated documents.
 
-As part of Prerequisites item 4, always read `CONTEXT_FILE` in addition to the ordinary research materials, and read documents under `KNOWLEDGE_ROOT` that relate to the target feature. If `CONTEXT_FILE` does not yet exist, investigate other relevant documents first and then follow the creation rules above.
+As part of Prerequisites item 4, always read `CONTEXT_FILE` and, when `GLOSSARY_EXISTS` is true, `GLOSSARY_FILE`, in addition to the ordinary research materials, and read documents under `KNOWLEDGE_ROOT` that relate to the target feature. If `CONTEXT_FILE` does not yet exist, investigate other relevant documents first and then follow the creation rules above. Treat `CONTEXT_FILE` as the authority for term spelling; legacy entries are evidence, not authority.
 
 Use ordinary file search, reading, and editing capabilities. After every write, read the target file back and confirm that the settled content has exactly one canonical definition or decision record in the intended artifact, has not been duplicated as a second canonical record, and has not damaged the existing structure, Markdown, or relative links. Ordinary references to the canonical record, such as links or usage of a defined term, are not duplicates. If the canonical location cannot be read, created, updated, or verified, do not fall back to another location; report the failure and stop.
 
@@ -99,7 +103,8 @@ Use the following authoritative source for each type of content.
 | --- | --- |
 | Project principles | `docs/constitution/constitution.md`, when present; it constrains all other requirements and decisions |
 | Feature-specific requirements and expected behavior | The current `FEATURE_SPEC` and decisions explicitly settled by the user in this session |
-| Cross-feature terminology, domain knowledge, and design decisions | The canonical `CONTEXT_FILE`, topic documents under `KNOWLEDGE_ROOT`, and ADRs under `ADR_DIR`, unless the user explicitly settles a change in this session and the new decision has been saved and verified |
+| Cross-feature terminology | `CONTEXT_FILE`, in the matching 域节. `GLOSSARY_FILE`, when present, is a legacy snapshot and evidence only, not authority |
+| Cross-feature domain knowledge and design decisions | The canonical `CONTEXT_FILE`, topic documents under `KNOWLEDGE_ROOT`, and ADRs under `ADR_DIR`, unless the user explicitly settles a change in this session and the new decision has been saved and verified |
 | Current implementation state | Primary sources such as code, schemas, migrations, models, interfaces, and tests |
 
 - Do not treat an answer that conflicts with the constitution as settled. Reopen the decision point and confirm a compliant decision. Changing the constitution is outside this command's scope.
@@ -112,32 +117,33 @@ Use the following authoritative source for each type of content.
 | Content | Write destination |
 | --- | --- |
 | Requirements, behavior, edge cases, and acceptance criteria specific to this feature | `FEATURE_SPEC`, following Steps 4A, 4B, and 4C |
-| Canonical terms, concepts, and boundaries that apply beyond this feature | `CONTEXT_FILE` or a topic document linked from it under `KNOWLEDGE_ROOT` |
+| Canonical terms that apply beyond this feature | `CONTEXT_FILE`, in the matching 域节 |
+| Concept boundaries and domain knowledge that apply beyond this feature | `CONTEXT_FILE` for short boundaries, or a topic document linked from its index under `KNOWLEDGE_ROOT` |
 | Business-domain or technical-architecture decisions worth preserving for future readers | `ADR_DIR`, but only when all three recording conditions below are met |
 
 A decision passes the recording gate only when all three conditions hold: (1) reversing it would be materially costly, (2) it would surprise a future reader without context, and (3) real alternatives existed and one was chosen for a reason. If any condition is absent, do not create an ADR.
 
-- Do not maintain the same content as a canonical definition in both the intent and the domain-knowledge documents. Keep cross-feature definitions canonical in the knowledge documents; in the intent, include only the minimum context needed to understand and validate the feature and the feature-specific consequences. Clarifications Q&A lines are audit records, so they do not count as duplicate canonical management and must not be omitted.
-- When the same settled matter relates to both terminology or domain knowledge and an ADR, put only the current meaning, boundary, and business rules in the knowledge document, and put only the adoption rationale, alternatives, and trade-offs in the ADR. Do not duplicate the same explanation as canonical information. Use a relative link to show the relationship when useful.
-- Keep `CONTEXT_FILE` as a short, declarative glossary and entry point to domain boundaries. Do not mix in implementation details, specifications, scratch notes, or ADR bodies. When detail forms an independent domain topic, move it to a topic document and leave only a short summary and link in `CONTEXT_FILE`.
+- Do not maintain the same content as a canonical definition in both the intent and the knowledge artifacts (`CONTEXT_FILE` or a topic document). Keep cross-feature definitions canonical in the artifact that owns their type; in the intent, include only the minimum context needed to understand and validate the feature and the feature-specific consequences. Clarifications Q&A lines are audit records, so they do not count as duplicate canonical management and must not be omitted.
+- When the same settled matter relates to both terminology or domain knowledge and an ADR, put only the current meaning, boundary, and business rules in `CONTEXT_FILE` or the owning topic document, and put only the adoption rationale, alternatives, and trade-offs in the ADR. Do not duplicate the same explanation as canonical information. Use a relative link to show the relationship when useful.
+- Keep `CONTEXT_FILE` declarative: term entries, domain boundaries, and the topic-document index. Do not mix in implementation details, specifications, scratch notes, or ADR bodies. When detail forms an independent domain topic, move it to a topic document and leave only a short summary and link in `CONTEXT_FILE`.
 - A new topic document must have a short stable title, a one-sentence summary at the beginning, boundaries around its concepts and business rules, and relative paths to verified primary sources when such sources exist. A user-settled policy does not require an implementation source; do not invent evidence for it. Put the history of design choices in an ADR, and do not invent content merely to fill an inapplicable section.
 - Never hand-number an ADR: id allocation belongs to the adrkit scaffold entry point, which keeps one numbering sequence across this command, `/che-adr-draft`, and compound retro. Fill the scaffolded body with what the interview actually settled — the decision, its scope, and the selection rationale are required; complete or trim the remaining scaffold sections (Context, Options considered, Consequences) only from real interview content, never to fill a template.
 - When replacing an existing ADR, do not delete the old one. Allocate the replacement through the scaffold entry point, then update the old record's frontmatter per the adrkit schema — `status: superseded` with `supersededBy` naming the new record's id — and verify the result with `.agents/skills/che-adr-draft/scripts/adr.sh lint`.
-- Persist settled content immediately, one item at a time. If one answer settles several independent terms or decisions, process them separately rather than as a batch. When one settled item requires several artifact types, process them in this order: (1) intent, (2) terminology or concepts in `CONTEXT_FILE`, (3) topic document under `KNOWLEDGE_ROOT`, (4) the related-documents index in `CONTEXT_FILE`, (5) new ADR in `ADR_DIR`, (6) superseded old ADR in `ADR_DIR`, and (7) read-back verification of all affected artifacts. Resolve the decision point only after all required operations succeed. In addition to verifying each file immediately after writing it, use step 7 to verify consistency across the artifacts. Skip artifact types that are not needed.
+- Persist settled content immediately, one item at a time. If one answer settles several independent terms or decisions, process them separately rather than as a batch. When one settled item requires several artifact types, process them in this order: (1) intent, (2) the term entry in `CONTEXT_FILE`, (3) the boundary and topic link in `CONTEXT_FILE`, (4) topic document under `KNOWLEDGE_ROOT`, (5) the topic-document index in `CONTEXT_FILE`, (6) new ADR in `ADR_DIR`, (7) superseded old ADR in `ADR_DIR`, and (8) read-back verification of all affected artifacts. Resolve the decision point only after all required operations succeed. In addition to verifying each file immediately after writing it, use step 8 to verify consistency across the artifacts. Skip artifact types that are not needed.
 - When an item incorporated through Step 4A also qualifies for a knowledge document, save and verify the intent first, then save and read back all required knowledge documents before marking the point Resolved.
 - Do not promote an implementation fact established only through Step 4B into a business-domain or technical-architecture decision. If it may warrant a project-wide decision, add it to the question candidate pool as a decision for the user and write it only after acceptance.
 
 ## Document update discipline
 
 - When updating an existing document, preserve its structure, style, terminology, and link format, changing only the smallest area related to the settled information.
-- A terminology record must include the concept's meaning and boundary, its canonical spelling, and synonyms to avoid. Do not mix implementation details or feature-specific working notes into a term definition.
+- A terminology record lives in the matching `CONTEXT_FILE` 域节 and must include the concept's meaning and boundary, its canonical spelling, and synonyms to avoid. Topic documents link to that record instead of repeating it. Do not mix implementation details or feature-specific working notes into a term definition.
 - An ADR must include the decision, scope, and selection rationale. Preserve important rejected alternatives only when they have value for future reconsideration. Do not invent history or alternatives.
 - When creating a topic document, treat updating the `CONTEXT_FILE` index as part of the same recording operation. Neither the document alone nor the index alone is complete. ADRs are not required to be linked from `CONTEXT_FILE`.
-- When changing a canonical term or domain rule, replace the existing definition so the current state remains unambiguous instead of appending a contradiction. Changes to design decisions follow the ADR supersession rule.
+- When changing a canonical term, replace its `CONTEXT_FILE` entry in place; when changing a domain rule, replace the existing definition in the owning document, so the current state remains unambiguous instead of appending a contradiction. Changes to design decisions follow the ADR supersession rule.
 
 ## Persistence failure handling
 
-Updating the intent and the knowledge documents is not a single transaction. If saving or verifying one side of the intent-and-knowledge update, one side of the topic-document-and-`CONTEXT_FILE`-index update, or one side of a new-and-superseded ADR update fails, attach the auxiliary state **Persistence incomplete** to the affected decision point and stop.
+Updating the intent and the knowledge documents is not a single transaction. If saving or verifying one side of the intent-and-knowledge update, one side of the term-and-boundary update, one side of the topic-document-and-`CONTEXT_FILE`-index update, or one side of a new-and-superseded ADR update fails, attach the auxiliary state **Persistence incomplete** to the affected decision point and stop.
 
 Persistence incomplete is not a decision-point status from the Glossary. Keep the design-tree and coverage-map status Partial until every required file has been saved and verified; do not change it to Resolved.
 
@@ -149,7 +155,7 @@ Persistence incomplete is not a decision-point status from the Glossary. Keep th
 ## Additional in-session discipline
 
 - **Raise a conflict with canonical terminology at the first opportunity.** Include a conflict found while constructing a question in that question; if an answer exposes the conflict, add a follow-up to a later round.
-- **Resolve ambiguous or overloaded language to a canonical term.** Confirm which concept is intended, normalize the intent after its meaning and boundary are settled, and immediately update the knowledge document when required.
+- **Resolve ambiguous or overloaded language to a canonical term.** Confirm which concept is intended, normalize the intent after its meaning and boundary are settled, and immediately update `CONTEXT_FILE` — or the owning topic document — when required.
 - **Probe concept boundaries with concrete scenarios.** Explicitly identify a scenario as hypothetical, and do not persist it as fact or decision before acceptance.
 - **Cross-check against code.** When the user's explanation, knowledge documents, and implementation differ, show the primary implementation evidence and ask for confirmation. Do not silently align requirements or canonical documents to the implementation.
 - **Handle answers or research that conflict with recorded documents through the conflict-confirmation discipline in this command.** Update related documents only after the change is settled, and mark the point Resolved only after saving and verification.
@@ -377,7 +383,7 @@ Step 4 does not run sequentially after Step 3. Invoke Step 4A from Step 3 whenev
    - Data shape → Data Model, preserving the existing field order and keeping constraints concise
    - Non-functional requirement → measurable form under Success Criteria; convert vague adjectives into metrics
    - Edge case → Edge Cases / Error Handling
-   - Terminology → normalize to the canonical term throughout the intent; register new domain terms in the matching 域节 of `docs/GLOSSARY.md` and the canonical knowledge artifacts this command maintains; if needed, note `(formerly "X")` once
+   - Terminology → normalize to the canonical term throughout the intent; register a new domain term exactly once, in the matching 域节 of `CONTEXT_FILE`; when the intent adopts a legacy term, copy its entry from `GLOSSARY_FILE` without editing the legacy file. Do not copy the definition into a topic document or the intent. If needed, note `(formerly "X")` once
 2. If new content invalidates older ambiguous text, **replace** it rather than appending a duplicate. Leave no conflicting obsolete text.
 3. **Save intent.md after every incorporation.** Do not reorder unrelated sections or alter their heading hierarchy. Keep additions minimal and testable.
 4. **Validate after every save**, and run one final full pass after the last round:
@@ -431,7 +437,7 @@ Report:
 - Completion type (normal / user interruption). For an interruption, include where it occurred and that no post-interruption question or answer was incorporated.
 - Number of rounds and total questions; optionally include a per-round breakdown.
 - Path to the updated intent and the sections changed.
-- The resolved `KNOWLEDGE_ROOT`, `CONTEXT_FILE`, and `ADR_DIR` (always the adrkit corpus `docs/adr/`); paths and types of knowledge documents created or updated; and a summary of terms, concepts, and decisions recorded, including the ids of the ADR records allocated.
+- The resolved `CONTEXT_FILE`, `KNOWLEDGE_ROOT`, `GLOSSARY_FILE` (legacy, possibly absent), and `ADR_DIR` (the adrkit corpus); the 域节 and terms added or changed in `CONTEXT_FILE`; legacy terms copied or left unmigrated; paths and types of knowledge documents created or updated; and a summary of concepts and decisions recorded, including the ids of the ADR records allocated.
 - Coverage table: show every category's aggregate status as **Resolved** / **Clear** / **Deferred** / **Outstanding**, with a per-point status breakdown for each category. Do not proceed to the completion report if even one Partial / Missing point remains.
 - If Outstanding / Deferred items remain, recommend whether to proceed to the agent-specific invocation of `che-plan` or rerun this command later.
 - Suggested next command, normally the agent-specific invocation of `che-plan` (for example, `/che-plan` or `$che-plan`).
@@ -441,7 +447,7 @@ Report:
 - This workflow is expected to finish **before** `che-plan`. If the user explicitly skips it and proceeds, comply after warning that the risk of downstream rework will increase.
 - If no significant ambiguity exists, report "No critical ambiguities detected," provide an aggregate category summary showing all points as Clear, and proceed to the Step 6 satisfaction gate. Do not invent questions.
 - Do not ask speculative questions about the technology stack unless they block functional clarification.
-- This command may modify only intent.md and the canonical domain-knowledge artifacts resolved under `KNOWLEDGE_ROOT`, `CONTEXT_FILE`, and `ADR_DIR`. Do not modify plans, tasks, code, configuration, or unrelated files. Never write a `## Clarifications` Q&A history.
+- This command may modify only intent.md, `CONTEXT_FILE`, topic documents under `KNOWLEDGE_ROOT`, and `ADR_DIR`. It must never modify `docs/GLOSSARY.md` (`GLOSSARY_FILE`), plans, tasks, code, configuration, or unrelated files. Never write a `## Clarifications` Q&A history.
 
 ## Done When
 
@@ -453,10 +459,11 @@ Report:
 - [ ] User satisfaction is explicit, except upon interruption.
 - [ ] No `## Clarifications` Q&A history was written; scenario `E#` IDs stayed stable, and changed scenarios re-pass `SQ1–SQ4`.
 - [ ] A completion report has been issued with rounds, question count, changed sections, and a coverage table containing aggregate category statuses and per-point breakdowns.
-- [ ] Settled canonical terminology and domain knowledge have been saved and read back from `CONTEXT_FILE` or topic documents under `KNOWLEDGE_ROOT`; qualifying decisions have been saved and read back from `ADR_DIR`.
+- [ ] Every settled canonical term has exactly one entry in the matching `CONTEXT_FILE` 域节, saved and read back; topic documents link to it without restating it. Domain knowledge has been saved and read back from `CONTEXT_FILE` or topic documents under `KNOWLEDGE_ROOT`; qualifying decisions have been saved and read back from `ADR_DIR`.
+- [ ] `docs/GLOSSARY.md` was not modified; legacy terms copied into `CONTEXT_FILE` or deliberately left unmigrated are listed in the completion report.
 - [ ] Every new topic document is linked relatively from `CONTEXT_FILE`, and every new ADR passes the three-condition recording gate, was allocated through the adrkit scaffold entry point (never hand-numbered), and passes `.agents/skills/che-adr-draft/scripts/adr.sh lint`.
 - [ ] No decision point has Persistence incomplete, and no point became Resolved before every required intent and knowledge artifact was saved and verified.
-- [ ] The completion report lists the resolved knowledge locations, changed knowledge documents, and summaries of the terms and decisions recorded.
+- [ ] The completion report lists the resolved knowledge locations, the `CONTEXT_FILE` 域节 and terms changed, changed knowledge documents, and summaries of the terms and decisions recorded.
 
 ---
 
@@ -467,4 +474,4 @@ Report:
 - **目标**：`/che-design`（涉 UI）或 `/che-plan`（无 UI）
 - **条件**：
   - 追问结论已落 ADR（经 `che-adr-draft` 归口 `docs/adr/`）
-  - 需回写 intent 先跑 `/che-clarify`
+  - intent 已即时回写并校验；旧 `docs/GLOSSARY.md` 未改动

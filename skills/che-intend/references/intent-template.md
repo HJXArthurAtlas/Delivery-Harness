@@ -35,12 +35,14 @@ status: active
 
 ## 统一语言 *(mandatory)*
 
-本规格遵循中央统一语言词汇表 `docs/GLOSSARY.md` 的【域名称】域，
-全文术语以词汇表为准，不重复定义已收录词条。本 spec 新引入的领域概念，
-须已同步登记至词汇表对应域节（治理规则见 `docs/GLOSSARY.md`
-「使用规则」节）。
+本规格遵循统一语言与领域知识入口 `【CONTEXT_FILE】` 的【域名称】域，
+全文术语以该文件为准，不重复定义已收录词条。本 spec 新引入的领域概念，
+须已同步登记至该文件对应域节（治理规则见该文件「使用规则」节）。
 
-<!-- 仅在此处记录本 spec 特有的术语使用约定或跨域引用；词条定义一律进中央词汇表。 -->
+<!-- 【CONTEXT_FILE】由 /che-intend 用 `che knowledge paths --json` 的 CONTEXT_FILE 替换。
+     若旧文件 `docs/GLOSSARY.md` 存在，它只是只读 legacy 快照，不是本规格的术语来源。 -->
+
+<!-- 仅在此处记录本 spec 特有的术语使用约定或跨域引用；词条定义一律进知识入口文件。 -->
 
 ## User Scenarios & Testing *(mandatory)*
 

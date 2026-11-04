@@ -34,7 +34,7 @@ If non-empty, treat it as a request to prioritize the specified area for deeper 
 ## Prerequisites
 
 1. Confirm that the environment is macOS / Linux and that `bash` and the external `che` CLI are available on PATH (`@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest` if missing). If not, state that the environment is unsupported and stop. Do not substitute a project-local prerequisite script.
-2. From the repository root, run `che paths --json` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC`. If it does not return JSON, stop and recommend rerunning the agent-specific invocation of `che-intend` or checking the active feature environment.
+2. From the repository root, run `che paths --json` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC`, and `che knowledge paths --json` **exactly once** to obtain `CONTEXT_FILE` / `GLOSSARY_FILE`. If either does not return JSON, stop: for `che paths`, recommend rerunning the agent-specific invocation of `che-intend` or checking the active feature environment; for `che knowledge`, report the command's error and recommend upgrading `@newchiwan/che` when the subcommand is unknown.
 3. If intent.md does not exist, stop and recommend running the agent-specific invocation of `che-intend` first. Do not create a new intent here.
 4. Read `docs/constitution/constitution.md` (project principles) if it exists. In addition, inspect **only the existing materials relevant to the work at hand** using ordinary file search, file reading, and symbol search:
    - `README*` / `CONTEXT.md` / `CLAUDE.md` / `AGENTS.md` / `documents/**` / `docs/**` — domain terminology, stakeholders, business flows, and design decisions
@@ -263,7 +263,7 @@ Step 4 does not run sequentially after Step 3. Invoke Step 4A from Step 3 whenev
    - Data shape → Data Model, preserving the existing field order and keeping constraints concise
    - Non-functional requirement → measurable form under Success Criteria; convert vague adjectives into metrics
    - Edge case → Edge Cases / Error Handling
-   - Terminology → normalize to the canonical term throughout the intent; register new domain terms in the matching 域节 of `docs/GLOSSARY.md`; if needed, note `(formerly "X")` once
+   - Terminology → normalize to the canonical term throughout the intent; register new domain terms in the matching 域节 of the resolved `CONTEXT_FILE`; `docs/GLOSSARY.md`, when present, is read-only legacy and must not be modified; if needed, note `(formerly "X")` once
 2. If new content invalidates older ambiguous text, **replace** it rather than appending a duplicate. Leave no conflicting obsolete text.
 3. **Save intent.md after every incorporation.** Do not reorder unrelated sections or alter their heading hierarchy. Keep additions minimal and testable.
 4. **Validate after every save**, and run one final full pass after the last round:
