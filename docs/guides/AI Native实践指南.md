@@ -249,7 +249,7 @@ UI 设计侧注意：
 1. spec 的 `### User Story N` 章节齐备，标题行标注 `(Priority: P1/P2/P3)`
 2. 建卡可选：`.che/pingcode-config.yml` 在位即视为选择建卡，`specs/pingcode-mapping.json` 必须已登记、每张卡 id / 状态可追溯——没登记等于建卡没完成；未配置或选择不建卡 → 本项通过，不阻塞
 3. 选择不建卡的无须补跑；spec 定稿后任何时候可手动 `/che-pingcode-specstoissues` 补建并登记
-4. config 在位时：`.che/pingcode-config.yml` 已初始化（未执行过先 `/che-pingcode-init`），`pingcode` CLI 已装并认证；无 config 跳过本项
+4. config 在位时：`.che/pingcode-config.yml` 已初始化（未执行过先 `/che-pingcode-init`），`pingcode` CLI 已装并认证——未认证不拦流程：项目级登录脚本 `.che/pingcode-login.sh`（`/che-project-init` 落盘）会自动开浏览器完成授权；无 config 跳过本项
 
 任一不过就留在产品 / 设计侧处理完再交接，不把半成品推给开发。
 
