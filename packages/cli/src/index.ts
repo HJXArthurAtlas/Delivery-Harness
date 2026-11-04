@@ -8,6 +8,7 @@ import { TASK_USAGE, runTask } from './tasks.ts';
 import { STATE_USAGE, runState } from './state.ts';
 import { SETUP_PLAN_USAGE, SETUP_TASKS_USAGE, runSetupPlan, runSetupTasks } from './setup.ts';
 import { PACK_USAGE, runPack } from './pack.ts';
+import { KNOWLEDGE_USAGE, runKnowledge } from './knowledge.ts';
 import { SELF_UPDATE_USAGE, runSelfUpdate } from './self-update.ts';
 import { TemplateResolutionError, resolveTemplateContent } from './template.ts';
 import { CLI_VERSION } from './version.ts';
@@ -29,6 +30,7 @@ Commands:
   template <name> --references-dir <dir> [--json]  Resolve a bundled references/ template
   setup-plan --references-dir <dir> [--json]       Create plan.md from plan-template
   setup-tasks --references-dir <dir> [--json]      Resolve the tasks template + docs
+  knowledge paths [--json] [--root <path>]        Resolve KNOWLEDGE_ROOT / CONTEXT_FILE / ADR_DIR
   pack init|status|update [--ref <ref>] [--json]   Install/inspect/update the harness pack (.che/pack.json)
   self-update [--version <x>] [--check] [--json]   Update the global @newchiwan/che itself
 
@@ -57,6 +59,7 @@ const COMMAND_USAGE: Record<string, string> = {
   template: TEMPLATE_USAGE,
   'setup-plan': SETUP_PLAN_USAGE,
   'setup-tasks': SETUP_TASKS_USAGE,
+  knowledge: KNOWLEDGE_USAGE,
   pack: PACK_USAGE,
   'self-update': SELF_UPDATE_USAGE,
 };
@@ -112,6 +115,8 @@ export function main(argv: string[]): number {
       return runSetupPlan(rest);
     case 'setup-tasks':
       return runSetupTasks(rest);
+    case 'knowledge':
+      return runKnowledge(rest);
     case 'pack':
       return runPack(rest);
     case 'self-update':

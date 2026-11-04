@@ -759,6 +759,64 @@ esac
 run "$CHE_BIN" self-update --no-such-flag
 [ "$RC" -eq 2 ] && ok || bad "self-update 未知 flag: 退出码 ${RC}，预期 2"
 
+# 20d. knowledge paths: default, declarations, conflict, --root, containment.
+KNOWPROJ="$TMP/knowproj"
+mkdir -p "$KNOWPROJ/.git"
+runk() { # runk <command...>; same as run() but in KNOWPROJ
+  OUT="$(cd "$KNOWPROJ" && "$@" 2>"$TMP/stderr")"
+  RC=$?
+}
+runk "$CHE_BIN" knowledge paths --json
+[ "$RC" -eq 0 ] && ok || bad "knowledge default: 退出码 ${RC}"
+[ "$(node -p 'JSON.parse(process.argv[1]).KNOWLEDGE_ROOT' "$OUT")" = "$KNOWPROJ/docs/domain_knowledge" ] \
+  && ok || bad "knowledge default: KNOWLEDGE_ROOT=$(node -p 'JSON.parse(process.argv[1]).KNOWLEDGE_ROOT' "$OUT")"
+[ "$(node -p 'JSON.parse(process.argv[1]).CONTEXT_FILE' "$OUT")" = "$KNOWPROJ/docs/domain_knowledge/CONTEXT.md" ] \
+  && ok || bad "knowledge default: CONTEXT_FILE 不符"
+[ "$(node -p 'JSON.parse(process.argv[1]).SOURCE.PRIORITY' "$OUT")" = "4" ] \
+  && ok || bad "knowledge default: SOURCE.PRIORITY 非 4"
+[ "$(node -p 'JSON.parse(process.argv[1]).GLOSSARY_EXISTS' "$OUT")" = "false" ] \
+  && ok || bad "knowledge default: GLOSSARY_EXISTS 非 false"
+
+printf 'knowledge_root: knowledge\n' > "$KNOWPROJ/AGENTS.md"
+runk "$CHE_BIN" knowledge paths --json
+[ "$(node -p 'JSON.parse(process.argv[1]).KNOWLEDGE_ROOT' "$OUT")" = "$KNOWPROJ/knowledge" ] \
+  && ok || bad "knowledge AGENTS 覆盖: KNOWLEDGE_ROOT 不符"
+[ "$(node -p 'JSON.parse(process.argv[1]).SOURCE.PRIORITY' "$OUT")" = "2" ] \
+  && ok || bad "knowledge AGENTS 覆盖: SOURCE.PRIORITY 非 2"
+
+printf 'knowledge_root: other\n' > "$KNOWPROJ/CLAUDE.md"
+runk "$CHE_BIN" knowledge paths --json
+[ "$RC" -eq 2 ] && ok || bad "knowledge 同级冲突: 退出码 ${RC}，预期 2"
+case "$(<"$TMP/stderr")" in
+  *"conflicting"*) ok ;;
+  *) bad "knowledge 同级冲突: stderr 未报冲突：$(<"$TMP/stderr")" ;;
+esac
+printf 'knowledge_root: knowledge\n' > "$KNOWPROJ/CLAUDE.md"
+runk "$CHE_BIN" knowledge paths --json
+[ "$RC" -eq 0 ] && ok || bad "knowledge 同级一致: 退出码 ${RC}"
+
+runk "$CHE_BIN" knowledge paths --root docs/knowledge/CONTEXT.md --json
+[ "$(node -p 'JSON.parse(process.argv[1]).CONTEXT_FILE' "$OUT")" = "$KNOWPROJ/docs/knowledge/CONTEXT.md" ] \
+  && ok || bad "knowledge --root 文件: CONTEXT_FILE 不符"
+[ "$(node -p 'JSON.parse(process.argv[1]).KNOWLEDGE_ROOT' "$OUT")" = "$KNOWPROJ/docs/knowledge" ] \
+  && ok || bad "knowledge --root 文件: KNOWLEDGE_ROOT 非父目录"
+[ "$(node -p 'JSON.parse(process.argv[1]).SOURCE.PRIORITY' "$OUT")" = "1" ] \
+  && ok || bad "knowledge --root: SOURCE.PRIORITY 非 1"
+
+runk "$CHE_BIN" knowledge paths --root ../outside --json
+[ "$RC" -eq 3 ] && ok || bad "knowledge 越界: 退出码 ${RC}，预期 3"
+
+mkdir -p "$KNOWPROJ/docs"
+printf '# legacy\n' > "$KNOWPROJ/docs/GLOSSARY.md"
+runk "$CHE_BIN" knowledge paths --json
+[ "$(node -p 'JSON.parse(process.argv[1]).GLOSSARY_EXISTS' "$OUT")" = "true" ] \
+  && ok || bad "knowledge legacy: GLOSSARY_EXISTS 非 true"
+
+runk "$CHE_BIN" knowledge bogus
+[ "$RC" -eq 2 ] && ok || bad "knowledge 未知子命令: 退出码 ${RC}，预期 2"
+runk "$CHE_BIN" knowledge paths
+[ "$RC" -eq 0 ] && ok || bad "knowledge 人类输出: 退出码 ${RC}"
+
 # 21. version parity, help, unknown command.
 EXPECTED_VERSION="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).version' "$REPO_ROOT/packages/cli/package.json")"
 run "$CHE_BIN" --version
