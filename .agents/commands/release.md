@@ -1,39 +1,74 @@
 ---
-description: 发版流程——统一版本源、双版本 bump、原子打 tag 与 postcondition 校验；用户说「发布 / 发版 / 升版本 / 打 tag / 出新版本」时执行
+description: 发版流程——自动探测 pack / che CLI 各自是否需发、生成建议版本号、经用户确认后直接发布（私有 Nexus + git tag）；用户说「发布 / 发版 / 升版本 / 打 tag / 出新版本」时执行
 ---
 
 # release
 
-本仓只有一条发版路径：**根 `package.json#version` 是 pack 唯一版本源，git tag `vX.Y.Z` 是 che 安装通道的发布原语**。没打 tag = che 通道没发版。绝不手工 bump + push。
+本仓只有一条发版路径：**根 `package.json#version` 是 pack 唯一版本源（omp 插件与 DSH bundle 共用），git tag `vX.Y.Z` 是 che 安装通道的发布原语**（没打 tag = che 通道没发版）。CLI 版本源是 `packages/cli/package.json`（须与 `src/version.ts` 的 `CLI_VERSION` 一致，测试强制）。绝不手工 bump + push。
 
-## 版本号口径（semver）
+## 前置
+
+工作树必须干净、main 与 origin 同步（先 `git pull --ff-only`）；不满足即停下处理，不发版。
+
+## 第 0 步：探测发版面（只读，不改文件）
+
+```bash
+last_tag="$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null || true)"
+git log --oneline "${last_tag:-v0.0.0}..HEAD" -- . ':!packages/cli'   # pack 改动
+git log --oneline "${last_tag:-v0.0.0}..HEAD" -- packages/cli         # CLI 改动
+bash release.sh --check; echo "rc=$?"   # 0=本地 CLI 版本未上 Nexus；1=已在线上；2=读不到 Nexus，先解决
+node -p 'require("./package.json").version'                            # 根版本（对照最新 tag 查漏 tag）
+```
+
+判定：
+- **pack 需发**：tag 后存在非 `packages/cli` 提交（含文档/分发面）；或根版本 > 最新 tag（上次漏 tag 的中间态，并入本次发版）。
+- **CLI 需发**：tag 后存在 `packages/cli` 提交；或 `release.sh --check` rc=0。
+- 两面都无 → 回报「无可发内容」结束，不 bump、不打 tag。
+
+## 第 1 步：自动生成建议版本号（pack 与 CLI 各自独立套用 semver）
 
 | 变化 | bump |
 |---|---|
 | 修 bug、文档小修 | patch |
 | 加技能、加功能、加配置键 | minor |
-| **删技能、技能更名、改配置键语义、改 manifest schema** | **major**（消费端可见破坏，如 0.4.0 的 che-* 更名） |
+| 删技能、技能更名、改配置键语义、改 manifest schema | major |
 
-双版本解耦：技能/文档/分发面变化 → 只 bump 根版本；CLI 行为变化 → 只 bump `packages/cli`。唯一耦合点：pack 用到 CLI 新能力时抬高根 `engines.che`，随 pack 同次发版。
+CLI 按其提交内容同口径 bump。唯一耦合点：pack 用到 CLI 新能力时抬根 `engines.che`（不得高于已发布 CLI 版本，测试拦截），随 pack 同次发版。
 
-## 步骤（每步有可判定通过条件，失败即停）
+## 第 2 步：向用户确认（必经；未确认不得写盘、不得推送、不得打 tag）
 
-1. **定版本号**：按上表口径确定 `X.Y.Z`；先 `git log --oneline <上个tag>..HEAD` 核对本版内容再定。
-2. **本版含 CLI 变更时**：`bash release.sh X.Y.Z` 发布 Nexus（回写 `packages/cli/package.json` 与 `src/version.ts` 的 `CLI_VERSION`、核对线上最新版后推送；两者不一致会被 `test-che-cli.sh` 拦下；需 devops 认证，见 README「发布」）。**先发 CLI 再 bump pack**——`engines.che` 引用已存在的版本。
-3. **bump pack**：根 `package.json#version` = `X.Y.Z`，同步 `.omp-plugin/marketplace.json` 的 plugin `version`（不一致被 `test-skill-structure.sh` 拦下）与 `docs/guides/AI Native实践指南.md` 顶部「版本对齐」行（pack 版本 + 本版对应的 CLI 版本）。
-4. **质量门**：`npm test` 必须全绿（三个脚本依次跑）。
-5. **单提交**：`chore(release): 发布 X.Y.Z`，只含根 `package.json`、`.omp-plugin/marketplace.json`（及本版动过的 `packages/cli` 两文件）。
-6. **原子发布**：一条命令同时推 main 与 tag，不存在「先推 main、tag 下次补」的中间态：
-   ```bash
-   git tag vX.Y.Z   # 打在步骤 5 的提交上
-   git push origin main vX.Y.Z
-   ```
-6.1. **postcondition（硬校验，失败即整次发版判 FAIL）**：
-   ```bash
-   git ls-remote --tags origin "refs/tags/vX.Y.Z" | grep -q "refs/tags/vX.Y.Z$" \
-     && echo OK || echo "FAIL: tag 未生效，che 通道未发版"
-   ```
-7. **README**：核对 `/readme-refresh` 触发条件（发布方式变化必触发），需要时执行。
+确认内容固定四项：
+1. **改了什么**：按面归类的 git log（pack 面 / CLI 面）。
+2. **之前版本**：pack = 最新 tag 与根版本；CLI = Nexus 最新版与本地版本。
+3. **建议版本**：各自新版本号 + bump 理由。
+4. **将执行的动作**：第 3 步将跑的命令清单（release.sh / npm test / commit / tag / push）。
+
+用户改口径则按用户版本号执行；确认后第 3 步全自动，不再逐条询问。
+
+## 第 3 步：确认后自动发布（先 CLI，后 pack——`engines.che` 引用已存在的版本）
+
+- **CLI 需发**：`bash release.sh <CLI新版本>` —— 自动回写 `packages/cli/package.json` 与 `src/version.ts`、核对 Nexus 最新性、bun 打包并推送私有 Nexus。失败即停；需用户级 `~/.npmrc` devops 认证（见 README「发布」），缺认证直接报告，不代填凭据。
+  - pack 同发：CLI 两文件并入 pack bump 提交。
+  - 仅 CLI 发版：单独提交 `chore(release): che CLI <版本>` 推 main，**不打 tag**（tag 只承载 pack 通道）。
+- **pack 需发**：
+  1. bump 三处：根 `package.json#version`、`.omp-plugin/marketplace.json` 的 plugin `version`（不一致被测试拦下）、`docs/guides/AI Native实践指南.md` 版本对齐行（pack 版 + 本版 CLI 版）。
+  2. `npm test` 全绿（三个脚本依次跑）。
+  3. 单提交 `chore(release): 发布 X.Y.Z`：只含根 `package.json`、`.omp-plugin/marketplace.json`、指南、本版动过的 `packages/cli` 两文件。
+  4. 原子发布（一条命令推 main 与 tag，无中间态）：
+     ```bash
+     git tag vX.Y.Z   # 打在步骤 3 的提交上
+     git push origin main vX.Y.Z
+     ```
+
+## 第 4 步：postcondition（硬校验，失败即整次发版判 FAIL）
+
+```bash
+git ls-remote --tags origin "refs/tags/vX.Y.Z" | grep -q "refs/tags/vX.Y.Z$" \
+  && echo OK || echo "FAIL: tag 未生效，che 通道未发版"
+npm view @newchiwan/che version --@newchiwan:registry=https://nexus.newchiwan.cn/repository/internal-npm/
+```
+
+最后核对 `/readme-refresh` 触发条件（发布方式变化必触发），需要时执行。
 
 ## 发版漏 tag 的兜底探测
 
@@ -44,5 +79,5 @@ description: 发版流程——统一版本源、双版本 bump、原子打 tag 
 - GitLab CI / push rules 校验（仓内无 CI 定位；push rules 是 Premium 且只能防乱打 tag）。
 - `npm test` 校验 tag（bump 提交先于 tag 的窗口期必然误报）。
 
-**Input**: 可选，目标版本号；不给则按步骤 1 口径现定
+**Input**: 可选，目标版本号；给了则跳过第 1 步建议，仍走第 2 步确认
 **Provided arguments**: $@
