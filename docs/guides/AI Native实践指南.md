@@ -221,7 +221,7 @@ flowchart TD
 1. `/che-load` —— 装载 ADR 语料与经验（corrections / patterns）进上下文，每会话一次（intend 技能会提示）
 2. `/che-intend` —— 意图访谈式捕获目标、范围、约束、失败条件，起草 User Stories、Acceptance Scenarios 与 Edge Cases（全局稳定 `E#` ID），并生成统一特性规格 `intent.md`（意图块 + `### User Story N` 章节与 P1 / P2 / P3 优先级 + `### Edge Cases`）；结束时经 `che task create` 创建任务目录 `specs/NNN-{slug}/` 并绑定 session，任务由此诞生
 3. `/che-clarify` —— ≤5 个针对性问题澄清，结论**回写** spec 对应章节，并把 `[NEEDS CLARIFICATION]` 产品标记清零；场景改动保留既有 `E#` ID，只有真正新增的场景才分配新 ID
-4. 结束后可确认接续 `/che-pingcode-specstoissues` 建卡：spec 转需求树卡片（idea → epic → feature 规格卡 → story 卡），登记 `specs/pingcode-mapping.json`，任务目录改名 `{identifier}-{slug}`（slug 不变）；选择「否」时，按交接门禁要求在交接前补建
+4. 结束后可确认接续 `/che-pingcode-specstoissues` 建卡：spec 转需求树卡片（idea → epic → feature 规格卡 → story 卡），登记 `specs/pingcode-mapping.json`，任务目录改名 `{identifier}-{slug}`（slug 不变）；选择「否」时不建卡、不阻塞交接，spec 定稿后任何时候可手动补建登记
 5. 涉 UI 的特性可并行移交 UI 设计侧生成设计清单（见下）；它不阻塞建卡与交接，产物供开发 plan / implement 使用
 6. 逐项核对交接门禁（见下），全过才移交开发
 
@@ -247,9 +247,9 @@ UI 设计侧注意：
 #### 交接门禁（产品 / UI → 开发，逐项必过）
 
 1. spec 的 `### User Story N` 章节齐备，标题行标注 `(Priority: P1/P2/P3)`
-2. `specs/pingcode-mapping.json` 已登记，每张卡 id / 状态可追溯——没登记等于建卡没完成
-3. 建卡是可选环节：选择不建卡的，交接前执行 `/che-pingcode-specstoissues`
-4. `.che/pingcode-config.yml` 在位（未执行过时先执行 `/che-pingcode-init`），`pingcode` CLI 已装并认证
+2. 建卡可选：`.che/pingcode-config.yml` 在位即视为选择建卡，`specs/pingcode-mapping.json` 必须已登记、每张卡 id / 状态可追溯——没登记等于建卡没完成；未配置或选择不建卡 → 本项通过，不阻塞
+3. 选择不建卡的无须补跑；spec 定稿后任何时候可手动 `/che-pingcode-specstoissues` 补建并登记
+4. config 在位时：`.che/pingcode-config.yml` 已初始化（未执行过先 `/che-pingcode-init`），`pingcode` CLI 已装并认证；无 config 跳过本项
 
 任一不过就留在产品 / 设计侧处理完再交接，不把半成品推给开发。
 
