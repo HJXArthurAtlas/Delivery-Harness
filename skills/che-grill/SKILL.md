@@ -346,6 +346,9 @@ Report:
 > Pack fork (ncw), port on upstream upgrade.
 
 - **目标**：`/che-design`（涉 UI）或 `/che-plan`（无 UI）
+- **可选目标**：`/che-pingcode-specstoissues` —— 追问定稿后建需求树卡片并登记 `specs/pingcode-mapping.json`（上游 `after_intend` 挂点，与 `/che-clarify` / `/che-grill-with-docs` 承接同一可选目标）
+  - 条件：`.che/pingcode-config.yml` 在位才提示
+  - 回退：未配置或用户拒绝 → 不建卡不阻塞交接，后续可随时手动补建登记
 - **条件**：
   - 追问结论已明确
   - grill 不回写 intent，需回写先跑 `/che-clarify`

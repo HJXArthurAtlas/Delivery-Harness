@@ -214,7 +214,10 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
 > Pack fork (ncw), port on upstream upgrade.
 
 - **目标**：`/che-design`（涉 UI）或 `/che-plan`（无 UI，交接门禁通过后）
+- **可选目标**：`/che-pingcode-specstoissues` —— 澄清定稿后建需求树卡片并登记 `specs/pingcode-mapping.json`（上游 `after_intend` 挂点；clarify 与 grill 同为可选追问路径，跑 grill 的由 grill Handoff 承接同一可选目标）
+  - 条件：`.che/pingcode-config.yml` 在位才提示
+  - 回退：未配置或用户拒绝 → 不建卡不阻塞交接，后续可随时手动补建登记
 - **条件**：
   - 澄清结论已回写 intent
   - 可选 `/che-grill` 继续追问
-  - 交接门禁（intent 章节齐备 + pingcode-mapping.json 登记）通过后才进 plan
+  - 交接门禁：intent 章节齐备；建卡可选——config 在位时 `specs/pingcode-mapping.json` 须已登记，未配置或选择不建卡不阻塞
