@@ -278,7 +278,7 @@ UI 设计侧注意：
 
 | 技能 | 时机 | 作用 |
 |---|---|---|
-| `che-grill` | 产品侧，intend / clarify 之后 | 对 spec 执行追问式深度澄清，暴露隐含假设与自相矛盾；结论**不回写** spec，如需回写先执行 clarify |
+| `che-grill` | 产品侧，intend / clarify 之后 | 对 spec 执行追问式深度澄清，暴露隐含假设与自相矛盾；结论**回写** spec（intent.md）并即时校验 |
 | `che-grill-with-docs` | 产品侧，同上 | 深度澄清并沉淀跨特性知识：术语与概念边界写入知识入口（默认 `docs/domain_knowledge/CONTEXT.md`，位置由 `che knowledge paths --json` 解析），长规则落主题文档；旧 `docs/GLOSSARY.md` 只读共存，由用户自行迁移；符合记录门的决策归口 `docs/adr/` |
 | `che-adr-context` | 开发 plan 前 | 取 ADR 决策语料进上下文（只读），避免 plan 与既有决策冲突 |
 | `che-analyze` | 开发 tasks 后 | spec / plan / tasks 跨制品一致性只读分析，尽早发现工件间的漂移 |
