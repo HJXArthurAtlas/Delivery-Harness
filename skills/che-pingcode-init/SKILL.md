@@ -7,7 +7,7 @@ description: 交互式初始化 PingCode 集成配置：选择项目/产品/迭�
 
 # 初始化 PingCode 集成配置
 
-> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.init` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；specify extension 的 hook 接线全部移除（pack 无 hook 执行机制，命令按流程节点手动调用）；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`。配置模板见本技能 `references/pingcode-config.template.yml`。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
+> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.init` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；specify extension 的 hook 接线全部移除（pack 无 hook 执行机制，命令按流程节点手动调用）；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；自带 `scripts/pingcode-login.sh` 登录包装（OAuth client 凭据封装在脚本内，不落消费项目文件，供本技能前置检查、`/che-project-init` 步骤 5 与项目 AGENTS.md 环境检查复用）。配置模板见本技能 `references/pingcode-config.template.yml`。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
 
 交互式完成 PingCode 集成配置并直接生成 `.che/pingcode-config.yml`。所有类型/状态/优先级名都从项目实际字典探查后写入，不猜测；产品与迭代可固定到配置，也可留空走运行时解析链。
 
@@ -16,7 +16,13 @@ description: 交互式初始化 PingCode 集成配置：选择项目/产品/迭�
 1. `pingcode` CLI 已安装且在 PATH 中（安装：`npm i -g @metaphorli/pingcode-cli`）
 2. 已认证：`pingcode auth status` 显示 `authenticated: true` 且 `token_valid: true`
 
-任何一项不满足 → 停止并给出指引（`pingcode auth login`），不要继续。
+CLI 缺失 → 提示安装并终止。未认证 → **不终止**：先告知用户「即将打开浏览器完成 PingCode 授权，完成后自动继续」，再执行本技能自带登录包装（路径相对本技能目录）：
+
+```bash
+bash scripts/pingcode-login.sh            # 已认证直接通过；未认证自动开浏览器登录并复检
+```
+
+脚本封装 OAuth client 凭据（凭据**绝不**写入项目文件或向用户展示）。`pingcode auth login` 自带本地回调监听（`127.0.0.1:8765`）：打开浏览器 → 阻塞等用户授权 → 回调到达自动换 token 并自行退出，**命令退出即登录完成，无需轮询**；挂起是正常状态，给足等待时间（≥300 秒），绝不因未退出而中止或杀进程（运行环境把长命令转入后台时，等其完成结果送达后继续）。浏览器打不开或 CLI 与浏览器不在同一机器（远程 SSH）→ 授权码兜底：`bash scripts/pingcode-login.sh login --dry-run` 打印授权 URL 交用户，用户在浏览器完成授权后从重定向地址 `…/callback?code=…` 复制 `code` 交回，改跑 `bash scripts/pingcode-login.sh login --code <授权码>`。登录失败或用户放弃才终止。
 
 ## 用户输入
 
@@ -32,7 +38,7 @@ description: 交互式初始化 PingCode 集成配置：选择项目/产品/迭�
 
 ```bash
 command -v pingcode              # 缺失 → 提示安装 CLI，终止
-pingcode auth status             # 未认证 → 引导 pingcode auth login，终止
+pingcode auth status             # 未认证 → 跑本技能 scripts/pingcode-login.sh 自动登录（见前置条件），失败才终止
 pingcode context list
 ```
 
@@ -186,7 +192,7 @@ sync:
 | 症状 | 处理 |
 |---|---|
 | `command not found: pingcode` | `npm i -g @metaphorli/pingcode-cli` 安装 CLI |
-| `authenticated: false` | 运行 `pingcode auth login`，或设置 `PINGCODE_CLIENT_ID`/`PINGCODE_CLIENT_SECRET` |
+| `authenticated: false` | 自动登录：`bash <本技能目录>/scripts/pingcode-login.sh`（阻塞等浏览器回调属正常，给足 ≥300 秒；远程/无浏览器走 `login --dry-run` 取授权 URL + `login --code <授权码>`），或设置 `PINGCODE_CLIENT_ID`/`PINGCODE_CLIENT_SECRET` |
 | 项目名解析失败 | 用 `pingcode context list` 查看缓存项目清单；确认名称/标识符后重试 |
 | 产品列表为空/解析失败 | `pingcode product list --compact` 核对；企业未开通产品域时写空，运行时跳过需求关联 |
 | 字典为空 | 重跑 `pingcode context set-current-project`；仍为空则检查 CLI 版本 |

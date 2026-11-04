@@ -143,7 +143,13 @@ language 需要问时**最先问**（本项固定中文提问，用户选定后�
 本步只在 `pingcode_integration` 本次被问且用户选 on、或用户显式要求补接时执行：沿用现有 on 且 `.che/pingcode-config.yml` 已在位 → 跳过本步；沿用 on 但 config 缺失 → 询问现在补接（移交 `/che-pingcode-init`）还是保持现状（回显标注）。接入时依次执行；任何一步失败必须停下按「故障排除」处理，**绝不**跳过继续：
 
 1. **CLI 在位且版本达标**：`command -v pingcode` 与 `pingcode --version`（要求 ≥ 0.14.0）。CLI 缺失、版本不符、或无法输出版本 → `npm install -g @metaphorli/pingcode-cli@latest` 安装/重装最新版后复检。
-2. **登录**：`pingcode auth status`。未认证 → 执行登录命令：`<待补充：登录命令由维护者提供后替换此占位>`。占位未替换时必须向用户当场询问登录命令并执行，**绝不**编造登录命令。
+2. **登录**：`pingcode auth status`。已是 `authenticated: true` 且 `token_valid: true` → 跳过；未认证 → 先告知用户「即将打开浏览器完成 PingCode 登录授权，完成后自动继续」，再执行登录包装脚本（OAuth client 凭据封装在脚本内随技能包分发，**绝不**把凭据写进项目文件或向用户展示）。脚本位于已安装的 che-pingcode-init 技能目录下的 scripts 子目录（文件名 pingcode-login.sh）——che pack 通道即项目内 `.agents/skills/che-pingcode-init/scripts/pingcode-login.sh`，omp/dsh 宿主到 che-pingcode-init 技能目录下取同名路径：
+
+   ```bash
+   bash .agents/skills/che-pingcode-init/scripts/pingcode-login.sh
+   ```
+
+   脚本行为：已认证直接通过；未认证自动打开浏览器并**阻塞等待授权回调**（`127.0.0.1:8765`）——挂起是正常状态，给足等待时间（≥300 秒），绝不因未退出而中止或杀进程（运行环境把长命令转入后台时，等其完成结果送达后继续），命令退出即登录完成，无需轮询。浏览器打不开或 CLI 与浏览器不在同一机器（如远程 SSH）→ 授权码兜底：`…/pingcode-login.sh login --dry-run` 打印授权 URL 给用户，用户完成授权后从重定向地址 `…/callback?code=…` 复制 `code` 交回，改跑 `…/pingcode-login.sh login --code <授权码>`。超时未完成 → 询问用户重试还是改走授权码模式，绝不静默跳过。
 3. **复检认证**：`pingcode auth status` 必须显示 `authenticated: true` 且 `token_valid: true`。
 4. **移交集成配置**：执行 `/che-pingcode-init` 交互生成 `.che/pingcode-config.yml`。用户在中途拒绝或中止 → 回来询问用户保持 `pingcode_integration: off` 还是稍后重跑。
 5. **记录**：接入链全部走通 → `pingcode_integration: on`；用户拒绝接入或链路未走通 → `off`。必须诚实记录实际状态，**绝不**写未经跑通的 on。
