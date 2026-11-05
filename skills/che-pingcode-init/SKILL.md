@@ -7,7 +7,7 @@ description: 交互式初始化 PingCode 集成配置：选择项目/产品/迭�
 
 # 初始化 PingCode 集成配置
 
-> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.init` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；specify extension 的 hook 接线全部移除（pack 无 hook 执行机制，命令按流程节点手动调用）；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；登录走 `/che-project-init` 落盘的项目级脚本 `.che/pingcode-login.sh`（未认证时自动登录，上游为提示用户手动登录后终止）。配置模板见本技能 `references/pingcode-config.template.yml`。前置依赖：`pingcode` CLI ≥ 0.14.0（`npm i -g @metaphorli/pingcode-cli`）。
+> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.init` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；specify extension 的 hook 接线全部移除（pack 无 hook 执行机制，命令按流程节点手动调用）；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；登录走 `/che-project-init` 落盘的项目级脚本 `.che/pingcode-login.sh`（未认证时自动登录，上游为提示用户手动登录后终止）。配置模板见本技能 `references/pingcode-config.template.yml`。前置依赖：`pingcode` CLI ≥ 0.15.0（`npm i -g @metaphorli/pingcode-cli`）。
 
 交互式完成 PingCode 集成配置并直接生成 `.che/pingcode-config.yml`。所有类型/状态/优先级名都从项目实际字典探查后写入，不猜测；产品与迭代可固定到配置，也可留空走运行时解析链。
 

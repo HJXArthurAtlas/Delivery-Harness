@@ -164,7 +164,7 @@ language 需要问时**最先问**（本项固定中文提问，用户选定后�
 
 本步只在 `pingcode_integration` 本次被问且用户选 on、或用户显式要求补接时执行：沿用现有 on 且 `.che/pingcode-config.yml` 已在位 → 跳过本步，但 `.che/pingcode-login.sh` 缺失时仍按下述第 2 步从模板补放脚本（其余不重跑）；沿用 on 但 config 缺失 → 询问现在补接（移交 `/che-pingcode-init`）还是保持现状（回显标注）。接入时依次执行；任何一步失败必须停下按「故障排除」处理，**绝不**跳过继续：
 
-1. **CLI 在位且版本达标**：`command -v pingcode` 与 `pingcode --version`（要求 ≥ 0.14.0）。CLI 缺失、版本不符、或无法输出版本 → `npm install -g @metaphorli/pingcode-cli@latest` 安装/重装最新版后复检。
+1. **CLI 在位且版本达标**：`command -v pingcode` 与 `pingcode --version`（要求 ≥ 0.15.0）。CLI 缺失、版本不符、或无法输出版本 → `npm install -g @metaphorli/pingcode-cli@latest` 安装/重装最新版后复检。
 2. **放置登录脚本并登录**：`mkdir -p .che` 后，把本技能自带模板 `references/pingcode-login.sh` 复制为 `.che/pingcode-login.sh`（OAuth client 凭据封装在脚本内；模板随技能分发、在项目内落盘，与宿主安装路径无关——omp/dsh/che pack 三端技能目录各不相同，项目内 `.che/` 是唯一确定路径）。脚本已在位：内容与模板一致 → 跳过复制；不一致 → 说明 pack 模板已更新，经用户确认后先备份为 `.che/pingcode-login.sh.bak` 再覆盖（同名不覆盖原则）。该脚本是项目共享工具——其他开发者的 AGENTS 环境检查与 che-pingcode-* 技能都调用它——**随仓库提交**，绝不加入 .gitignore。随后 `pingcode auth status`：已是 `authenticated: true` 且 `token_valid: true` → 跳过登录；未认证 → 先告知用户「即将打开浏览器完成 PingCode 登录授权，完成后自动继续」，再执行：
 
    ```bash
@@ -412,7 +412,7 @@ graph LR
 | `npm install -g` 失败 | 检查 npm registry 可达性与全局 bin 目录权限；企业内网确认内部 registry 镜像 |
 | che 安装报 404（@newchiwan 不在公网） | 配置公司 Nexus 消费端：`npm config set @newchiwan:registry https://nexus.newchiwan.cn/repository/registry-npm/` 后重试 |
 | 安装后仍 `command not found: pingcode` | 重开 shell 确认 npm 全局 bin 目录在 PATH 中 |
-| `pingcode --version` 低于 0.14.0 | `npm install -g @metaphorli/pingcode-cli@latest` |
+| `pingcode --version` 低于 0.15.0 | `npm install -g @metaphorli/pingcode-cli@latest` |
 | `auth status` 始终未认证 | 检查登录命令输出；或改设 `PINGCODE_CLIENT_ID`/`PINGCODE_CLIENT_SECRET` |
 | 非 git 目录被拒绝 | 切到项目根再运行本技能 |
 | 纯新仓库要不要画像 | 判定为纯新仓库就跳过，绝不硬扫；代码落地后重跑本技能补画像 |
