@@ -1,6 +1,6 @@
 ---
 name: che-adr-draft
-description: docs/adr/ 的唯一写命令，两个模式——起草：从当前 plan 工件立一条新 ADR（脚本脚手架 + 人工填推理，落稿后 lint 校验）；种子导入：把团队基础 ADR（references/seed-adr/ 七条底版，源自 monorepo-template）先讲 ADR 是什么与 adr_gate 联动、再逐条确认后导入 docs/adr/（id 冲突顺延重编号，同名不覆盖），/che-project-init 在语料缺失时移交本模式。刻意不经任何 hook 自动触发——决策变更必须显式立档。当用户说「把这个决策落成 ADR」「立一条 ADR」「draft 一份决策记录」「导入基础 ADR」「初始化 ADR 语料」，或 plan 出现需正式化的决策变更时使用——即使用户没提命令名，只要是起草新 ADR 或导入团队种子也用本 skill。
+description: docs/adr/ 的唯一写命令，两个模式——起草：从当前 plan 工件立一条新 ADR（脚本脚手架 + 人工填推理，落稿后 lint 校验）；种子导入：把团队基础 ADR（references/seed-adr/ 七条默认底版，随技能分发维护）先讲 ADR 是什么与 adr_gate 联动、再逐条确认后导入 docs/adr/（id 冲突顺延重编号，同名不覆盖），/che-project-init 在语料缺失时移交本模式。刻意不经任何 hook 自动触发——决策变更必须显式立档。当用户说「把这个决策落成 ADR」「立一条 ADR」「draft 一份决策记录」「导入基础 ADR」「初始化 ADR 语料」，或 plan 出现需正式化的决策变更时使用——即使用户没提命令名，只要是起草新 ADR 或导入团队种子也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -65,7 +65,7 @@ handoff and a direct user invocation behave identically:
 Bootstrap the project corpus from the team base records bundled with this
 skill — `references/seed-adr/0001-backend-architecture-rules-layering-and-call-direction.md`
 through `references/seed-adr/0007-liquibase-database-change-regime.md`
-(verbatim copies of the team monorepo-template's `docs/adr/`). Execute these
+(the team's default seed ADRs, shipped and maintained with this pack). Execute these
 steps in order; steps 1 and 2 are mandatory explanations and MUST NOT be
 skipped even if the user pushes to move fast:
 

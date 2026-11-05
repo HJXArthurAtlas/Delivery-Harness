@@ -50,7 +50,7 @@ npm test
 - 上游技能的 pack fork 差异记录在对应技能中，上游升级时必须保留。
 - 每个 `SKILL.md` 顶部带语言规则块：读项目根 `.che/config.yml` 的 `language:`（缺省 `zh-cn`）决定全 pack 输出语言（含思考）；新增技能必须携带，`/che-project-init` 负责写入该键。
 - 技能写盘遵循同名不覆盖；版本号以仓内登记文件为准，不凭记忆填写。
-- 基础宪法、种子 ADR 与 AGENTS 环境检查节的内容上游是 council/monorepo-template（`docs/constitution/`、`docs/adr/`、`AGENTS-TEMPLATE.md` 环境检查节）：上游变更时逐字同步复制进 `skills/che-constitution/references/seed-constitution.md`、`skills/che-adr-draft/references/seed-adr/` 与 `skills/che-project-init/references/seed-agents-env.md`，不就地改动副本。
+- 基础宪法、种子 ADR 与 AGENTS 环境检查节的唯一维护处在 harness 内：`skills/che-constitution/references/seed-constitution.md`、`skills/che-adr-draft/references/seed-adr/` 与 `skills/che-project-init/references/seed-agents-env.md` 就地修改，无外部模板上游；council/monorepo-template 的同名内容与本仓各自独立、互不同步。
 
 ## 发布
 

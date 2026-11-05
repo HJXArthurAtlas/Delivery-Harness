@@ -93,7 +93,7 @@ ncw-delivery-harness 项目地址：https://git.newchiwan.com/council/ncw-delive
 先确认 ncw-delivery-harness 已生效（列出已装插件/技能能看到它）；然后运行 /che-project-init 做项目级配置（.che/config.yml + 可选 PingCode 接入），按我的答复执行；完成后按根目录 AGENTS.md「环境检查」章节做一次全量环境检查作为初始化验证：逐项汇报结果，不符合项经我确认后才按「安装 / 升级」列处理——其中 codegraph 及其项目索引存量项目未必需要，装不装先问我；确认不适用的检查行（如不接 codegraph）直接在我项目 AGENTS.md 该行标注不适用，之后检查跳过；最后按提交规范提交本次变更。
 ```
 
-> **pack v1.1.0 起的简化**：第 3 步可整步省略——`/che-project-init` 已内置环境检查节种子（逐字同步自 monorepo-template，幂等补缺、只补不删用户内容，见 §3.1），装完技能包直接跑第二段提示词即可。
+> **pack v1.1.0 起的简化**：第 3 步可整步省略——`/che-project-init` 已内置环境检查节种子（随技能包分发维护，幂等补缺、只补不删用户内容，见 §3.1），装完技能包直接跑第二段提示词即可。
 
 ## 2. monorepo-template：项目骨架
 
@@ -178,7 +178,7 @@ your-repo/
 | 跨模型 CLI：codex / gemini / claude（条件） | 仅 intentverify checker 策略强制 `cross-model` / `cli:model` 时需要在 PATH，默认不装不查（planverify checker 固定同模型新上下文子代理，无需外部模型） |
 | codegraph（+ 项目级索引） | 代码知识图谱 MCP：一次查询返回符号源码、调用路径与影响面 |
 
-版本号不写在本文——**单一事实源**是 monorepo-template 仓的 `AGENTS-TEMPLATE.md`（巡检基线）与 `README.md`（初始化基线），两处同步修改。
+版本号不写在本文——环境检查基线的 pack 侧事实源是 harness 的 `skills/che-project-init/references/seed-agents-env.md`，初始化基线是 monorepo-template 仓的 `README.md`；模板仓 `AGENTS-TEMPLATE.md` 服务骨架复制初始化，与 pack 种子各自独立维护。
 
 ## 3. ncw-delivery-harness：流程技能包
 
@@ -306,4 +306,4 @@ bug 修复三步：
 2. **完善登记（一次性）**：发 §1.1 第二段提示词 → 验证索引、登记 `AGENTS.md` 布局、执行 `/che-project-init`——除配置外还会移交治理资产种子：宪法缺失走 `/che-constitution` 逐条确认实例化、基础 ADR 缺失走 `/che-adr-draft` 逐条确认导入。
 3. **架构画像（已有代码仓库，一次性）**：`/che-project-init` 自带新旧仓库判定——纯新仓库（无提交且无任何 manifest/源码）跳过；已有代码的仓库由 Agent 扫描 `services/`、`apps/` 等布局生成 `docs/architecture.md`（服务/应用清单 + mermaid 依赖图），确认后入库；此后每个特性会话 `/che-load` 自动装载，架构变化时重跑 `/che-project-init` 对账。
 4. **日常交付**：按角色进入 harness 主线（§3.2）；产品从 intend（含 intent 访谈与场景起草）开始，开发从 plan 开始；bug 使用修复链。每会话 Agent 自动执行环境检查。
-5. **维护分工**：改骨架、初始化提示词、环境基线 → 直接改 monorepo-template 仓的 `README.md` 与 `AGENTS-TEMPLATE.md`（版本两处同步）；技能流程问题 → 去 harness 仓。
+5. **维护分工**：改骨架、初始化提示词 → 直接改 monorepo-template 仓的 `README.md` 与 `AGENTS-TEMPLATE.md`；环境基线、技能流程 → 去 harness 仓（环境检查种子在 `skills/che-project-init/references/seed-agents-env.md` 就地维护）。

@@ -224,7 +224,7 @@ pingcode_integration: off
 
 ### 8. AGENTS.md 环境检查段落（幂等补缺；种子随技能分发）
 
-把团队标准的环境检查节接进项目根 `AGENTS.md`，让任意 Agent 会话都能按需全量自检工具链。种子为技能自带 `references/seed-agents-env.md`——逐字复制自 monorepo-template 的 `AGENTS-TEMPLATE.md`「环境检查（仅用户明确要求时执行）」整节（触发说明段 + 口径注释 + 工具表）；上游变更时同步技能种子，运行时**不克隆** monorepo-template。
+把团队标准的环境检查节接进项目根 `AGENTS.md`，让任意 Agent 会话都能按需全量自检工具链。种子为技能自带 `references/seed-agents-env.md`——团队标准的环境检查节（触发说明段 + 口径注释 + 工具表），随技能包就地维护；运行时**不克隆** monorepo-template。
 
 写盘纪律：**只补缺，绝不删改多余内容**——用户段落里自加的工具行、改过的期望版本都可能是项目自身的检查需要，一律原样保留并回显差异。除该节外，**绝不**动 `AGENTS.md` 的任何其他章节。用户显式要求「更新环境检查」时，快速通道（见「快速通道：仅更新环境检查段」）也按本步规则对账，且跳过其余全部步骤。
 
@@ -243,7 +243,7 @@ pingcode_integration: off
 **9.1 宪法（移交 `/che-constitution`·实例化模式）**
 
 - `docs/constitution/constitution.md` 已在位 → 跳过，回显标注「宪法已在位，修订走 /che-constitution」。
-- 缺失 → 移交执行。该技能的实例化模式会：先讲宪法是什么维度 → 讲团队基础宪法整体（种子为该技能自带的 seed-constitution.md，位于其 references 目录，逐字复制自 monorepo-template）→ 逐条确认（保留 / 去掉 / 改措辞）→ 讲自定义条款维度并收集追加 → 替换 `[PROJECT_NAME]` 落盘 1.0.0。本技能在移交前向用户说明「接下来逐条过默认宪法」这一预期。
+- 缺失 → 移交执行。该技能的实例化模式会：先讲宪法是什么维度 → 讲团队基础宪法整体（种子为该技能自带的 seed-constitution.md，位于其 references 目录）→ 逐条确认（保留 / 去掉 / 改措辞）→ 讲自定义条款维度并收集追加 → 替换 `[PROJECT_NAME]` 落盘 1.0.0。本技能在移交前向用户说明「接下来逐条过默认宪法」这一预期。
 
 **9.2 基础 ADR（移交 `/che-adr-draft`·种子导入模式）**
 

@@ -1,6 +1,6 @@
 ---
 name: che-constitution
-description: 创建或更新项目章程 docs/constitution/constitution.md，作为后续 intent/plan 的治理约束来源。两个模式按工件状态判定（与调用方无关）——实例化模式（宪法不存在时）：先讲宪法是什么维度、再讲团队基础宪法整体（references/seed-constitution.md，源自 monorepo-template），逐条确认保留/去掉/改措辞，收集项目专属条款后落盘 1.0.0，/che-project-init 在宪法缺失时移交本模式；修订模式（宪法已在位）：既有流程，无讲解环节。当用户运行或提到 /che-constitution，或说「立章程」「初始化宪法」「修订治理原则」「建项目宪章」时使用——即使用户没提命令名，只要是项目治理原则的建立或修订也用本 skill。
+description: 创建或更新项目章程 docs/constitution/constitution.md，作为后续 intent/plan 的治理约束来源。两个模式按工件状态判定（与调用方无关）——实例化模式（宪法不存在时）：先讲宪法是什么维度、再讲团队基础宪法整体（references/seed-constitution.md，团队默认版随技能分发），逐条确认保留/去掉/改措辞，收集项目专属条款后落盘 1.0.0，/che-project-init 在宪法缺失时移交本模式；修订模式（宪法已在位）：既有流程，无讲解环节。当用户运行或提到 /che-constitution，或说「立章程」「初始化宪法」「修订治理原则」「建项目宪章」时使用——即使用户没提命令名，只要是项目治理原则的建立或修订也用本 skill。
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
@@ -102,8 +102,8 @@ Follow this execution flow:
 ## Instantiation mode
 
 First instantiation seeds from the team base constitution bundled with this
-skill (`references/seed-constitution.md` — verbatim copy of the team
-monorepo-template's base constitution). Execute these steps in order; steps 1
+skill (`references/seed-constitution.md` — the team's default base
+constitution, shipped and maintained with this pack). Execute these steps in order; steps 1
 and 2 are mandatory explanations and MUST NOT be skipped even if the user
 pushes to move fast:
 
