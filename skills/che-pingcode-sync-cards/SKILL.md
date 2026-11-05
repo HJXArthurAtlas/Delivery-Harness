@@ -67,7 +67,7 @@ pingcode workitem get <identifier> --compact
 | 动作 | 判定 | 处理 |
 |---|---|---|
 | **删除** | 登记有卡，但 spec/tasks.md 中制品已不存在 | `pingcode workitem delete <identifier>` |
-| **更新** | 制品仍在，标题或描述与现算内容不一致 | `pingcode workitem update <identifier> --title ... --description-file <临时文件>`——含换行的描述先写 `.pingcode/` 下临时文件再引用，创建/更新成功后删除（硬规则同 `/che-pingcode-specstoissues` 第 9 步）。字段级，只改有差异的字段 |
+| **更新** | 制品仍在，标题或描述与现算内容不一致 | `pingcode workitem update <identifier> --title ... --description-file <临时文件>`——含换行的描述先写 `specs/<spec 目录名>/desc/<运行标识>/` 运行目录下的临时文件再引用，成功后删除（目录、注释头约定与硬规则同 `/che-pingcode-specstoissues` 第 9 步）。字段级，只改有差异的字段 |
 | **新建** | 制品存在但登记无卡或 `status: failed` | 按 `/che-pingcode-specstoissues` 第 9/10/11 步规则创建并挂接 |
 
 - 描述对比 = 现"期望描述全文"与远端 `description` 不一致即视为有差异（描述由制品确定性生成）
