@@ -442,9 +442,13 @@ Report:
 - If Outstanding / Deferred items remain, recommend whether to proceed to `/che-design` / `/che-plan` or rerun this command later.
 - **Pack fork (ncw), port on upstream upgrade** — after the report body, close with this fixed ending sequence, nothing after it:
   1. **PingCode push confirmation (before any next-step hint)**: `.che/pingcode-config.yml` exists (PingCode push enabled) → ask via the **AskUserQuestion tool** (never plain-text output that pauses the session for input) with two options, each carrying a one-line description — 「现在推送」（**推荐**）— 把定稿的 spec 推送为 PingCode 需求树卡片 / 「暂不推送」— 不阻塞交接，之后可随时手动补建. The question names the action, never a skill/command. On push, execute the `/che-pingcode-specstoissues` flow in this session immediately (agent runs it itself; never tell the user to run it), then continue to step 2 after it finishes. On skip, or when the config is absent, fall through to step 2 silently.
-  2. End with grouped next-step hints, rendered verbatim as follows:
+  2. Judge UI presence from the intent itself — scan User Stories, In scope, and Acceptance Scenarios for any user-visible interface interaction (pages, forms, components, visualization, frontend behavior); when uncertain, treat as UI. Then end with exactly ONE of the following next-step hints, rendered verbatim:
+     UI 存在 →
      主流程:
-     - /che-design（本特性涉 UI）或 /che-plan（无 UI, 交接门禁通过后）
+     - /che-design（本特性含 UI，先出设计明细 design-tasks.md，再进 plan）
+     无 UI →
+     主流程:
+     - /che-plan（无 UI，交接门禁通过后直接出实现计划）
 
 ## Behavior rules
 
@@ -475,7 +479,7 @@ Report:
 
 > Pack fork (ncw), port on upstream upgrade.
 
-- **目标**：`/che-design`（涉 UI）或 `/che-plan`（无 UI，交接门禁通过后）
+- **目标**：按 intent 判定 UI 需求——涉 UI → `/che-design`（先出设计明细再进 plan）；无 UI → `/che-plan`（交接门禁通过后）
 - **推送确认（PingCode，先于主流程提示）**：`.che/pingcode-config.yml` 在位（已开启推送）→ 经 AskUserQuestion 两选项确认（「现在推送」/「暂不推送」，问句只说动作、不出现技能名）；选推送 → 本会话直接执行 `/che-pingcode-specstoissues` 建卡流程并登记 `specs/pingcode-mapping.json`，推送完成后才提示主流程；选不推送或未配置 → 静默跳过，不阻塞交接，后续可随时手动补建登记
 - **条件**：
   - 追问结论已落 ADR（经 `che-adr-draft` 归口 `docs/adr/`）

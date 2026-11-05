@@ -193,9 +193,13 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
 - If any Outstanding or Deferred remain, recommend whether to proceed to `/che-plan` or run `/che-clarify` again later post-plan.
 - Suggested next command.
 - **Pack fork (ncw), port on upstream upgrade** — after the report body, close with this fixed ending sequence, nothing after it:
-  1. **Chain handoff to grill (main path)**: use the AskUserQuestion tool (never plain-text output that pauses the session for input) with two options, each carrying a one-line description of the action; on selection the agent executes it immediately in this session — 「继续 grill」（**推荐**）— 深度追问：多轮交叉检验 intent，暴露自相矛盾与隐含假设，把每个决策点钉到终态；结束后承接「是否现在推送到 PingCode?」与主流程提示。选中即自动执行 `/che-grill`（携带 `TASK_DIR` 与 `SLUG`）/「就此停下」— 结束本次链，grill 与推送稍后手动跑. On continue, grill takes over and nothing follows here. On stop, show the manual next-step hints rendered verbatim as follows:
+  1. **Chain handoff to grill (main path)**: use the AskUserQuestion tool (never plain-text output that pauses the session for input) with two options, each carrying a one-line description of the action; on selection the agent executes it immediately in this session — 「继续 grill」（**推荐**）— 深度追问：多轮交叉检验 intent，暴露自相矛盾与隐含假设，把每个决策点钉到终态；结束后承接「是否现在推送到 PingCode?」与主流程提示。选中即自动执行 `/che-grill`（携带 `TASK_DIR` 与 `SLUG`）/「就此停下」— 结束本次链，grill 与推送稍后手动跑. On continue, grill takes over and nothing follows here. On stop, judge UI presence from the intent (User Stories / In scope / Acceptance Scenarios 中是否出现用户可见界面交互；拿不准按涉 UI 处理) and show exactly ONE manual next-step hint, rendered verbatim:
+     UI 存在 →
      主流程:
-     - /che-design（本特性涉 UI）或 /che-plan（无 UI, 交接门禁通过后）
+     - /che-design（本特性含 UI，先出设计明细 design-tasks.md，再进 plan）
+     无 UI →
+     主流程:
+     - /che-plan（无 UI，交接门禁通过后直接出实现计划）
 
 ## Done When
 
