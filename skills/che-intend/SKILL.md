@@ -236,7 +236,7 @@ Report completion to the user with:
 - Counts: goal ✓, {N} constraints (CQ1–CQ5), {N} failure conditions (FQ1–FQ4), {N} acceptance + {N} edge scenarios (SQ1–SQ4), {N} ADR refs, {N} remaining markers
 
 Then offer the chain handoff (use AskUserQuestion with three options):
-- **Continue to clarify** — invoke `/che-clarify` next, carrying the selected `TASK_DIR` and `SLUG` into that chained invocation
+- **Continue to grill** — invoke `/che-grill` next, carrying the selected `TASK_DIR` and `SLUG` into this chained invocation
 - **Stop here** — user will run later phases manually
 - **Quit** — stop the chain entirely
 
@@ -368,9 +368,10 @@ When creating this intent from a user prompt:
 
 > Pack fork (ncw), port on upstream upgrade.
 
-- **目标**：`/che-clarify` —— 澄清并清零 intent 中的 `[NEEDS CLARIFICATION]` 产品标记，结论回写 intent（含场景，保留既有 `E#` ID）
+- **目标**：`/che-grill` —— 追问式深度澄清，暴露隐含假设与自相矛盾，结论回写 intent 并即时校验
+- **可选目标**：`/che-clarify` —— 仅遗留 `[NEEDS CLARIFICATION]` 产品标记、需要产品澄清清零时手动跑（不占主流程）
 - **条件**：
   - 入向输入门禁（Phase 0）：访谈之前无任何上下文且调用时无有效输入 → 中断，向用户明确提问需要澄清的意图，拿到有效描述后才开访谈
   - 前置装载（入向）：会话上下文无 `COMPOUND STORE LOADED` 摘要 → 先跑 `/che-load` 再开访谈；已有摘要（本会话已装载）→ 跳过
-  - 统一 `intent.md` 已写入（任务目录经 `che task create` 创建或经用户确认更新，session 已绑定/显式解析）且出口校验通过；AskUserQuestion 选 continue 直接链式调用 `/che-clarify`，stop/quit 由用户稍后手动跑
-- **回退**：无 config 或用户拒绝建卡时由交接门禁兜底；建卡（`/che-pingcode-specstoissues`）按流程在 clarify 之后进行
+  - 统一 `intent.md` 已写入（任务目录经 `che task create` 创建或经用户确认更新，session 已绑定/显式解析）且出口校验通过；AskUserQuestion 选 continue 直接链式调用 `/che-grill`，stop/quit 由用户稍后手动跑
+- **回退**：无 config 或用户拒绝建卡时由交接门禁兜底；建卡（`/che-pingcode-specstoissues`）按流程在 grill 之后进行（grill Handoff 承接同一可选目标）
