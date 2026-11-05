@@ -165,6 +165,14 @@ At end of report, output a concise Next Actions block:
 
 Ask the user: "Would you like me to suggest concrete remediation edits for the top N issues?" (Do NOT apply them automatically.)
 
+### 9. Chain handoff (Pack fork (ncw), port on upstream upgrade)
+
+After the report (and the optional remediation offer above), close with this fixed ending sequence, nothing after it:
+
+1. **Chain handoff to gapfill (main path)**: use the AskUserQuestion tool (never plain-text output that pauses the session for input) with two options, each carrying a one-line description of the action; on selection the agent executes it immediately in this session — 「继续 gapfill」（**推荐**）— 对照 intent 意图块与场景，把缺失的四类测试任务（约束违反/失败条件/越界回归/边界）追加进 tasks.md。选中即自动执行 `/che-gapfill` /「就此停下」— 结束本次链，gapfill 与后续校验稍后手动跑. If CRITICAL findings exist, prefix the question with one line: 存在 CRITICAL 发现，建议先按上方 Next Actions 修正再继续. On continue, gapfill takes over and nothing follows here. On stop, show the manual next-step hints rendered verbatim as follows:
+   主流程:
+   - /che-gapfill（补四类缺口测试任务，随后 planverify 独立判定）
+
 ## Operating Principles
 
 ### Context Efficiency
@@ -181,6 +189,16 @@ Ask the user: "Would you like me to suggest concrete remediation edits for the t
 - **Prioritize constitution violations** (these are always CRITICAL)
 - **Use examples over exhaustive rules** (cite specific instances, not generic patterns)
 - **Report zero issues gracefully** (emit success report with coverage statistics)
+
+## Handoff
+
+> Pack fork (ncw), port on upstream upgrade.
+
+- **主链**：plan → analyze → gapfill → planverify（门禁开启时必问）→ implement
+- **目标**：`/che-gapfill` —— 把本报告发现的覆盖缺口与缺失的四类测试任务追加进 tasks.md（analyze 只发现报告，落地靠 gapfill）
+- **条件**：
+  - 三工件齐备（本命令前置），报告已输出
+  - 存在 CRITICAL 发现时先建议按 Next Actions 修正；用户仍选继续 → 尊重选择并在报告中留痕
 
 ## Context
 

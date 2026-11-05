@@ -36,13 +36,13 @@ Report branch, IMPL_PLAN path, generated design artifacts (research/data-model/c
 - Independent test criteria for each story
 - Suggested MVP scope (typically just User Story 1)
 - Format validation: Confirm ALL tasks follow the checklist format (checkbox, ID, labels, file paths)
-- **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
-  主流程:
-  - /che-gapfill: 对照 intent 意图块与场景补四类缺口任务（约束违反/失败条件/越界回归/边界）
-  - /che-planverify: 独立校验者审 plan + tasks（含确定性 ADR 机械层与 P3e；正式实现前校验与门禁唯一入口）
-  可选:
-  - /che-pingcode-specstoissues: [可选] 配了 mapping.task_artifact 时现在补建任务卡（implement 前 intent 有改动先跑 /che-pingcode-sync-cards 对账）
-  - /che-analyze: [可选] intent/plan/tasks 三工件一致性只读分析
+- **Pack fork (ncw), port on upstream upgrade** — close with this fixed ending sequence, nothing after it:
+  1. **Optional task-card backfill (after_tasks 挂点, condition-gated)**: `.che/pingcode-config.yml` 在位且 `mapping.task_artifact` 已设置 → ask via the AskUserQuestion tool 「根据 tasks.md 补建任务卡?」— 同意即在本会话自动执行 `/che-pingcode-specstoissues` 补建任务卡；拒绝或条件不满足 → 静默跳过
+  2. **Chain handoff to analyze (main path)**: use the AskUserQuestion tool (never plain-text output that pauses the session for input) with two options, each carrying a one-line description of the action; on selection the agent executes it immediately in this session — 「继续 analyze」（**推荐**）— 实现前体检：intent/plan/tasks 三工件一致性只读分析，尽早暴露矛盾、覆盖缺口与宪法冲突，此时修复成本最低。选中即自动执行 `/che-analyze` /「就此停下」— 结束本次链，analyze / gapfill / planverify 稍后手动跑. On continue, analyze takes over and nothing follows here. On stop, show the manual next-step hints rendered verbatim as follows:
+     主流程:
+     - /che-analyze（三工件一致性体检，随后 gapfill 补缺口、planverify 独立判定）
+     可选:
+     - /che-pingcode-specstoissues: 配了 mapping.task_artifact 时补建任务卡
 
 The tasks.md should be immediately executable - each task must be specific enough that an LLM can complete it without additional context.
 
@@ -210,7 +210,8 @@ Every task MUST strictly follow this format:
 
 > Pack fork (ncw), port on upstream upgrade.
 
-- **目标**：`/che-gapfill` —— 补约束违反/失败条件/越界回归/边界任务
+- **主链**：plan → analyze（三工件体检）→ gapfill（补四类缺口任务）→ planverify（独立判定；门禁开启时必问）→ implement
+- **目标**：`/che-analyze` —— intent/plan/tasks 三工件一致性只读分析，尽早暴露漂移
 - **可选目标**：`/che-pingcode-specstoissues`（补建任务卡）
   - 条件：`.che/pingcode-config.yml` 在位且 `mapping.task_artifact` 已设置
   - 回退：未配置或用户拒绝 → 跳过，任务留本地 checklist
