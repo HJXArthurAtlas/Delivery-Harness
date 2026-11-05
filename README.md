@@ -108,7 +108,7 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 
 ## 使用指南
 
-完整使用指南见 **[docs/guides/AI Native实践指南.md](docs/guides/AI%20Native实践指南.md)**：两仓底座总览与分工、项目初始化与 monorepo 骨架规则、主线流程（产品 / UI 设计 / 开发各侧顺序、交接门禁、质量环节、辅助链）、产物结构与从初始化到日常交付的完整路径。校验技能分工对比见 **[docs/guides/校验技能对比.md](docs/guides/校验技能对比.md)**。
+完整使用指南见 **[docs/guides/AI Native实践指南.md](docs/guides/AI%20Native实践指南.md)**：开发底座与 monorepo 结构约定、项目初始化与治理种子接入、主线流程（产品 / UI 设计 / 开发各侧顺序、交接门禁、质量环节、辅助链）、产物结构与从初始化到日常交付的完整路径。校验技能分工对比见 **[docs/guides/校验技能对比.md](docs/guides/校验技能对比.md)**。
 
 ## Pack 内容
 
