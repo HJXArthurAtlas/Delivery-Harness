@@ -193,7 +193,7 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
 - If any Outstanding or Deferred remain, recommend whether to proceed to `/che-plan` or run `/che-clarify` again later post-plan.
 - Suggested next command.
 - **Pack fork (ncw), port on upstream upgrade** — after the report body, close with this fixed ending sequence, nothing after it:
-  1. **Chain handoff to grill (main path)**: use AskUserQuestion with three options, each carrying a one-line description of the action; on selection the agent executes it immediately in this session — 「继续 grill」（**推荐**）— 深度追问：多轮交叉检验 intent，暴露自相矛盾与隐含假设，把每个决策点钉到终态；结束后承接「是否现在推送到 PingCode?」与主流程提示。选中即自动执行 `/che-grill`（携带 `TASK_DIR` 与 `SLUG`）/「就此停下」— 结束本次链，grill 与推送稍后手动跑 /「退出」— 直接结束. On continue, grill takes over and nothing follows here. On stop or quit, show the manual next-step hints rendered verbatim as follows:
+  1. **Chain handoff to grill (main path)**: use AskUserQuestion with two options, each carrying a one-line description of the action; on selection the agent executes it immediately in this session — 「继续 grill」（**推荐**）— 深度追问：多轮交叉检验 intent，暴露自相矛盾与隐含假设，把每个决策点钉到终态；结束后承接「是否现在推送到 PingCode?」与主流程提示。选中即自动执行 `/che-grill`（携带 `TASK_DIR` 与 `SLUG`）/「就此停下」— 结束本次链，grill 与推送稍后手动跑. On continue, grill takes over and nothing follows here. On stop, show the manual next-step hints rendered verbatim as follows:
      主流程:
      - /che-design（本特性涉 UI）或 /che-plan（无 UI, 交接门禁通过后）
 
@@ -213,4 +213,4 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
 - **目标**：`/che-grill` —— 追问式深度澄清（主路径下一环）：暴露隐含假设与自相矛盾；PingCode 推送确认与 design/plan 主流程提示由 grill 收尾承接
 - **条件**：
   - 澄清结论已回写 intent，`[NEEDS CLARIFICATION]` 标记清零
-  - AskUserQuestion 选「继续 grill」直接链式调用；stop/quit 由用户稍后手动跑 grill 或直接进 design/plan
+  - AskUserQuestion 选「继续 grill」直接链式调用；停下由用户稍后手动跑 grill 或直接进 design/plan
