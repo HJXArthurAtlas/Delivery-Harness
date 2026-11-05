@@ -235,7 +235,7 @@ Report completion to the user with:
 - Exit-gate results summary
 - Counts: goal ✓, {N} constraints (CQ1–CQ5), {N} failure conditions (FQ1–FQ4), {N} acceptance + {N} edge scenarios (SQ1–SQ4), {N} ADR refs, {N} remaining markers
 
-Then offer the chain handoff (**Pack fork (ncw), port on upstream upgrade**: use AskUserQuestion with two options, each carrying a one-line description of the action; on selection the agent executes it immediately in this session):
+Then offer the chain handoff (**Pack fork (ncw), port on upstream upgrade**: use the AskUserQuestion tool — never plain-text output that pauses the session for input — with two options, each carrying a one-line description of the action; on selection the agent executes it immediately in this session):
 - **继续 clarify**（**推荐**）— 产品澄清：≤5 个针对性问题补齐 intent 定义不足的区域，清零 `[NEEDS CLARIFICATION]` 标记，结论回写 intent。选中即在本会话自动执行 `/che-clarify`（携带 `TASK_DIR` 与 `SLUG`）
 - **就此停下** — 结束本次链，clarify / grill 稍后手动跑
 
