@@ -192,12 +192,10 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
 - Coverage summary table listing each taxonomy category with Status: Resolved (was Partial/Missing and addressed), Deferred (exceeds question quota, or remaining item is specifically implementation method, tech-stack comparison, or task breakdown), Clear (already sufficient), Outstanding (still Partial/Missing but low impact).
 - If any Outstanding or Deferred remain, recommend whether to proceed to `/che-plan` or run `/che-clarify` again later post-plan.
 - Suggested next command.
-- **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
-  主流程:
-  - /che-design: 出设计明细 design-tasks.md（涉 UI 必跑，先于 plan）
-  - /che-plan: 交接门禁通过后开发侧出实现计划
-  可选:
-  - /che-grill: [可选] 决策点仍有歧义时的深度澄清
+- **Pack fork (ncw), port on upstream upgrade** — after the report body, close with this fixed ending sequence, nothing after it:
+  1. **Chain handoff to grill (main path)**: use AskUserQuestion with three options — 「继续 grill」（**推荐**；invoke `/che-grill` next, carrying `TASK_DIR` and `SLUG` into this chained invocation — 深度追问、PingCode 推送确认与主流程提示由 grill 收尾承接）/「就此停下」/「退出」. On continue, grill takes over and nothing follows here. On stop or quit, show the manual next-step hints rendered verbatim as follows:
+     主流程:
+     - /che-design（本特性涉 UI）或 /che-plan（无 UI, 交接门禁通过后）
 
 ## Done When
 
@@ -212,9 +210,7 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
 
 > Pack fork (ncw), port on upstream upgrade.
 
-- **目标**：`/che-design`（涉 UI）或 `/che-plan`（无 UI，交接门禁通过后）
-- **推送确认（PingCode，先于主流程提示）**：`.che/pingcode-config.yml` 在位（已开启推送）→ 直接向用户确认「是否现在推送到 PingCode?」，问句只说动作、不出现技能名；同意 → 本会话直接执行 `/che-pingcode-specstoissues` 建卡流程并登记 `specs/pingcode-mapping.json`，推送完成后才提示主流程；拒绝或未配置 → 静默跳过，不阻塞交接，后续可随时手动补建登记
+- **目标**：`/che-grill` —— 追问式深度澄清（主路径下一环）：暴露隐含假设与自相矛盾；PingCode 推送确认与 design/plan 主流程提示由 grill 收尾承接
 - **条件**：
-  - 澄清结论已回写 intent
-  - 可选 `/che-grill` 继续追问
-  - 交接门禁：intent 章节齐备；建卡可选——config 在位时 `specs/pingcode-mapping.json` 须已登记，未配置或选择不建卡不阻塞
+  - 澄清结论已回写 intent，`[NEEDS CLARIFICATION]` 标记清零
+  - AskUserQuestion 选「继续 grill」直接链式调用；stop/quit 由用户稍后手动跑 grill 或直接进 design/plan

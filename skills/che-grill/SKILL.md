@@ -354,3 +354,4 @@ Report:
 - **条件**：
   - 追问结论已明确
   - 追问结论已回写 intent 并即时校验（Step 4A / 4B 落盘 + Step 4C 终验全过）
+  - 交接门禁：intent 章节齐备；建卡可选——config 在位时 `specs/pingcode-mapping.json` 须已登记，未配置或选择不建卡不阻塞

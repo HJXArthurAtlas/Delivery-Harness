@@ -480,3 +480,4 @@ Report:
 - **条件**：
   - 追问结论已落 ADR（经 `che-adr-draft` 归口 `docs/adr/`）
   - intent 已即时回写并校验；旧 `docs/GLOSSARY.md` 未改动
+  - 交接门禁：intent 章节齐备；建卡可选——config 在位时 `specs/pingcode-mapping.json` 须已登记，未配置或选择不建卡不阻塞
