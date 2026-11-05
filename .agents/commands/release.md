@@ -14,15 +14,16 @@ description: 发版流程——自动探测 pack / che CLI 各自是否需发、
 
 ```bash
 last_tag="$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null || true)"
-git log --oneline "${last_tag:-v0.0.0}..HEAD" -- . ':!packages/cli'   # pack 改动
-git log --oneline "${last_tag:-v0.0.0}..HEAD" -- packages/cli         # CLI 改动
+git log --oneline "${last_tag:-v0.0.0}..HEAD" -- . ':!packages/cli'   # pack 改动（自最新 tag，已 push 与否一律计入）
+cli_base="$(git log -n1 --format=%H -- packages/cli/package.json packages/cli/src/version.ts)"
+git log --oneline "${cli_base:-v0.0.0}..HEAD" -- packages/cli         # CLI 改动（自上次 CLI 发布回写提交）
 bash release.sh --check; echo "rc=$?"   # 0=本地 CLI 版本未上 Nexus；1=已在线上；2=读不到 Nexus，先解决
 node -p 'require("./package.json").version'                            # 根版本（对照最新 tag 查漏 tag）
 ```
 
-判定：
-- **pack 需发**：tag 后存在非 `packages/cli` 提交（含文档/分发面）；或根版本 > 最新 tag（上次漏 tag 的中间态，并入本次发版）。
-- **CLI 需发**：tag 后存在 `packages/cli` 提交；或 `release.sh --check` rc=0。
+判定（锚点纪律：pack 面锚定最新 tag，CLI 面锚定上次 CLI 发布——都绝不是 origin/main 或未 push 提交）：
+- **pack 需发**：最新 tag 后存在非 `packages/cli` 提交（含文档/分发面）；或根版本 > 最新 tag（上次漏 tag 的中间态，并入本次发版）。
+- **CLI 需发**：上次 CLI 发布回写提交之后存在 `packages/cli` 提交；或 `release.sh --check` rc=0（版本已 ahead，必发，以 rc 为准）。上次 CLI 发布回写提交 = `packages/cli/package.json` 或 `src/version.ts` 最近一次提交——CLI 发布不打 tag（tag 只承载 pack 通道），禁止用 pack tag 锚定 CLI 面，否则仅 CLI 发版后其发布提交落在 tag 后会误判。
 - 两面都无 → 回报「无可发内容」结束，不 bump、不打 tag。
 
 ## 第 1 步：自动生成建议版本号（pack 与 CLI 各自独立套用 semver）
