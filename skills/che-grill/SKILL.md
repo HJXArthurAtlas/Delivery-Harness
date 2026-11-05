@@ -318,8 +318,12 @@ Report:
 - Number of rounds and total questions; optionally include a per-round breakdown.
 - Path to the updated intent and the sections changed.
 - Coverage table: show every category's aggregate status as **Resolved** / **Clear** / **Deferred** / **Outstanding**, with a per-point status breakdown for each category. Do not proceed to the completion report if even one Partial / Missing point remains.
-- If Outstanding / Deferred items remain, recommend whether to proceed to the agent-specific invocation of `che-plan` or rerun this command later.
-- Suggested next command, normally the agent-specific invocation of `che-plan` (for example, `/che-plan` or `$che-plan`).
+- If Outstanding / Deferred items remain, recommend whether to proceed to `/che-design` / `/che-plan` or rerun this command later.
+- **Pack fork (ncw), port on upstream upgrade** — after the report body, close with this fixed ending sequence, nothing after it:
+  1. **PingCode push confirmation (before any next-step hint)**: `.che/pingcode-config.yml` exists (PingCode push enabled) → ask the user directly 「是否现在推送到 PingCode?」 — the question names the action, never a skill/command. On yes, execute the `/che-pingcode-specstoissues` flow in this session immediately (agent runs it itself; never tell the user to run it), then continue to step 2 after it finishes. On no, or when the config is absent, fall through to step 2 silently.
+  2. End with grouped next-step hints, rendered verbatim as follows:
+     主流程:
+     - /che-design（本特性涉 UI）或 /che-plan（无 UI, 交接门禁通过后）
 
 ## Behavior rules
 
@@ -345,10 +349,8 @@ Report:
 
 > Pack fork (ncw), port on upstream upgrade.
 
-- **目标**：`/che-design`（涉 UI）或 `/che-plan`（无 UI）
-- **可选目标**：`/che-pingcode-specstoissues` —— 追问定稿后建需求树卡片并登记 `specs/pingcode-mapping.json`（上游 `after_intend` 挂点，与 `/che-clarify` / `/che-grill-with-docs` 承接同一可选目标）
-  - 条件：`.che/pingcode-config.yml` 在位才提示
-  - 回退：未配置或用户拒绝 → 不建卡不阻塞交接，后续可随时手动补建登记
+- **目标**：`/che-design`（涉 UI）或 `/che-plan`（无 UI，交接门禁通过后）
+- **推送确认（PingCode，先于主流程提示）**：`.che/pingcode-config.yml` 在位（已开启推送）→ 直接向用户确认「是否现在推送到 PingCode?」，问句只说动作、不出现技能名；同意 → 本会话直接执行 `/che-pingcode-specstoissues` 建卡流程并登记 `specs/pingcode-mapping.json`，推送完成后才提示主流程；拒绝或未配置 → 静默跳过，不阻塞交接，后续可随时手动补建登记
 - **条件**：
   - 追问结论已明确
   - 追问结论已回写 intent 并即时校验（Step 4A / 4B 落盘 + Step 4C 终验全过）

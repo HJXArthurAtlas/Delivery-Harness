@@ -374,4 +374,4 @@ When creating this intent from a user prompt:
   - 入向输入门禁（Phase 0）：访谈之前无任何上下文且调用时无有效输入 → 中断，向用户明确提问需要澄清的意图，拿到有效描述后才开访谈
   - 前置装载（入向）：会话上下文无 `COMPOUND STORE LOADED` 摘要 → 先跑 `/che-load` 再开访谈；已有摘要（本会话已装载）→ 跳过
   - 统一 `intent.md` 已写入（任务目录经 `che task create` 创建或经用户确认更新，session 已绑定/显式解析）且出口校验通过；AskUserQuestion 选 continue 直接链式调用 `/che-grill`，stop/quit 由用户稍后手动跑
-- **回退**：无 config 或用户拒绝建卡时由交接门禁兜底；建卡（`/che-pingcode-specstoissues`）按流程在 grill 之后进行（grill Handoff 承接同一可选目标）
+- **回退**：无 config 或用户拒绝推送时由交接门禁兜底；建卡（`/che-pingcode-specstoissues`）由 grill 收尾的推送确认承接（同意推送即自动执行）

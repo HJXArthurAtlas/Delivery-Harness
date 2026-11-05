@@ -7,7 +7,7 @@ description: 把 specs/ 下的 spec 转换为 PingCode 需求树卡片（spec �
 
 # 从 Spec 创建 PingCode 卡片层级
 
-> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.specstoissues` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 hook（after_intend/after_tasks）改接为澄清阶段（`after_intend` 挂 `/che-clarify` / `/che-grill` / `/che-grill-with-docs`，clarify 的可选替代追问路径）与 `/che-plan`（plan+tasks 合并产出）Handoff 块的可选目标（optional，`.che/pingcode-config.yml` 在位才提示，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约（`intent.md` 的 `### User Story N` 章节、`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记）与上游逐字一致；未认证时经项目级登录脚本 `.che/pingcode-login.sh` 自动登录（上游为提示用户手动登录后终止）。前置依赖：`pingcode` CLI（`npm i -g @metaphorli/pingcode-cli`，保持 npm 最新版）。
+> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.specstoissues` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 hook（after_intend/after_tasks）改接为澄清阶段（`after_intend` 挂 `/che-grill`（主路径）/ `/che-grill-with-docs` / `/che-clarify` 的收尾推送确认——主流程提示之前）与 `/che-plan`（plan+tasks 合并产出）的 Handoff 块（`after_intend` 为推送确认、`after_tasks` 为可选目标，`.che/pingcode-config.yml` 在位才提示，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约（`intent.md` 的 `### User Story N` 章节、`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记）与上游逐字一致；未认证时经项目级登录脚本 `.che/pingcode-login.sh` 自动登录（上游为提示用户手动登录后终止）。前置依赖：`pingcode` CLI（`npm i -g @metaphorli/pingcode-cli`，保持 npm 最新版）。
 
 本命令把 specs/ 产物转换为 PingCode 需求树卡片（通过 `pingcode` CLI，不依赖 MCP）：
 
@@ -490,7 +490,7 @@ Story 卡: <n> 张(spec-story 模式)
 
 | 上游 hook | 挂点 | optional | condition | 提示语 |
 |---|---|---|---|---|
-| `after_intend` | `/che-clarify` / `/che-grill` / `/che-grill-with-docs` Handoff 块「可选目标」（clarify 的可选替代追问路径，澄清定稿后建卡） | true | `.che/pingcode-config.yml` 存在 | 「选择关联需求并创建 PingCode 卡片?」 |
+| `after_intend` | `/che-grill`（主路径）/ `/che-grill-with-docs` / `/che-clarify` 收尾「推送确认」——主流程提示之前 | true | `.che/pingcode-config.yml` 存在（已开启推送） | 「是否现在推送到 PingCode?」（问句不出现技能名；同意即由 agent 在本会话直接执行本命令流程） |
 | `after_tasks` | `/che-plan` Handoff 块「可选目标」 | true | config 存在且 `mapping.task_artifact` 已设置 | 「根据 tasks.md 补建任务卡?」 |
 
-挂点以 Handoff 块「可选目标 + 条件 + 回退」表达（agent 按块指示询问用户，同意才运行本命令）；上游 `priority: 99`（排在本阶段其他 hook 之后）在 pack 内简化为「报告打印完再交接」。condition 不满足或用户拒绝 → 静默跳过，不阻塞主命令；建卡与否不改变交接门禁（不建卡不阻塞交接，后续可随时手动补建登记）。
+`after_intend` 挂点以 Handoff 块「推送确认 + 条件 + 回退」表达：agent 在主流程提示之前直接确认是否现在推送，同意即在本会话直接执行本命令流程（绝不提示用户自行执行），推送完成后才展示主流程提示；`after_tasks` 挂点维持「可选目标 + 条件 + 回退」表达。上游 `priority: 99`（排在本阶段其他 hook 之后）在 pack 内简化为「报告打印完再交接」。condition 不满足或用户拒绝 → 静默跳过，不阻塞主命令；建卡与否不改变交接门禁（不建卡不阻塞交接，后续可随时手动补建登记）。
