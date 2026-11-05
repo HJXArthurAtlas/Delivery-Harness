@@ -85,7 +85,7 @@ printf '<项目编号>\n<迭代编号>\n<用户ID>\n' | pingcode context init
 
 完成后用 `pingcode context list` 确认 `preferences` 含 `current_project_id`/`current_sprint_id`/`current_user_id` 三项。（若运行过 `/che-pingcode-init`，这三项通常已就绪，本步可跳过。）
 
-工作区缓存 `.pingcode/cache.json` 是机器本地文件，确认它已被项目 `.gitignore` 忽略；没有则追加 `.pingcode/`。同时追加 `specs/*/desc/`（描述临时文件目录，见第 9 步）。
+工作区缓存 `.pingcode/cache.json` 是机器本地文件，确认它已被项目 `.gitignore` 忽略；没有则追加 `.pingcode/`。同时追加 `specs/*/middlewares/`（描述临时文件目录，见第 9 步）。
 
 ### 3. 加载配置
 
@@ -259,7 +259,7 @@ pingcode workitem list --type <第 j 层类型名> --project <project_id> --limi
 
 **描述传递硬规则（步骤 9–11 通用）**：含换行的描述必须先用写文件工具落盘为 UTF-8 文本文件，再经 `--description-file` 传给 CLI，创建成功后立即删除临时文件；只有单行短文本才允许内联 `--description`。禁止把多行文本内联进命令行参数，禁止写临时脚本绕过 CLI 传描述——Windows cmd 单命令行上限 8191 字符，且 shell 会改写参数中的换行（换行被压成字面 `\n` 会产出整卡无排版的错误描述，实测翻车点）。
 
-临时文件目录：`specs/<spec 目录名>/desc/<运行标识>/`（放在 spec 制品旁边，中断残留时用户能就近看到）。运行标识 = `$CHE_SESSION_ID`（非空时）或本轮生成的 6 位随机串；目录内文件名固定为 `spec.md`、`us<N>.md`、`t<task_id>.md`。同仓多 session / 多 worktree 并行处理不同 spec 时互不覆盖（spec 目录 + 运行标识双重隔离）。
+临时文件目录：`specs/<spec 目录名>/middlewares/<运行标识>/`（放在 spec 制品旁边，中断残留时用户能就近看到）。运行标识 = `$CHE_SESSION_ID`（非空时）或本轮生成的 6 位随机串；目录内文件名固定为 `spec.md`、`us<N>.md`、`t<task_id>.md`。同仓多 session / 多 worktree 并行处理不同 spec 时互不覆盖（spec 目录 + 运行标识双重隔离）。
 
 每个描述文件顶部必须带 HTML 注释头——CLI 在发送前剥离文件通道的注释块，注释不会进入卡片描述，专门供 session 中断残留时辨认用途：
 
@@ -267,11 +267,11 @@ pingcode workitem list --type <第 j 层类型名> --project <project_id> --limi
 <!--
 临时文件：仅用于推送 PingCode 卡片描述（经 --description-file 传给 CLI）。
 本注释块由 CLI 在发送前剥离，不会进入卡片描述。
-session 中断可能残留本文件——确认对应卡片无误后，可安全删除整个 desc/ 目录。
+session 中断可能残留本文件——确认对应卡片无误后，可安全删除整个 middlewares/ 目录。
 -->
 ```
 
-生命周期：整轮开始时运行目录已存在则先清空；每卡现写现用，单卡成功后即删该文件；步骤 11 完成后（12b 目录改名前）删除整个运行目录。`specs/*/desc/` 必须在 `.gitignore` 中（第 2 步自检含此条），防止残留被误提交。
+生命周期：整轮开始时运行目录已存在则先清空；每卡现写现用，单卡成功后即删该文件；步骤 11 完成后（12b 目录改名前）删除整个运行目录。`specs/*/middlewares/` 必须在 `.gitignore` 中（第 2 步自检含此条），防止残留被误提交。
 
 ```bash
 pingcode workitem create \
@@ -281,7 +281,7 @@ pingcode workitem create \
   --sprint <sprint_id> \
   --priority "<config.defaults.spec.priority>" \
   --parent <最深祖先工作项 id,第 8 步解析结果> \
-  --description-file specs/<spec 目录名>/desc/<运行标识>/spec.md
+  --description-file specs/<spec 目录名>/middlewares/<运行标识>/spec.md
 ```
 
 （`--priority`/`--sprint`/`--parent` 按解析结果省略可选项；无工作项父级时省略 `--parent`。spec_artifact 为空 → 跳过本步，章节卡直接挂最深祖先。）
@@ -305,7 +305,7 @@ pingcode workitem create \
   --sprint <sprint_id> \
   --priority "<章节优先级,解析链见下>" \
   --parent <spec_card_id 或最深祖先> \
-  --description-file specs/<spec 目录名>/desc/<运行标识>/us<N>.md
+  --description-file specs/<spec 目录名>/middlewares/<运行标识>/us<N>.md
 ```
 
 描述文件内容：
@@ -341,7 +341,7 @@ pingcode workitem create \
   --project <project_id> \
   --sprint <sprint_id> \
   --parent <归属卡 id> \
-  --description-file specs/<spec 目录名>/desc/<运行标识>/t<task_id>.md
+  --description-file specs/<spec 目录名>/middlewares/<运行标识>/t<task_id>.md
 ```
 
 描述文件内容：
@@ -481,7 +481,7 @@ Story 卡: <n> 张(spec-story 模式)
 | 史诗（中间层）列表为空 | 先在 PingCode 创建史诗后重跑，或选择跳过关联（spec 卡上浮为顶层） |
 | 任务卡没建 | 初次建卡时 tasks.md 尚未生成：本地任务清单生成后手动重跑本命令补建 |
 | 卡片描述变成一行、出现字面 `\n` 或 Markdown 不渲染 | 描述被内联进命令行参数且换行被 shell 压平：违反第 9 步硬规则。含换行的描述一律走 `--description-file`（CLI ≥ 0.15.0），按该机制重新推送描述即可恢复 |
-| spec 目录下残留 `desc/` 临时文件 | 上轮推送中途 session 中断的残留，文件头部注释写明用途；确认对应卡片无误后删除整个 `desc/` 目录即可，不影响已建卡片 |
+| spec 目录下残留 `middlewares/` 临时文件 | 上轮推送中途 session 中断的残留，文件头部注释写明用途；确认对应卡片无误后删除整个 `middlewares/` 目录即可，不影响已建卡片 |
 | 状态名不识别 | 用缓存字典里的真实状态名；或按 `state_type` 兜底 |
 | HTTP 429 | 等待 `x-pc-retry-after` 秒后重试 |
 | 项目下无进行中迭代 | 询问用户指定迭代或不挂迭代 |
