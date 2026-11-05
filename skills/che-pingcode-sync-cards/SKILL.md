@@ -7,7 +7,7 @@ description: 核对 specs/ 产物与 PingCode 卡片的一致性，按差异增�
 
 # 核对 spec 制品与 PingCode 卡片一致
 
-> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.sync-cards` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 before_implement hook 改接为 `/che-implement` Handoff 块的前置对账条件（optional，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约与上游逐字一致。前置依赖：`pingcode` CLI ≥ 0.15.0（`npm i -g @metaphorli/pingcode-cli`）。
+> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.sync-cards` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 before_implement hook 改接为 `/che-implement` Handoff 块的前置对账条件（optional，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约与上游逐字一致。前置依赖：`pingcode` CLI（`npm i -g @metaphorli/pingcode-cli`，保持 npm 最新版）。
 
 在开始实现之前运行：建卡之后、动代码之前，spec 制品可能又被修改过——本命令把差异同步到 PingCode，保证卡片与制品一致。
 

@@ -7,7 +7,7 @@ description: 把 specs/ 下的 spec 转换为 PingCode 需求树卡片（spec �
 
 # 从 Spec 创建 PingCode 卡片层级
 
-> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.specstoissues` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 hook（after_intend/after_tasks）改接为澄清阶段（`after_intend` 挂 `/che-clarify` / `/che-grill` / `/che-grill-with-docs`，clarify 的可选替代追问路径）与 `/che-plan`（plan+tasks 合并产出）Handoff 块的可选目标（optional，`.che/pingcode-config.yml` 在位才提示，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约（`intent.md` 的 `### User Story N` 章节、`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记）与上游逐字一致；未认证时经项目级登录脚本 `.che/pingcode-login.sh` 自动登录（上游为提示用户手动登录后终止）。前置依赖：`pingcode` CLI ≥ 0.15.0（`npm i -g @metaphorli/pingcode-cli`）。
+> **Pack fork**：吸收自 [Spec-Kit-PingCode](https://github.com/HJXArthurAtlas/Spec-Kit-PingCode) v2.9.0（commit 4b5aeb3，MIT），正文为上游命令 `speckit.pingcode.specstoissues` 的 pack 改编。相对上游：配置落 `.che/pingcode-config.yml`（上游落项目根）；上游 hook（after_intend/after_tasks）改接为澄清阶段（`after_intend` 挂 `/che-clarify` / `/che-grill` / `/che-grill-with-docs`，clarify 的可选替代追问路径）与 `/che-plan`（plan+tasks 合并产出）Handoff 块的可选目标（optional，`.che/pingcode-config.yml` 在位才提示，见文末「Handoff 挂点」），挂点外手动调用不变；命令名 `/speckit.pingcode.*` 改为 `/che-pingcode-*`；specs/ 产物契约（`intent.md` 的 `### User Story N` 章节、`tasks.md` 任务行、`specs/pingcode-mapping.json` 统一登记）与上游逐字一致；未认证时经项目级登录脚本 `.che/pingcode-login.sh` 自动登录（上游为提示用户手动登录后终止）。前置依赖：`pingcode` CLI（`npm i -g @metaphorli/pingcode-cli`，保持 npm 最新版）。
 
 本命令把 specs/ 产物转换为 PingCode 需求树卡片（通过 `pingcode` CLI，不依赖 MCP）：
 
@@ -480,7 +480,7 @@ Story 卡: <n> 张(spec-story 模式)
 | 需求列表为空 | 核对 `--product`/config `product`；产品下确无需求时先在 PingCode 创建需求 |
 | 史诗（中间层）列表为空 | 先在 PingCode 创建史诗后重跑，或选择跳过关联（spec 卡上浮为顶层） |
 | 任务卡没建 | 初次建卡时 tasks.md 尚未生成：本地任务清单生成后手动重跑本命令补建 |
-| 卡片描述变成一行、出现字面 `\n` 或 Markdown 不渲染 | 描述被内联进命令行参数且换行被 shell 压平：违反第 9 步硬规则。含换行的描述一律走 `--description-file`（CLI ≥ 0.15.0），按该机制重新推送描述即可恢复 |
+| 卡片描述变成一行、出现字面 `\n` 或 Markdown 不渲染 | 描述被内联进命令行参数且换行被 shell 压平：违反第 9 步硬规则。含换行的描述一律走 `--description-file`（CLI 0.15.0 起支持），按该机制重新推送描述即可恢复 |
 | spec 目录下残留 `middlewares/` 临时文件 | 上轮推送中途 session 中断的残留，文件头部注释写明用途；确认对应卡片无误后删除整个 `middlewares/` 目录即可，不影响已建卡片 |
 | 状态名不识别 | 用缓存字典里的真实状态名；或按 `state_type` 兜底 |
 | HTTP 429 | 等待 `x-pc-retry-after` 秒后重试 |
