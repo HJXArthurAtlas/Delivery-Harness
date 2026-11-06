@@ -178,31 +178,30 @@ your-repo/
 
 ### 3.2 主线流程
 
-主线链条（阶段数随角色取舍浮动，不按固定数字计）：**统一 intend（含 intent 访谈与场景起草）→ clarify → UI 设计明细 / 建卡 / 交接门禁 → plan → gapfill → planverify（含确定性 ADR 校验）→ implement 前对账 → implement → converge 收敛差距 → intentverify 独立校验 → 卡片收尾**；另有独立辅助链：bug 修复三步（assess → fix → test）。四个校验技能的分工对比见 [校验技能对比](校验技能对比.md)。
+主线链条（阶段数随角色取舍浮动，不按固定数字计）：**统一 intend（含 intent 访谈与场景起草）→ clarify → grill（或 grill-with-docs，链尾经推送确认建卡）→ 按 intent 动态判定分流 design（涉 UI）/ plan → analyze（三工件体检）→ gapfill → planverify（含确定性 ADR 校验，PASS 放行）→ implement（前对账 + 静默双 gate）→ converge 收敛差距 → intentverify 独立校验 → 卡片收尾 → retro**；另有独立辅助链：bug 修复三步（assess → fix → test）。链上交接统一为 AskUserQuestion 两选项提问（选项带动作说明、选中即自动执行、无「退出」项）。四个校验技能的分工对比见 [校验技能对比](校验技能对比.md)。
 
 ```mermaid
 flowchart TD
   subgraph PM["产品"]
     direction TB
-    SP["intend 意图访谈 + 场景起草 → 统一 intent.md"] --> CL["clarify 澄清（≤5 问，清零 NEEDS CLARIFICATION）"]
-    PC["建卡并登记 mapping（optional，交接前完成）"]
+    SP["intend 意图访谈 + 场景起草 → 统一 intent.md"] --> CL["clarify 澄清（≤5 问，清零 NEEDS CLARIFICATION）"] --> GR["grill 深度追问（或 grill-with-docs，二选一）"]
+    GR -.->|"链尾推送确认（config 在位才问）：<br/>「是否现在推送到 PingCode?」同意即自动建卡"| PC["建卡并登记 mapping（specs/pingcode-mapping.json）"]
   end
   subgraph DS["UI 设计"]
-    DE["design 设计清单 design-tasks.md（涉 UI，澄清后与建卡并行）"]
+    DE["design 设计清单 design-tasks.md（涉 UI，与建卡并行）"]
   end
   subgraph DV["开发"]
-    PL["plan 实现规划 + tasks 任务清单"] --> GF["gapfill 缺口补全"] --> PV["planverify 独立校验（含 ADR 机械层 + P3e）"] --> IM["implement 实现"] --> CV["converge 收敛差距"] --> IV["intentverify 独立校验"] --> ST["sync-status 卡片收尾"]
+    PL["plan 实现规划 + tasks 任务清单"] --> AN["analyze 三工件一致性只读体检"] --> GF["gapfill 缺口补全"] --> PV["planverify 独立校验（含 ADR 机械层 + P3e）"] --> IM["implement 实现（入向静默过双 gate）"] --> CV["converge 收敛差距"] --> IV["intentverify 独立校验"] --> ST["sync-status 卡片收尾"]
     CV -->|有差距，追加任务| IM
     IV -->|BLOCKED| IM
   end
-  SP --> PC
-  CL --> DE
-  PC --> GA{"交接门禁"}
+  GR -->|"收尾按 intent 动态判定 UI；交接门禁"| GA{"交接门禁"}
+  GA -->|"全过 + 涉 UI"| DE
+  GA -->|"全过 + 无 UI"| PL
   DE -. 设计约束 .-> PL
-  GA -->|全过| PL
 ```
 
-> **阶段如何衔接**：建卡、planverify 及其门禁、sync-cards 和各类门禁由技能的 Handoff 与入向条件驱动，agent 按条件提示或接续；本 pack 无 hook 执行器，不把它们理解为后台自动任务。下面的顺序列出需要执行或裁决的动作，条件不满足时按提示补跑。
+> **阶段如何衔接**：链上交接（intend→clarify→grill、plan→analyze→gapfill、gapfill→planverify）由技能收尾的 AskUserQuestion 两选项驱动——选项带动作说明、选中即自动执行、停下展示手动路径；建卡走 grill 链尾推送确认（问句不出现技能名，拒绝静默跳过）；planverify 的双 gate、sync-cards 对账是 implement 的静默入向条件；gapfill 收尾按 gate 实际配置分流提示。本 pack 无 hook 执行器，不把它们理解为后台自动任务；条件不满足时按提示补跑。
 
 #### 产品侧（需求 → 规格 → 建卡）
 
@@ -210,8 +209,8 @@ flowchart TD
 
 1. `/che-load` —— 装载 ADR 语料与经验（corrections / patterns）进上下文，每会话一次（intend 技能会提示）
 2. `/che-intend` —— 意图访谈式捕获目标、范围、约束、失败条件，起草 User Stories、Acceptance Scenarios 与 Edge Cases（全局稳定 `E#` ID），并生成统一特性规格 `intent.md`（意图块 + `### User Story N` 章节与 P1 / P2 / P3 优先级 + `### Edge Cases`）；结束时经 `che task create` 创建任务目录 `specs/NNN-{slug}/` 并绑定 session，任务由此诞生
-3. `/che-clarify` —— ≤5 个针对性问题澄清，结论**回写** spec 对应章节，并把 `[NEEDS CLARIFICATION]` 产品标记清零；场景改动保留既有 `E#` ID，只有真正新增的场景才分配新 ID
-4. 结束后可确认接续 `/che-pingcode-specstoissues` 建卡：spec 转需求树卡片（idea → epic → feature 规格卡 → story 卡），登记 `specs/pingcode-mapping.json`，任务目录改名 `{identifier}-{slug}`（slug 不变）；选择「否」时不建卡、不阻塞交接，spec 定稿后任何时候可手动补建登记
+3. `/che-clarify` —— ≤5 个针对性问题澄清，结论**回写** spec 对应章节，并把 `[NEEDS CLARIFICATION]` 产品标记清零；场景改动保留既有 `E#` ID，只有真正新增的场景才分配新 ID；收尾链式询问「继续 grill?」（选中即自动执行）
+4. `/che-grill`（或 `/che-grill-with-docs`，二选一）—— 多轮追问式深度澄清，把每个决策点钉到终态（Clear / Resolved / Outstanding / Deferred），结论回写并即时校验；收尾两步：先推送确认建卡——`.che/pingcode-config.yml` 在位（已开启推送）时问「是否现在推送到 PingCode?」，同意即自动执行 `/che-pingcode-specstoissues`（spec 转需求树卡片：idea → epic → feature 规格卡 → story 卡，登记 `specs/pingcode-mapping.json`，任务目录改名 `{identifier}-{slug}`，slug 不变），拒绝不阻塞交接、随时可手动补建；再按 intent 动态判定 UI，提示下一步 `/che-design`（涉 UI）或 `/che-plan`（无 UI）
 5. 涉 UI 的特性可并行移交 UI 设计侧生成设计清单（见下）；它不阻塞建卡与交接，产物供开发 plan / implement 使用
 6. 逐项核对交接门禁（见下），全过才移交开发
 
@@ -246,13 +245,14 @@ UI 设计侧注意：
 #### 开发侧（plan → 实现 → 收尾）
 
 1. `/che-load` —— 每会话一次（plan 的入向前置）
-2. `/che-plan` —— 单命令一次完成实现规划与任务拆解：spec 转实现规划（research / data-model / contracts / quickstart）后，同一命令按用户故事生成依赖有序 `tasks.md`；有 `design-tasks.md` 必读并对齐，冲突回产品 / 设计裁决；配置了 `mapping.task_artifact` 时，结束确认后可接续补建任务卡并关联至 story / spec 卡
-3. `/che-gapfill` —— 对照统一 spec 意图块（In scope / Out of scope / Constraints / Failure conditions）+ spec 场景（Acceptance / Edge `E#`）补四类缺口测试进 `tasks.md`（约束违反 / 失败条件 / 越界回归 / 边界）
-4. `/che-planverify` —— 正式实现前校验的唯一入口：机械层对 gapfill 后的最终 plan/tasks 表面跑确定性 ADR 查询（共用 `che-adr-check` 的 check.sh，产出 `planverify.adr.json` 审计记录与报告 hash），密封 briefing 交独立 checker 审 plan + tasks（含 P3e ADR conformance）；PASS 放行；REPLAN_ALLOWED 修订 plan（重跑 `/che-plan` 再生 tasks.md）后重新校验；BLOCKED_DRIFT 回退至 plan；BLOCKED_ADR（越过 governing ADR）修 plan 或 `/che-adr-draft` 起草 superseding ADR 经人工 accept 后重跑（draft 状态不放行）。规划过程中也可随时手动 `/che-adr-check` 排查，但它只读、无门禁效力
-5. `/che-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；先过 `/che-planverify-gate`——`adr_gate` 默认 block（报告缺失、`adr_status` 非 clean、或 spec/plan/tasks 改动后 hash 不匹配即拒绝），`planverify_gate` 为 block 时再拒 BLOCKED_DRIFT / BLOCKED_ADR。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): 中文消息` + `Co-Authored-By` 页脚（消息不带工作项 ID），小步拆分、精确暂存、排除敏感文件
-6. `/che-intentverify` —— 独立校验者审实现 vs 锁定意图：PASS 交接，REVIEW 人工复核后放行，BLOCKED 回退至 implement 修复
-7. `/che-pingcode-sync-status` —— 本地任务全部 `[x]` 后卡片单向流转完成态
-8. `/che-retro` —— 把新经验（ADR / corrections / patterns）沉淀回 compound store，供后续特性复用
+2. `/che-plan` —— 单命令一次完成实现规划与任务拆解：spec 转实现规划（research / data-model / contracts / quickstart）后，同一命令按用户故事生成依赖有序 `tasks.md`；有 `design-tasks.md` 必读并对齐，冲突回产品 / 设计裁决；收尾固定序列：先条件问「根据 tasks.md 补建任务卡?」（`.che/pingcode-config.yml` + `mapping.task_artifact` 已设置才问，同意即自动执行 `/che-pingcode-specstoissues` 补建任务卡并关联至 story / spec 卡），再链式询问「继续 analyze?」
+3. `/che-analyze` —— 三工件一致性只读体检：矛盾 / 重复 / 歧义 / 欠定义 / 宪法对齐 / 覆盖缺口六级检测（CRITICAL–LOW 分级），只报告不修改；存在 CRITICAL 时建议先按 Next Actions 修正再继续；收尾链式询问「继续 gapfill?」
+4. `/che-gapfill` —— 对照统一 spec 意图块（In scope / Out of scope / Constraints / Failure conditions）+ spec 场景（Acceptance / Edge `E#`）补四类缺口测试进 `tasks.md`（约束违反 / 失败条件 / 越界回归 / 边界）；收尾按 gate 实际配置分流（口径与 `che planverify-gate` 一致：env `SKC_ADR_GATE` / `SKC_PLANVERIFY_GATE` 优先于 `.che/config.yml`，默认 `adr_gate: block`、`planverify_gate: off`）：门禁开启问「继续 planverify?」，双 gate off 静态提示直接 implement（planverify 降可选）
+5. `/che-planverify` —— 正式实现前校验的唯一入口：机械层对 gapfill 后的最终 plan/tasks 表面跑确定性 ADR 查询（共用 `che-adr-check` 的 check.sh，产出 `planverify.adr.json` 审计记录与报告 hash），密封 briefing 交独立 checker 审 plan + tasks（含 P3e ADR conformance）；PASS 放行，收尾单行「下一步：/che-implement」（gate 前置不外显）；REPLAN_ALLOWED 修订 plan（重跑 `/che-plan` 再生 tasks.md）后重新校验；BLOCKED_DRIFT 回退至 plan；BLOCKED_ADR（越过 governing ADR）修 plan 或 `/che-adr-draft` 起草 superseding ADR 经人工 accept 后重跑（draft 状态不放行）。规划过程中也可随时手动 `/che-adr-check` 排查，但它只读、无门禁效力
+6. `/che-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；先过 `/che-planverify-gate`——`adr_gate` 默认 block（报告缺失、`adr_status` 非 clean、或 spec/plan/tasks 改动后 hash 不匹配即拒绝），`planverify_gate` 为 block 时再拒 BLOCKED_DRIFT / BLOCKED_ADR。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): 中文消息` + `Co-Authored-By` 页脚（消息不带工作项 ID），小步拆分、精确暂存、排除敏感文件
+7. `/che-intentverify` —— 独立校验者审实现 vs 锁定意图：PASS 交接，REVIEW 人工复核后放行，BLOCKED 回退至 implement 修复
+8. `/che-pingcode-sync-status` —— 本地任务全部 `[x]` 后卡片单向流转完成态
+9. `/che-retro` —— 把新经验（ADR / corrections / patterns）沉淀回 compound store，供后续特性复用
 
 开发侧纪律：
 
@@ -264,14 +264,14 @@ UI 设计侧注意：
 
 #### 质量环节
 
-以下技能并非主线的强制环节，但它们是这套流程中提升质量的关键——尤其 grill 类：需求阶段的矛盾在访谈中暴露，成本远低于在实现阶段返工；grill-with-docs 沉淀的 ADR 会反哺 planverify 机械层的越界校验，治理链随使用不断完善。
+grill 家族已是规格侧主链（clarify → grill，二选一），analyze 已入开发侧主链（plan 直后、gapfill 前）；下表其余条目为非强制质量环节。需求阶段的矛盾在访谈中暴露，成本远低于在实现阶段返工；grill-with-docs 沉淀的 ADR 会反哺 planverify 机械层的越界校验，治理链随使用不断完善。
 
 | 技能 | 时机 | 作用 |
 |---|---|---|
-| `che-grill` | 产品侧，intend / clarify 之后 | 对 spec 执行追问式深度澄清，暴露隐含假设与自相矛盾；结论**回写** spec（intent.md）并即时校验 |
-| `che-grill-with-docs` | 产品侧，同上 | 深度澄清并沉淀跨特性知识：术语与概念边界写入知识入口（默认 `docs/domain_knowledge/CONTEXT.md`，位置由 `che knowledge paths --json` 解析），长规则落主题文档；旧 `docs/GLOSSARY.md` 只读共存，被采纳的词条随澄清迁入知识入口，未采纳的保留原样并在完成报告列明；符合记录门的决策归口 `docs/adr/` |
+| `che-grill` | 主链，clarify 之后（链式必经） | 对 spec 执行追问式深度澄清，暴露隐含假设与自相矛盾；结论**回写** spec（intent.md）并即时校验 |
+| `che-grill-with-docs` | 主链同位，与 grill 二选一 | 深度澄清并沉淀跨特性知识：术语与概念边界写入知识入口（默认 `docs/domain_knowledge/CONTEXT.md`，位置由 `che knowledge paths --json` 解析），长规则落主题文档；旧 `docs/GLOSSARY.md` 只读共存，被采纳的词条随澄清迁入知识入口，未采纳的保留原样并在完成报告列明；符合记录门的决策归口 `docs/adr/` |
 | `che-adr-context` | 开发 plan 前 | 取 ADR 决策语料进上下文（只读），避免 plan 与既有决策冲突 |
-| `che-analyze` | 开发 tasks 后 | spec / plan / tasks 跨制品一致性只读分析，尽早发现工件间的漂移 |
+| `che-analyze` | 主链，plan 直后、gapfill 前（亦可按需随时） | spec / plan / tasks 跨制品一致性只读分析，尽早发现工件间的漂移 |
 | `che-converge` | 实现之后 | 代码现状与工件有差距时，追加收敛任务进 tasks.md，避免差距持续累积 |
 
 #### 辅助链（独立于主线，任意阶段可用）
