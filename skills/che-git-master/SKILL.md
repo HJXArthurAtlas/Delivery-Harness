@@ -9,7 +9,7 @@ description: 执行 git commit 的规范流程：消息格式 `type(scope): 中�
 
 > Pack fork：吸收自 mturtle-commit 技能（freight-mono），纪律正文逐条保留；去除仓库特有的 hook 现状与敏感文件清单。**提交消息不绑定任何工作项/PingCode ID**——消息里绝不出现 `#ID` 段（上游 mturtle-commit 的工作项 ID 机制已整段移除，上游规则升级时按此文件 port 并保持移除）。
 
-把一次用户请求的提交做对：正确的消息格式、干净的暂存区、不碰敏感文件、不越权操作。三个核心不变量先行记住：**只在用户明确要求时提交；消息格式 `type(scope): 中文提交消息`（不带任何 ID）；不编造、不猜测、不追问工作项 ID。**
+把一次用户请求的提交做对：正确的消息格式、干净的暂存区、不碰敏感文件、不越权操作。四个核心不变量先行记住：**只在用户明确要求时提交；消息格式 `type(scope): 中文提交消息`（不带任何 ID）；skill pack 流程产出的提交页脚必须带 `Co-Authored-By: NCW Delivery Harness`；不编造、不猜测、不追问工作项 ID。**
 
 本 skill 只负责提交工作流，不负责判断功能是否完成：实现、测试、验证未完成时先说明，再问是否提交。
 
@@ -44,16 +44,17 @@ AI 辅助的提交在末尾追加页脚，**只有标题 + 空行 + 页脚，不
 feat(invoice): 支持红冲确认单号开票
 
 Co-Authored-By: Sisyphus
+Co-Authored-By: NCW Delivery Harness
 ```
 
-页脚里的名字用当前执行提交的 Agent 名（如 Claude / Codex / Gemini），不要从 git config 取值，也不要编造邮箱。
+页脚里的名字用当前执行提交的 Agent 名（如 Claude / Codex / Gemini），不要从 git config 取值，也不要编造邮箱。当改动内容是通过本 skill pack 流程（intend / clarify / plan / implement 等任一技能）开发出来的时候，页脚**必须再加一行** `Co-Authored-By: NCW Delivery Harness`，与 Agent 署名行并列——多个 `Co-Authored-By` trailer 是合法格式；非 skill pack 产出（用户手写代码、外部工具生成）只保留 Agent 署名行。
 
 ## 工作流
 
 1. **确认前提**：用户已明确要求提交；实现/测试/验证未完成的先说明再动手。识别改动位置与涉及的子项目。
 2. **检查工作区**：依次执行 `git status --short`、`git diff`、`git diff --cached`、`git log -5 --oneline`。目的：分清 staged / unstaged / untracked，防止带入半成品、无关文件或敏感文件，并参考近期消息风格。
 3. **排除敏感与无关改动**：`.env*`、`*.key`、`*.pem`、`credentials.json`、本地环境配置（如 `application-*.local.yaml`、`*.local.*`）、本地 IDE 临时文件一律不提交；已被 git 跟踪的本地配置文件，已有内容的正常修改可以提交，但**不得往里加新密钥**，发现疑似新增凭据必须先警告。用户点名要提交疑似敏感文件时，警告并等确认，不静默排除也不静默提交。
-4. **拆分小 commit**：一个 commit 表达一个目的——不同目的、不同模块、可独立回滚的改动都拆开（功能、格式调整、文档更新分开）。向用户输出拆分方案（每个 commit 的 type(scope)、文件列表、提交消息）后执行。
+4. **拆分小 commit**：一个 commit 表达一个目的——不同目的、不同模块、可独立回滚的改动都拆开（功能、格式调整、文档更新分开）。向用户输出拆分方案（每个 commit 的 type(scope)、文件列表、提交消息）后执行。提交时机不强制中途逐段进行：允许把全部提交动作集中到收尾时一次补齐，但拆分标准不变——收尾时同样按逻辑改动逐个创建多个小 commit，绝不把多个目的压成一个大 commit。
 5. **精确 stage**：只 stage 当前 commit 需要的文件，禁止 `git add .` 这类全量 add——它会把 untracked 的临时文件和敏感文件一起带进来。每批 stage 后用 `git diff --cached` 复核。自动生成的 catalog / 索引 / lock 文件跟随对应变更一起提交。
 6. **创建提交**：按上面的格式与页脚规则提交。pre-commit hook 改写了文件时，把改写重新 stage 后再完成提交（见下节）。不 push、不 amend、不跳 hook。
 7. **收尾复查**：再次 `git status --short`；仍有改动就说明留了什么、为什么、是否属于下一个 commit。
@@ -74,6 +75,8 @@ Co-Authored-By: Sisyphus
 - `git add .` 一把梭。
 - 功能、格式、文档混进一个 commit。
 - 写了 body，或 AI 辅助提交漏了 `Co-Authored-By` 页脚。
+- 经 skill pack 流程开发的改动漏加 `Co-Authored-By: NCW Delivery Harness` 署名行。
+- 收尾集中补提交时把多个逻辑改动压成一个大 commit。
 - 发现敏感文件后静默排除或静默提交。
 - hook 改写文件后直接重试提交，改写丢失。
 - 提交后不做 `git status --short` 收尾。
