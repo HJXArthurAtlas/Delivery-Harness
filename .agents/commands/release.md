@@ -42,7 +42,7 @@ CLI 按其提交内容同口径 bump。唯一耦合点：pack 用到 CLI 新能�
 1. **改了什么**：按面归类的 git log（pack 面 / CLI 面）。
 2. **之前版本**：pack = 最新 tag 与根版本；CLI = Nexus 最新版与本地版本。
 3. **建议版本**：各自新版本号 + bump 理由。
-4. **将执行的动作**：第 3 步将跑的命令清单（release.sh / npm test / commit / tag / push）。
+4. **将执行的动作**：第 3 步将跑的命令清单（release.sh / 发布文档生成 / npm test / commit / tag / push / GitLab Release）。
 
 用户改口径则按用户版本号执行；确认后第 3 步全自动，不再逐条询问。
 
@@ -50,22 +50,43 @@ CLI 按其提交内容同口径 bump。唯一耦合点：pack 用到 CLI 新能�
 
 - **CLI 需发**：`bash release.sh <CLI新版本>` —— 自动回写 `packages/cli/package.json` 与 `src/version.ts`、核对 Nexus 最新性、bun 打包并推送私有 Nexus。失败即停；需用户级 `~/.npmrc` devops 认证（见 README「发布」），缺认证直接报告，不代填凭据。
   - pack 同发：CLI 两文件并入 pack bump 提交。
-  - 仅 CLI 发版：单独提交 `chore(release): che CLI <版本>` 推 main，**不打 tag**（tag 只承载 pack 通道）。
+  - 仅 CLI 发版：单独提交 `chore(release): che CLI <版本>` 推 main，**不打 tag**（tag 只承载 pack 通道）；不生成 pack 发布文档，其改动并入下次 pack 发布文档的「CLI 变化」节。
 - **pack 需发**：
   1. bump 三处：根 `package.json#version`、`.omp-plugin/marketplace.json` 的 plugin `version`（不一致被测试拦下）、`docs/guides/AI Native实践指南.md` 版本对齐行（pack 版 + 本版 CLI 版）。
-  2. `npm test` 全绿（三个脚本依次跑）。
-  3. 单提交 `chore(release): 发布 X.Y.Z`：只含根 `package.json`、`.omp-plugin/marketplace.json`、指南、本版动过的 `packages/cli` 两文件。
+  2. 生成发布文档 `docs/releases/<X.Y.Z>.md`（内容口径见「发布文档」节），并入 bump 提交。
+  3. `npm test` 全绿（三个脚本依次跑）。
+  4. 单提交 `chore(release): 发布 X.Y.Z`：只含根 `package.json`、`.omp-plugin/marketplace.json`、指南、`docs/releases/<X.Y.Z>.md`、本版动过的 `packages/cli` 两文件。
   4. 原子发布（一条命令推 main 与 tag，无中间态）：
      ```bash
      git tag vX.Y.Z   # 打在步骤 3 的提交上
      git push origin main vX.Y.Z
      ```
+  5. 创建 GitLab Release（基于已推 tag，发布说明即 `docs/releases/<X.Y.Z>.md`）：
+     ```bash
+     GITLAB_HOST=git.newchiwan.com glab release create vX.Y.Z \
+       --notes-file "docs/releases/X.Y.Z.md" -R council/ncw-delivery-harness
+     ```
+     glab 未配置该主机时先 `glab auth login --hostname git.newchiwan.com`（需 api scope 的 PAT）；无 glab 时走 GitLab API（`POST /projects/:id/releases`，`PRIVATE-TOKEN` 认证）。认证缺失直接报告，不代填凭据；失败即停，补建后重跑本步与 postcondition。仅 CLI 发版无 tag，不创建 GitLab Release。
+
+## 发布文档（docs/releases/<版本号>.md）
+
+pack 每次发版必须在 bump 提交内生成 `docs/releases/<X.Y.Z>.md`（版本号不带 `v` 前缀），随 tag 一起发布，作为该版本的发布说明。内容为 Markdown 要点列表（不用表格），固定结构：
+
+- **头部**：版本号 + 发版日期（tag 提交日期）。
+- **修改清单**：按当版实际主题分组的要点（主链 / 交互契约 / 集成改造 / 校验与门禁 / 文档与版本等），一条一个可观察变化，不写流水账 commit 标题。
+- **CLI 变化**：本版 CLI 改动列表；无则写「无」。
+
+素材直接取自第 0 步面探测的 git log，不新增未发生的声明；历史发布文档只增不改。
 
 ## 第 4 步：postcondition（硬校验，失败即整次发版判 FAIL）
 
 ```bash
 git ls-remote --tags origin "refs/tags/vX.Y.Z" | grep -q "refs/tags/vX.Y.Z$" \
   && echo OK || echo "FAIL: tag 未生效，che 通道未发版"
+test -f "docs/releases/X.Y.Z.md" \
+  && echo OK || echo "FAIL: 发布文档 docs/releases/X.Y.Z.md 缺失"
+GITLAB_HOST=git.newchiwan.com glab release view vX.Y.Z -R council/ncw-delivery-harness >/dev/null \
+  && echo OK || echo "FAIL: GitLab Release 未创建"
 npm view @newchiwan/che version --@newchiwan:registry=https://nexus.newchiwan.cn/repository/internal-npm/
 ```
 
