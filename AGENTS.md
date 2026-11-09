@@ -60,7 +60,7 @@ npm test
 
 - 修改技能、CLI 或分发配置后必须运行 `npm test`；三个测试脚本分别覆盖技能结构、che CLI 契约和技能运行时行为，具体契约以测试脚本为准。
 - 提交信息使用 `<type>(<scope>): 中文主题`；type 为 `feat`、`fix`、`refactor`、`docs`、`test` 或 `chore`，不绑定工作项/故事卡 ID（溯源由 `specs/pingcode-mapping.json` 承担）。
-- 小步提交：一个逻辑改动一个提交，只包含相关文件；阶段性功能完成即自动提交该阶段改动（提交前过 `npm test`），无需等待指示——自动提交只到本地 commit，不 push。
+- 小步提交：一个逻辑改动一个提交，只包含相关文件；提交动作可在中途逐段进行，也可集中到收尾一次补齐，但拆分始终按小步规则（提交前过 `npm test`），无需等待指示——自动提交只到本地 commit，不 push。经 skill pack 流程开发的改动，页脚另加一行 `Co-Authored-By: NCW Delivery Harness`。
 
 ## 文档维护
 
