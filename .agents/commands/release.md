@@ -56,12 +56,12 @@ CLI 按其提交内容同口径 bump。唯一耦合点：pack 用到 CLI 新能�
   2. 生成发布文档 `docs/releases/<X.Y.Z>.md`（内容口径见「发布文档」节），并入 bump 提交。
   3. `npm test` 全绿（三个脚本依次跑）。
   4. 单提交 `chore(release): 发布 X.Y.Z`：只含根 `package.json`、`.omp-plugin/marketplace.json`、指南、`docs/releases/<X.Y.Z>.md`、本版动过的 `packages/cli` 两文件。
-  4. 原子发布（一条命令推 main 与 tag，无中间态）：
+  5. 原子发布（一条命令推 main 与 tag，无中间态）：
      ```bash
      git tag vX.Y.Z   # 打在步骤 3 的提交上
      git push origin main vX.Y.Z
      ```
-  5. 创建 GitLab Release（基于已推 tag，发布说明即 `docs/releases/<X.Y.Z>.md`）：
+  6. 创建 GitLab Release（基于已推 tag，发布说明即 `docs/releases/<X.Y.Z>.md`）：
      ```bash
      GITLAB_HOST=git.newchiwan.com glab release create vX.Y.Z \
        --notes-file "docs/releases/X.Y.Z.md" -R council/ncw-delivery-harness
