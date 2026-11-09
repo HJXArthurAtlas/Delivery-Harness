@@ -42,7 +42,7 @@ CLI 按其提交内容同口径 bump。唯一耦合点：pack 用到 CLI 新能�
 1. **改了什么**：按面归类的 git log（pack 面 / CLI 面）。
 2. **之前版本**：pack = 最新 tag 与根版本；CLI = Nexus 最新版与本地版本。
 3. **建议版本**：各自新版本号 + bump 理由。
-4. **将执行的动作**：第 3 步将跑的命令清单（release.sh / 发布文档生成 / npm test / commit / tag / push / GitLab Release）。
+4. **将执行的动作**：第 3 步将跑的命令清单（release.sh / npm test / 发布文档生成 / commit / tag / push / GitLab Release）。
 
 用户改口径则按用户版本号执行；确认后第 3 步全自动，不再逐条询问。
 
@@ -53,8 +53,8 @@ CLI 按其提交内容同口径 bump。唯一耦合点：pack 用到 CLI 新能�
   - 仅 CLI 发版：单独提交 `chore(release): che CLI <版本>` 推 main，**不打 tag**（tag 只承载 pack 通道）；不生成 pack 发布文档，其改动并入下次 pack 发布文档的「CLI 变化」节。
 - **pack 需发**：
   1. bump 三处：根 `package.json#version`、`.omp-plugin/marketplace.json` 的 plugin `version`（不一致被测试拦下）、`docs/guides/AI Native实践指南.md` 版本对齐行（pack 版 + 本版 CLI 版）。
-  2. 生成发布文档 `docs/releases/<X.Y.Z>.md`（内容口径见「发布文档」节），并入 bump 提交。
-  3. `npm test` 全绿（三个脚本依次跑）。
+  2. `npm test` 全绿（三个脚本依次跑；bump 三处一致性在此校验）。失败即停并 `git restore` 还原 bump 改动，不发版、不生成任何文档。
+  3. 生成发布文档 `docs/releases/<X.Y.Z>.md`（内容口径见「发布文档」节），并入 bump 提交。
   4. 单提交 `chore(release): 发布 X.Y.Z`：只含根 `package.json`、`.omp-plugin/marketplace.json`、指南、`docs/releases/<X.Y.Z>.md`、本版动过的 `packages/cli` 两文件。
   5. 原子发布（一条命令推 main 与 tag，无中间态）：
      ```bash
