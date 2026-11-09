@@ -145,10 +145,11 @@ Note: This command assumes a complete task breakdown exists in tasks.md. If task
 
 Report final status with summary of completed work. Record the runs timeline completion once here in the final report — not inside the per-task loop: `che state done implement --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available). **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
   主流程:
-  - /che-pingcode-sync-status: 全部任务 [x] 后收尾故事卡（单向流转，重开需新建工作项）
+  - /che-intentverify: 独立 checker 审判实现 diff（越界/约束/场景），PASS 才进收尾
   可选:
   - /che-converge: [可选] 实现与工件有差距时追加收敛任务
   - /che-adr-draft: [可选] 把本次耐久决策落成 ADR 归口 docs/adr/
+  - /che-pingcode-sync-status: [可选·收尾] intentverify PASS 后流转故事卡完成态（单向流转，重开需新建工作项）
 
 ## Done When
 
