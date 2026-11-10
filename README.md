@@ -148,7 +148,7 @@ npm test   # 依次运行技能结构、che CLI 契约和技能运行时契约�
 
 **版本声明点**：根 `package.json#version` 是 pack 唯一版本源——omp 插件版本（`.omp-plugin/marketplace.json`，`npm test` 强制同步）与 DSH bundle 版本（原生读取）都从它推导；git tag `vX.Y.Z` 是 che 安装通道（`che pack init/status/update`）的发布锚点；根 `engines.che` 声明 pack 所需的 che CLI 最低版本（安装时抄进 `.che/pack.json`）。CLI 版本独立演进（`packages/cli/package.json` + `src/version.ts` 的 `CLI_VERSION`，`test-che-cli.sh` 强制一致）。
 
-**发版一律走 `/release`**（流程见 `.agents/commands/release.md`）：定版本号 → 本版含 CLI 变更先发 Nexus → bump 根版本 + 同步 marketplace → `npm test` 全绿 → `chore(release)` 单提交 → `git push origin main vX.Y.Z` 原子推送 → `git ls-remote` postcondition 验证 tag 生效。没打 tag = che 通道没发版；漏 tag 会被任何项目里的 `che pack status` 探测为 `CHANNEL_DRIFT`。
+**发版一律走 `/release`**（流程见 `.agents/commands/release.md`）：定版本号 → 本版含 CLI 变更先发 Nexus → bump 根版本 + 同步 marketplace → `npm test` 全绿 → 生成 `docs/releases/X.Y.Z.md` 发布文档 → `chore(release)` 单提交（含发布文档）→ `git push origin main vX.Y.Z` 原子推送 → 创建 GitLab Release（发布说明即发布文档）→ postcondition 验证 tag / 发布文档 / Release 生效。没打 tag = che 通道没发版；漏 tag 会被任何项目里的 `che pack status` 探测为 `CHANNEL_DRIFT`。
 
 只有 `@newchiwan/che` 发布到公司 Nexus（`internal-npm` hosted；安装侧走 `registry-npm` group）。**根包（即整个 pack）不发 npm**（`package.json` 已 `private: true` 防误发）——它的分发就是 omp / DSH 插件与 che 安装通道：
 
