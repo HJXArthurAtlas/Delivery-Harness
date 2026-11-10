@@ -4,6 +4,8 @@ description: 意图与场景访谈 + 特性意图一体化：问答式锁定目�
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+>
+> **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — clarifying questions, option choices, confirmations, gate questions, chain handoffs — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Display-only output (reports, explanations, next-step hints) is unaffected.**
 
 ## User Input
 
@@ -76,11 +78,11 @@ If the user tries to skip a phase, refuse politely and explain which specific te
 判定纪律：
 
 - 纯触发词不算有效输入——「开始」「跑一下 intend」「继续」这类无主题内容的消息按无效处理。
-- **两个来源都为空 → 必须中断**：不建任务、不推 slug、不从仓库猜主题。直接向用户明确提问，例如：
+- **两个来源都为空 → 必须中断**：不建任务、不推 slug、不从仓库猜主题。经交互式提问工具（AskUserQuestion；omp 端即 `ask` 工具）提问——表单正文说明：
   > 我目前没有任何关于本次意图的上下文或输入。请说明需要澄清的意图是什么：用一句话描述期望的结果（解决什么问题、给谁带来什么），或给出相关讨论 / 文档 / issue 的指向。收到有效描述后我再开始访谈。
 
-  收到用户的有效描述前绝不开始访谈；该描述即为访谈的 goal 输入，照常过 GQ1–GQ5。
-- 只有其一 → 照常开始访谈。若只有前置上下文而没有调用输入，先用一句话复述你从上下文推断的主题，请用户确认或纠正后再开始 GQ 测试——绝不基于推断的主题直接开跑。
+  表单放一个多行文本输入（textarea）承载描述，绝不把问题打印进正文后停下等待键入回答。收到用户的有效描述前绝不开始访谈；该描述即为访谈的 goal 输入，照常过 GQ1–GQ5。
+- 只有其一 → 照常开始访谈。若只有前置上下文而没有调用输入，先用一句话复述你从上下文推断的主题，经交互式提问工具请用户确认或纠正（确认/纠正两选项，纠正走自由文本输入）后再开始 GQ 测试——绝不基于推断的主题直接开跑。
 
 ---
 
@@ -162,7 +164,7 @@ Work from the locked intent + feature description, in this order:
 1. **Generate User Stories and Functional Requirements.** Prioritized user journeys (P1/P2/P3, each independently testable) plus testable `FR-###` requirements; document reasonable defaults in Assumptions. If no clear user flow exists: ERROR "Cannot determine user scenarios".
 2. **Draft Acceptance Scenarios** from the stories and requirements — user-observable Given/When/Then per story.
 3. **Draft Edge Cases** from the out-of-scope list (what must NOT happen if implementation overreaches), the failure conditions (user-observable parallels), commonly-missed degradation cases for the feature type, and relevant `docs/corrections/` entries (*"Correction note from {date} flagged that {pattern} caused {issue}. Worth an edge scenario for it."*).
-4. **Batch-review both scenario sets**: show the full drafts as numbered lists and ask *"Accept all / edit specific numbers / write your own."* Apply tests **SQ1–SQ4** to every accepted scenario; push back on failures with a concrete reword. Iterate until both sets are locked.
+4. **Batch-review both scenario sets**: show the full drafts as numbered lists, then ask via the interactive question tool (AskUserQuestion) — options 接受全部 / 编辑指定编号 / 自己重写，编辑与重写的内容走表单的自由文本输入；push back on SQ failures through the same tool with a concrete reword. Iterate until both sets are locked.
 5. **Assign globally stable IDs**: one `E1…En` sequence across Acceptance Scenarios and Edge Cases, never reordered, never reused. Each scenario carries a `Validates:` line citing the `FR-###` it proves.
 
 Coverage — not counts — decides when drafting is done:
@@ -177,7 +179,7 @@ No fixed scenario quota exists; do not pad. Do not add a separate `## Expectatio
 When all interview phases pass (or, for update, after the update confirmation):
 
 1. For create-new: derive a slug from the locked goal (3–5 words, lowercase, hyphenated).
-2. Show the slug as a one-line confirmation: *"Slug: `{slug}` — reply `override` to change, anything else (including empty) accepts."* Default behavior is accept-on-any-non-override reply.
+2. Confirm the slug through the interactive question tool: one form with a single text input pre-filled with the derived slug (form body: *"Slug: `{slug}` — edit to override, submit as-is to accept."*). Default behavior is accept-on-unchanged-value.
 3. Create the task (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`):
    ```bash
    che task create {slug} --summary "<locked goal in one plain sentence>" --session "$CHE_SESSION_ID"   # omit --session when no session id is available
@@ -223,7 +225,7 @@ Run this in-line validation after writing; no separate checklist file is created
 4. **IDs**: one global `E#` sequence, unique, no gaps introduced by edits; `C#`/`F#`/`FR-###`/`SC-###` unique.
 5. **Markers**: at most 3 `[NEEDS CLARIFICATION]` markers, each explicit and product-level.
 6. **Failure handling**: list failing items, update the intent, re-validate — maximum **3 repair iterations**; if still failing, report the remaining issues and warn the user.
-7. If markers exist, present them batched (Q1–Qn option tables) so the user can resolve them now; whatever remains explicit stays for `/che-clarify`, which must end with zero markers.
+7. If markers exist, present them batched — one interactive question-tool form per marker (question text in the form body, options as radio choices, free-text input for custom resolutions) — so the user can resolve them now; whatever remains explicit stays for `/che-clarify`, which must end with zero markers.
 
 **Close the run**: after the final write/validation, record `che state done intend --session "$CHE_SESSION_ID"` (omit `--session` when unavailable; use `--feature {slug}` when there is no session id). Do **not** run `state done` while the exit gate still fails.
 
@@ -321,8 +323,8 @@ If the compound store was loaded:
 
 ## Tool choices
 
-- **Plain chat** for free-form prose (goal sentence, why now, constraint text, scenario drafts)
-- **AskUserQuestion** for discrete choices (update-or-new, accept/edit/reject scenario sets, slug override, yes/no/later for the chain handoff)
+- **Interactive question tool (AskUserQuestion; the `ask` tool on omp) for EVERY user answer** — free-form prose questions (goal sentence, why now, constraint text, scenario drafts) go out as a form with a text/textarea input; discrete choices (update-or-new, accept/edit/reject scenario sets, slug override, yes/no/later for the chain handoff) as a form with options. NEVER plain-chat a question and end the turn waiting for typed input.
+- **Plain chat** only for display-only prose: presenting drafts, verdicts, and pushback explanations alongside the form — never as the question channel itself.
 - **Bash** for `che paths --json`, `che task create {slug} --summary "<locked goal>" --session "$CHE_SESSION_ID"`, and `che state start|done intend`
 - **Read** for an existing intent on the update path
 - **Write/Edit** for the final `{TASK_DIR}/intent.md` file and the resolved `CONTEXT_FILE`

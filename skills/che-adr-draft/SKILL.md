@@ -4,6 +4,8 @@ description: docs/adr/ 的唯一写命令，两个模式——起草：从当前
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+>
+> **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — per-seed import/skip, draft-now prompts — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input.**
 
 # Adrkit Draft Skill
 
@@ -81,13 +83,16 @@ skipped even if the user pushes to move fast:
    save, Liquibase-only schema changes). Say plainly: on a non-Spring project
    every record may be declined, and an empty corpus is valid — adr_gate
    treats it as clean.
-3. **Per-record confirmation**, one question at a time (never batched): for
-   each record state the rule in one sentence, the `affects` path patterns it
-   governs, and applicability (Spring-specific or general); ask 导入 / 跳过.
-4. **Optional drafting**: after the walk-through, ask whether the user wants
-   to record a decision of their own right now; if yes, switch to the
-   draft-from-plan Steps (or `scripts/scaffold.sh` when no plan exists) and
-   continue the import afterwards.
+3. **Per-record confirmation**, one question at a time (never batched), each
+   through the interactive question tool (AskUserQuestion; see the interaction
+   rule above): for each record state the rule in one sentence, the `affects`
+   path patterns it governs, and applicability (Spring-specific or general) in
+   the form body; options 导入 / 跳过.
+4. **Optional drafting**: after the walk-through, ask via the interactive
+   question tool whether the user wants to record a decision of their own
+   right now; if yes, switch to the draft-from-plan Steps (or
+   `scripts/scaffold.sh` when no plan exists) and continue the import
+   afterwards.
 5. **Import**: copy each approved seed into `docs/adr/`. A record whose
    `NNNN-` id file already exists is NOT overwritten — rename the incoming
    file to the next free id first (the filename drives the record id; never

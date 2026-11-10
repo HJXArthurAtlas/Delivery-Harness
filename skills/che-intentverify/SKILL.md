@@ -4,6 +4,8 @@ description: 实现后独立校验（L3）：密封 briefing（锁定 intent + i
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+>
+> **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — including "open the report?" after writing — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question into the reply body and end the turn waiting for typed input. Display-only output (verdict reports, next-step hints) is unaffected.**
 
 # Intent Verify Validation
 

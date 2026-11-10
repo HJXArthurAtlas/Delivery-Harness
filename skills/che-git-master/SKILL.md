@@ -4,6 +4,8 @@ description: 执行 git commit 的规范流程：消息格式 `type(scope): 中�
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+>
+> **交互规则（pack fork，port on upstream upgrade）**：所有需要用户回答的问题——「是否提交」询问、拆分方案确认——必须经宿主的交互式提问工具发出（AskUserQuestion；omp 端即 `ask` 工具），以表单承载选项；绝不把问题与选项打印进回复正文后停下等待键入回答。纯展示、无需回答的输出（拆分方案展示、提交后复查）不受此限。
 
 # 按规范提交
 
@@ -15,7 +17,7 @@ description: 执行 git commit 的规范流程：消息格式 `type(scope): 中�
 
 ## 触发门槛
 
-只有用户明确要求时才提交："提交"、"commit"、"帮我提交当前改动"算明确要求。功能开发、补测试完成时只能**询问**是否提交，不得自行 commit。未经用户明确指示：不 push、不 amend、不用 `--no-verify` / `--no-gpg-sign`、不执行 `git reset --hard` / `git clean -fd` / `git push --force`。这些限制保护的是共享历史和用户对仓库状态的控制权，不是形式主义。
+只有用户明确要求时才提交："提交"、"commit"、"帮我提交当前改动"算明确要求。功能开发、补测试完成时只能经交互式提问工具（AskUserQuestion；omp 端即 `ask` 工具）**询问**是否提交，不得自行 commit。未经用户明确指示：不 push、不 amend、不用 `--no-verify` / `--no-gpg-sign`、不执行 `git reset --hard` / `git clean -fd` / `git push --force`。这些限制保护的是共享历史和用户对仓库状态的控制权，不是形式主义。
 
 ## 消息格式
 

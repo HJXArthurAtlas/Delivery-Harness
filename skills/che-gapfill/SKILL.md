@@ -4,6 +4,8 @@ description: 任务缺口补全：把统一 intent（In scope / Out of scope / C
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+>
+> **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — the accept/group/individual/reject review, high-risk pushback, gate questions, chain handoffs — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Display-only output (coverage matrix, diff preview, reports, next-step hints) is unaffected.**
 
 # Gap-Fill Analysis
 
@@ -124,11 +126,11 @@ Define high-risk gaps as:
 - **Any out-of-scope regression check** — `/che-intentverify` L3 will block the merge if the OOS area was touched, and you'll have to re-add this task then. Cheaper to add now.
 - **Any failure condition with no covering task** — the failure condition was explicitly declared in the intent and is now untestable in CI.
 
-If the user rejects a high-risk gap addition, push back once:
+If the user rejects a high-risk gap addition, push back once — through the interactive question tool (AskUserQuestion), with the pushback text as the form body and two options 「仍然拒绝」/「撤销拒绝，追加任务」:
 
 *"You're rejecting the {F1 / OOS} coverage. The intentverify at merge time will still flag the gap, and you'll have to re-add this then. Confirm reject?"*
 
-If they confirm, accept and move on.
+If they confirm the reject, accept and move on.
 
 ---
 

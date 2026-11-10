@@ -4,6 +4,8 @@ description: 验证 bug 修复是否真正解决：重跑复现步骤、补新�
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+>
+> **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — bug disambiguation, overwrite confirmation — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Automated / non-interactive mode never asks at all.**
 
 # Bug Test Skill
 
@@ -31,7 +33,7 @@ Resolve `BUG_SLUG` in this order, stopping at the first match:
 2. **Conversation context** — if the current session has just run `/che-bug-assess` or `/che-bug-fix`, the slug it reported is the working slug. Reuse it without re-prompting. Confirm it by checking that `docs/bugs/<slug>/fix.md` exists; if it does not, fall through.
 3. **Single candidate on disk** — list `docs/bugs/*/fix.md`. If exactly one bug has a `fix.md`, use it.
 4. **Disambiguate**:
-   - **Interactive mode**: ask the user which bug to validate and list the candidates.
+   - **Interactive mode**: ask the user via the interactive question tool (AskUserQuestion) which bug to validate, listing the candidates as options.
    - **Automated mode**: stop with an error listing the candidates. Do not guess.
 
 Once resolved, set `BUG_SLUG` and `BUG_DIR = docs/bugs/<BUG_SLUG>`, and briefly state in your reply which resolution path was used (explicit / from context / single candidate / asked).
@@ -40,7 +42,7 @@ Once resolved, set `BUG_SLUG` and `BUG_DIR = docs/bugs/<BUG_SLUG>`, and briefly 
 
 - `BUG_DIR/assessment.md` MUST exist.
 - `BUG_DIR/fix.md` MUST exist. If not, stop and instruct the user to run `/che-bug-fix` first.
-- If `BUG_DIR/test.md` already exists, ask the user whether to overwrite it (interactive mode) or refuse (automated mode).
+- If `BUG_DIR/test.md` already exists, ask the user whether to overwrite it via the interactive question tool (interactive mode) or refuse (automated mode).
 - Read both `assessment.md` and `fix.md` in full so you know:
   - The original symptom and reproduction steps (from `assessment.md`).
   - The actual code changes and tests added (from `fix.md`).

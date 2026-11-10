@@ -201,7 +201,7 @@ flowchart TD
   DE -. 设计约束 .-> PL
 ```
 
-> **阶段如何衔接**：链上交接（intend→clarify→grill、plan→analyze→gapfill、gapfill→planverify）由技能收尾的 AskUserQuestion 两选项驱动——选项带动作说明、选中即自动执行、停下展示手动路径；建卡走 grill 链尾推送确认（问句不出现技能名，拒绝静默跳过）；planverify 的双 gate、sync-cards 对账是 implement 的静默入向条件；gapfill 收尾按 gate 实际配置分流提示。本 pack 无 hook 执行器，不把它们理解为后台自动任务；条件不满足时按提示补跑。
+> **阶段如何衔接**：链上交接（intend→clarify→grill、plan→analyze→gapfill、gapfill→planverify）由技能收尾的 AskUserQuestion 两选项驱动——选项带动作说明、选中即自动执行、停下展示手动路径；建卡走 grill 链尾推送确认（问句不出现技能名，拒绝静默跳过）；planverify 的双 gate、sync-cards 对账是 implement 的静默入向条件；gapfill 收尾按 gate 实际配置分流提示。所有需要用户回答的问题一律经交互式提问工具（AskUserQuestion / omp `ask`）承载，绝不正文提问后中断等待键入回答。本 pack 无 hook 执行器，不把它们理解为后台自动任务；条件不满足时按提示补跑。
 
 #### 产品侧（需求 → 规格 → 建卡）
 

@@ -4,6 +4,8 @@ description: 按既有 bug 评估实施修复并记录变更到 docs/bugs/<slug>
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+>
+> **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — bug disambiguation, overwrite confirmation, proceed-on-clarification — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Automated / non-interactive mode never asks at all.**
 
 # Bug Fix Skill
 
@@ -31,7 +33,7 @@ Resolve `BUG_SLUG` in this order, stopping at the first match:
 2. **Conversation context** — if the current session has just run `/che-bug-assess`, the slug it reported is the working slug. Reuse it without re-prompting. Confirm it by checking that `docs/bugs/<slug>/assessment.md` exists; if it does not, fall through.
 3. **Single candidate on disk** — list `docs/bugs/*/assessment.md`. If exactly one matching `assessment.md` is found, use the slug from its parent directory.
 4. **Disambiguate**:
-   - **Interactive mode**: ask the user which bug to fix and list the candidates.
+   - **Interactive mode**: ask the user via the interactive question tool (AskUserQuestion) which bug to fix, listing the candidates as options.
    - **Automated mode**: stop with an error listing the candidates. Do not guess.
 
 Once resolved, set `BUG_SLUG` and `BUG_DIR = docs/bugs/<BUG_SLUG>`, and briefly state in your reply which resolution path was used (explicit / from context / single candidate / asked).
@@ -39,7 +41,7 @@ Once resolved, set `BUG_SLUG` and `BUG_DIR = docs/bugs/<BUG_SLUG>`, and briefly 
 ## Prerequisites
 
 - `BUG_DIR/assessment.md` MUST exist. If it does not, stop and instruct the user to run `/che-bug-assess` first.
-- If `BUG_DIR/fix.md` already exists, ask the user whether to overwrite it before continuing (interactive mode) or refuse (automated mode).
+- If `BUG_DIR/fix.md` already exists, ask the user whether to overwrite it via the interactive question tool (interactive mode) or refuse (automated mode).
 - Read `BUG_DIR/assessment.md` in full. Treat its **Proposed Remediation**, **Files likely to change**, **Tests to add or update**, and **Risks & Considerations** sections as the contract for this command.
 
 ## Execution
@@ -47,7 +49,7 @@ Once resolved, set `BUG_SLUG` and `BUG_DIR = docs/bugs/<BUG_SLUG>`, and briefly 
 1. **Confirm the plan**
    - Restate, in 3–6 bullets, what you are about to change and where, based on the assessment.
    - If the assessment's verdict is `invalid`, stop — there is nothing to fix. Tell the user and exit.
-   - If the verdict is `likely valid, needs reproduction` and there are unresolved `[NEEDS CLARIFICATION]` items, flag them and ask the user whether to proceed in interactive mode, or stop in automated mode.
+   - If the verdict is `likely valid, needs reproduction` and there are unresolved `[NEEDS CLARIFICATION]` items, flag them and ask the user whether to proceed via the interactive question tool (interactive mode), or stop in automated mode.
 
 2. **Apply the remediation**
    - Make the code changes described by the preferred remediation. Stay within the files listed by the assessment unless newly discovered evidence requires expanding scope (in which case, log the expansion explicitly in the report).

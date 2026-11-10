@@ -4,6 +4,8 @@ description: bug 报告三角定位（评估，不动代码）：对照代码库
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+>
+> **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — slug resolution, overwrite confirmation, URL-trust prompts — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Automated / non-interactive mode never asks at all.**
 
 # Bug Assess Skill
 
@@ -30,7 +32,7 @@ If both a URL and text are present, fetch the URL and merge its content with the
 Each bug gets its own directory under `docs/bugs/<slug>/`. Resolve the slug in this order:
 
 1. **User-provided slug**: If the user explicitly passes a slug (e.g., `slug=login-timeout`, `--slug login-timeout`, or just an obvious slug-like token), use it verbatim after normalization (lowercase, hyphen-separated, no spaces, no special characters other than `-` and digits). Preserve the shape the user asked for — do not append timestamps or numbers.
-2. **Interactive mode** (a human is driving): If no slug was provided, **ask the user** for one and wait for the answer before continuing. Suggest a 2–4 word kebab-case candidate derived from the bug summary as a default.
+2. **Interactive mode** (a human is driving): If no slug was provided, **ask the user** via the interactive question tool (AskUserQuestion; see the interaction rule above) — one text input pre-filled with a 2–4 word kebab-case candidate derived from the bug summary — and wait for the submitted answer before continuing.
 3. **Automated / non-interactive mode** (no human to ask): Generate a concise slug yourself from the bug summary (2–4 kebab-case words, e.g. `login-timeout-500`). The generated slug **MUST** produce a unique directory — if `docs/bugs/<slug>/` already exists, append the shortest disambiguating suffix needed (`-2`, `-3`, …) or a short ISO-style date (`-20260605`) to make it unique. Never overwrite an existing bug directory.
 
 After resolution, set `BUG_SLUG` and `BUG_DIR = docs/bugs/<BUG_SLUG>`.
@@ -38,7 +40,7 @@ After resolution, set `BUG_SLUG` and `BUG_DIR = docs/bugs/<BUG_SLUG>`.
 ## Prerequisites
 
 - Ensure the directory `docs/bugs/<BUG_SLUG>/` (i.e., `BUG_DIR`) exists, creating it (including any missing parents) if necessary. Use whatever mechanism is appropriate for the current environment.
-- If `BUG_DIR/assessment.md` already exists, ask the user whether to overwrite it before continuing (in interactive mode); in automated mode, refuse and pick a new unique slug instead.
+- If `BUG_DIR/assessment.md` already exists, ask the user whether to overwrite it via the interactive question tool before continuing (interactive mode); in automated mode, refuse and pick a new unique slug instead.
 
 ## Safety When Fetching URLs
 
@@ -64,7 +66,7 @@ Before fetching, classify the URL by its host and scheme:
    - `stackoverflow.com`, `*.stackexchange.com`
    - `sentry.io`, `*.sentry.io`
 3. **Otherwise**, the host is unrecognized. Behavior depends on mode:
-   - **Interactive**: ask the user once, naming the host parsed from the URL explicitly — for example, `Fetch https://example.internal/foo (host: example.internal)? (yes/no)`. Default to **no**. Only fetch on an explicit affirmative.
+   - **Interactive**: ask the user once via the interactive question tool, naming the host parsed from the URL explicitly — for example, `Fetch https://example.internal/foo (host: example.internal)?` with yes/no options, "no" preselected. Only fetch on an explicit affirmative.
    - **Automated / non-interactive**: do **not** fetch. Record `[UNVERIFIED — fetch skipped: host not on safe list: <host>]` in the assessment and continue with whatever pasted text the user supplied.
 
 In every case, record in `assessment.md`:

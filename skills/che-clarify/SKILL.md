@@ -4,6 +4,8 @@ description: 意图澄清问答（产品澄清独占）：最多提 5 个高针�
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+>
+> **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — clarifying questions, option choices, confirmations, gate questions, chain handoffs — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Display-only output (reports, explanations, next-step hints) is unaffected.**
 
 ## User Input
 
@@ -100,37 +102,28 @@ Execution steps:
     - If more than 5 categories remain unresolved, select the top 5 by (Impact * Uncertainty) heuristic.
 
 5. Sequential questioning loop (interactive):
-    - Present EXACTLY ONE question at a time.
+    - Ask EXACTLY ONE question at a time — each question goes out through the interactive question tool (AskUserQuestion; the `ask` tool on omp) as ONE form. NEVER print the question and options as chat text and end the turn waiting for a typed reply.
     - **Question writing quality (applies to every question, MC or short-answer):**
-       - Lead with `**Question:**` followed by a full interrogative that ends with `?`. The question text before the `?` must make sense on its own.
+       - Lead with a full interrogative that ends with `?`. The question text before the `?` must make sense on its own.
        - NEVER use a topic label, section heading, or requirement id as the question itself. For example, `Acceptance device/runtime matrix (FR-023)` is INVALID — it is a label, not a question.
-       - After the `?`, the only permitted suffix is an optional parenthesized requirement/question id. Exact format: `**Question:** <interrogative>?` or `**Question:** <interrogative>? (FR-023)`. Never put the id before the `?`, and never use the id (alone or with a topic label) as the whole prompt.
-       - Immediately after the question line, add one plain-language "Why it matters" sentence (the stake for acceptance or shipping) before the recommendation/options.
-       - Use everyday wording; introduce jargon only if defined in the same sentence. Self-check: a reader unfamiliar with this workflow must be able to answer from the Question line alone. Terse is fine; cryptic labels are not.
+       - The only permitted suffix after the `?` is an optional parenthesized requirement/question id. Exact format: `<interrogative>?` or `<interrogative>? (FR-023)`. Never put the id before the `?`, and never use the id (alone or with a topic label) as the whole prompt.
+       - Include one plain-language "Why it matters" sentence (the stake for acceptance or shipping) in the form body before the recommendation/options.
+       - Use everyday wording; introduce jargon only if defined in the same sentence. Self-check: a reader unfamiliar with this workflow must be able to answer from the question text alone. Terse is fine; cryptic labels are not.
     - For multiple‑choice questions:
        - **Analyze all options** and determine the **most suitable option** based on:
           - Best practices for the project type
           - Common patterns in similar implementations
           - Risk reduction (security, performance, maintainability)
           - Alignment with any explicit project goals or constraints visible in the intent
-       - Present your **recommended option prominently** at the top with clear reasoning (1-2 sentences explaining why this is the best choice).
-       - Format as: `**Recommended:** Option [X] - <reasoning>`
-       - Then render all options as a Markdown table:
-
-       | Option | Description |
-       |--------|-------------|
-       | A | <Option A description> |
-       | B | <Option B description> |
-       | C | <Option C description> (add D/E as needed up to 5) |
-       | Short | Provide a different short answer (<=5 words) (Include only if free-form alternative is appropriate) |
-
-       - After the table, add: `You can reply with the option letter (e.g., "A"), accept the recommendation by saying "yes" or "recommended", or provide your own short answer.`
+       - Build ONE form with a radio group: all options (2–5 distinct, mutually exclusive), each as `<label><input type="radio">` with a one-line description; the recommended option goes FIRST and is preselected (`checked`).
+       - Present your **recommended option prominently** with clear reasoning in the form body (1-2 sentences explaining why this is the best choice), formatted as: `**Recommended:** Option [X] - <reasoning>`
+       - The tool's built-in free-text ("Other") input covers a different short answer (<=5 words) — NEVER add your own "Other"/"Short" option to the group.
     - For short‑answer style (no meaningful discrete options):
-       - Provide your **suggested answer** based on best practices and context.
+       - Provide your **suggested answer** based on best practices and context in the form body.
        - Format as: `**Suggested:** <your proposed answer> - <brief reasoning>`
-       - Then output: `Format: Short answer (<=5 words). You can accept the suggestion by saying "yes" or "suggested", or provide your own answer.`
+       - Build ONE form with a single text input pre-filled with the suggested answer as its default value (answer constrained to <=5 words).
     - After the user answers:
-       - If the user replies with "yes", "recommended", or "suggested", use your previously stated recommendation/suggestion as the answer.
+       - If the user accepts (keeps the preselected option, submits the pre-filled suggestion, or replies "yes" / "recommended" / "suggested"), use your previously stated recommendation/suggestion as the answer.
        - Otherwise, validate the answer maps to one option or fits the <=5 word constraint.
        - If ambiguous, ask for a quick disambiguation (count still belongs to same question; do not advance).
        - Once satisfactory, record it in working memory (do not yet write to disk) and move to the next queued question.

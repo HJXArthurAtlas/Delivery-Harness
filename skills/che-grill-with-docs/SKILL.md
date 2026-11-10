@@ -4,6 +4,8 @@ description: 深度澄清 + 领域知识沉淀：与 che-grill 同样的穷尽�
 ---
 
 > **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+>
+> **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — interview questions, option choices, conflict confirmations, the satisfaction gate, chain handoffs — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Display-only output (round announcements, reports, next-step hints) is unaffected.**
 
 # Grill With Docs Skill
 
@@ -268,7 +270,7 @@ A list associating the semantic identity of every decision point (category, deci
 - **Recalculate the design tree whenever a round ends.** Apply the round's answers to the design tree, then identify question candidates whose unresolved prerequisites previously prevented them from being asked but whose prerequisites are now all settled. Treat these as candidates for the next frontier. Recalculate the frontier only during the round-end processing in Step 3, never midway through a round.
 - **Investigate facts instead of asking for them. Finding facts is always the agent's responsibility, not the user's.** Investigate facts available from the codebase, project documents, and existing intents, and exclude them from questions. Ask the user only for **decisions** that only the user can make after ordinary file search (for example, `rg`), file reading, and symbol/reference search have been exhausted. Perform the investigation yourself; do not delegate it to subagents.
 - **Do not stop a round while waiting for research.** Treat unfinished research like an unsettled prerequisite. If research cannot finish during the current round, remove only the questions that depend on it from the frontier and return them to the question candidate pool. Add them to a later frontier after research finishes. Continue asking all remaining questions in the current frontier.
-- **Offer one to three situation-appropriate choices labeled from `A.`.** Offer one choice when there is one best answer and two or three when real trade-offs exist. Give each choice a one- or two-sentence rationale, and always end with a free-form option. The user must be able to accept a non-recommended choice as easily as the recommended one by replying with a single label.
+- **Offer one to three situation-appropriate choices labeled from `A.` as radio options in the interactive question tool** (see the interaction rule above). Offer one choice when there is one best answer and two or three when real trade-offs exist. Give each choice a one- or two-sentence rationale, and rely on the tool's built-in free-text input as the free-form option. The user must be able to accept a non-recommended choice as easily as the recommended one by selecting it.
 - **Whenever marking an option `**Recommended**`, explain the recommendation.** Put the best-supported option at `A` with `**Recommended**` and state in one or two sentences **why it is preferred to the alternatives**, citing investigated facts, existing implementation, or an assessment of trade-offs. Never apply the marker without a reason.
 - **Allow free-form answers at any time and at any length.** Welcome answers outside the choices, partial adoption, and conditional answers such as "A, except when X"; treat them directly as decisions.
 - **If a selected option requires drill-down, present another choice set later.** When a selection creates new decision points or boundary conditions, add them to the question candidate pool and place them on a later frontier, drilling down until the user is satisfied.
@@ -297,19 +299,15 @@ If the user asks to stop after the intent has been loaded and any decision point
 
 ### Question format
 
-Present questions one at a time in sequence using the following format. Restart numbering at `Q1` for every round so the number itself signals a new round. Give carried-over questions new numbers and state in one line when presenting them that they were carried over from the previous round.
+Ask questions one at a time in sequence **through the interactive question tool** (AskUserQuestion; the `ask` tool on omp) — never as plain chat text that ends the turn waiting for a typed label. Restart numbering at `Q1` for every round so the number itself signals a new round. Give carried-over questions new numbers and state in one line (in chat, before the form) that they were carried over from the previous round.
 
-```text
-❓ **Q1** - **<Question title>**: <Question text. It may include contextual explanation and multiple paragraphs.>
+Each question is ONE form:
 
-➡️
-- **A. <Choice>** — **Recommended**. <Reason for recommendation in 1–2 sentences>
-- **B. <Choice>** — <Rationale in 1–2 sentences>
-- **C. <Choice>** — <Rationale in 1–2 sentences>
-- **Free-form** — Another answer, partial adoption, or a conditional answer (unlimited length)
-```
+- Form body: the question title and text (`Q1 - <Question title>: <Question text>`, may include contextual explanation and multiple paragraphs).
+- Radio group with one to three choices labeled `A. <Choice>` …, each carrying its rationale; the best-supported option goes first with `**Recommended**` in its label and is preselected (`checked`).
+- Free-form answers: rely on the tool's built-in free-text ("Other") input — never add your own "Free-form" option.
 
-Vary the number of choices between one and three according to the situation, but always include the `**Free-form**` line. The user may answer the one currently presented question with a single label such as "A" or "B," with "recommended," or in free form. Accept "yes" only when its meaning is unambiguous in the current question. If the user says "skip" or "defer," carry the question into a later round and renumber it there. Also accept free-form text that addresses a question other than the one currently presented—such as an advance answer to a later question or an explicit revision to a settled decision—and incorporate each decision through Step 4A just like the answer to the current question. Recalculate the frontier only at the end of the round. Numbers are for reference within a round and are not recorded in intent.md; reference the affected intent section in Step 4A. When referring to a question from an earlier round, use "Round n, Qk (<question title or summary>)" and always restate the question content because the number alone is not memorable.
+Vary the number of choices between one and three according to the situation. The user may accept the preselected recommendation or pick any other choice. Accept "yes" only when its meaning is unambiguous in the current question. If the user says "skip" or "defer," carry the question into a later round and renumber it there. Also treat free-form text that addresses a question other than the one currently presented—such as an advance answer to a later question or an explicit revision to a settled decision—as a decision, and incorporate it through Step 4A just like the answer to the current question. Recalculate the frontier only at the end of the round. Numbers are for reference within a round and are not recorded in intent.md; reference the affected intent section in Step 4A. When referring to a question from an earlier round, use "Round n, Qk (<question title or summary>)" and always restate the question content because the number alone is not memorable.
 
 ## Workflow
 
@@ -339,7 +337,7 @@ Associate each remaining decision candidate with the design-tree node it will se
 Treat the current frontier as one round and proceed with one question and one answer at a time:
 
 1. At the start of a round, announce `Round n (m questions)` in one line. If a round starts with confirmation of a conflict detected in the previous round, include that fact in the announcement, for example: `Round n (m questions) — Starting with confirmation of a conflict with a recorded decision.` Do not preview the question list.
-2. Following the Question format, present only the first question in the round and wait for the user's answer. The presentation order is the ordering from Step 2, and numbering begins with Q1 in that order.
+2. Following the Question format, ask only the first question in the round through the interactive question tool and wait for its submitted answer. The presentation order is the ordering from Step 2, and numbering begins with Q1 in that order.
 3. When the answer arrives, incorporate and save each settled decision via Step 4A, change the corresponding point to Resolved, and only then present the next question. If an answer remains ambiguous or contradictory, create a follow-up in the candidate pool for a later frontier; do not insert it into the current round. State in one line that it was held and why before moving to the next question. Carry skipped or deferred questions into a later round and renumber them there. If an answer conflicts with a recorded decision, hold it according to the interview rule for conflicts and put the confirmation follow-up first in the next round.
 4. If an existing answer already settles a later question in the round, do not present it; say in one line that it was incorporated as answered based on the existing answer. If the answer invalidates the premise of a later question, immediately apply the Design tree non-applicability rules, change the corresponding point to Resolved, then say in one line that the parent decision made it inapplicable.
 5. After the round's questions are exhausted, perform **round-end processing**: report `Round n complete — x settled, y carried over` in one line, run the **decision-derived check**, recalculate the design tree, return to Step 2, and recalculate the next frontier. During the decision-derived check, compare every decision settled in the round with investigated facts about its applicable scope—target types, differences by screen, list/detail/history views, field composition, required/optional status, and so on—and add any overlooked inconsistency or boundary condition to the candidate pool.
@@ -416,7 +414,7 @@ Check candidates generated by rescanning for semantic duplicates. If a candidate
 
 ### Step 6. Satisfaction gate
 
-Once every point is Clear / Resolved / Outstanding / Deferred, present aggregate category statuses, a per-point summary of Outstanding / Deferred items, and the sections changed in this run. Then use **AskUserQuestion or another interactive UI to present choices and confirm satisfaction**. (If no interactive UI is available, present the same three choices in the normal response and wait for the user's selection.) Do not wait for a free-form "OK." Use this fixed confirmation format every time **at this satisfaction gate only**; it does not apply to Step 3 rounds, which use the question format from the interview discipline.
+Once every point is Clear / Resolved / Outstanding / Deferred, present aggregate category statuses, a per-point summary of Outstanding / Deferred items, and the sections changed in this run. Then use **the interactive question tool (AskUserQuestion; the `ask` tool on omp) to present the three choices as a form and confirm satisfaction — never plain-text output that pauses the session for input**. Do not wait for a free-form "OK." Use this fixed confirmation format every time **at this satisfaction gate only**; it does not apply to Step 3 rounds, which use the question format from the interview discipline.
 
 Always offer these three choices and explain the recommendation:
 
@@ -426,7 +424,7 @@ Always offer these three choices and explain the recommendation:
 
 If the user selects 1, proceed to Step 7.
 
-If the user selects 2, ask a confirmation question requesting a free-form description of the area and concern. After confirming the response, perform option 2 above: make the relevant point Partial, add it to the candidate pool, recalculate aggregate category status, and return to Step 2.
+If the user selects 2, ask a confirmation question through the interactive question tool (text input) requesting a free-form description of the area and concern. After confirming the response, perform option 2 above: make the relevant point Partial, add it to the candidate pool, recalculate aggregate category status, and return to Step 2.
 
 Also accept free-form answers outside the choices, such as directly identifying an additional point, and treat them like option 2 or 3 according to their content.
 
