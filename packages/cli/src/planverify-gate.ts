@@ -1,7 +1,8 @@
 // Inlined planverify gate (was scripts/bash/planverify-gate.sh + planverify-lib.sh).
 //
 // Phase-boundary gate before /che-implement. Two independent gate
-// switches are read (env wins over .che/config.yml for each):
+// switches are read (env wins over .che/config.local.yml, which overrides
+// .che/config.yml key by key):
 //   - adr_gate (SKC_ADR_GATE / `adr_gate:`)   default block — the ADR
 //     mechanical layer: the planverify report must exist, carry
 //     `adr_status: clean`, and its recorded spec/plan/tasks SHA-256 hashes
@@ -27,7 +28,7 @@ import {
   type TaskDir,
 } from './feature-paths.ts';
 import { isFile } from './check.ts';
-import { readCheConfigValue } from './config.ts';
+import { readCheConfigSource } from './config.ts';
 
 export const PLANVERIFY_GATE_USAGE = `Usage: che planverify-gate [<slug>] [--json] [--feature <slug>] [--session <id>]
 
@@ -37,7 +38,8 @@ export const PLANVERIFY_GATE_USAGE = `Usage: che planverify-gate [<slug>] [--jso
   --json            Output results in JSON format
   --help            Show this help message
 
-  Gates (env wins over .che/config.yml, invalid values fail closed):
+  Gates (env wins over .che/config.local.yml -> .che/config.yml, invalid
+  values fail closed):
     adr_gate (SKC_ADR_GATE)             block (default) | off
       Report must exist, adr_status: clean, and recorded spec/plan/tasks
       SHA-256 hashes must match the artifacts on disk.
@@ -82,10 +84,11 @@ function resolveGateMode(
   defaultMode: 'block' | 'off',
 ): 'block' | 'off' {
   let raw = (process.env[envKey] ?? '').trim();
-  let source = envKey;
+  let source: string = envKey;
   if (raw === '') {
-    raw = readCheConfigValue(repoRoot, configKey).trim();
-    source = `.che/config.yml ${configKey}`;
+    const fromConfig = readCheConfigSource(repoRoot, configKey);
+    raw = fromConfig.value.trim();
+    source = `.che/${fromConfig.file} ${configKey}`;
   }
   if (raw === '') return defaultMode;
   const value = stripQuotesAndTrim(raw).toLowerCase();
@@ -97,12 +100,12 @@ function resolveGateMode(
   return value as 'block' | 'off';
 }
 
-/** Env wins over .che/config.yml; default off. Invalid values throw. */
+/** Env wins over .che/config.local.yml -> .che/config.yml; default off. Invalid values throw. */
 export function resolvePlanVerifyGateMode(repoRoot: string): 'block' | 'off' {
   return resolveGateMode(repoRoot, 'SKC_PLANVERIFY_GATE', 'planverify_gate', 'off');
 }
 
-/** Env wins over .che/config.yml; default block. Invalid values throw. */
+/** Env wins over .che/config.local.yml -> .che/config.yml; default block. Invalid values throw. */
 export function resolveAdrGateMode(repoRoot: string): 'block' | 'off' {
   return resolveGateMode(repoRoot, 'SKC_ADR_GATE', 'adr_gate', 'block');
 }
