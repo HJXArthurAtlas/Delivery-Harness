@@ -3,7 +3,7 @@ name: che-grill-with-docs
 description: 深度澄清 + 领域知识沉淀：与 che-grill 同样的穷尽澄清，另把敲定的术语与概念边界写入知识入口（`che knowledge paths --json` 解析的 CONTEXT_FILE，默认 docs/domain_knowledge/CONTEXT.md），长规则落对应主题文档；旧 docs/GLOSSARY.md 仅作只读 legacy 快照；过三条件记录门的决策经 adrkit scaffold 归口为 ADR（docs/adr/）。当用户说「澄清并沉淀领域知识」「把这块业务规则沉淀下来」时使用——即使用户没提命令名，只要是澄清兼领域知识落盘也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 >
 > **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — interview questions, option choices, conflict confirmations, the satisfaction gate, chain handoffs — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Display-only output (round announcements, reports, next-step hints) is unaffected.**
 

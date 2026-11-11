@@ -3,7 +3,7 @@ name: che-adr-check
 description: 按需对 plan 做独立 ADR 越界检查（只读）：把 plan 拟修改的路径与 adrkit 语料 docs/adr/ 中约束这些路径的决策逐条比对，标出违反项与需补的 ADR 变更。正式实现前校验与门禁由 /che-planverify 承担（其机械层共用本技能的 check.sh）；本技能用于规划过程中随时手动排查，不参与强制流程、不产生可供 gate 消费的 verdict、不满足 adr_gate。当用户说「check 这个 plan」「校验 plan 越没越界」「plan 有没有违反决策」「adr-check」时使用——即使用户没提命令名，只要是规划中的手动决策越界排查也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 
 # Adrkit Check Skill
 

@@ -3,7 +3,7 @@ name: che-pingcode-discover-context
 description: 探查 PingCode 项目的类型/状态/优先级/迭代/产品字典并生成配置片段。当用户问 PingCode 项目有哪些工作项类型、状态、优先级、迭代，要写或校对 pingcode-config.yml 配置片段，或建卡时报类型名/状态名匹配失败需要查实际字典时使用——即使用户没提命令名，只要是探查 PingCode 项目字典也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 
 # 发现 PingCode 项目上下文
 

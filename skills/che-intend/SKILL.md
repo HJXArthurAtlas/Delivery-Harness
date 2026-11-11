@@ -3,7 +3,7 @@ name: che-intend
 description: 意图与场景访谈 + 特性意图一体化：问答式锁定目标、范围、约束与失败条件（GQ/CQ/FQ 全过），生成 User Stories 与 Functional Requirements，起草 Acceptance Scenarios 与 Edge Cases（稳定 E# ID，SQ1–SQ4 全过），创建或更新任务并全部写入统一 intent.md（含 User Story 章节与优先级），intent.md 落 `che paths` 解析的任务目录；任务不存在时经 `che task create` 创建任务目录并绑定 session，是意图驱动流程的第一步（任务自此诞生）。当用户运行或提到 /che-intend，或说「出 spec」「写特性需求」「把这个需求转成规格」「先做 intent 访谈」「锁定目标与约束」「捕获失败条件」「补期望场景」「写 expectations」「捕获成功场景」「捕获边界场景」时使用——即使用户没提命令名，只要是动工前的意图捕获、场景捕获或特性意图的创建/更新也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 >
 > **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — clarifying questions, option choices, confirmations, gate questions, chain handoffs — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Display-only output (reports, explanations, next-step hints) is unaffected.**
 

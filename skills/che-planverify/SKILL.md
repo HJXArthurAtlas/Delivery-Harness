@@ -3,7 +3,7 @@ name: che-planverify
 description: plan 独立校验（L3）：实现前由独立 checker（固定为同模型新上下文的原生子代理）对照统一 intent 锁定的范围/约束/失败条件 + 场景（Acceptance/Edge `E#`）审查 plan 与补全后的 tasks；机械层先跑确定性 ADR 查询（共用 che-adr-check 的 check.sh，产出 planverify.adr.json 与报告 hash），再密封 briefing（含 adrkit 返回的 governing ADR 全文）派发（绝不含规划者的上下文），返回 PASS / REPLAN_ALLOWED / BLOCKED_DRIFT / BLOCKED_ADR。当用户说「验证 plan」「planverify」「实现前审一遍计划」时使用——即使用户没提命令名，只要是实现前的计划独立校验也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 >
 > **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Display-only output (verdict reports, next-step hints) is unaffected.**
 

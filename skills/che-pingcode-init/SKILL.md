@@ -3,7 +3,7 @@ name: che-pingcode-init
 description: 交互式初始化 PingCode 集成配置：选择项目/产品/迭代/映射类型，生成 pingcode-config.yml。当用户要配置或重置 pingcode-config.yml、选择 PingCode 项目/产品/迭代/卡片类型映射、修正建卡映射层级、询问"怎么接入 PingCode"时使用——即使用户没提命令名，只要是给 spec 建卡流程做 PingCode 初始化配置也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 >
 > **交互规则（pack fork，port on upstream upgrade）**：所有需要用户回答的问题——项目/产品/迭代/映射选择、层级归类、defaults 两档优先级、覆盖确认——必须经宿主的交互式提问工具发出（AskUserQuestion；omp 端即 `ask` 工具），以表单承载选项或自由文本输入（候选列表放表单正文）；绝不把问题与候选打印进回复正文后停下等待键入回答。纯展示、无需回答的输出（探查结果、配置回显）不受此限。
 

@@ -3,7 +3,7 @@ name: che-load
 description: 会话开场装载治理资产：把 adrkit ADR 语料（docs/adr/）与 compound store（docs/corrections/、docs/patterns/）加载进上下文；目录缺失时按 bundled 模板自动 scaffold。每个特性会话开始时跑一次。当用户说「加载 compound store」「加载 ADR 语料」时使用——即使用户没提命令名，只要是会话开场的治理资产装载也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 
 # Load Compound Store
 

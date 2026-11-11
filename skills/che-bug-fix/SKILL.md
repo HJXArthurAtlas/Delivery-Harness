@@ -3,7 +3,7 @@ name: che-bug-fix
 description: 按既有 bug 评估实施修复并记录变更到 docs/bugs/<slug>/fix.md（仅 assessment 已存在时可用；实施中发现评估有误会停下回退而不是硬修）。当用户运行或提到 /che-bug-fix，或说「按评估修这个 bug」「实施这个修复方案」时使用——即使用户没提命令名，只要是落地 bug assessment 的修复也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 >
 > **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — bug disambiguation, overwrite confirmation, proceed-on-clarification — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Automated / non-interactive mode never asks at all.**
 

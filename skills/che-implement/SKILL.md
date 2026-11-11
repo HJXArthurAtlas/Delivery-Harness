@@ -3,7 +3,7 @@ name: che-implement
 description: 按 tasks.md 执行实现：逐任务处理并落实任务清单；涉 UI 时按 design-tasks.md 的交互规则实现并逐项核验 UI-xx 设计要求清单，全部核验通过才算完成。当用户运行或提到 /che-implement，或说「开始实现」「按任务清单编码」「执行实现计划」时使用——即使用户没提命令名，只要是按 tasks.md 的实现执行也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 >
 > **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — the checklist proceed gate, design-conflict questions — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Display-only output (progress tables, completion reports, next-step hints) is unaffected.**
 

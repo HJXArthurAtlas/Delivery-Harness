@@ -61,9 +61,9 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     esac
   done < <(grep -oE '`[^`]+`' "$skill_md" | tr -d '`' | grep -E '(references|scripts)/' | sort -u)
 
-  # 4b. 语言规则块：SKILL.md 顶部必须声明 pack 语言配置（.che/config.yml 的 language）
+  # 4b. 语言规则块：SKILL.md 顶部必须声明 pack 语言配置（.che/config.local.yml 覆盖 → .che/config.yml 的 language）
   grep -Eq '^> \*\*语言规则（pack fork.*\.che/config\.yml' "$skill_md" \
-    && ok || bad "$skill: SKILL.md 顶部缺少语言规则块（读 .che/config.yml 的 language 决定输出语言）"
+    && ok || bad "$skill: SKILL.md 顶部缺少语言规则块（读 .che/config.local.yml → .che/config.yml 的 language 决定输出语言）"
 done
 
 # 5. 泄漏扫描：技能与 omp 目录文件不得含本机绝对路径

@@ -3,7 +3,7 @@ name: che-planverify-gate
 description: implement 前门禁（双 gate）：adr_gate 默认 block——planverify 报告缺失、adr_status 缺失或非 clean、或 intent/plan/tasks 的 SHA-256 与报告记录不匹配即拒绝；planverify_gate（默认 off）为 block 时再拒绝 BLOCKED_DRIFT / BLOCKED_ADR 裁决；未知 verdict 一律 fail-closed；两者均 off 才静默放行。手动或 agent 在 implement 边界前调用。当用户说「过一遍 implement 门禁」「检查 planverify 放行了没」时使用——即使用户没提命令名，只要是实现前的门禁检查也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 
 # Planverify Gate (before_implement)
 
@@ -38,8 +38,8 @@ The command:
 
 1. Walks up from cwd to find the project root (the directory containing `.git`)
 2. Resolves both gate modes, each: env first (`SKC_ADR_GATE` / `SKC_PLANVERIFY_GATE`), else
-   `adr_gate:` / `planverify_gate:` in `.che/config.local.yml` (machine-local overlay, overrides
-   key by key), else in `.che/config.yml`; invalid values are errors (fail-closed)
+   `adr_gate:` / `planverify_gate:` in `.che/config.yml`; invalid values are errors (fail-closed).
+   The machine-local `.che/config.local.yml` only covers language/checker and is never read here
 3. If **both** modes are not `block` → exits 0 silently — `/che-implement` proceeds normally
 4. Otherwise, against the task's `evidence/planverify.md` (`{task_dir}` = `che paths` `FEATURE_DIR`; legacy specs with the report flat at the task-dir root are still accepted, `evidence/` winning when both exist):
    - **ADR layer (`adr_gate`, default `block`)**:

@@ -3,7 +3,7 @@ name: che-analyze
 description: intent/plan/tasks 跨工件一致性只读分析（tasks 生成后、实现前）：交叉核对三份工件，找矛盾、缺失与需求覆盖缺口，只报告不修改任何文件。当用户运行或提到 /che-analyze，或说「分析 spec/plan/tasks 一致性」「找工件之间的矛盾」「实现前查一遍覆盖」时使用——即使用户没提命令名，只要是跨工件一致性分析也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 
 ## User Input
 

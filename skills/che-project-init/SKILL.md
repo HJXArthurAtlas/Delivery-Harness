@@ -3,7 +3,7 @@ name: che-project-init
 description: 交互式初始化 .che 配置：逐项确认 language、adr_gate、planverify_gate、checker、pingcode_integration 五个配置项，幂等生成 .che/config.yml（团队基座）与本地覆盖层 .che/config.local.yml（checker 落此；只补缺失或非法键，不重问）；自检安装 che/adrkit/pingcode，PingCode 接入移交 /che-pingcode-init；AGENTS 环境检查段幂等补缺、不删用户内容；宪法与基础 ADR 缺失时移交 /che-constitution、/che-adr-draft；还生成架构画像 docs/architecture.md（C4 L1+L2，仅已有代码仓库）；当用户要初始化 .che 配置、切换输出语言、开关意图流程门禁、配置校验者策略、接入本 pack、补环境检查段、更新环境检查段（收窄通道）、初始化宪法或章程、导入基础 ADR、生成/刷新架构画像、看有哪些服务/前端应用、升级后补装新配置项、查 che/adrkit 是否安装时使用——没提 skill 名也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 >
 > **交互规则（pack fork，port on upstream upgrade）**：所有需要用户回答的问题——配置逐项提问、覆盖确认、PingCode 接入确认——必须经宿主的交互式提问工具发出（AskUserQuestion；omp 端即 `ask` 工具），以表单承载选项或自由文本输入；绝不把问题与选项打印进回复正文后停下等待键入回答。纯展示、无需回答的输出（讲解、回显、报告）不受此限。
 
@@ -56,6 +56,7 @@ description: 交互式初始化 .che 配置：逐项确认 language、adr_gate�
 - **English（en）**：对话输出使用英文。
 - 合法值：BCP-47 风格语言代码（`zh-cn`、`en`、`ja`…）。交互只提供上面两个常用选项；用户主动要求其他语言时按其要求写入对应代码。
 - 本项没有环境变量覆盖。
+- 机器本地可覆盖：`.che/config.local.yml` 的非空 `language:` 优先于团队基座（个人想换输出语言时自行写本地覆盖层；本项答案仍写 `.che/config.yml` 作团队默认）。
 
 ### 1. adr_gate（ADR 机械层门禁；默认 block；选项 block / off）
 
@@ -77,6 +78,7 @@ description: 交互式初始化 .che 配置：逐项确认 language、adr_gate�
 
 - 问法：「审查实现的那个独立 AI 审查者，要挑多独立的？」选项用大白话讲：自动挑最独立的（默认）/ 必须用别家模型 / 钉死同家族便宜模型 / 钉死同款模型 / 你自己指定 CLI 和模型。
 - **本键的答案写进机器本地覆盖层 `.che/config.local.yml`（不入库、gitignore，每个成员在自己机器上各配各的），不进团队共享的 `.che/config.yml`**：checker 能配什么取决于本机装了哪些模型 CLI。读取优先级：环境变量 `SKC_CHECKER` > `.che/config.local.yml` 的非空 `checker:` > `.che/config.yml` 的 `checker:`（手工写入时作为团队默认兜底）> 默认 `auto`；覆盖层缺键或空值即回落团队基座。
+- 本地覆盖层只认 `language` 与 `checker` 两键——其他键（如门禁）写进 `.che/config.local.yml` 一律不生效，只认 `.che/config.yml`。
 
 intentverify 判定时**不让写代码的对话自己给自己打分**——判定外包给一个隔离的 checker。checker 按三级独立性阶梯选拔：跨厂商模型（Tier 1，如 codex / gemini）＞ 同家族便宜模型（Tier 2，subagent + haiku）＞ 同模型新上下文（Tier 3，subagent）。planverify 的 checker **不读本配置**——固定为同模型新上下文的原生子代理，无需任何外部模型 CLI。选项：
 
@@ -161,7 +163,7 @@ L3 组件图（某容器内部的模块拆解）不默认产出；用户显式�
 
 ### 4. 逐项提问
 
-language 需要问时**最先问**（本项固定中文提问，用户选定后，本次会话后续讲解与提问切换为所选语言），再按上面 1～4 项的顺序走一遍，**只对步骤 1 标注为缺失或值非法的键**讲解并问询（先讲通俗口径，再按该项「问法」的自然语言提问，把答案落成对应的键值记录）；已有合法值的键**绝不重问**，原样沿用，回显标注「沿用现有」。`checker` 用户选「自己指定 CLI 和模型」时必须追问具体模型标识，写成 `cli:<model>` 完整值。`checker` 的答案落 `.che/config.local.yml`，其余四键的答案落 `.che/config.yml`。用户显式点名重配某项或全部重配 → 按其指定范围重问，仍逐项单独问。五键全部沿用 → 回显标注「配置已是最新」，跳过步骤 5～7，**继续执行步骤 8**（AGENTS 环境检查、治理种子与架构画像不依赖本次是否有配置增补，重跑本技能即对账/补种/补缺入口）。
+language 需要问时**最先问**（本项固定中文提问，用户选定后，本次会话后续讲解与提问切换为所选语言），再按上面 1～4 项的顺序走一遍，**只对步骤 1 标注为缺失或值非法的键**讲解并问询（先讲通俗口径，再按该项「问法」的自然语言提问，把答案落成对应的键值记录）；已有合法值的键**绝不重问**，原样沿用，回显标注「沿用现有」。`checker` 用户选「自己指定 CLI 和模型」时必须追问具体模型标识，写成 `cli:<model>` 完整值。`checker` 的答案落 `.che/config.local.yml`，其余四键的答案落 `.che/config.yml`。用户显式点名重配某项或全部重配 → 按其指定范围重问，仍逐项单独问。五键全部沿用 → 回显标注「配置已是最新」，跳过步骤 5 与 7a（团队基座不写盘），仍执行步骤 6 与 7b（幂等补 gitignore 规则与本地覆盖层文件），**继续执行步骤 8**（AGENTS 环境检查、治理种子与架构画像不依赖本次是否有配置增补，重跑本技能即对账/补种/补缺入口）。
 
 ### 5. PingCode 接入链（仅当本次新选接入或用户显式要求补接）
 
@@ -206,7 +208,7 @@ language 需要问时**最先问**（本项固定中文提问，用户选定后�
 ```yaml
 # .che/config.yml — ncw-delivery-harness 项目配置（/che-project-init 生成）
 # 环境变量优先于本文件：SKC_ADR_GATE、SKC_PLANVERIFY_GATE、SKC_CHECKER；
-# 机器本地覆盖层 .che/config.local.yml 的同名键也覆盖本文件（缺键或空值回落本文件）。
+# 机器本地覆盖层 .che/config.local.yml 仅 language / checker 两键可覆盖本文件（缺键或空值回落本文件）。
 # checker（intentverify 独立校验者策略）为机器本地键：各成员在 .che/config.local.yml 自配，
 # 本文件不预写；手工写入的 checker: 值作为团队默认兜底。
 # planverify 的 checker 固定同模型新上下文子代理，不读任何 checker 配置。
@@ -229,19 +231,24 @@ pingcode_integration: off
   - 有增补或修正 → 旧文件备份为 `.che/config.yml.bak` 后合并写盘（用户拒绝 → 中止不写）。
   - 无增补（全部沿用）→ 不写盘，回显注明「团队基座已是最新」。
 
-**7b. `.che/config.local.yml`（机器本地、不入库）**——`checker` 本次被问且产生答案时写：
+**7b. `.che/config.local.yml`（机器本地、不入库）**——每次执行都确保在位（幂等）。本文件只认 `language` 与 `checker` 两键，其他键写入不生效：
 
-- 文件不存在 → 写（值用用户所选）：
+- 文件不存在 → 写**空模板**（只有说明注释，不含任何生效键；`language` 与 `checker` 是仅有的两个可生效键，用户按需取消注释填值）：
 
 ```yaml
 # .che/config.local.yml — 机器本地覆盖层（/che-project-init 生成，不入库、gitignore）
-# 覆盖 .che/config.yml 的同名键；缺键或空值回落团队基座。环境变量优先于两层。
+# 用途：每个成员覆盖自己机器上的个人偏好配置，不随仓库分发、不影响团队。
+# 本文件只认两个键，其他键写了也不生效（一律以 .che/config.yml 团队基座为准）：
+#   language: 全 pack 输出语言（zh-cn / en 等语言代码）
+#   checker:  intentverify 独立校验者策略（auto | cross-model | same-family | same-model | cli:<model>）
+# 覆盖方式：去掉对应行的注释并填值；缺键或空值回落 .che/config.yml；环境变量 SKC_CHECKER 优先于本文件。
 
-# checker：intentverify 独立校验者策略（auto | cross-model | same-family | same-model | cli:<model>）
-checker: <值>
+# language: en
+# checker: auto
 ```
 
-- 文件已存在 → 只增补/修正 `checker:` 键，其余键（用户自配的任何覆盖键）原样保留；有增补或修正 → 旧文件备份为 `.che/config.local.yml.bak` 后合并写盘（已被 `.che/*.bak` 忽略规则覆盖；用户拒绝 → 中止不写）；无增补 → 不写盘。
+- 文件已存在 → 原样保留（用户已配的键绝不重写）；含 `language`/`checker` 以外的键 → 回显标注「不生效键: <键…>」（只认两键，绝不代删）。
+- 本次 `checker` 被问且产生答案 → 把 `checker:` 写成所选值（替换已有同键行，或取消模板示例行的注释）；写前备份为 `.che/config.local.yml.bak`（已被 `.che/*.bak` 忽略规则覆盖；用户拒绝 → 中止不写）。
 
 ### 8. AGENTS.md 环境检查段落（幂等补缺；种子随技能分发）
 
@@ -329,6 +336,7 @@ checker: <值>
    adr_gate: <值>
    planverify_gate: <值>
    checker: <值>（config.local.yml 本地覆盖）   pingcode_integration: <值>
+   config.local.yml: <✓ 生成空模板 ｜ ✓ 写入 checker=<值> ｜ 已在位（不生效键: <键…>）>
    变更: <新增 键=值 …；修正 键=值 …；沿用 键 …；未识别键保留: 键 …（无增补时整行显示「已是最新」）>
    che: <✓ 或 ✗ + 安装命令>   adrkit: <✓ 或 ✗ + 安装命令>
    gitignore: <✓ 已忽略 .che/feature.json、.che/config.local.yml、.che/*.bak 或 +新增规则 或 用户拒绝跳过>
@@ -435,7 +443,7 @@ graph LR
 | 安装后仍 `command not found: pingcode` | 重开 shell 确认 npm 全局 bin 目录在 PATH 中 |
 | `pingcode --version` 落后于 npm 最新版 | `npm install -g @metaphorli/pingcode-cli@latest` |
 | `auth status` 始终未认证 | 检查登录命令输出；或改设 `PINGCODE_CLIENT_ID`/`PINGCODE_CLIENT_SECRET` |
-| 本地覆盖未生效 | 检查 `.che/config.local.yml`：缺键或空值回落 `.che/config.yml` 团队基座；环境变量 `SKC_*` 优先于两层；非法值 fail-closed 并在报错里标注来源文件 |
+| 本地覆盖未生效 | `.che/config.local.yml` 只认 `language` 与 `checker` 两键，其他键写入不生效；缺键或空值回落 `.che/config.yml` 团队基座；环境变量 `SKC_*` 优先于两层 |
 | 非 git 目录被拒绝 | 切到项目根再运行本技能 |
 | 纯新仓库要不要画像 | 判定为纯新仓库就跳过，绝不硬扫；代码落地后重跑本技能补画像 |
 | 宪法/ADR 移交链中断（用户拒绝或技能未走通） | 诚实回显实际状态（⚠ 移交未完成），不阻塞后续步骤；不代写治理文件，用户可稍后单独跑 /che-constitution 或 /che-adr-draft 补齐 |

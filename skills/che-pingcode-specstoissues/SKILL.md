@@ -3,7 +3,7 @@ name: che-pingcode-specstoissues
 description: 把 specs/ 下的 spec 转换为 PingCode 需求树卡片（spec 卡/用户故事卡/任务卡三级映射，向上只补未映射祖先层），登记到 specs/pingcode-mapping.json。当用户说"建卡""把 spec 转成 PingCode 卡片""创建需求树""spec 转 issues""补建/重建卡片"，或 spec 定稿后要落 PingCode 工作项时使用——即使用户没提命令名，只要是从 spec 制品创建 PingCode 卡片也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 >
 > **交互规则（pack fork，port on upstream upgrade）**：所有需要用户回答的问题——需求（idea）选择、祖先层新建/复用二选一、迭代归属、补建/重建/中止——必须经宿主的交互式提问工具发出（AskUserQuestion；omp 端即 `ask` 工具），以表单承载选项或自由文本输入（候选列表放表单正文）；绝不把问题与候选打印进回复正文后停下等待键入回答。纯展示、无需回答的输出（登记摘要、建卡报告）不受此限。
 

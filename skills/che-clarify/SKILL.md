@@ -3,7 +3,7 @@ name: che-clarify
 description: 意图澄清问答（产品澄清独占）：最多提 5 个高针对性的澄清问题，找出当前特性 intent 定义不足的区域，把结论直接合并进 intent.md 对应章节，并把 `[NEEDS CLARIFICATION]` 产品标记清零（intend 最多留 3 个明确标记，clarify 必须以零标记完成）。在 intend 之后、plan 之前使用。当用户运行或提到 /che-clarify，或说「澄清规格」「补全需求细节」「解决需求歧义」时使用——即使用户没提命令名，只要是对 intent 的澄清回写也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 >
 > **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — clarifying questions, option choices, confirmations, gate questions, chain handoffs — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Display-only output (reports, explanations, next-step hints) is unaffected.**
 

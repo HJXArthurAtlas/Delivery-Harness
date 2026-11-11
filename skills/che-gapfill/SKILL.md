@@ -3,7 +3,7 @@ name: che-gapfill
 description: 任务缺口补全：把统一 intent（In scope / Out of scope / Constraints / Failure conditions 各节 + Acceptance Scenarios / Edge Cases）对照已生成的 tasks.md 交叉核对，追加缺失的四类测试任务（约束违反/失败条件/越界回归/边界场景）并带来源注释。当用户说「补任务缺口」「gapfill」「对照 spec 查任务覆盖」时使用——即使用户没提命令名，只要是 tasks 的覆盖缺口补全也用本 skill。
 ---
 
-> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.yml` 的 `language:` 值（`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；文件、键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
+> **语言规则（pack fork，上游升级时保留；优先于本文件其他语言指示）**：任何输出前，读取项目根 `.che/config.local.yml` 的非空 `language:` 值（缺键或空值回落 `.che/config.yml` 的 `language:`；`zh-cn`、`en` 等语言代码），全程（含思考与所有对话输出）使用该语言；两处键缺失或值非法时默认 `zh-cn`。路径、命令、键名与代码不翻译。
 >
 > **Interaction rule (pack fork, port on upstream upgrade): every question that needs a user answer — the accept/group/individual/reject review, high-risk pushback, gate questions, chain handoffs — MUST be asked through the host's interactive question tool (AskUserQuestion; the `ask` tool on omp), rendered as a form with options or free-text input. NEVER print the question and options into the reply body and end the turn waiting for typed input. Display-only output (coverage matrix, diff preview, reports, next-step hints) is unaffected.**
 
@@ -105,7 +105,7 @@ Append accepted entries. Preserve the existing formatting. Add a section header 
 
 Show summary: *"Appended {N} tasks to {task_dir}/tasks.md across {N} categories."*
 
-**Pack fork (ncw), port on upstream upgrade** — close with this gate-conditional ending sequence, nothing after it. Resolve the gate config exactly as `che planverify-gate` does: env `SKC_ADR_GATE` / `SKC_PLANVERIFY_GATE` wins over `.che/config.local.yml` (machine-local overlay) then `.che/config.yml` `adr_gate:` / `planverify_gate:`; defaults `adr_gate: block`, `planverify_gate: off`; either gate resolving to `block` counts as 门禁开启:
+**Pack fork (ncw), port on upstream upgrade** — close with this gate-conditional ending sequence, nothing after it. Resolve the gate config exactly as `che planverify-gate` does: env `SKC_ADR_GATE` / `SKC_PLANVERIFY_GATE` wins over `.che/config.yml` `adr_gate:` / `planverify_gate:` (the machine-local overlay `.che/config.local.yml` only covers language/checker, never gates); defaults `adr_gate: block`, `planverify_gate: off`; either gate resolving to `block` counts as 门禁开启:
 
 1. **门禁开启（任一 gate = block）→ 主流程提问**: use the AskUserQuestion tool (never plain-text output that pauses the session for input) with two options, each carrying a one-line description; on selection the agent executes it immediately in this session — 「继续 planverify」（**推荐**）— 独立校验者审 plan+tasks（含确定性 ADR 机械层），PASS 才能进 implement。选中即自动执行 `/che-planverify` /「就此停下」— 结束本次链，planverify 稍后手动跑. On continue, planverify takes over and nothing follows here. On stop, show the manual hints rendered verbatim:
    主流程:
