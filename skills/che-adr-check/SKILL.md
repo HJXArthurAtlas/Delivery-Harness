@@ -15,7 +15,7 @@ the decisions already made, or does it quietly cross one?
 This is an **on-demand diagnostic**, not a gate. The formal pre-implement
 verification and gate live in `/che-planverify` (whose deterministic
 ADR layer invokes this same `scripts/check.sh` against the gapfilled plan/tasks
-surface). Running this command manually never writes `planverify.md`, produces
+surface). Running this command manually never writes `evidence/planverify.md`, produces
 no verdict the gate consumes, and does not satisfy `adr_gate` — a manual PASS
 here does not replace the pre-implement planverify.
 
@@ -59,7 +59,7 @@ $ARGUMENTS
 - Requires `@adrkit/cli` 0.20.0 with `adrkit` on `PATH`. If unavailable,
   install it with `npm install -g @adrkit/cli@0.20.0` and retry.
 - Read-only, and that is load-bearing rather than incidental: this command
-  never writes — no `planverify.md`, no verdict, no gate-relevant state.
+  never writes — no `evidence/planverify.md`, no verdict, no gate-relevant state.
 - Exit code 1 means findings exist (corpus errors, or the evaluator returned the
   proposal). The report is still complete. Exit code 2 is a usage error.
 - Configuration: `ADRKIT_DIR` (corpus, default `docs/adr/`), `ADRKIT_SNAPSHOT`

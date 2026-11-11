@@ -338,7 +338,8 @@ esac
 
 # 20. planverify-gate: 双 gate —— adr_gate（默认 block）+ planverify_gate（默认 off）。
 DEMO_DIR="$PROJECT/specs/NCW-4921-demo"
-PV_REPORT="$DEMO_DIR/planverify.md"
+PV_REPORT="$DEMO_DIR/evidence/planverify.md"
+mkdir -p "$DEMO_DIR/evidence"
 # 写一份带 ADR 字段与三工件 hash 的完整报告：<verdict> <adr_status>
 write_full_report() {
   {

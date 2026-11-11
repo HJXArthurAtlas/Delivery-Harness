@@ -40,7 +40,7 @@ The command:
 2. Resolves both gate modes, each: env first (`SKC_ADR_GATE` / `SKC_PLANVERIFY_GATE`), else
    `adr_gate:` / `planverify_gate:` in `.che/config.yml`; invalid values are errors (fail-closed)
 3. If **both** modes are not `block` → exits 0 silently — `/che-implement` proceeds normally
-4. Otherwise, against the task's `planverify.md` (`{task_dir}` = `che paths` `FEATURE_DIR`):
+4. Otherwise, against the task's `evidence/planverify.md` (`{task_dir}` = `che paths` `FEATURE_DIR`):
    - **ADR layer (`adr_gate`, default `block`)**:
      - No planverify report → exits 1 (run `/che-planverify` for that feature first)
      - `adr_status` missing or not `clean` → exits 1 (a pre-ADR report counts as *needs re-run*,

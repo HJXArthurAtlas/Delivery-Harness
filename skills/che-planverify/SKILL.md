@@ -71,10 +71,12 @@ If the intent is missing, stop and tell the user (a missing `intent.md` means `/
 
 ## Outputs you produce
 
-- `{task_dir}/planverify.md` — verdict report (records `checked_by`, `checker`, `gate_mode`, ADR mechanical fields, intent/plan/tasks SHA-256)
-- `{task_dir}/planverify.adr.json` — the adrkit raw facts: command, exit code, raw stdout/stderr (audit record of the mechanical layer)
-- `{task_dir}/planverify.briefing.md` — the sealed briefing (auditable proof of the firewall)
-- `{task_dir}/planverify.checker.txt` — the checker's raw response
+All four files land in `{task_dir}/evidence/` — create the directory first (`mkdir -p "{task_dir}/evidence"`); nothing flat in the task dir.
+
+- `{task_dir}/evidence/planverify.md` — verdict report (records `checked_by`, `checker`, `gate_mode`, ADR mechanical fields, intent/plan/tasks SHA-256)
+- `{task_dir}/evidence/planverify.adr.json` — the adrkit raw facts: command, exit code, raw stdout/stderr (audit record of the mechanical layer)
+- `{task_dir}/evidence/planverify.briefing.md` — the sealed briefing (auditable proof of the firewall)
+- `{task_dir}/evidence/planverify.checker.txt` — the checker's raw response
 - A clear **PASS / REPLAN_ALLOWED / BLOCKED_DRIFT / BLOCKED_ADR** verdict in the file and in chat
 
 ---
@@ -116,7 +118,7 @@ adrkit invocation):
 Requirements:
 
 - Pass the Phase 1a surface paths, deduplicated and repo-relative.
-- Save the raw output and the exit code to `{task_dir}/planverify.adr.json`
+- Save the raw output and the exit code to `{task_dir}/evidence/planverify.adr.json`
   (JSON: `{"script", "args", "exit_code", "stdout", "stderr", "ran_at"}`).
 - The `==> adrkit:check` section and its JSON **must** be present and parseable.
 - When `ADRKIT_SNAPSHOT` is configured, the `==> adrkit:evaluate` report is also
@@ -124,7 +126,7 @@ Requirements:
   explicitly. Never claim a deterministic evaluator pass that did not run.
 - **Failure is not a verdict.** Exit code 2, an unreachable corpus, a missing or
   unparseable `adrkit:check` JSON → **stop**: write no verdict, do not seal a
-  briefing, do not write `planverify.md`. Report the tool/corpus error and end.
+  briefing, do not write `evidence/planverify.md`. Report the tool/corpus error and end.
   A mechanical failure must never be interpreted as PASS.
 
 ### Phase 1c — Classify the mechanical results *(facts only)*
@@ -146,7 +148,7 @@ with the default model. Announce: *"Independent checker: native subagent
 
 ### Phase 3 — Seal the briefing *(the firewall)*
 
-Write `{task_dir}/planverify.briefing.md` containing **only**:
+Write `{task_dir}/evidence/planverify.briefing.md` containing **only**:
 - The goal sentence
 - **Locked intent** (from the unified intent): full out-of-scope list, every constraint (with IDs), every failure condition — verbatim
 - **Locked scenarios** (from the unified intent): every Acceptance Scenario and Edge Case, with their `E#` IDs — verbatim
@@ -207,7 +209,7 @@ Departure disposition (for the report's recommendations and chat):
   runs `adr accept`, then re-run planverify.
 
 If you disagree with the checker, add a one-line meta-note — the checker's verdict
-stands. Write `{task_dir}/planverify.md` using the format below; compute the
+stands. Write `{task_dir}/evidence/planverify.md` using the format below; compute the
 SHA-256 of intent/plan/tasks (`shasum -a 256`) into the frontmatter.
 
 ### Phase 6 — Communicate verdict
@@ -216,7 +218,7 @@ Read both gate modes (`SKC_ADR_GATE` / `adr_gate:` default `block`; `SKC_PLANVER
 `planverify_gate:` default `off`) and record them in the report frontmatter.
 
 - **PASS**: *"Verdict: PASS (checked by {checker}). Plan is in scope, ADR-conformant, and complete. Safe to run `/che-implement`."*
-- **REPLAN_ALLOWED**: *"Verdict: REPLAN_ALLOWED (checked by {checker}). {N} items to address (see `{task_dir}/planverify.md`). Fix via `/che-plan` — re-running it regenerates plan and tasks together, and manual plan edits also need a re-run so `tasks.md` stays in sync — then re-run `/che-planverify`."* (planverify does not patch the plan for you.)
+- **REPLAN_ALLOWED**: *"Verdict: REPLAN_ALLOWED (checked by {checker}). {N} items to address (see `{task_dir}/evidence/planverify.md`). Fix via `/che-plan` — re-running it regenerates plan and tasks together, and manual plan edits also need a re-run so `tasks.md` stays in sync — then re-run `/che-planverify`."* (planverify does not patch the plan for you.)
 - **BLOCKED_DRIFT**: *"Verdict: BLOCKED_DRIFT (checked by {checker}). {N} unjustified expansions:"* — list each with the bounded alternative. Replan before implementing.
 - **BLOCKED_ADR**: *"Verdict: BLOCKED_ADR (checked by {checker}). {N} departures from governing ADRs:"* — list each with evidence. Fix the plan, or draft a superseding ADR via `/che-adr-draft` and have it ratified (`adr accept`), then re-run planverify. With the default `adr_gate: block`, `/che-implement` is refused until a clean, hash-fresh report exists.
 
@@ -282,7 +284,7 @@ requested_surface:
 
 ---
 
-## Output format — `{task_dir}/planverify.md`
+## Output format — `{task_dir}/evidence/planverify.md`
 
 ```markdown
 ---
@@ -312,7 +314,7 @@ tasks_sha256: {sha256 of tasks.md at run time}
 > **Checked by {checker} — same-model, fresh-context subagent.**
 > The checker received only the locked intent, locked scenarios, the plan, the
 > tasks, the surface analysis, and the adrkit governing-ADR facts (see
-> `…planverify.briefing.md`). It did not see the planning.
+> `…/evidence/planverify.briefing.md`). It did not see the planning.
 
 ## ADR Mechanical Layer *(orchestrator, deterministic)*
 - adrkit: {version}; corpus: {corpus dir}; check.sh exit code: {0|1}

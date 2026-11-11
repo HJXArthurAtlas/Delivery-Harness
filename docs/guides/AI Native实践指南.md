@@ -288,7 +288,7 @@ bug 修复三步：
 
 ### 3.3 产出物结构
 
-每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`intent.md`（统一规格：意图块 + User Story / Acceptance / Edge / FR / SC，场景带全局稳定 `E#` ID）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单，gapfill 追加 `## Gap-filling tasks` 节、converge 追加 `## Phase N: Convergence` 节）、`planverify.md`（门禁报告，frontmatter 记录 verdict、`adr_status` 与 intent/plan/tasks SHA-256）、`planverify.adr.json`（adrkit 原始审计记录）、`intentverify.md`（实现后独立校验报告，记录 `checked_by` 与独立性 Tier）、`intentverify.briefing.md` 与 `intentverify.checker.txt`（密封 briefing 与 checker 原文，独立性防火墙的审计证据）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/domain_knowledge/`（统一语言入口 `CONTEXT.md` + 跨特性主题知识）、`docs/GLOSSARY.md`（legacy 只读快照，词条随特性采纳时迁入 `CONTEXT.md`）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
+每个特性一个任务目录 `specs/NNN-{slug}/`（推送 PingCode 后改名 `{identifier}-{slug}`，slug 不变），依次沉淀：`intent.md`（统一规格：意图块 + User Story / Acceptance / Edge / FR / SC，场景带全局稳定 `E#` ID）、`design-tasks.md`（设计明细）、plan 工件、`tasks.md`（任务清单，gapfill 追加 `## Gap-filling tasks` 节、converge 追加 `## Phase N: Convergence` 节）、`evidence/` 子目录（planverify / intentverify 校验产物统一归档，不平铺在任务目录下）：`evidence/planverify.md`（门禁报告，frontmatter 记录 verdict、`adr_status` 与 intent/plan/tasks SHA-256）、`evidence/planverify.adr.json`（adrkit 原始审计记录）、`evidence/intentverify.md`（实现后独立校验报告，记录 `checked_by` 与独立性 Tier）、`evidence/intentverify.briefing.md` 与 `evidence/intentverify.checker.txt`（密封 briefing 与 checker 原文，独立性防火墙的审计证据）、`metadata.json`（运行时间线）。治理侧工件随流程持续沉淀：`docs/adr/`（决策）、`docs/domain_knowledge/`（统一语言入口 `CONTEXT.md` + 跨特性主题知识）、`docs/GLOSSARY.md`（legacy 只读快照，词条随特性采纳时迁入 `CONTEXT.md`）、`docs/corrections/` 与 `docs/patterns/`（经验沉淀）、`docs/bugs/<slug>/`（bug 三件套）。
 
 ## 4. 使用路径：从初始化到日常交付
 

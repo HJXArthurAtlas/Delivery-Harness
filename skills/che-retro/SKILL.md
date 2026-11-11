@@ -17,7 +17,7 @@ After `/che-intentverify` returns PASS (or REVIEW NEEDED that a human has cleare
 
 **1. Verify intent verify passed.**
 
-Read `{task_dir}/intentverify.md` (`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR`). If verdict is:
+Read `{task_dir}/evidence/intentverify.md` (`{task_dir}` = the task directory `che paths` reports as `FEATURE_DIR`). If verdict is:
 - **BLOCKED**: refuse — *"Intent verify verdict is BLOCKED. Resolve violations before retro."*
 - **REVIEW NEEDED**: ask the user via the interactive question tool (AskUserQuestion; the `ask` tool on omp) — *"Verdict is REVIEW NEEDED. Has a human reviewed the {N} items?"* (options 「已人工复核」/「尚未复核」). Refuse if not reviewed.
 - **PASS**: proceed.

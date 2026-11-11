@@ -285,8 +285,8 @@ export function runPlanVerifyGate(argv: string[]): number {
   }
   const slug = task.slug;
 
-  // Report lives inside the task directory (rename-safe: resolved per run).
-  const report = join(task.path, 'planverify.md');
+  // Report lives in the task directory's evidence/ subdir (rename-safe: resolved per run).
+  const report = join(task.path, 'evidence', 'planverify.md');
   const blocking = mode === 'block' || adrMode === 'block';
   let reportExists = false;
   let verdict = '';

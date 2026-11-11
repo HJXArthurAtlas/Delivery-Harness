@@ -62,9 +62,11 @@ If the intent is missing, stop and tell the user (a missing `intent.md` means `/
 
 ## Output you produce
 
-- `{TASK_DIR}/intentverify.md` — the verdict report (records `checked_by` + `independence_tier`)
-- `{TASK_DIR}/intentverify.briefing.md` — the **sealed briefing** the checker received (auditable proof it saw no builder context)
-- `{TASK_DIR}/intentverify.checker.txt` — the checker's raw response (auditable proof of who judged)
+All files land in `{TASK_DIR}/evidence/` — create the directory first (`mkdir -p "$TASK_DIR/evidence"`); nothing flat in the task dir.
+
+- `{TASK_DIR}/evidence/intentverify.md` — the verdict report (records `checked_by` + `independence_tier`)
+- `{TASK_DIR}/evidence/intentverify.briefing.md` — the **sealed briefing** the checker received (auditable proof it saw no builder context)
+- `{TASK_DIR}/evidence/intentverify.checker.txt` — the checker's raw response (auditable proof of who judged)
 - A clear **PASS / REVIEW NEEDED / BLOCKED** verdict in the file and in chat
 
 ---
@@ -107,7 +109,7 @@ Record any task marked complete with no diff evidence as a **L2 concern**. If 80
 
 ### Phase 4 — Seal the briefing *(the firewall)*
 
-Write `{TASK_DIR}/intentverify.briefing.md` containing **only**:
+Write `{TASK_DIR}/evidence/intentverify.briefing.md` containing **only**:
 - The goal sentence
 - **Locked intent** (from `intent.md`): the full out-of-scope list, every constraint (with IDs), every failure condition — copied verbatim
 - **Locked scenarios** (from `intent.md`): every Acceptance Scenario and Edge Case, with their `E#` IDs — copied verbatim
@@ -120,16 +122,18 @@ It must contain **NONE** of: your chat history, the plan's reasoning, task-by-ta
 
 ### Phase 5 — Dispatch the independent checker
 
-**Tier 1 (cross-model, e.g. Codex):** shell out via Bash in non-interactive mode, feeding it the sealed briefing, and capture stdout to `{TASK_DIR}/intentverify.checker.txt`:
+**Tier 1 (cross-model, e.g. Codex):** shell out via Bash in non-interactive mode, feeding it the sealed briefing, and capture stdout to `{TASK_DIR}/evidence/intentverify.checker.txt`:
 
 ```bash
+# All intentverify artifacts live in evidence/; create it once up front.
+mkdir -p "$TASK_DIR/evidence"
 # Feed the sealed briefing on stdin — robust for large diffs (avoids ARG_MAX).
 # `codex exec -` reads instructions from stdin. Confirm flags with `codex exec --help`.
 # Keep stderr OUT of the verdict file: Codex prints a banner + any MCP/plugin
 # warnings to stderr; the clean final message (with the JSON block) goes to stdout.
-codex exec - < "$TASK_DIR/intentverify.briefing.md" \
-  >  "$TASK_DIR/intentverify.checker.txt" \
-  2> "$TASK_DIR/intentverify.checker.log"
+codex exec - < "$TASK_DIR/evidence/intentverify.briefing.md" \
+  >  "$TASK_DIR/evidence/intentverify.checker.txt" \
+  2> "$TASK_DIR/evidence/intentverify.checker.log"
 # Codex defaults suit a validator: `approval: never`, `sandbox: read-only`.
 # Parse the LAST ```json block in checker.txt as the verdict (ignore any banner).
 # Options: `-m <model>` picks the checker model; `codex review` is a purpose-built
@@ -141,7 +145,7 @@ The briefing carries the **full diff**, so the cross-model checker judges hermet
 
 The briefing instructs the checker to end its response with the JSON verdict block. Extract that block from the captured output.
 
-**Tier 2 / Tier 3 (native subagent):** dispatch the **Agent/Task tool** with a read-only-capable agent (it needs Read + Bash to inspect files referenced in the diff, but **must not** Edit/Write code), passing the sealed briefing as the entire prompt. Set `model: haiku` for Tier 2; omit for Tier 3. Save its returned JSON to `{TASK_DIR}/intentverify.checker.txt`.
+**Tier 2 / Tier 3 (native subagent):** dispatch the **Agent/Task tool** with a read-only-capable agent (it needs Read + Bash to inspect files referenced in the diff, but **must not** Edit/Write code), passing the sealed briefing as the entire prompt. Set `model: haiku` for Tier 2; omit for Tier 3. Save its returned JSON to `{TASK_DIR}/evidence/intentverify.checker.txt`.
 
 The checker performs **all of L3** internally:
 - **L3a — Out-of-scope** *(BLOCKING)*: for each out-of-scope item, inspect the diff for matching paths/symbols/strings. Clear (non-borderline) match → BLOCKED.
@@ -160,12 +164,12 @@ Take the checker's L3a–L3d verdicts **as given** and combine with your L1/L2:
 
 If you *disagree* with the checker, you may add a one-line **meta-note** to the report, but the checker's L3 verdict stands — overriding it re-merges the two contexts you just separated and voids the independence claim.
 
-Write `{TASK_DIR}/intentverify.md` using the format below.
+Write `{TASK_DIR}/evidence/intentverify.md` using the format below.
 
 ### Phase 7 — Communicate verdict
 
 - **PASS**: *"Verdict: PASS (checked by {checker}, Tier {N}). Safe to merge. Run `/che-retro` to persist learnings before merging."*
-- **REVIEW NEEDED**: *"Verdict: REVIEW NEEDED (checked by {checker}). {N} items need human review (see `{TASK_DIR}/intentverify.md`). Do not merge until reviewed."*
+- **REVIEW NEEDED**: *"Verdict: REVIEW NEEDED (checked by {checker}). {N} items need human review (see `{TASK_DIR}/evidence/intentverify.md`). Do not merge until reviewed."*
 - **BLOCKED**: *"Verdict: BLOCKED (checked by {checker}). {N} violations:"* — list each with the required fix.
 
 ---
@@ -196,7 +200,7 @@ Embed this in the briefing. Both native subagents and cross-model CLIs return th
 
 ---
 
-## Output format — `{TASK_DIR}/intentverify.md`
+## Output format — `{TASK_DIR}/evidence/intentverify.md`
 
 ```markdown
 ---
@@ -215,7 +219,7 @@ diff_files: {N}
 
 > **Checked by {checker} — Tier {N} ({cross-model | cross-tier | same-model fresh-context}).**
 > The checker received only the locked intent, locked scenarios, the diff, and the
-> mechanical results (see `…intentverify.briefing.md`). It did not see the build.
+> mechanical results (see `…/evidence/intentverify.briefing.md`). It did not see the build.
 
 ## L1 — Mechanical *(orchestrator)*
 - Build: {pass/fail}
