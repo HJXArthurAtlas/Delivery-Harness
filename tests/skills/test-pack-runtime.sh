@@ -149,7 +149,8 @@ json_matches "$OUT" "{\"REPO_ROOT\":\"$PROJECT\",\"FEATURE_DIR\":\"$PROJECT/spec
 # The planverify-gate wrapper delegates to `che planverify-gate`: both gates
 # off is a silent no-op; the default config (adr_gate block) refuses a missing
 # report; planverify_gate=block (ADR layer off, to isolate the semantic path)
-# gates on the task dir's evidence/planverify.md report.
+# gates on the task dir's evidence/planverify.md report (legacy flat
+# planverify.md still accepted when evidence/ is absent).
 OUT="$(cd "$PROJECT" && SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=off "$PV_GATE_WRAPPER" demo 2>"$TMP/stderr")"
 RC=$?
 [ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate 双 off: RC=$RC OUT=[$OUT] 预期静默退 0"
@@ -167,6 +168,12 @@ case "$(<"$TMP/stderr")" in
   *"no planverify report exists for 'demo'"*) ok ;;
   *) bad "planverify-gate block 无报告: 错误信息不符：$(<"$TMP/stderr")" ;;
 esac
+# 旧版平铺报告兼容：evidence/ 缺失时退读任务目录根的 planverify.md。
+printf 'verdict: PASS\n' > "$PROJECT/specs/001-demo/planverify.md"
+OUT="$(cd "$PROJECT" && SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=block "$PV_GATE_WRAPPER" demo 2>"$TMP/stderr")"
+RC=$?
+[ "$RC" -eq 0 ] && ok || bad "planverify-gate 平铺旧报告兼容: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
+rm -f "$PROJECT/specs/001-demo/planverify.md"
 mkdir -p "$PROJECT/specs/001-demo/evidence"
 printf 'verdict: PASS\n' > "$PROJECT/specs/001-demo/evidence/planverify.md"
 OUT="$(cd "$PROJECT" && SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=block "$PV_GATE_WRAPPER" demo 2>"$TMP/stderr")"

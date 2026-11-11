@@ -285,25 +285,29 @@ export function runPlanVerifyGate(argv: string[]): number {
   }
   const slug = task.slug;
 
-  // Report lives in the task directory's evidence/ subdir (rename-safe: resolved per run).
-  const report = join(task.path, 'evidence', 'planverify.md');
+  // Report lives in the task directory's evidence/ subdir (rename-safe: resolved
+  // per run). Pre-evidence specs keep the report flat at the task-dir root — the
+  // gate reads either, evidence/ winning when both exist.
+  const evidenceReport = join(task.path, 'evidence', 'planverify.md');
+  const legacyReport = join(task.path, 'planverify.md');
   const blocking = mode === 'block' || adrMode === 'block';
-  let reportExists = false;
+  let reportPath: string | null = null;
   let verdict = '';
   let adrStatus = '';
   let hashesMatch: boolean | null = null;
   if (blocking) {
-    reportExists = isFile(report);
-    verdict = reportExists ? readPlanVerifyField(report, 'verdict') : '';
-    adrStatus = reportExists ? readPlanVerifyField(report, 'adr_status') : '';
-    if (reportExists) {
+    if (isFile(evidenceReport)) reportPath = evidenceReport;
+    else if (isFile(legacyReport)) reportPath = legacyReport;
+    verdict = reportPath ? readPlanVerifyField(reportPath, 'verdict') : '';
+    adrStatus = reportPath ? readPlanVerifyField(reportPath, 'adr_status') : '';
+    if (reportPath) {
       hashesMatch = true;
       for (const [field, file] of [
         ['intent_sha256', 'intent.md'],
         ['plan_sha256', 'plan.md'],
         ['tasks_sha256', 'tasks.md'],
       ] as const) {
-        const recorded = readPlanVerifyField(report, field);
+        const recorded = readPlanVerifyField(reportPath, field);
         const actual = sha256Of(join(task.path, file));
         if (recorded === '' || actual === null || recorded !== actual) {
           hashesMatch = false;
@@ -318,7 +322,7 @@ export function runPlanVerifyGate(argv: string[]): number {
   let blockReason: 'report' | 'stale' | 'adr' | 'drift' | 'blocked_adr' | 'unknown_verdict' | null =
     null;
   if (adrMode === 'block') {
-    if (!reportExists) blockReason = 'report';
+    if (!reportPath) blockReason = 'report';
     else if (adrStatus !== 'clean') blockReason = 'adr';
     else if (hashesMatch !== true) blockReason = 'stale';
   }
@@ -340,7 +344,7 @@ export function runPlanVerifyGate(argv: string[]): number {
         SLUG: slug,
         MODE: mode,
         ADR_GATE: adrMode,
-        REPORT: reportExists ? report : null,
+        REPORT: reportPath,
         VERDICT: verdict === '' ? null : verdict,
         ADR_STATUS: adrStatus === '' ? null : adrStatus,
         HASHES_MATCH: hashesMatch,

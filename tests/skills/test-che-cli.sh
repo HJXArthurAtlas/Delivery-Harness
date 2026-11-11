@@ -382,6 +382,28 @@ run env SKC_ADR_GATE=off "$CHE_BIN" planverify-gate --session s1 --json
 json_matches "$OUT" "{\"SLUG\":\"demo\",\"MODE\":\"off\",\"ADR_GATE\":\"off\",\"PROCEED\":true}" \
   && ok || bad "planverify-gate 双 off --json: RC=$RC OUT=$OUT"
 
+# 旧版平铺报告兼容：evidence/ 缺失时退读任务目录根的 planverify.md（REPORT 指向旧路径）。
+rm -f "$PV_REPORT"
+printf 'verdict: PASS\n' > "$DEMO_DIR/planverify.md"
+run "$CHE_BIN" planverify-gate --session s1 --json
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate 平铺旧报告缺 adr_status: RC=$RC，预期 1"
+case "$OUT" in
+  *"\"REPORT\":\"$DEMO_DIR/planverify.md\""*) ok ;;
+  *) bad "planverify-gate 平铺旧报告: --json REPORT 未指向旧路径: OUT=$OUT" ;;
+esac
+case "$(<"$TMP/stderr")" in
+  *"predates the ADR layer"*) ok ;;
+  *) bad "planverify-gate 平铺旧报告: 错误信息不符：$(<"$TMP/stderr")" ;;
+esac
+# 两处并存 → evidence/ 优先。
+printf 'verdict: PASS\n' > "$PV_REPORT"
+run "$CHE_BIN" planverify-gate --session s1 --json
+case "$OUT" in
+  *"\"REPORT\":\"$PV_REPORT\""*) ok ;;
+  *) bad "planverify-gate 双路径并存: --json REPORT 未指向 evidence/: OUT=$OUT" ;;
+esac
+rm -f "$DEMO_DIR/planverify.md"
+
 # adr_gate=off + planverify_gate=block：仅语义 verdict，不查 ADR 字段/hash。
 printf 'verdict: PASS\n' > "$PV_REPORT"
 run env SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=block "$CHE_BIN" planverify-gate --session s1
