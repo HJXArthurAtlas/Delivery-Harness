@@ -186,6 +186,7 @@ When all interview phases pass (or, for update, after the update confirmation):
    ```
    The command allocates the next `NNN-` number, enforces slug uniqueness, creates `specs/NNN-{slug}/` with a `metadata.json` skeleton, and binds the session. `--summary` is the one-line "what is this task about" (use the locked goal sentence). Use the printed `TASK_DIR` for every subsequent file operation. If the slug already exists the command fails — go back and pick another slug, confirmed the same way.
 4. For update: skip task creation; keep the resolved `FEATURE_DIR`/`SLUG`.
+5. Ensure `{TASK_DIR}/compound.md` exists (create-new and update) — the per-feature compound store record `/che-retro` fills after intentverify PASS. When missing, write the record skeleton from step 1 of `/che-load` (`skills/che-load/SKILL.md`, single canonical copy) with the directory name filled in; never overwrite an existing record.
 
 ### Step 4 — Start the runs timeline (before the first artifact write)
 

@@ -106,9 +106,9 @@ Claude Code's memory files are stored locally, not permanently in the project's 
 docs/
 ├── adr/              ← settled architecture decisions (shared adrkit corpus)
 ├── corrections/      ← what AI did wrong + derived rule to avoid repeat
-├── patterns/         ← reusable implementation patterns for this codebase
-└── compound/
-    └── README.md     ← compound store guide
+└── patterns/         ← reusable implementation patterns for this codebase
+specs/<task-dir>/
+└── compound.md       ← per-feature record of this feature's store contributions
 ```
 (Settled ADRs live in the shared adrkit corpus at `docs/adr/` —
 same schema as `/che-adr-draft`, validated by `.agents/skills/che-adr-draft/scripts/adr.sh lint`.)
@@ -155,7 +155,7 @@ The most critical architectural decision.
 
 The toolkit and its harnesses store agent memory locally. This breaks across sessions, machines, and team members.
 
-The compound store is version-controlled and committed: artifacts live in `docs/adr/`, `docs/corrections/`, and `docs/patterns/`, while metadata remains under `docs/compound/`. It is treated as a first-class repo artifact — because that is exactly what it is.
+The compound store is version-controlled and committed: artifacts live in `docs/adr/`, `docs/corrections/`, and `docs/patterns/`, while each feature's contribution record lives beside its spec at `specs/<task-dir>/compound.md`. It is treated as a first-class repo artifact — because that is exactly what it is.
 
 ### One requirement artifact; independence at the dispatch boundary (supersedes the v0.2 file split)
 IDSD's original compartmentation principle kept success scenarios out of the artifact the builder reads, because LLMs reward-hack — the builder will optimize for the scenarios the validator checks. v0.2 shipped that as two files: `/che-intend` wrote `intent.md` (intent + generated specification) and a separate `/che-expectations` wrote the validator-only `expectations.md`.

@@ -103,9 +103,9 @@ Show each draft and ask (use AskUserQuestion per draft):
 - **accept** — write the file as drafted
 - **edit** — open for inline edit, then write
 - **reject** — drop this draft
-- **defer** — save to a scratch file `docs/compound/_drafts/` for later review
+- **defer** — save to a scratch file `{task_dir}/_drafts/` for later review
 
-**5. Write accepted files.** ADRs go to the shared adrkit corpus at `docs/adr/`; corrections and patterns go to `docs/corrections/` and `docs/patterns/`.
+**5. Write accepted files.** ADRs go to the shared adrkit corpus at `docs/adr/`; corrections and patterns go to `docs/corrections/` and `docs/patterns/`. Then update the per-feature record `{task_dir}/compound.md` (create it from the record skeleton in step 1 of `/che-load` if missing): one line per accepted artifact under the matching `## ADRs` / `## Corrections` / `## Patterns` heading in the format its HTML comment prescribes, and one `## Deferred` line per draft parked in `{task_dir}/_drafts/`.
 
 - For ADRs: allocate each accepted ADR through the scaffold entry point `.agents/skills/che-adr-draft/scripts/scaffold.sh <title>` (global install: `~/.agents/skills/che-adr-draft/scripts/scaffold.sh`). It writes a schema-valid draft with the next free corpus id into `docs/adr/` (override with `ADRKIT_DIR`), printing `{ "id", "path" }`; write the drafted body into that file and run `.agents/skills/che-adr-draft/scripts/adr.sh lint` afterwards (global install: `~/.agents/skills/che-adr-draft/scripts/adr.sh lint`). Status stays `draft` — ratification is a human act, as in `/che-adr-draft`. Never hand-number and never edit an existing ADR; a changed decision gets a new record that supersedes the old one.
 - For corrections: write `docs/corrections/{YYYY-MM-DD}-{slug}.md`, prefixing the filename with the date. Always include the `paths:`/`match:`/`rule:`/`context:` frontmatter from the template above so the correction is enforceable — only fall back to a frontmatter-less body if the user explicitly wants a context-only note.
@@ -121,7 +121,7 @@ completed: {YYYY-MM-DD}
 
 **7. Summary**:
 
-*"Retro complete. {N} ADRs committed to the adrkit corpus (`docs/adr/`), {N} corrections committed to `docs/corrections/`, and {N} patterns committed to `docs/patterns/`. Intent `{slug}` marked completed. Corpus size: {N} ADRs; store size: {N} corrections / {N} patterns."*
+*"Retro complete. {N} ADRs committed to the adrkit corpus (`docs/adr/`), {N} corrections committed to `docs/corrections/`, and {N} patterns committed to `docs/patterns/`. Per-feature record `{task_dir}/compound.md` updated. Intent `{slug}` marked completed. Corpus size: {N} ADRs; store size: {N} corrections / {N} patterns."*
 
 ---
 
@@ -148,5 +148,5 @@ completed: {YYYY-MM-DD}
 
 > Pack fork (ncw), port on upstream upgrade.
 
-- **目标**：无 —— 链终点；产物落 `docs/adr/`、`docs/corrections/`、`docs/patterns/`
+- **目标**：无 —— 链终点；产物落 `docs/adr/`、`docs/corrections/`、`docs/patterns/`，记录落 `{task_dir}/compound.md`
 - **条件**：仅在 intentverify PASS（或 REVIEW NEEDED 经人工确认）后执行；BLOCKED 必须拒绝
