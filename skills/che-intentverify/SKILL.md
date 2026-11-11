@@ -35,14 +35,14 @@ The checker is selected at runtime by climbing to the **highest available** tier
 | **2 — cross-tier** | A *cheaper sibling* in the same family (e.g. Opus → **Haiku**) | Different weights + fresh context. | Native subagent via the **Agent/Task tool** with `model:` override. |
 | **3 — same-model, fresh context** | Same model, brand-new agent | Fresh context only (no model diversity). The honest floor. | Native subagent via the **Agent/Task tool**, default model. |
 
-**Config knob (`SKC_CHECKER`)** — the user decides the policy:
+**Config knob (`SKC_CHECKER`)** — each user decides the policy on their machine:
 - `auto` *(default)* — climb to the highest available tier.
 - `cross-model` — require Tier 1; if no other-vendor CLI is found, **fail loudly** rather than silently degrade.
 - `same-family` — force Tier 2.
 - `same-model` — force Tier 3 (e.g. offline, or no second model installed).
 - `cli:model` — explicit, e.g. `codex` or `claude:haiku`.
 
-Read it from the `SKC_CHECKER` env var, or a `checker:` line in `.che/config.yml` if present. Default `auto`.
+Read it in priority order: the `SKC_CHECKER` env var → a non-empty `checker:` line in the machine-local overlay `.che/config.local.yml` → a `checker:` line in the team-shared `.che/config.yml` → default `auto`. A missing or empty overlay key falls through to the team base.
 
 Tier 1 is optional. Without a cross-model CLI, `auto` continues through native
 Tier 2 / Tier 3; a fresh default-model subagent is the pack-local baseline. Only
@@ -99,7 +99,7 @@ Record any task marked complete with no diff evidence as a **L2 concern**. If 80
 ### Phase 3 — Select the checker
 
 1. Identify **your own** family (the model executing this command — e.g. Claude). The checker should come from a *different* family when possible.
-2. Resolve `SKC_CHECKER` (default `auto`).
+2. Resolve the checker policy: `SKC_CHECKER` env → `.che/config.local.yml` `checker:` (machine-local overlay) → `.che/config.yml` `checker:` → default `auto`.
 3. Probe availability and pick the tier:
    - **Tier 1** — `command -v codex` / `command -v gemini` (any other-vendor CLI on PATH). If found and policy allows → Tier 1.
    - **Tier 2** — no other vendor, but you can spawn a native subagent with a cheaper model (`haiku`) → Tier 2.

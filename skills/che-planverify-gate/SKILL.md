@@ -38,7 +38,8 @@ The command:
 
 1. Walks up from cwd to find the project root (the directory containing `.git`)
 2. Resolves both gate modes, each: env first (`SKC_ADR_GATE` / `SKC_PLANVERIFY_GATE`), else
-   `adr_gate:` / `planverify_gate:` in `.che/config.yml`; invalid values are errors (fail-closed)
+   `adr_gate:` / `planverify_gate:` in `.che/config.local.yml` (machine-local overlay, overrides
+   key by key), else in `.che/config.yml`; invalid values are errors (fail-closed)
 3. If **both** modes are not `block` → exits 0 silently — `/che-implement` proceeds normally
 4. Otherwise, against the task's `evidence/planverify.md` (`{task_dir}` = `che paths` `FEATURE_DIR`; legacy specs with the report flat at the task-dir root are still accepted, `evidence/` winning when both exist):
    - **ADR layer (`adr_gate`, default `block`)**:

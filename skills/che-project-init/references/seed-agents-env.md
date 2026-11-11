@@ -12,7 +12,7 @@
 | adr（adrkit CLI） | 0.20.0 | `adr --version`，输出为 `0.20.0` 即合规 | `npm i -g @adrkit/cli@0.20.0` |
 | pingcode CLI | 与 npm 上 `latest` 一致 | 仅接入 PingCode 的项目检查，判据：`.che/config.yml` 为 `pingcode_integration: on` 且 `.che/pingcode-config.yml` 在位（二者由 /che-project-init 与 /che-pingcode-init 生成，任一不满足视为未接入、不检查）。合规检测：`pingcode -v` 与 `npm view @metaphorli/pingcode-cli version` 输出一致即合规；命令失败、缺装或版本不一致均不符 | 缺装或版本落后时 `npm i -g @metaphorli/pingcode-cli@latest` 升到最新（che-pingcode-* 五技能依赖）；未接入时不装 |
 | PingCode 登录（条件） | 已认证且 token 有效 | 仅接入 PingCode 的项目检查（接入判据同上一行）；跑登录包装脚本 `bash .che/pingcode-login.sh status`，退出码 0 即合规；脚本缺失视为不符，按右列补放 | 脚本缺失 → 重跑 /che-project-init 补放（其接入链会把登录包装脚本落盘到 .che/）；未登录 → 告知用户「即将打开浏览器授权」后 `bash .che/pingcode-login.sh login`：自动打开浏览器并阻塞等待授权回调——挂起属正常，给足 ≥300 秒勿中止，完成后自动复检；远程 SSH/浏览器打不开 → `login --dry-run` 取授权 URL 交用户，授权后从重定向地址 `…/callback?code=…` 复制 `code`，改 `login --code <授权码>`。凭据只封装在脚本内，不散落于文档与配置 |
-| 跨模型 CLI（codex / gemini / claude） | 条件性 | 默认 `auto` 策略不需要 | 仅当 .che/config.yml 的 checker 策略强制 `cross-model` 或 `cli:model` 时对应 CLI 需在 PATH（macOS/Linux 用 `command -v <cli>`、Windows 用 `Get-Command <cli>`，可达即合规），默认不装不查 |
+| 跨模型 CLI（codex / gemini / claude） | 条件性 | 默认 `auto` 策略不需要 | 仅当 checker 策略（`SKC_CHECKER` > `.che/config.local.yml` > `.che/config.yml` 的首个非空 `checker:`）强制 `cross-model` 或 `cli:model` 时对应 CLI 需在 PATH（macOS/Linux 用 `command -v <cli>`、Windows 用 `Get-Command <cli>`，可达即合规），默认不装不查 |
 | codegraph | 1.6.2 | `codegraph --version`，输出 `1.6.2` 即合规 | `npm i -g @colbymchenry/codegraph@1.6.2` |
 | codegraph 索引（项目级） | 已初始化 | 项目根目录跑 `codegraph status`，出现 `Not initialized` 即未初始化 | 未初始化：列入不符合项，经我确认后执行 `codegraph init`；已初始化：默认执行一次 `codegraph sync` 刷新索引（这是检查动作本身，不需确认） |
 

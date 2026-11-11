@@ -59,7 +59,7 @@ flowchart LR
 重启 Agent 后再发第二段：
 
 ```text
-先确认 codegraph MCP 已接入，并用 codegraph 实际执行一次查询验证索引可用；随后通读根目录的 AGENTS.md 并严格遵循，把我的项目信息登记进「布局」章节（没有该章节就新建）；然后运行 /che-project-init 做项目级配置（.che/config.yml + 可选 PingCode 接入），按我的答复执行——它会幂等补全 AGENTS.md 的「环境检查」节，宪法缺失时移交 /che-constitution 逐条确认实例化、基础 ADR 缺失时移交 /che-adr-draft 逐条确认导入；并按 AGENTS.md 的提交规范把本次变更提交。
+先确认 codegraph MCP 已接入，并用 codegraph 实际执行一次查询验证索引可用；随后通读根目录的 AGENTS.md 并严格遵循，把我的项目信息登记进「布局」章节（没有该章节就新建）；然后运行 /che-project-init 做项目级配置（.che/config.yml 团队基座 + .che/config.local.yml 本地覆盖 + 可选 PingCode 接入），按我的答复执行——它会幂等补全 AGENTS.md 的「环境检查」节，宪法缺失时移交 /che-constitution 逐条确认实例化、基础 ADR 缺失时移交 /che-adr-draft 逐条确认导入；并按 AGENTS.md 的提交规范把本次变更提交。
 ```
 
 > 前提：Agent 所在环境能访问 `git.newchiwan.com`（安装技能包）；内网装 `@newchiwan/che` 需要公司 Nexus（初始化提示词与 `/che-project-init` 会处理 scope 配置）。
@@ -82,7 +82,7 @@ ncw-delivery-harness 项目地址：https://git.newchiwan.com/council/ncw-delive
 重启 Agent 之后再发这一段：
 
 ```text
-先确认 ncw-delivery-harness 已生效（列出已装插件/技能能看到它）；然后运行 /che-project-init 做项目级配置（.che/config.yml + 可选 PingCode 接入），按我的答复执行——它会给我的 AGENTS.md 幂等补上「环境检查」章节（没有 AGENTS.md 就新建最小 AGENTS.md：一句话说明 + 该节；已有近似章节则逐项比对表格列出差异问我，经我确认再合并，绝不删改既有内容）；完成后按该章节做一次全量环境检查作为初始化验证：逐项汇报结果，不符合项经我确认后才按「安装 / 升级」列处理——其中 codegraph 及其项目索引存量项目未必需要，装不装先问我；确认不适用的检查行（如不接 codegraph）直接在我项目 AGENTS.md 该行标注不适用，之后检查跳过；最后按提交规范提交本次变更。
+先确认 ncw-delivery-harness 已生效（列出已装插件/技能能看到它）；然后运行 /che-project-init 做项目级配置（.che/config.yml 团队基座 + .che/config.local.yml 本地覆盖 + 可选 PingCode 接入），按我的答复执行——它会给我的 AGENTS.md 幂等补上「环境检查」章节（没有 AGENTS.md 就新建最小 AGENTS.md：一句话说明 + 该节；已有近似章节则逐项比对表格列出差异问我，经我确认再合并，绝不删改既有内容）；完成后按该章节做一次全量环境检查作为初始化验证：逐项汇报结果，不符合项经我确认后才按「安装 / 升级」列处理——其中 codegraph 及其项目索引存量项目未必需要，装不装先问我；确认不适用的检查行（如不接 codegraph）直接在我项目 AGENTS.md 该行标注不适用，之后检查跳过；最后按提交规范提交本次变更。
 ```
 
 ## 2. monorepo 结构约定
@@ -247,7 +247,7 @@ UI 设计侧注意：
 1. `/che-load` —— 每会话一次（plan 的入向前置）
 2. `/che-plan` —— 单命令一次完成实现规划与任务拆解：spec 转实现规划（research / data-model / contracts / quickstart）后，同一命令按用户故事生成依赖有序 `tasks.md`；有 `design-tasks.md` 必读并对齐，冲突回产品 / 设计裁决；收尾固定序列：先条件问「根据 tasks.md 补建任务卡?」（`.che/pingcode-config.yml` + `mapping.task_artifact` 已设置才问，同意即自动执行 `/che-pingcode-specstoissues` 补建任务卡并关联至 story / spec 卡），再链式询问「继续 analyze?」
 3. `/che-analyze` —— 三工件一致性只读体检：矛盾 / 重复 / 歧义 / 欠定义 / 宪法对齐 / 覆盖缺口六级检测（CRITICAL–LOW 分级），只报告不修改；存在 CRITICAL 时建议先按 Next Actions 修正再继续；收尾链式询问「继续 gapfill?」
-4. `/che-gapfill` —— 对照统一 spec 意图块（In scope / Out of scope / Constraints / Failure conditions）+ spec 场景（Acceptance / Edge `E#`）补四类缺口测试进 `tasks.md`（约束违反 / 失败条件 / 越界回归 / 边界）；收尾按 gate 实际配置分流（口径与 `che planverify-gate` 一致：env `SKC_ADR_GATE` / `SKC_PLANVERIFY_GATE` 优先于 `.che/config.yml`，默认 `adr_gate: block`、`planverify_gate: off`）：门禁开启问「继续 planverify?」，双 gate off 静态提示直接 implement（planverify 降可选）
+4. `/che-gapfill` —— 对照统一 spec 意图块（In scope / Out of scope / Constraints / Failure conditions）+ spec 场景（Acceptance / Edge `E#`）补四类缺口测试进 `tasks.md`（约束违反 / 失败条件 / 越界回归 / 边界）；收尾按 gate 实际配置分流（口径与 `che planverify-gate` 一致：env `SKC_ADR_GATE` / `SKC_PLANVERIFY_GATE` 优先于 `.che/config.local.yml`（机器本地覆盖）与 `.che/config.yml`，默认 `adr_gate: block`、`planverify_gate: off`）：门禁开启问「继续 planverify?」，双 gate off 静态提示直接 implement（planverify 降可选）
 5. `/che-planverify` —— 正式实现前校验的唯一入口：机械层对 gapfill 后的最终 plan/tasks 表面跑确定性 ADR 查询（共用 `che-adr-check` 的 check.sh，产出 `planverify.adr.json` 审计记录与报告 hash），密封 briefing 交独立 checker 审 plan + tasks（含 P3e ADR conformance）；PASS 放行，收尾单行「下一步：/che-implement」（gate 前置不外显）；REPLAN_ALLOWED 修订 plan（重跑 `/che-plan` 再生 tasks.md）后重新校验；BLOCKED_DRIFT 回退至 plan；BLOCKED_ADR（越过 governing ADR）修 plan 或 `/che-adr-draft` 起草 superseding ADR 经人工 accept 后重跑（draft 状态不放行）。规划过程中也可随时手动 `/che-adr-check` 排查，但它只读、无门禁效力
 6. `/che-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；先过 `/che-planverify-gate`——`adr_gate` 默认 block（报告缺失、`adr_status` 非 clean、或 spec/plan/tasks 改动后 hash 不匹配即拒绝），`planverify_gate` 为 block 时再拒 BLOCKED_DRIFT / BLOCKED_ADR。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): 中文消息` + `Co-Authored-By` 页脚（skill pack 产出须含 `Co-Authored-By: NCW Delivery Harness` 署名行；消息不带工作项 ID），小步拆分、精确暂存、排除敏感文件；提交时机可中途逐段，也可收尾一次补齐，拆分始终小步
 7. `/che-intentverify` —— 独立校验者审实现 vs 锁定意图：PASS 交接，REVIEW 人工复核后放行，BLOCKED 回退至 implement 修复
