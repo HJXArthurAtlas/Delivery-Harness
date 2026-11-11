@@ -1,6 +1,6 @@
 {
   "name": "ncw-delivery-harness",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "private": true,
   "description": "赤湾东方自建软件交付 Harness：以知识工程、Intent Driven Development、Compound Engineering 为方法底座的跨端 agent skill pack（规格驱动流程 + adrkit/grill/compound/bug 治理 + 线上排障）",
   "type": "module",
@@ -16,7 +16,7 @@
   "engines": {
     "node": ">=22.18",
     "dsh": ">=0.2.0-rc.2 <0.3.0",
-    "che": ">=0.4.0"
+    "che": ">=0.5.0"
   },
   "dependencies": {
     "@adrkit/cli": "0.20.0",

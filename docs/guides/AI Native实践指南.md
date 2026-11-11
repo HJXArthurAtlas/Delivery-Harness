@@ -2,7 +2,7 @@
 
  面向新项目成员与项目负责人。团队的 AI native 开发底座由 [**ncw-delivery-harness**](https://git.newchiwan.com/council/ncw-delivery-harness/-/blob/main/README.md)（流程技能包）与一套标准 **monorepo 结构约定**组成：技能包定义 Agent 执行什么，并随包携带治理种子（宪法 / ADR / 环境检查节）；结构约定约束项目内代码的存放位置与交付规范。本文说明项目的标准结构与治理规则，以及从初始化到日常交付的完整路径。
 
-> **版本对齐**：Skill pack `ncw-delivery-harness` **v1.6.0**；CLI `@newchiwan/che` **0.4.0**。
+> **版本对齐**：Skill pack `ncw-delivery-harness` **v1.7.0**；CLI `@newchiwan/che` **0.5.0**。
 
 > **谁读什么**
 > - **项目负责人 / 初始化者**：读全文——初始化、结构约定与规则、技能包接入、维护分工都在这里。
