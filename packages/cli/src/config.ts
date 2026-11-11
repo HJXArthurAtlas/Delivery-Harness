@@ -17,18 +17,25 @@ function readConfigFileValue(repoRoot: string, file: string, key: string): strin
   return '';
 }
 
+/** Keys the machine-local overlay may override; anything else in
+ *  .che/config.local.yml is ignored (only .che/config.yml counts). */
+const LOCAL_OVERRIDE_KEYS: Record<string, true> = { language: true, checker: true };
+
 /**
  * First `<key>:` value across the two .che config files, with the supplying
- * file. The machine-local overlay `.che/config.local.yml` overrides the
- * team-shared `.che/config.yml` key by key; a missing or empty overlay key
- * falls through to the team base.
+ * file. Only `language` and `checker` may be overridden by the machine-local
+ * overlay `.che/config.local.yml`; every other key (e.g. the gates) is read
+ * from the team-shared `.che/config.yml` alone. A missing or empty overlay
+ * key falls through to the team base.
  */
 export function readCheConfigSource(
   repoRoot: string,
   key: string,
 ): { value: string; file: string } {
-  const local = readConfigFileValue(repoRoot, 'config.local.yml', key);
-  if (local.trim() !== '') return { value: local, file: 'config.local.yml' };
+  if (LOCAL_OVERRIDE_KEYS[key]) {
+    const local = readConfigFileValue(repoRoot, 'config.local.yml', key);
+    if (local.trim() !== '') return { value: local, file: 'config.local.yml' };
+  }
   return { value: readConfigFileValue(repoRoot, 'config.yml', key), file: 'config.yml' };
 }
 

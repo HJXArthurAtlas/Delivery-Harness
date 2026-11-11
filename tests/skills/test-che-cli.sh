@@ -530,30 +530,20 @@ run env SKC_ADR_GATE=off SKC_PLANVERIFY_GATE=bogus "$CHE_BIN" planverify-gate --
 [ "$RC" -eq 1 ] && ok || bad "planverify-gate env 非法值: 退出码 ${RC}，预期 1"
 rm "$PROJECT/.che/config.yml"
 
-# 开关机器本地覆盖层：.che/config.local.yml 逐键覆盖 .che/config.yml；
-# 覆盖层缺键或空值回落团队基座；env 优先于两层；非法值 fail-closed 并标注来源文件。
+# 门禁键只认 .che/config.yml：.che/config.local.yml 仅 language/checker 两键可覆盖，
+# 写入门禁键（含非法值）一律不生效、不 fail-closed；env 仍最高优先。
 printf 'adr_gate: off\nplanverify_gate: off\n' > "$PROJECT/.che/config.yml"
-printf '# 机器本地覆盖层（/che-project-init 生成，不入库）\nadr_gate: block\n' > "$PROJECT/.che/config.local.yml"
+printf 'adr_gate: block\nplanverify_gate: maybe\nlanguage: en\nchecker: cross-model\n' > "$PROJECT/.che/config.local.yml"
 run "$CHE_BIN" planverify-gate --session s1
-[ "$RC" -eq 1 ] && ok || bad "planverify-gate local 覆盖 block: 退出码 ${RC}，预期 1"
-printf 'adr_gate:\n' > "$PROJECT/.che/config.local.yml"
-run "$CHE_BIN" planverify-gate --session s1
-[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate local 空值回落基座: RC=$RC OUT=[$OUT] 预期静默退 0"
+[ "$RC" -eq 0 ] && [ -z "$OUT" ] && ok || bad "planverify-gate local 门禁键不生效: RC=$RC OUT=[$OUT] 预期静默退 0"
 run env SKC_ADR_GATE=block "$CHE_BIN" planverify-gate --session s1
-[ "$RC" -eq 1 ] && ok || bad "planverify-gate env 优先于 local off: 退出码 ${RC}，预期 1"
-printf 'adr_gate: maybe\n' > "$PROJECT/.che/config.local.yml"
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate env 优先于两层: 退出码 ${RC}，预期 1"
+printf 'adr_gate: maybe\n' > "$PROJECT/.che/config.yml"
 run "$CHE_BIN" planverify-gate --session s1
-[ "$RC" -eq 1 ] && ok || bad "planverify-gate local 非法值: 退出码 ${RC}，预期 fail-closed 1"
+[ "$RC" -eq 1 ] && ok || bad "planverify-gate config 非法值: 退出码 ${RC}，预期 fail-closed 1"
 case "$(<"$TMP/stderr")" in
-  *'invalid adr_gate mode "maybe" from .che/config.local.yml'*) ok ;;
-  *) bad "planverify-gate local 非法值: 错误信息不符：$(<"$TMP/stderr")" ;;
-esac
-printf 'planverify_gate: block\n' > "$PROJECT/.che/config.local.yml"
-run "$CHE_BIN" planverify-gate --session s1
-[ "$RC" -eq 1 ] && ok || bad "planverify-gate local pv block 无报告: 退出码 ${RC}，预期 1"
-case "$(<"$TMP/stderr")" in
-  *"no planverify report exists for 'demo'"*) ok ;;
-  *) bad "planverify-gate local pv block: 错误信息不符：$(<"$TMP/stderr")" ;;
+  *'invalid adr_gate mode "maybe" from .che/config.yml'*) ok ;;
+  *) bad "planverify-gate config 非法值: 错误信息不符：$(<"$TMP/stderr")" ;;
 esac
 rm "$PROJECT/.che/config.local.yml"
 
