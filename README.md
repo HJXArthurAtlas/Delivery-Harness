@@ -39,7 +39,7 @@ https://git.newchiwan.com/council/ncw-delivery-harness）。按步骤执行，�
    - 技能发现：omp 用 omp plugin list；手动拷贝方式确认 ~/.agents/skills/ 下的技能目录已就位
 
 4. 最后询问我：是否要在当前 git 项目里运行 /che-project-init 做项目级配置
-   （.che/config.yml 团队基座 + .che/config.local.yml 机器本地覆盖 checker + 可选 PingCode 接入）。我不需要就到此为止。
+   （.che/config.yml 团队基座 + .che/config.local.yml 本地覆盖（仅 language/checker）+ 可选 PingCode 接入）。我不需要就到此为止。
 ```
 
 手动安装步骤见下文「安装」。
@@ -73,7 +73,7 @@ che pack update                  # 按 manifest 同步（--dry-run 先看计划�
 
 omp 实测同时读项目级与全局级；OpenCode 官方支持同两个路径；DSH 同样官方支持手动拷贝（skill 是「被扫描的文件」，拷贝即安装、免重启热加载），原生插件安装见下文「DSH 插件」小节。
 
-**che CLI 通道说明**：`che pack init` 默认解析仓内最新 `vX.Y.Z` tag（git tag 即发布锚点），技能装进项目 `.agents/skills/`，版本记录在 `.che/pack.json`（建议随项目提交，`che pack update` 会产生可 review 的 diff）；升级走 `che pack update`（manifest 驱动：加新、更托管、删上游移除，防新旧双份）。目标目录里非 che 装的同名技能目录视为手工资产，不加 `--force` 不会被覆盖；手工改坏托管技能时 `che pack update --force` 会整目录重装、恢复为上游版本（普通 update 在同版本下不动本地文件，`--force` 是唯一修复路径）。首次安装后仍需 `/che-project-init` 生成 `.che/config.yml`（团队基座）与 `.che/config.local.yml`（机器本地覆盖层，不入库）。无 che 时的兜底仍是手工拷贝（`git clone` 后把 `skills/<name>/` 拷入发现目录），无版本管理、同名不覆盖。
+**che CLI 通道说明**：`che pack init` 默认解析仓内最新 `vX.Y.Z` tag（git tag 即发布锚点），技能装进项目 `.agents/skills/`，版本记录在 `.che/pack.json`（建议随项目提交，`che pack update` 会产生可 review 的 diff）；升级走 `che pack update`（manifest 驱动：加新、更托管、删上游移除，防新旧双份）。目标目录里非 che 装的同名技能目录视为手工资产，不加 `--force` 不会被覆盖；手工改坏托管技能时 `che pack update --force` 会整目录重装、恢复为上游版本（普通 update 在同版本下不动本地文件，`--force` 是唯一修复路径）。首次安装后仍需 `/che-project-init` 生成 `.che/config.yml`（团队基座）与 `.che/config.local.yml`（机器本地覆盖层，仅 language/checker 生效，不入库）。无 che 时的兜底仍是手工拷贝（`git clone` 后把 `skills/<name>/` 拷入发现目录），无版本管理、同名不覆盖。
 
 ### npm 运行时 CLI（`che` / `adrkit`，所有安装路径通用）
 
