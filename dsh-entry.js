@@ -1,5 +1,5 @@
 /**
- * ncw-delivery-harness — DSH bundle 入口：把 pack 的 skills/ 挂成 DSH 一等 SkillProvider。
+ * delivery-harness — DSH bundle 入口：把 pack 的 skills/ 挂成 DSH 一等 SkillProvider。
  *
  * 契约（dsh 0.2.x docs/subsystems/skills.md）：
  *   - apply() 同步注册 provider（inject ['skills'] → ctx.skills.registerProvider）；
@@ -15,11 +15,11 @@ import { readdir, readFile, stat } from 'node:fs/promises'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-export const name = 'ncw-delivery-skills'
+export const name = 'delivery-harness-skills'
 
 export const inject = ['skills']
 
-const PROVIDER_LABEL = 'ncw-delivery'
+const PROVIDER_LABEL = 'delivery-harness'
 const SOURCE = 'bundled'
 const RANK = 250
 
@@ -127,14 +127,14 @@ class PackSkillsProvider {
       parsed = undefined
     }
     if (!parsed) {
-      this.ctx.logger.warn(`[ncw-delivery] skill ${path} ignored: frontmatter 不可解析`)
+      this.ctx.logger.warn(`[delivery-harness] skill ${path} ignored: frontmatter 不可解析`)
       return undefined
     }
     const name = stringField(parsed.data, 'name') ?? basename(dirname(path))
     const description = stringField(parsed.data, 'description')
     if (!description || !KEBAB.test(name)) {
       this.ctx.logger.warn(
-        `[ncw-delivery] skill ${path} ignored: 需要 kebab-case name 与非空 description`,
+        `[delivery-harness] skill ${path} ignored: 需要 kebab-case name 与非空 description`,
       )
       return undefined
     }
@@ -167,5 +167,5 @@ class PackSkillsProvider {
 
 export function apply(ctx, config = {}) {
   ctx.skills.registerProvider((control) => new PackSkillsProvider(ctx, control, config))
-  ctx.logger.info(`[ncw-delivery] pack skills root: ${SKILLS_ROOT}`)
+  ctx.logger.info(`[delivery-harness] pack skills root: ${SKILLS_ROOT}`)
 }

@@ -5,7 +5,7 @@
 // 与远端最新 vX.Y.Z tag，有新版则通过 ctx.ui.notify 提示升级命令——对标 omp
 // 自身的 Update Available 横幅（形态为 TUI 通知）。
 //
-// 纪律：任何失败（无 git、内网不可达、解析失败、无 UI）一律静默返回，绝不阻塞
+// 纪律：任何失败（无 git、网络不可达、解析失败、无 UI）一律静默返回，绝不阻塞
 // 会话启动；远端查询结果缓存 24 小时（XDG_CACHE_HOME 优先），失败沿用旧缓存。
 
 import { execFile } from 'node:child_process';
@@ -18,8 +18,8 @@ import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 
-const PACK_REPO = 'https://git.newchiwan.com/council/ncw-delivery-harness.git';
-const UPGRADE_CMD = 'omp plugin upgrade ncw-delivery@ncw-delivery-harness';
+const PACK_REPO = 'https://github.com/HJXArthurAtlas/Delivery-Harness.git';
+const UPGRADE_CMD = 'omp plugin upgrade delivery-harness@delivery-harness';
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const GIT_TIMEOUT_MS = 8000;
 const RELEASE_TAG = /^v(\d+)\.(\d+)\.(\d+)$/;
@@ -39,7 +39,7 @@ function cacheFile(): string {
   const base = process.env.XDG_CACHE_HOME && process.env.XDG_CACHE_HOME.trim() !== ''
     ? process.env.XDG_CACHE_HOME
     : join(homedir(), '.cache');
-  return join(base, 'ncw-delivery-harness', 'omp-update-check.json');
+  return join(base, 'delivery-harness', 'omp-update-check.json');
 }
 
 interface CheckState {
@@ -143,7 +143,7 @@ export default function ompUpdateCheck(pi: PiLike): void {
       if (latest === null) return;
       if (compareVersions(latest, installed) > 0) {
         ctx?.ui?.notify?.(
-          `NCW Delivery Harness 新版本 ${latest} 可用（当前 ${installed}）。运行: ${UPGRADE_CMD}`,
+          `Delivery Harness 新版本 ${latest} 可用（当前 ${installed}）。运行: ${UPGRADE_CMD}`,
           'info',
         );
       }
