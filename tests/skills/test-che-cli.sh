@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # che CLI contract: task create, session bindings, resolution order, template/setup parity.
-# Drives the repo-local @newchiwan/che via node_modules/.bin (npm install).
+# Drives the repo-local @hjxarthuratlas/che via node_modules/.bin (npm install).
 set -u
 
 pass=0
@@ -14,7 +14,7 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 if ! node -e 'process.exit(process.features.typescript ? 0 : 1)' 2>/dev/null; then
-  printf 'che-cli: SKIP（本机 Node 无原生 type stripping，无法运行 @newchiwan/che）\n'
+  printf 'che-cli: SKIP（本机 Node 无原生 type stripping，无法运行 @hjxarthuratlas/che）\n'
   exit 0
 fi
 
@@ -150,11 +150,11 @@ run env CHE_SESSION_ID=s1 "$CHE_BIN" paths --json
   && ok || bad "paths CHE_SESSION_ID env: RC=$RC OUT=$OUT"
 
 # 8. Push-time rename is transparent: binding stores the slug, not the path.
-mv "$PROJECT/specs/001-demo" "$PROJECT/specs/NCW-4921-demo"
+mv "$PROJECT/specs/001-demo" "$PROJECT/specs/PROJ-4921-demo"
 run "$CHE_BIN" paths --session s1 --json
 [ "$RC" -eq 0 ] && ok || bad "paths 改名后: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-json_matches "$OUT" "{\"SLUG\":\"demo\",\"FEATURE_DIR\":\"$PROJECT/specs/NCW-4921-demo\",\"BRANCH\":\"NCW-4921-demo\"}" \
-  && ok || bad "paths 改名后: 未解析到 NCW-4921-demo：$OUT"
+json_matches "$OUT" "{\"SLUG\":\"demo\",\"FEATURE_DIR\":\"$PROJECT/specs/PROJ-4921-demo\",\"BRANCH\":\"PROJ-4921-demo\"}" \
+  && ok || bad "paths 改名后: 未解析到 PROJ-4921-demo：$OUT"
 
 # 9. Resolution order: --feature > env > session; identifier dir name resolves too.
 run env CHE_FEATURE_DIRECTORY=specs/002-payment "$CHE_BIN" paths --feature demo --json
@@ -166,7 +166,7 @@ run env CHE_FEATURE_DIRECTORY=specs/002-payment "$CHE_BIN" paths --session s1 --
 run "$CHE_BIN" paths --feature specs/002-payment --json
 [ "$RC" -eq 0 ] && json_matches "$OUT" '{"SLUG":"payment"}' \
   && ok || bad "解析序 --feature 路径形态: RC=$RC OUT=$OUT"
-run "$CHE_BIN" paths --feature NCW-4921-demo --json
+run "$CHE_BIN" paths --feature PROJ-4921-demo --json
 [ "$RC" -eq 0 ] && json_matches "$OUT" '{"SLUG":"demo"}' \
   && ok || bad "解析序 identifier 目录名: RC=$RC OUT=$OUT"
 
@@ -192,7 +192,7 @@ case "$_stderr" in
   *"Multiple tasks in flight and no session binding"*) ok ;;
   *) bad "paths 多任务歧义: 错误信息不符：$_stderr" ;;
 esac
-printf '%s\n' "$_stderr" | grep -q -- "- demo  (NCW-4921-demo, stage: created)" \
+printf '%s\n' "$_stderr" | grep -q -- "- demo  (PROJ-4921-demo, stage: created)" \
   && ok || bad "paths 多任务歧义: 候选列表缺 demo：$_stderr"
 
 # 12. feature bind: idempotent same-value; rebind overwrites; clear is idempotent.
@@ -256,11 +256,11 @@ run2 "$CHE_BIN" paths --json
   && ok || bad "project2 单任务自动解析: RC=$RC OUT=$OUT"
 
 # 15. check resolves via session; --require-tasks reports missing tasks.md.
-printf '# Demo\n' > "$PROJECT/specs/NCW-4921-demo/intent.md"
-printf '# Plan\n' > "$PROJECT/specs/NCW-4921-demo/plan.md"
+printf '# Demo\n' > "$PROJECT/specs/PROJ-4921-demo/intent.md"
+printf '# Plan\n' > "$PROJECT/specs/PROJ-4921-demo/plan.md"
 run "$CHE_BIN" check --session s1 --json
 [ "$RC" -eq 0 ] && ok || bad "check session: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-json_matches "$OUT" "{\"FEATURE_DIR\":\"$PROJECT/specs/NCW-4921-demo\",\"AVAILABLE_DOCS\":[]}" \
+json_matches "$OUT" "{\"FEATURE_DIR\":\"$PROJECT/specs/PROJ-4921-demo\",\"AVAILABLE_DOCS\":[]}" \
   && ok || bad "check session --json: 输出不符：$OUT"
 run "$CHE_BIN" check --session s1 --json --require-tasks
 [ "$RC" -eq 1 ] && ok || bad "check --require-tasks: 退出码 ${RC}，预期 1"
@@ -292,12 +292,12 @@ run "$CHE_BIN" template constitution-template --json
 
 # 17. setup-plan copies plan-template byte-exact via session; rerun skips.
 PLAN_REFS="$REPO_ROOT/skills/che-plan/references"
-rm -f "$PROJECT/specs/NCW-4921-demo/plan.md"
+rm -f "$PROJECT/specs/PROJ-4921-demo/plan.md"
 run "$CHE_BIN" setup-plan --json --references-dir "$PLAN_REFS" --session s1
 [ "$RC" -eq 0 ] && ok || bad "setup-plan: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-byte_equal "$PROJECT/specs/NCW-4921-demo/plan.md" "$PLAN_REFS/plan-template.md" \
+byte_equal "$PROJECT/specs/PROJ-4921-demo/plan.md" "$PLAN_REFS/plan-template.md" \
   && ok || bad "setup-plan: plan.md 与 plan-template.md 非字节一致"
-json_matches "$OUT" "{\"IMPL_PLAN\":\"$PROJECT/specs/NCW-4921-demo/plan.md\"}" \
+json_matches "$OUT" "{\"IMPL_PLAN\":\"$PROJECT/specs/PROJ-4921-demo/plan.md\"}" \
   && ok || bad "setup-plan: JSON 缺 IMPL_PLAN：$OUT"
 run "$CHE_BIN" setup-plan --json --references-dir "$PLAN_REFS" --session s1
 [ "$RC" -eq 0 ] && ok || bad "setup-plan 重跑: 退出码 ${RC}"
@@ -305,19 +305,19 @@ case "$(<"$TMP/stderr")" in
   *"Plan already exists"*) ok ;;
   *) bad "setup-plan 重跑: stderr 未提示已存在：$(<"$TMP/stderr")" ;;
 esac
-byte_equal "$PROJECT/specs/NCW-4921-demo/plan.md" "$PLAN_REFS/plan-template.md" \
+byte_equal "$PROJECT/specs/PROJ-4921-demo/plan.md" "$PLAN_REFS/plan-template.md" \
   && ok || bad "setup-plan 重跑: plan.md 被改动"
 
 # 18. setup-tasks requires plan.md; otherwise resolves tasks-template byte-exact.
 TASKS_REFS="$REPO_ROOT/skills/che-plan/references"
-rm "$PROJECT/specs/NCW-4921-demo/plan.md"
+rm "$PROJECT/specs/PROJ-4921-demo/plan.md"
 run "$CHE_BIN" setup-tasks --json --references-dir "$TASKS_REFS" --session s1
 [ "$RC" -eq 1 ] && ok || bad "setup-tasks 无 plan: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
   *"ERROR: plan.md not found"*) ok ;;
   *) bad "setup-tasks 无 plan: stderr 未报 plan.md：$(<"$TMP/stderr")" ;;
 esac
-printf '# Plan\n' > "$PROJECT/specs/NCW-4921-demo/plan.md"
+printf '# Plan\n' > "$PROJECT/specs/PROJ-4921-demo/plan.md"
 run "$CHE_BIN" setup-tasks --json --references-dir "$TASKS_REFS" --session s1
 [ "$RC" -eq 0 ] && ok || bad "setup-tasks: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
 node -e '
@@ -337,7 +337,7 @@ case "$(<"$TMP/stderr")" in
 esac
 
 # 20. planverify-gate: 双 gate —— adr_gate（默认 block）+ planverify_gate（默认 off）。
-DEMO_DIR="$PROJECT/specs/NCW-4921-demo"
+DEMO_DIR="$PROJECT/specs/PROJ-4921-demo"
 PV_REPORT="$DEMO_DIR/evidence/planverify.md"
 mkdir -p "$DEMO_DIR/evidence"
 # 写一份带 ADR 字段与三工件 hash 的完整报告：<verdict> <adr_status>
@@ -565,9 +565,9 @@ run "$CHE_BIN" planverify-gate --bogus
 # 20b. state: runs timeline in metadata.json; stage/next derived, never stored.
 run "$CHE_BIN" state start intend --session s1
 [ "$RC" -eq 0 ] && ok || bad "state start intend: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-_before="$(md5 -q "$PROJECT/specs/NCW-4921-demo/metadata.json")"
+_before="$(md5 -q "$PROJECT/specs/PROJ-4921-demo/metadata.json")"
 run "$CHE_BIN" state start intend --session s1
-[ "$RC" -eq 0 ] && [ "$(md5 -q "$PROJECT/specs/NCW-4921-demo/metadata.json")" = "$_before" ] \
+[ "$RC" -eq 0 ] && [ "$(md5 -q "$PROJECT/specs/PROJ-4921-demo/metadata.json")" = "$_before" ] \
   && ok || bad "state start 幂等: 已开启的 run 被改写"
 run "$CHE_BIN" state done intend --session s1
 [ "$RC" -eq 0 ] && ok || bad "state done intend: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
@@ -580,11 +580,11 @@ node -e '
   if (!Array.isArray(runs) || runs.length !== 1) process.exit(1);
   if (Number.isNaN(Date.parse(runs[0].start)) || Number.isNaN(Date.parse(runs[0].end))) process.exit(1);
   process.exit(0);
-' "$PROJECT/specs/NCW-4921-demo/metadata.json" \
+' "$PROJECT/specs/PROJ-4921-demo/metadata.json" \
   && ok || bad "state done: metadata.json runs.intend 结构不符"
 run "$CHE_BIN" state show --session s1 --json
 [ "$RC" -eq 0 ] && ok || bad "state show --json: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
-json_matches "$OUT" "{\"TASK_DIR\":\"$PROJECT/specs/NCW-4921-demo\",\"SLUG\":\"demo\",\"STAGE\":\"plan\",\"NEXT\":\"clarify\",\"DURATION_SECONDS\":{\"intend\":0}}" \
+json_matches "$OUT" "{\"TASK_DIR\":\"$PROJECT/specs/PROJ-4921-demo\",\"SLUG\":\"demo\",\"STAGE\":\"plan\",\"NEXT\":\"clarify\",\"DURATION_SECONDS\":{\"intend\":0}}" \
   && ok || bad "state show --json: 输出不符：$OUT"
 run "$CHE_BIN" state show --session s1
 [ "$RC" -eq 0 ] && ok || bad "state show text: 退出码 ${RC}，stderr: $(<"$TMP/stderr")"
@@ -603,7 +603,7 @@ node -e '
   const meta = JSON.parse(fs.readFileSync(p, "utf8"));
   meta.runs.expectations = [{ start: "2020-01-01T00:00:00.000Z", end: null }];
   fs.writeFileSync(p, JSON.stringify(meta) + "\n");
-' "$PROJECT/specs/NCW-4921-demo/metadata.json"
+' "$PROJECT/specs/PROJ-4921-demo/metadata.json"
 run "$CHE_BIN" state show --session s1 --json
 json_matches "$OUT" '{"NEXT":"clarify","RUNS":{"expectations":[{"start":"2020-01-01T00:00:00.000Z","end":null}]}}' \
   && ok || bad "state show（legacy open run）: expectations 应可见且不参与 NEXT：$OUT"
@@ -615,7 +615,7 @@ node -e '
   const run = meta.runs.expectations[0];
   if (run.end === null || Number.isNaN(Date.parse(run.end))) process.exit(1);
   process.exit(0);
-' "$PROJECT/specs/NCW-4921-demo/metadata.json" \
+' "$PROJECT/specs/PROJ-4921-demo/metadata.json" \
   && ok || bad "state done expectations: legacy run 未被关闭"
 run "$CHE_BIN" state done expectations --session s1
 [ "$RC" -eq 1 ] && ok || bad "state done expectations（已闭环）: 退出码 ${RC}，预期 1"
@@ -647,7 +647,7 @@ git init -q -b main "$FIXTURE"
 mkdir -p "$FIXTURE/skills/alpha" "$FIXTURE/skills/beta"
 printf 'name: alpha\n' > "$FIXTURE/skills/alpha/SKILL.md"
 printf 'name: beta\n' > "$FIXTURE/skills/beta/SKILL.md"
-printf '{"name":"ncw-delivery-harness","version":"0.5.0","engines":{"che":">=0.3.0"}}' > "$FIXTURE/package.json"
+printf '{"name":"delivery-harness","version":"0.5.0","engines":{"che":">=0.3.0"}}' > "$FIXTURE/package.json"
 git -C "$FIXTURE" add -A
 git -C "$FIXTURE" -c user.email=test@local -c user.name=test commit -qm 'v0.5.0 fixture'
 git -C "$FIXTURE" tag v0.5.0
@@ -659,13 +659,13 @@ runp "$CHE_BIN" pack init --from "file://$FIXTURE"
 [ -f "$PACKPROJ/.agents/skills/alpha/SKILL.md" ] && ok || bad "pack init: alpha 未安装"
 node -e '
   const m = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8"));
-  const ok = m.schema === 1 && m.pack === "ncw-delivery-harness" && m.packVersion === "0.5.0" &&
+  const ok = m.schema === 1 && m.pack === "delivery-harness" && m.packVersion === "0.5.0" &&
     m.ref === "v0.5.0" && m.target === ".agents/skills" && m.minCliVersion === ">=0.3.0" &&
     JSON.stringify(m.skills) === JSON.stringify(["alpha", "beta"]) && !Number.isNaN(Date.parse(m.updatedAt));
   process.exit(ok ? 0 : 1);
 ' "$PACKPROJ/.che/pack.json" && ok || bad "pack init: manifest 字段不符：$(cat "$PACKPROJ/.che/pack.json")"
 case "$OUT" in
-  *"正在安装 NCW Delivery Harness 0.5.0 ..."*"安装完成 0.5.0."*"安装2个 (2个新增"*"下一步:"*"执行 /che-project-init"*) ok ;;
+  *"正在安装 Delivery Harness 0.5.0 ..."*"安装完成 0.5.0."*"安装2个 (2个新增"*"下一步:"*"执行 /che-project-init"*) ok ;;
   *) bad "pack init: 输出格式不符：$OUT" ;;
 esac
 
@@ -701,7 +701,7 @@ runp "$CHE_BIN" pack update
 runp "$CHE_BIN" pack update
 [ "$RC" -eq 0 ] && ok || bad "pack update 幂等: 退出码 ${RC}"
  case "$OUT" in
-  *"NCW Delivery Harness 当前版本： 0.5.0"*"✓ 已是最新版本"*) ok ;;
+  *"Delivery Harness 当前版本： 0.5.0"*"✓ 已是最新版本"*) ok ;;
   *) bad "pack update 幂等: 横幅不符：$OUT" ;;
  esac
 UPDATED_AT_1="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1],"utf8")).updatedAt' "$PACKPROJ/.che/pack.json")"
@@ -715,7 +715,7 @@ UPDATED_AT_2="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv
 printf 'broken by hand\n' > "$PACKPROJ/.agents/skills/alpha/SKILL.md"
 runp "$CHE_BIN" pack update
  case "$OUT" in
-  *"NCW Delivery Harness 当前版本： 0.5.0"*"✓ 已是最新版本"*) ok ;;
+  *"Delivery Harness 当前版本： 0.5.0"*"✓ 已是最新版本"*) ok ;;
   *) bad "pack update 改坏场景: 横幅不符：$OUT" ;;
  esac
 [ "$(cat "$PACKPROJ/.agents/skills/alpha/SKILL.md")" = "broken by hand" ] \
@@ -728,7 +728,7 @@ byte_equal "$PACKPROJ/.agents/skills/alpha/SKILL.md" "$FIXTURE/skills/alpha/SKIL
 # untagged main bump: drift detection + dry-run plan against main + minCli guard.
 mkdir -p "$FIXTURE/skills/delta"
 printf 'name: delta\n' > "$FIXTURE/skills/delta/SKILL.md"
-printf '{"name":"ncw-delivery-harness","version":"0.6.0","engines":{"che":">=99.0.0"}}' > "$FIXTURE/package.json"
+printf '{"name":"delivery-harness","version":"0.6.0","engines":{"che":">=99.0.0"}}' > "$FIXTURE/package.json"
 git -C "$FIXTURE" add -A
 git -C "$FIXTURE" -c user.email=test@local -c user.name=test commit -qm 'v0.6.0 untagged fixture'
 MAIN_SHA="$(git -C "$FIXTURE" rev-parse main)"
@@ -750,7 +750,7 @@ esac
 
  runp "$CHE_BIN" pack update --ref main
 case "$OUT" in
-  *"NCW Delivery Harness 当前版本： 0.5.0"*"发现新版本： main"*"正在安装新版本……"*"✓ 成功更新到 0.6.0"*"开启新对话 或 在当前对话Reload Skills以使用新版本"*) ok ;;
+  *"Delivery Harness 当前版本： 0.5.0"*"发现新版本： main"*"正在安装新版本……"*"✓ 成功更新到 0.6.0"*"开启新对话 或 在当前对话Reload Skills以使用新版本"*) ok ;;
   *) bad "pack update(main): 横幅不符：$OUT" ;;
 esac
 [ "$RC" -eq 0 ] && ok || bad "pack update(main): 退出码 ${RC}，stderr: $(<"$TMP/stderr")"

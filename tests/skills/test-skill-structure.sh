@@ -190,7 +190,7 @@ if command -v node >/dev/null 2>&1; then
       mod.default({ on: (event, h) => { if (event === "session_start") handler = h; } });
       if (typeof handler !== "function") { console.error("FAIL session_start 未注册"); process.exit(1); }
       const installed = JSON.parse(readFileSync(root + "/package.json", "utf8")).version;
-      const cacheDir = process.env.XDG_CACHE_HOME + "/ncw-delivery-harness";
+      const cacheDir = process.env.XDG_CACHE_HOME + "/delivery-harness";
       const scenario = process.argv[2];
       mkdirSync(cacheDir, { recursive: true });
       const latest = scenario === "newer" ? "v999.0.0" : "v0.0.1";
@@ -200,7 +200,7 @@ if command -v node >/dev/null 2>&1; then
       const wantNotify = scenario === "newer";
       if (wantNotify) {
         const ok = notes.length === 1 && notes[0].includes("v999.0.0") && notes[0].includes(installed) &&
-          notes[0].includes("omp plugin upgrade ncw-delivery@ncw-delivery-harness");
+          notes[0].includes("omp plugin upgrade delivery-harness@delivery-harness");
         if (!ok) { console.error("FAIL 更新通知不符: " + JSON.stringify(notes)); process.exit(1); }
       } else if (notes.length !== 0) {
         console.error("FAIL 已是最新不应通知: " + JSON.stringify(notes)); process.exit(1);
@@ -214,7 +214,7 @@ if command -v node >/dev/null 2>&1; then
       const mod = await import(pathToFileURL(root + "/omp-update-check.ts").href);
       let handler = null;
       mod.default({ on: (event, h) => { if (event === "session_start") handler = h; } });
-      const cacheDir = process.env.XDG_CACHE_HOME + "/ncw-delivery-harness";
+      const cacheDir = process.env.XDG_CACHE_HOME + "/delivery-harness";
       mkdirSync(cacheDir, { recursive: true });
       writeFileSync(cacheDir + "/omp-update-check.json", JSON.stringify({ latest: "v0.0.1", checkedAt: Date.now() }));
       const notes = [];
@@ -228,7 +228,7 @@ else
   bad "omp 扩展校验需要 node"
 fi
 
-# 9. @adrkit/cli 运行时依赖：必须钉精确版本，且 omp manifest 存在；分发包 private（不发 npm——发布面只有 omp/DSH 插件与 @newchiwan/che）
+# 9. @adrkit/cli 运行时依赖：必须钉精确版本，且 omp manifest 存在；分发包 private（不发 npm——发布面只有 omp/DSH 插件与 @hjxarthuratlas/che）
 if command -v node >/dev/null 2>&1; then
   while IFS= read -r line; do
     case "$line" in OK) ok ;; FAIL\ *) bad "${line#FAIL }" ;; esac
