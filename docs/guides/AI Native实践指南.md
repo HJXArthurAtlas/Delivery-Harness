@@ -1,8 +1,8 @@
 # AI Native 开发指南
 
- 面向新项目成员与项目负责人。团队的 AI native 开发底座由 [**ncw-delivery-harness**](https://git.newchiwan.com/council/ncw-delivery-harness/-/blob/main/README.md)（流程技能包）与一套标准 **monorepo 结构约定**组成：技能包定义 Agent 执行什么，并随包携带治理种子（宪法 / ADR / 环境检查节）；结构约定约束项目内代码的存放位置与交付规范。本文说明项目的标准结构与治理规则，以及从初始化到日常交付的完整路径。
+ 面向新项目成员与项目负责人。团队的 AI native 开发底座由 [**delivery-harness**](https://github.com/HJXArthurAtlas/Delivery-Harness/blob/main/README.md)（流程技能包）与一套标准 **monorepo 结构约定**组成：技能包定义 Agent 执行什么，并随包携带治理种子（宪法 / ADR / 环境检查节）；结构约定约束项目内代码的存放位置与交付规范。本文说明项目的标准结构与治理规则，以及从初始化到日常交付的完整路径。
 
-> **版本对齐**：Skill pack `ncw-delivery-harness` **v1.7.0**；CLI `@newchiwan/che` **0.5.0**。
+> **版本对齐**：Skill pack `delivery-harness` **v1.7.0**；CLI `@hjxarthuratlas/che` **0.5.0**。
 
 > **谁读什么**
 > - **项目负责人 / 初始化者**：读全文——初始化、结构约定与规则、技能包接入、维护分工都在这里。
@@ -29,12 +29,12 @@
 
 | 组成 | 承载位置 | 职责 |
 |---|---|---|
-| ncw-delivery-harness（流程技能包） | 你的 AI Agent | 定义 **Agent 执行什么**：意图驱动开发主线、治理种子（宪法 / ADR / 环境检查节）、PingCode 建卡收尾、bug 修复 |
+| delivery-harness（流程技能包） | 你的 AI Agent | 定义 **Agent 执行什么**：意图驱动开发主线、治理种子（宪法 / ADR / 环境检查节）、PingCode 建卡收尾、bug 修复 |
 | monorepo 结构约定 | 你的项目仓库 | 约束**代码的存放位置与交付规范**：目录布局、治理文件、环境基线、门禁 |
 
 ```mermaid
 flowchart LR
-  H["ncw-delivery-harness<br/>流程技能包（29 技能）<br/>含宪法 / ADR / 环境检查种子"] -->|"插件安装 / 手动拷贝<br/>+ che · adrkit · pingcode CLI"| A["你的 AI Agent"]
+  H["delivery-harness<br/>流程技能包（29 技能）<br/>含宪法 / ADR / 环境检查种子"] -->|"插件安装 / 手动拷贝<br/>+ che · adrkit · pingcode CLI"| A["你的 AI Agent"]
   H -.->|"初始化种子：AGENTS 环境检查节<br/>基础宪法 · 基础 ADR"| P["你的项目仓库<br/>services/ · apps/ · docs/ · AGENTS.md"]
   A <--> P
 ```
@@ -49,7 +49,7 @@ flowchart LR
 请把我的项目初始化为团队标准的 AI Native monorepo：
 1. 建立标准结构（只建目录与占位，不写业务代码）：根目录建 AGENTS.md（先只放一行说明「本项目的 Agent 操作指南；环境检查章节由 /che-project-init 维护」）、docs/adr/、docs/constitution/、services/、apps/、Makefile、.gitignore，空目录补 .gitkeep
 2. 环境就绪（缺了才装）：Node.js ≥ 22.18（第 3 步技能包的硬性要求）按系统装 LTS：macOS 用 brew / nvm，Windows 用 winget / choco，Linux 用 apt / dnf（本机有多个包管理器时问用户选哪个）；都没有则从 nodejs.org 装 LTS
-3. 安装团队交付技能包 ncw-delivery-harness：克隆 https://git.newchiwan.com/council/ncw-delivery-harness.git 到临时目录，读其 README.md 的「一键安装（For Agent）」章节，把该章节内嵌的安装提示词当作指令完整执行——它自动识别 omp / DSH / 手动拷贝三路安装方式、先配 @newchiwan 的 Nexus registry 再装 che 与 adrkit 运行时 CLI、并逐项验证汇报。执行完删除临时克隆。
+3. 安装团队交付技能包 delivery-harness：克隆 https://github.com/HJXArthurAtlas/Delivery-Harness.git 到临时目录，读其 README.md 的「一键安装（For Agent）」章节，把该章节内嵌的安装提示词当作指令完整执行——它自动识别 omp / DSH / 手动拷贝三路安装方式、装好 che 与 adrkit 运行时 CLI、并逐项验证汇报。执行完删除临时克隆。
 4. 接入 codegraph：npm i -g @colbymchenry/codegraph@1.6.2；只为当前宿主写项目级 MCP 配置，不要为其他检测到的 agent 写 .claude/ 之类目录：宿主在其支持列表内用 codegraph install -l local -t <宿主id> -y，不在就手写 .mcp.json：{"mcpServers":{"codegraph":{"type":"stdio","command":"codegraph","args":["serve","--mcp"]}}}；再 codegraph init 建索引（.codegraph/ 不提交，新 MCP 工具重启后才生效）
 5. 删除 init 产生的 *.backup.*，按提交规范提交本次变更（无规范则用 type(scope): 中文消息），然后停下提示我重启 Agent；索引完善等重启后再做
 
@@ -62,18 +62,18 @@ flowchart LR
 先确认 codegraph MCP 已接入，并用 codegraph 实际执行一次查询验证索引可用；随后通读根目录的 AGENTS.md 并严格遵循，把我的项目信息登记进「布局」章节（没有该章节就新建）；然后运行 /che-project-init 做项目级配置（.che/config.yml 团队基座 + .che/config.local.yml 本地覆盖（仅 language/checker）+ 可选 PingCode 接入），按我的答复执行——它会幂等补全 AGENTS.md 的「环境检查」节，宪法缺失时移交 /che-constitution 逐条确认实例化、基础 ADR 缺失时移交 /che-adr-draft 逐条确认导入；并按 AGENTS.md 的提交规范把本次变更提交。
 ```
 
-> 前提：Agent 所在环境能访问 `git.newchiwan.com`（安装技能包）；内网装 `@newchiwan/che` 需要公司 Nexus（初始化提示词与 `/che-project-init` 会处理 scope 配置）。
+> 前提：Agent 所在环境能访问 GitHub（安装技能包）；`@hjxarthuratlas/che` 与 `@adrkit/cli` 直接从公网 npm 安装（初始化提示词与 `/che-project-init` 会自检代装）。
 
 ### 1.2 直接开始（存量项目）
 
 项目已经是 monorepo、或不需要套用标准结构？用这段：只安装团队交付技能包（harness），项目级配置与环境检查接入交给 `/che-project-init`；做完提示重启 Agent，重启后发第二段收尾。
 
 ```text
-ncw-delivery-harness 项目地址：https://git.newchiwan.com/council/ncw-delivery-harness.git
+delivery-harness 项目地址：https://github.com/HJXArthurAtlas/Delivery-Harness.git
 
 这是存量项目，不要引入 monorepo 结构，只做两件事：装团队技能包、给 AGENTS.md 接上环境检查：
 1. 环境就绪（缺了才装）：Node.js ≥ 22.18（第 2 步技能包的硬性要求）按系统装 LTS：macOS 用 brew / nvm，Windows 用 winget / choco，Linux 用 apt / dnf（本机有多个包管理器时问用户选哪个）；都没有则从 nodejs.org 装 LTS
-2. 安装团队交付技能包 ncw-delivery-harness：克隆其仓库到临时目录，读其 README.md 的「一键安装（For Agent）」章节，把该章节内嵌的安装提示词当作指令完整执行——它自动识别 omp / DSH / 手动拷贝三路安装方式、先配 @newchiwan 的 Nexus registry 再装 che 与 adrkit 运行时 CLI、并逐项验证汇报。执行完删除临时克隆
+2. 安装团队交付技能包 delivery-harness：克隆其仓库到临时目录，读其 README.md 的「一键安装（For Agent）」章节，把该章节内嵌的安装提示词当作指令完整执行——它自动识别 omp / DSH / 手动拷贝三路安装方式、装好 che 与 adrkit 运行时 CLI、并逐项验证汇报。执行完删除临时克隆
 3. 按我的项目现有提交规范提交本次变更（无规范则用 type(scope): 中文消息），然后停下提示我重启 Agent
 
 不要顺手新建业务代码，不要改写我既有文件。
@@ -82,7 +82,7 @@ ncw-delivery-harness 项目地址：https://git.newchiwan.com/council/ncw-delive
 重启 Agent 之后再发这一段：
 
 ```text
-先确认 ncw-delivery-harness 已生效（列出已装插件/技能能看到它）；然后运行 /che-project-init 做项目级配置（.che/config.yml 团队基座 + .che/config.local.yml 本地覆盖（仅 language/checker）+ 可选 PingCode 接入），按我的答复执行——它会给我的 AGENTS.md 幂等补上「环境检查」章节（没有 AGENTS.md 就新建最小 AGENTS.md：一句话说明 + 该节；已有近似章节则逐项比对表格列出差异问我，经我确认再合并，绝不删改既有内容）；完成后按该章节做一次全量环境检查作为初始化验证：逐项汇报结果，不符合项经我确认后才按「安装 / 升级」列处理——其中 codegraph 及其项目索引存量项目未必需要，装不装先问我；确认不适用的检查行（如不接 codegraph）直接在我项目 AGENTS.md 该行标注不适用，之后检查跳过；最后按提交规范提交本次变更。
+先确认 delivery-harness 已生效（列出已装插件/技能能看到它）；然后运行 /che-project-init 做项目级配置（.che/config.yml 团队基座 + .che/config.local.yml 本地覆盖（仅 language/checker）+ 可选 PingCode 接入），按我的答复执行——它会给我的 AGENTS.md 幂等补上「环境检查」章节（没有 AGENTS.md 就新建最小 AGENTS.md：一句话说明 + 该节；已有近似章节则逐项比对表格列出差异问我，经我确认再合并，绝不删改既有内容）；完成后按该章节做一次全量环境检查作为初始化验证：逐项汇报结果，不符合项经我确认后才按「安装 / 升级」列处理——其中 codegraph 及其项目索引存量项目未必需要，装不装先问我；确认不适用的检查行（如不接 codegraph）直接在我项目 AGENTS.md 该行标注不适用，之后检查跳过；最后按提交规范提交本次变更。
 ```
 
 ## 2. monorepo 结构约定
@@ -93,7 +93,7 @@ ncw-delivery-harness 项目地址：https://git.newchiwan.com/council/ncw-delive
 
 1. 按标准结构建目录与占位（`AGENTS.md`、`docs/`、`services/`、`apps/`、`Makefile`、`.gitignore`，不写业务代码）；
 2. 检查并补齐环境（Node.js ≥ 22.18 等）；
-3. 安装团队技能包 ncw-delivery-harness（自动识别 omp / DSH / 手动拷贝；另支持 `che pack init` 项目级安装，见 §3.1）；
+3. 安装团队技能包 delivery-harness（自动识别 omp / DSH / 手动拷贝；另支持 `che pack init` 项目级安装，见 §3.1）；
 4. 接入 codegraph（代码知识图谱 MCP）并建立索引；
 5. 按提交规范提交本次变更，然后提示你**重启 Agent**。
 
@@ -156,13 +156,13 @@ your-repo/
 
 ### 2.5 工具链基线与环境检查
 
-你的项目 `AGENTS.md` 会带一张**环境检查表**（由 `/che-project-init` 幂等补缺；仅用户明确要求时执行：全量核对一遍，不符合项经确认才安装/升级，绝不随会话自动触发）。依赖面以 ncw-delivery-harness 为准，清单里的工具及其用途：
+你的项目 `AGENTS.md` 会带一张**环境检查表**（由 `/che-project-init` 幂等补缺；仅用户明确要求时执行：全量核对一遍，不符合项经确认才安装/升级，绝不随会话自动触发）。依赖面以 delivery-harness 为准，清单里的工具及其用途：
 
 | 工具 | 用途 |
 |---|---|
 | Node.js ≥ 22.18 | che 与技能包的硬性要求 |
-| ncw-delivery-harness 技能包 | 流程技能本体（按宿主检测：omp / DSH / che pack init / 手动拷贝） |
-| che CLI（`@newchiwan/che`） | 特性路径解析、知识库根解析（`che knowledge paths`）、任务模型与技能包安装升级（`pack init/status/update`、`self-update`），公司 Nexus 独发 |
+| delivery-harness 技能包 | 流程技能本体（按宿主检测：omp / DSH / che pack init / 手动拷贝） |
+| che CLI（`@hjxarthuratlas/che`） | 特性路径解析、知识库根解析（`che knowledge paths`）、任务模型与技能包安装升级（`pack init/status/update`、`self-update`），npm 公开发布 |
 | adr（adrkit CLI） | adrkit 系技能的运行时 |
 | pingcode CLI（条件） | 仅接入 PingCode 的项目检查，卡操作依赖 |
 | 跨模型 CLI：codex / gemini / claude（条件） | 仅 intentverify checker 策略强制 `cross-model` / `cli:model` 时需要在 PATH，默认不装不查（planverify checker 固定同模型新上下文子代理，无需外部模型） |
@@ -170,11 +170,11 @@ your-repo/
 
 版本号不写在本文——环境检查基线的唯一事实源是 harness 的 `skills/che-project-init/references/seed-agents-env.md`（随技能包分发维护）。
 
-## 3. ncw-delivery-harness：流程技能包
+## 3. delivery-harness：流程技能包
 
 ### 3.1 定位与依赖
 
-29 个 agent skill，承载「意图驱动开发 + PingCode」的流程：**产品出意图建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加治理资产、AGENTS 环境检查段落与项目架构画像的接入初始化（`/che-project-init`：宪法缺失移交 `/che-constitution` 实例化、基础 ADR 缺失移交 `/che-adr-draft` 导入；AGENTS「环境检查」节幂等补缺、只补不删；架构画像先判定仓库属已有代码还是纯新仓库，仅已有代码仓库生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / `che pack init` 项目级安装且版本受管 / 手动拷贝到 `~/.agents/skills/`，四路任一；omp 装法见 harness README——插件自带启动更新通知，要全自动升级可 `omp config set marketplace.autoUpdate auto`）。运行时需要全局 `che`（`@newchiwan/che`，公司 Nexus）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
+29 个 agent skill，承载「意图驱动开发 + PingCode」的流程：**产品出意图建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加治理资产、AGENTS 环境检查段落与项目架构画像的接入初始化（`/che-project-init`：宪法缺失移交 `/che-constitution` 实例化、基础 ADR 缺失移交 `/che-adr-draft` 导入；AGENTS「环境检查」节幂等补缺、只补不删；架构画像先判定仓库属已有代码还是纯新仓库，仅已有代码仓库生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / `che pack init` 项目级安装且版本受管 / 手动拷贝到 `~/.agents/skills/`，四路任一；omp 装法见 harness README——插件自带启动更新通知，要全自动升级可 `omp config set marketplace.autoUpdate auto`）。运行时需要全局 `che`（`@hjxarthuratlas/che`，公网 npm）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
 
 ### 3.2 主线流程
 
@@ -249,7 +249,7 @@ UI 设计侧注意：
 3. `/che-analyze` —— 三工件一致性只读体检：矛盾 / 重复 / 歧义 / 欠定义 / 宪法对齐 / 覆盖缺口六级检测（CRITICAL–LOW 分级），只报告不修改；存在 CRITICAL 时建议先按 Next Actions 修正再继续；收尾链式询问「继续 gapfill?」
 4. `/che-gapfill` —— 对照统一 spec 意图块（In scope / Out of scope / Constraints / Failure conditions）+ spec 场景（Acceptance / Edge `E#`）补四类缺口测试进 `tasks.md`（约束违反 / 失败条件 / 越界回归 / 边界）；收尾按 gate 实际配置分流（口径与 `che planverify-gate` 一致：env `SKC_ADR_GATE` / `SKC_PLANVERIFY_GATE` 优先于 `.che/config.yml`（门禁键不受 `.che/config.local.yml` 影响，该文件仅 language/checker 可覆盖），默认 `adr_gate: block`、`planverify_gate: off`）：门禁开启问「继续 planverify?」，双 gate off 静态提示直接 implement（planverify 降可选）
 5. `/che-planverify` —— 正式实现前校验的唯一入口：机械层对 gapfill 后的最终 plan/tasks 表面跑确定性 ADR 查询（共用 `che-adr-check` 的 check.sh，产出 `planverify.adr.json` 审计记录与报告 hash），密封 briefing 交独立 checker 审 plan + tasks（含 P3e ADR conformance）；PASS 放行，收尾单行「下一步：/che-implement」（gate 前置不外显）；REPLAN_ALLOWED 修订 plan（重跑 `/che-plan` 再生 tasks.md）后重新校验；BLOCKED_DRIFT 回退至 plan；BLOCKED_ADR（越过 governing ADR）修 plan 或 `/che-adr-draft` 起草 superseding ADR 经人工 accept 后重跑（draft 状态不放行）。规划过程中也可随时手动 `/che-adr-check` 排查，但它只读、无门禁效力
-6. `/che-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；先过 `/che-planverify-gate`——`adr_gate` 默认 block（报告缺失、`adr_status` 非 clean、或 spec/plan/tasks 改动后 hash 不匹配即拒绝），`planverify_gate` 为 block 时再拒 BLOCKED_DRIFT / BLOCKED_ADR。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): 中文消息` + `Co-Authored-By` 页脚（skill pack 产出须含 `Co-Authored-By: NCW Delivery Harness` 署名行；消息不带工作项 ID），小步拆分、精确暂存、排除敏感文件；提交时机可中途逐段，也可收尾一次补齐，拆分始终小步
+6. `/che-implement` —— 按 `tasks.md` 执行。开始时按条件处理前置：spec 建卡后有改动 → 提示 `/che-pingcode-sync-cards` 对账（已建卡才提示）；先过 `/che-planverify-gate`——`adr_gate` 默认 block（报告缺失、`adr_status` 非 clean、或 spec/plan/tasks 改动后 hash 不匹配即拒绝），`planverify_gate` 为 block 时再拒 BLOCKED_DRIFT / BLOCKED_ADR。UI 任务按设计稿 + UI-xx 清单逐项核验后才算完成；提交使用 `/che-git-master`：`type(scope): 中文消息` + `Co-Authored-By` 页脚（skill pack 产出须含 `Co-Authored-By: Delivery Harness` 署名行；消息不带工作项 ID），小步拆分、精确暂存、排除敏感文件；提交时机可中途逐段，也可收尾一次补齐，拆分始终小步
 7. `/che-intentverify` —— 独立校验者审实现 vs 锁定意图：PASS 交接，REVIEW 人工复核后放行，BLOCKED 回退至 implement 修复
 8. `/che-pingcode-sync-status` —— 本地任务全部 `[x]` 后卡片单向流转完成态
 9. `/che-retro` —— 把新经验（ADR / corrections / patterns）沉淀回 compound store，供后续特性复用

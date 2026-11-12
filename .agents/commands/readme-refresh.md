@@ -1,5 +1,5 @@
 ---
-description: 刷新 README 的项目信息与用户手册——glab 取 GitLab 项目数据核对事实，校对安装命令与技能清单；输出中文、面向终端用户、保持简洁
+description: 刷新 README 的项目信息与用户手册——gh 取 GitHub 项目数据核对事实，校对安装命令与技能清单；输出中文、面向终端用户、保持简洁
 ---
 
 # readme-refresh
@@ -18,8 +18,8 @@ description: 刷新 README 的项目信息与用户手册——glab 取 GitLab �
 ## 更新规则
 
 1. **校对项目事实**：
-   - 简介段：项目链接、可见性、默认分支与 GitLab 项目数据一致（`glab api` 或 `git remote` 现查）；
-   - 分发与安装：与 `package.json`、`.omp-plugin/marketplace.json`、`dsh-entry.js`、`cordis.patch.yml` 一致；`npx` / `git clone` 的 URL 必须等于 `http_url_to_repo`；
+   - 简介段：项目链接、可见性、默认分支与 GitHub 项目数据一致（`gh repo view --json url,visibility,defaultBranchRef` 或 `git remote` 现查）；
+   - 分发与安装：与 `package.json`、`.omp-plugin/marketplace.json`、`dsh-entry.js`、`cordis.patch.yml` 一致；`npx` / `git clone` 的 URL 必须等于 `git remote get-url origin` 解析后的 `https://github.com/<owner>/<repo>.git`；
    - 技能清单：与 `skills/` 逐一对应核对技能名、用途和触发语，权威描述以各 `skills/<name>/SKILL.md` frontmatter 的 `description` 为准；
    - 开发节：命令与 `package.json` 一致，测试说明与 `tests/skills/` 一致。
 2. **控制同步范围**：上述事实变化时更新 `README.md`；用户使用流程变化时，同步更新 `docs/guides/AI Native实践指南.md`（含 §3.2 主线 mermaid 与 §3.3 产出物清单）。

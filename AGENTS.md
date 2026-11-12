@@ -2,9 +2,9 @@
 
 ## 仓库定位
 
-本仓是赤湾东方自建软件交付 Harness——以知识工程、Intent Driven Development、Compound Engineering 为方法底座的跨端 agent skill pack，向 DSH、OpenCode、omp 等端分发意图驱动流程及 adrkit、grill、compound、bug 扩展技能。
+本仓是开源的软件交付 Harness（Delivery Harness）——以知识工程、Intent Driven Development、Compound Engineering 为方法底座的跨端 agent skill pack，向 DSH、OpenCode、omp 等端分发意图驱动流程及 adrkit、grill、compound、bug 扩展技能。
 
-本仓同时维护 `@newchiwan/che` CLI；monorepo 骨架由 `council/monorepo-template` 负责。仓内无 CI，本地 `npm test` 是唯一质量门。
+本仓同时维护 `@hjxarthuratlas/che` CLI。仓内无 CI，本地 `npm test` 是唯一质量门。
 
 ## 路径地图
 
@@ -16,7 +16,7 @@
 | `skills/che-bug-*/` | Bug 评估、修复和验证 |
 | `skills/che-git-master/` | git 提交规范流程（消息格式、拆分、暂存边界） |
 | `skills/che-project-init/` | 项目接入与基础配置、架构画像生成与对账（docs/architecture.md，仅已有代码仓库） |
-| `packages/cli/` | `@newchiwan/che` 源码与发布脚本 |
+| `packages/cli/` | `@hjxarthuratlas/che` 源码与发布脚本 |
 | `tests/skills/` | 技能结构、CLI 和技能运行时测试 |
 | `.omp-plugin/marketplace.json` | omp 插件 catalog |
 | `dsh-entry.js`、`cordis.patch.yml` | DSH bundle 入口与补丁 |
@@ -40,7 +40,7 @@ npm ci
 npm test
 ```
 
-根包不发布 npm（`private: true`），推送 `main` 即发布 omp 与 DSH 插件；仅 `@newchiwan/che` 通过根 `release.sh` 发布到公司 Nexus（内部委托 `packages/cli/scripts/publish.sh` 打包推送）。npm 认证只写用户级 `~/.npmrc`，绝不入库。
+根包不发布 npm（`private: true`）；omp 与 DSH 插件的分发以仓内容为准（marketplace add / dsh add 直接拉取本仓）。仅 `@hjxarthuratlas/che` 通过根 `release.sh` 发布到公共 npm（内部委托 `packages/cli/scripts/publish.sh` 打包推送）。npm 认证只写用户级 `~/.npmrc`，绝不入库。
 
 ## 修改约束
 
@@ -50,7 +50,7 @@ npm test
 - 上游技能的 pack fork 差异记录在对应技能中，上游升级时必须保留。
 - 每个 `SKILL.md` 顶部带语言规则块：读项目根 `.che/config.yml` 的 `language:`（缺省 `zh-cn`）决定全 pack 输出语言（含思考）；新增技能必须携带，`/che-project-init` 负责写入该键。
 - 技能写盘遵循同名不覆盖；版本号以仓内登记文件为准，不凭记忆填写。
-- 基础宪法、种子 ADR 与 AGENTS 环境检查节的唯一维护处在 harness 内：`skills/che-constitution/references/seed-constitution.md`、`skills/che-adr-draft/references/seed-adr/` 与 `skills/che-project-init/references/seed-agents-env.md` 就地修改，无外部模板上游；council/monorepo-template 的同名内容与本仓各自独立、互不同步。
+- 基础宪法、种子 ADR 与 AGENTS 环境检查节的唯一维护处在 harness 内：`skills/che-constitution/references/seed-constitution.md`、`skills/che-adr-draft/references/seed-adr/` 与 `skills/che-project-init/references/seed-agents-env.md` 就地修改，无外部模板上游。
 
 ## 发布
 
@@ -60,7 +60,7 @@ npm test
 
 - 修改技能、CLI 或分发配置后必须运行 `npm test`；三个测试脚本分别覆盖技能结构、che CLI 契约和技能运行时行为，具体契约以测试脚本为准。
 - 提交信息使用 `<type>(<scope>): 中文主题`；type 为 `feat`、`fix`、`refactor`、`docs`、`test` 或 `chore`，不绑定工作项/故事卡 ID（溯源由 `specs/pingcode-mapping.json` 承担）。
-- 小步提交：一个逻辑改动一个提交，只包含相关文件；提交动作可在中途逐段进行，也可集中到收尾一次补齐，但拆分始终按小步规则（提交前过 `npm test`），无需等待指示——自动提交只到本地 commit，不 push。经 skill pack 流程开发的改动，页脚另加一行 `Co-Authored-By: NCW Delivery Harness`。
+- 小步提交：一个逻辑改动一个提交，只包含相关文件；提交动作可在中途逐段进行，也可集中到收尾一次补齐，但拆分始终按小步规则（提交前过 `npm test`），无需等待指示——自动提交只到本地 commit，不 push。经 skill pack 流程开发的改动，页脚另加一行 `Co-Authored-By: Delivery Harness`。
 
 ## 文档维护
 

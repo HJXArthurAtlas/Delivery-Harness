@@ -1,36 +1,35 @@
-# NCW Delivery Harness
+# Delivery Harness
 
-赤湾东方自建软件交付 Harness：把团队 AI native 交付方法做成跨端 agent skill pack，可在 DSH / OpenCode / omp 等端安装。方法底座三条：
+开源跨端 agent skill pack：把 AI native 交付方法（知识工程、Intent Driven Development、Compound Engineering）做成可在 DSH / OpenCode / omp 等端安装的技能包。方法底座三条：
 
 - **知识工程**——把团队知识落盘为机器可装载的资产：宪法 `docs/constitution/`、ADR 语料 `docs/adr/`、领域知识库 `docs/domain_knowledge/`、compound store（`docs/corrections/`、`docs/patterns/`）；会话开场装载（load），交付后回写（retro）。
 - **Intent Driven Development**——规格是唯一意图来源：intend → clarify/grill → plan → gapfill 补验证任务 → planverify 门禁 → implement → converge 补实现差距 → intentverify 独立校验不越出意图，以宪法与 ADR 为治理约束。四个校验技能的分工见 [docs/guides/校验技能对比.md](docs/guides/校验技能对比.md)。
 - **Compound Engineering**——每次交付让下次更快：新经验写回 store、耐久纠偏升格为 ADR，bug 走 assess → fix → test 闭环沉淀回归，组织经验随交付复利。
 
-流程与 PingCode 打通：产品出规格建卡 → 开发接规格规划实现 → 卡片随实现收尾。GitLab 项目：[Tech Council / ncw-delivery-harness](https://git.newchiwan.com/council/ncw-delivery-harness)（内部仓，默认分支 `main`）。
+流程与 PingCode 打通：产品出规格建卡 → 开发接规格规划实现 → 卡片随实现收尾。仓库：[HJXArthurAtlas/Delivery-Harness](https://github.com/HJXArthurAtlas/Delivery-Harness)（默认分支 `main`）。
 
 ## 一键安装（For Agent）
 
 把下面提示词整段复制给任意 agent（omp / DSH / OpenCode / Claude Code…），由 agent 自动完成安装：
 
 ```text
-请在本机安装 ncw-delivery-harness agent skill pack（newchiwan 内部工具，仓库
-https://git.newchiwan.com/council/ncw-delivery-harness）。按步骤执行，任何一步失败
+请在本机安装 delivery-harness agent skill pack（开源项目，仓库
+https://github.com/HJXArthurAtlas/Delivery-Harness）。按步骤执行，任何一步失败
 就停下向我报告，绝不跳步继续：
 
 1. 技能包安装——检测本机环境，选择匹配的一种；检测不出就问我：
    - 有 omp CLI：
-     omp plugin marketplace add https://git.newchiwan.com/council/ncw-delivery-harness.git
-     omp plugin install ncw-delivery@ncw-delivery-harness
+     omp plugin marketplace add https://github.com/HJXArthurAtlas/Delivery-Harness.git
+     omp plugin install delivery-harness@delivery-harness
    - 有 dsh CLI：
-     dsh plugin --profile <当前 profile> add git+https://git.newchiwan.com/council/ncw-delivery-harness.git
+     dsh plugin --profile <当前 profile> add git+https://github.com/HJXArthurAtlas/Delivery-Harness.git
    - 都没有（OpenCode 等手动拷贝端）：
-     git clone https://git.newchiwan.com/council/ncw-delivery-harness.git /tmp/ncw-delivery-harness
+     git clone https://github.com/HJXArthurAtlas/Delivery-Harness.git /tmp/delivery-harness
      然后把仓库 skills/ 下每个子目录拷入 ~/.agents/skills/；
      目标已存在同名目录时停下来问我，绝不覆盖。
 
-2. 运行时 CLI——必须先做 scope 配置（@newchiwan/che 只在公司 Nexus，公网拉取 404）：
-   npm config set @newchiwan:registry https://nexus.newchiwan.cn/repository/registry-npm/
-   npm install -g @newchiwan/che@latest
+2. 运行时 CLI——全局安装（公网 npm）：
+   npm install -g @hjxarthuratlas/che@latest
    npm install -g @adrkit/cli@0.20.0
 
 3. 验证并逐项汇报结果：
@@ -50,16 +49,16 @@ omp 与 DSH 走各自的原生插件安装（见下），手动拷贝全靠文�
 
 ```bash
 # omp 插件（推荐）
-omp plugin marketplace add https://git.newchiwan.com/council/ncw-delivery-harness.git
-omp plugin install ncw-delivery@ncw-delivery-harness
+omp plugin marketplace add https://github.com/HJXArthurAtlas/Delivery-Harness.git
+omp plugin install delivery-harness@delivery-harness
 
 # 可选：omp 插件全自动升级（默认只启动通知、手动升级）
 omp config set marketplace.autoUpdate auto
 
 # DSH 插件（根包兼作 DSH bundle；默认跟踪 main 最新，升级走 update）
-dsh plugin --profile <name> add git+https://git.newchiwan.com/council/ncw-delivery-harness.git
-dsh plugin --profile <name> update ncw-delivery-harness   # 升级到 main 最新
-dsh plugin --profile <name> remove ncw-delivery-harness
+dsh plugin --profile <name> add git+https://github.com/HJXArthurAtlas/Delivery-Harness.git
+dsh plugin --profile <name> update delivery-harness   # 升级到 main 最新
+dsh plugin --profile <name> remove delivery-harness
 
 # che CLI（项目级安装 + 版本管理；先把 che 装到全局 PATH，见下节）
 che pack init                    # 装到当前项目 .agents/skills/，记录版本到 .che/pack.json（默认装最新 vX.Y.Z tag）
@@ -77,22 +76,21 @@ omp 实测同时读项目级与全局级；OpenCode 官方支持同两个路径�
 
 ### npm 运行时 CLI（`che` / `adrkit`，所有安装路径通用）
 
-两个外部 CLI 不随任何插件路径分发，必须装在全局 PATH 上。`@newchiwan/che` 发布在公司 Nexus（公网 npmjs 上没有这个包），内网机器先做一次性 scope 配置：
+两个外部 CLI 不随任何插件路径分发，必须装在全局 PATH 上；均发布在公网 npm：
 
 ```bash
-npm config set @newchiwan:registry https://nexus.newchiwan.cn/repository/registry-npm/   # Nexus group（internal + 公网代理）
-npm install -g @newchiwan/che@latest        # 特性路径解析（意图驱动 / grill / adrkit 系技能）
+npm install -g @hjxarthuratlas/che@latest   # 特性路径解析（意图驱动 / grill / adrkit 系技能）
 npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 ```
 
-或直接运行 `/che-project-init`——它自检并代装这两个 CLI，che 安装 404 时会提示上面的 scope 配置。
+或直接运行 `/che-project-init`——它自检并代装这两个 CLI。
 
 升级 che：全局安装的直接 `che self-update`（`--check` 只查不装；开发仓 `file:` 链接的 che 会被拒绝，走 git pull）。
 
 ### omp 插件补充（更新与坑）
 
 - 插件自带**启动更新检查**（`omp.extensions` 扩展，1.2.0 起）：每次会话启动对比远端最新 `vX.Y.Z` tag，有新版则 TUI 通知升级命令（24h 缓存、失败静默、`--no-extensions` 可退）。
-- 更新两档：默认**启动通知 + 手动升级**（`omp plugin upgrade ncw-delivery@ncw-delivery-harness`，装完 `/reload-plugins` 或开新会话生效）；要**全自动**执行 `omp config set marketplace.autoUpdate auto`（`marketplace.autoUpdate` 默认 `notify` 只写 debug log——可见的通知由上面的插件自带扩展补齐）。
+- 更新两档：默认**启动通知 + 手动升级**（`omp plugin upgrade delivery-harness@delivery-harness`，装完 `/reload-plugins` 或开新会话生效）；要**全自动**执行 `omp config set marketplace.autoUpdate auto`（`marketplace.autoUpdate` 默认 `notify` 只写 debug log——可见的通知由上面的插件自带扩展补齐）。
 - 插件**只含 skills**（`.agents/commands/` 是本仓维护者工具，不经插件分发）。
 - **marketplace 安装不解析 npm 依赖**——`che` / `adrkit` 按上节装到全局 PATH。
 - `git+` 前缀只用于 `omp plugin install`（会剥掉并改用 bun 装 `package.json#dependencies`）；`marketplace add` 必须写裸 `https://…`。
@@ -118,12 +116,12 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 
 ## 运行时与外部 CLI（排除 init）
 
-`che-adr-*` 依赖外部 `@adrkit/cli`；特性路径解析依赖外部 `che` CLI（`@newchiwan/che`）：
+`che-adr-*` 依赖外部 `@adrkit/cli`；特性路径解析依赖外部 `che` CLI（`@hjxarthuratlas/che`）：
 
 | 能力 | 实现 / 入口 | 运行时前提 |
 |---|---|---|
 | adrkit `new/check/queue/lint/migrate/evaluate` | 外部 `@adrkit/cli`；`adr.sh` 是跨技能入口 | Node ≥22；`adrkit` 不可用时运行 `npm install -g @adrkit/cli@0.20.0` |
-| grill、adrkit check/draft、speckit 全流程（analyze/clarify/constitution/converge/design/implement/plan/tasks/specify）的特性路径、知识库根（`che knowledge paths`）与模板解析 | 外部 `che` CLI（源与发布单元在 `packages/cli`，npm 包 `@newchiwan/che`，发布在公司 Nexus） | Node ≥22.18；`che` 不可用时运行 `npm install -g @newchiwan/che@latest`（先按「安装 → npm 运行时 CLI」配置 scope，公网无此包）；任务目录 `specs/NNN-{slug}/` 由 `che task create` 创建，session 绑定在 `.che/feature.json`（机器本地） |
+| grill、adrkit check/draft、speckit 全流程（analyze/clarify/constitution/converge/design/implement/plan/tasks/specify）的特性路径、知识库根（`che knowledge paths`）与模板解析 | 外部 `che` CLI（源与发布单元在 `packages/cli`，npm 包 `@hjxarthuratlas/che`，发布在公网 npm） | Node ≥22.18；`che` 不可用时运行 `npm install -g @hjxarthuratlas/che@latest`；任务目录 `specs/NNN-{slug}/` 由 `che task create` 创建，session 绑定在 `.che/feature.json`（机器本地） |
 | ADR scaffold / lint / legacy migration | `che-adr-draft/scripts/{scaffold.sh,adr.sh}` | 同 adrkit；全部走 pack-local 跨技能调用 |
 | PingCode 卡操作（che-pingcode-* 五技能） | 无 bundle——依赖外部 `pingcode` CLI（`npm i -g @metaphorli/pingcode-cli`，保持 npm 最新版）；认证走项目级登录包装 `.che/pingcode-login.sh`（由 `/che-project-init` 接入链落盘并随仓库提交，OAuth 凭据封装在脚本内） | `bash .che/pingcode-login.sh status` 退出码 0 + 网络可达 PingCode；未认证时跑同脚本自动开浏览器授权（阻塞等回调属正常，给足 ≥300 秒）；CLI 本体 pack 不内置（API 演进留在上游 CLI） |
 
@@ -136,7 +134,7 @@ CLI 解析（`adrkit-lib.sh`）：只执行 PATH 上的 `adrkit` 与 `che`，不
 ## 开发
 
 ```bash
-npm ci     # 安装钉版本的 @adrkit/cli，并把仓内 @newchiwan/che（file:packages/cli）链接进 node_modules/.bin，供运行时契约测试使用
+npm ci     # 安装钉版本的 @adrkit/cli，并把仓内 @hjxarthuratlas/che（file:packages/cli）链接进 node_modules/.bin，供运行时契约测试使用
 npm test   # 依次运行技能结构、che CLI 契约和技能运行时契约测试
 ```
 
@@ -148,16 +146,15 @@ npm test   # 依次运行技能结构、che CLI 契约和技能运行时契约�
 
 **版本声明点**：根 `package.json#version` 是 pack 唯一版本源——omp 插件版本（`.omp-plugin/marketplace.json`，`npm test` 强制同步）与 DSH bundle 版本（原生读取）都从它推导；git tag `vX.Y.Z` 是 che 安装通道（`che pack init/status/update`）的发布锚点；根 `engines.che` 声明 pack 所需的 che CLI 最低版本（安装时抄进 `.che/pack.json`）。CLI 版本独立演进（`packages/cli/package.json` + `src/version.ts` 的 `CLI_VERSION`，`test-che-cli.sh` 强制一致）。
 
-**发版一律走 `/release`**（流程见 `.agents/commands/release.md`）：定版本号 → 本版含 CLI 变更先发 Nexus → bump 根版本 + 同步 marketplace → `npm test` 全绿 → 生成 `docs/releases/X.Y.Z.md` 发布文档 → `chore(release)` 单提交（含发布文档）→ `git push origin main vX.Y.Z` 原子推送 → 创建 GitLab Release（发布说明即发布文档）→ postcondition 验证 tag / 发布文档 / Release 生效。没打 tag = che 通道没发版；漏 tag 会被任何项目里的 `che pack status` 探测为 `CHANNEL_DRIFT`。
+**发版一律走 `/release`**（流程见 `.agents/commands/release.md`）：定版本号 → 本版含 CLI 变更先发 npm → bump 根版本 + 同步 marketplace → `npm test` 全绿 → 生成 `docs/releases/X.Y.Z.md` 发布文档 → `chore(release)` 单提交（含发布文档）→ `git push origin main vX.Y.Z` 原子推送 → 创建 GitHub Release（发布说明即发布文档）→ postcondition 验证 tag / 发布文档 / Release 生效。没打 tag = che 通道没发版；漏 tag 会被任何项目里的 `che pack status` 探测为 `CHANNEL_DRIFT`。
 
-只有 `@newchiwan/che` 发布到公司 Nexus（`internal-npm` hosted；安装侧走 `registry-npm` group）。**根包（即整个 pack）不发 npm**（`package.json` 已 `private: true` 防误发）——它的分发就是 omp / DSH 插件与 che 安装通道：
+只有 `@hjxarthuratlas/che` 发布到公共 npm registry。**根包（即整个 pack）不发 npm**（`package.json` 已 `private: true` 防误发）——它的分发就是 omp / DSH 插件与 che 安装通道：
 
 ```bash
-# @newchiwan/che（bun 打包 dist/cli.js 单文件——Node 不剥 node_modules 内类型，纯 TS tarball 经 npm -g 装出来跑不了；需本机有 bun）
-bash release.sh              # 发布 packages/cli 当前版本，发布前自动核对 Nexus 最新版
+# @hjxarthuratlas/che（bun 打包 dist/cli.js 单文件——Node 不剥 node_modules 内类型，纯 TS tarball 经 npm -g 装出来跑不了；需本机有 bun）
+bash release.sh              # 发布 packages/cli 当前版本，发布前自动核对 npm 最新版
 bash release.sh 0.5.0        # 先回写版本到 package.json + src/version.ts，再发布
 bash release.sh --check      # 只核对版本是否比线上新，不发布
 ```
 
-- npm 认证写**用户级** `~/.npmrc`（`//nexus.newchiwan.cn/repository/internal-npm/:_auth` = base64(user:pass)，npm 按 registry URI 精确匹配凭据；devops 账号），绝不入仓库。
-- 消费端（内网机器）的一次性 scope 配置见「安装 → npm 运行时 CLI」。
+- npm 认证写**用户级** `~/.npmrc`（`npm login` 生成，npm 按 registry URI 精确匹配凭据），绝不入仓库。

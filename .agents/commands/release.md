@@ -1,5 +1,5 @@
 ---
-description: 发版流程——自动探测 pack / che CLI 各自是否需发、生成建议版本号、经用户确认后直接发布（私有 Nexus + git tag）；用户说「发布 / 发版 / 升版本 / 打 tag / 出新版本」时执行
+description: 发版流程——自动探测 pack / che CLI 各自是否需发、生成建议版本号、经用户确认后直接发布（npm + git tag）；用户说「发布 / 发版 / 升版本 / 打 tag / 出新版本」时执行
 ---
 
 # release
@@ -17,7 +17,7 @@ last_tag="$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null || true)"
 git log --oneline "${last_tag:-v0.0.0}..HEAD" -- . ':!packages/cli'   # pack 改动（自最新 tag，已 push 与否一律计入）
 cli_base="$(git log -n1 --format=%H -- packages/cli/package.json packages/cli/src/version.ts)"
 git log --oneline "${cli_base:-v0.0.0}..HEAD" -- packages/cli         # CLI 改动（自上次 CLI 发布回写提交）
-bash release.sh --check; echo "rc=$?"   # 0=本地 CLI 版本未上 Nexus；1=已在线上；2=读不到 Nexus，先解决
+bash release.sh --check; echo "rc=$?"   # 0=本地 CLI 版本未上 npm；1=已在线上；2=读不到 npm，先解决
 node -p 'require("./package.json").version'                            # 根版本（对照最新 tag 查漏 tag）
 ```
 
@@ -40,15 +40,15 @@ CLI 按其提交内容同口径 bump。唯一耦合点：pack 用到 CLI 新能�
 
 确认内容固定四项：
 1. **改了什么**：按面归类的 git log（pack 面 / CLI 面）。
-2. **之前版本**：pack = 最新 tag 与根版本；CLI = Nexus 最新版与本地版本。
+2. **之前版本**：pack = 最新 tag 与根版本；CLI = npm 最新版与本地版本。
 3. **建议版本**：各自新版本号 + bump 理由。
-4. **将执行的动作**：第 3 步将跑的命令清单（release.sh / npm test / 发布文档生成 / commit / tag / push / GitLab Release）。
+4. **将执行的动作**：第 3 步将跑的命令清单（release.sh / npm test / 发布文档生成 / commit / tag / push / GitHub Release）。
 
 用户改口径则按用户版本号执行；确认后第 3 步全自动，不再逐条询问。
 
 ## 第 3 步：确认后自动发布（先 CLI，后 pack——`engines.che` 引用已存在的版本）
 
-- **CLI 需发**：`bash release.sh <CLI新版本>` —— 自动回写 `packages/cli/package.json` 与 `src/version.ts`、核对 Nexus 最新性、bun 打包并推送私有 Nexus。失败即停；需用户级 `~/.npmrc` devops 认证（见 README「发布」），缺认证直接报告，不代填凭据。
+- **CLI 需发**：`bash release.sh <CLI新版本>` —— 自动回写 `packages/cli/package.json` 与 `src/version.ts`、核对 npm 最新性、bun 打包并推送公共 npm。失败即停；需用户级 `~/.npmrc` 发布凭据（`npm login`，见 README「发布」），缺认证直接报告，不代填凭据。
   - pack 同发：CLI 两文件并入 pack bump 提交。
   - 仅 CLI 发版：单独提交 `chore(release): che CLI <版本>` 推 main，**不打 tag**（tag 只承载 pack 通道）；不生成 pack 发布文档，其改动并入下次 pack 发布文档的「CLI 变化」节。
 - **pack 需发**：
@@ -61,12 +61,11 @@ CLI 按其提交内容同口径 bump。唯一耦合点：pack 用到 CLI 新能�
      git tag vX.Y.Z   # 打在步骤 3 的提交上
      git push origin main vX.Y.Z
      ```
-  6. 创建 GitLab Release（基于已推 tag，发布说明即 `docs/releases/<X.Y.Z>.md`）：
+  6. 创建 GitHub Release（基于已推 tag，发布说明即 `docs/releases/<X.Y.Z>.md`）：
      ```bash
-     GITLAB_HOST=git.newchiwan.com glab release create vX.Y.Z \
-       --notes-file "docs/releases/X.Y.Z.md" -R council/ncw-delivery-harness
+     gh release create vX.Y.Z --notes-file "docs/releases/X.Y.Z.md"
      ```
-     glab 未配置该主机时先 `glab auth login --hostname git.newchiwan.com`（需 api scope 的 PAT）；无 glab 时走 GitLab API（`POST /projects/:id/releases`，`PRIVATE-TOKEN` 认证）。认证缺失直接报告，不代填凭据；失败即停，补建后重跑本步与 postcondition。仅 CLI 发版无 tag，不创建 GitLab Release。
+     gh 未安装或未认证时先装 gh 并 `gh auth login`；无 gh 时走 GitHub API（`POST /repos/{owner}/{repo}/releases`，token 认证）。认证缺失直接报告，不代填凭据；失败即停，补建后重跑本步与 postcondition。仅 CLI 发版无 tag，不创建 GitHub Release。
 
 ## 发布文档（docs/releases/<版本号>.md）
 
@@ -86,9 +85,9 @@ git ls-remote --tags origin "refs/tags/vX.Y.Z" | grep -q "refs/tags/vX.Y.Z$" \
   && echo OK || echo "FAIL: tag 未生效，che 通道未发版"
 test -f "docs/releases/X.Y.Z.md" \
   && echo OK || echo "FAIL: 发布文档 docs/releases/X.Y.Z.md 缺失"
-GITLAB_HOST=git.newchiwan.com glab release view vX.Y.Z -R council/ncw-delivery-harness >/dev/null \
-  && echo OK || echo "FAIL: GitLab Release 未创建"
-npm view @newchiwan/che version --@newchiwan:registry=https://nexus.newchiwan.cn/repository/internal-npm/
+gh release view vX.Y.Z >/dev/null \
+  && echo OK || echo "FAIL: GitHub Release 未创建"
+npm view @hjxarthuratlas/che version
 ```
 
 最后核对 `/readme-refresh` 触发条件（发布方式变化必触发），需要时执行。
@@ -99,7 +98,7 @@ npm view @newchiwan/che version --@newchiwan:registry=https://nexus.newchiwan.cn
 
 ## 明确不做
 
-- GitLab CI / push rules 校验（仓内无 CI 定位；push rules 是 Premium 且只能防乱打 tag）。
+- CI / push rules 校验（仓内无 CI 定位）。
 - `npm test` 校验 tag（bump 提交先于 tag 的窗口期必然误报）。
 
 **Input**: 可选，目标版本号；给了则跳过第 1 步建议，仍走第 2 步确认
