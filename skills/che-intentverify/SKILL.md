@@ -285,7 +285,7 @@ diff_files: {N}
 
 ## Handoff
 
-> Pack fork (ncw), port on upstream upgrade.
+> Pack fork, port on upstream upgrade.
 
 - **目标**：`/che-retro` —— 把本特性的 ADR/修正/模式回写 compound store
 - **条件**：判定 PASS 直接交接；REVIEW NEEDED 须人工逐条清除后才可 retro

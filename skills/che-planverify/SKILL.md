@@ -222,7 +222,7 @@ Read both gate modes (`SKC_ADR_GATE` / `adr_gate:` default `block`; `SKC_PLANVER
 - **BLOCKED_DRIFT**: *"Verdict: BLOCKED_DRIFT (checked by {checker}). {N} unjustified expansions:"* — list each with the bounded alternative. Replan before implementing.
 - **BLOCKED_ADR**: *"Verdict: BLOCKED_ADR (checked by {checker}). {N} departures from governing ADRs:"* — list each with evidence. Fix the plan, or draft a superseding ADR via `/che-adr-draft` and have it ratified (`adr accept`), then re-run planverify. With the default `adr_gate: block`, `/che-implement` is refused until a clean, hash-fresh report exists.
 
-**Pack fork (ncw), port on upstream upgrade**: on PASS, end the report with exactly one next-step line, rendered verbatim — `下一步：/che-implement` — carrying no parenthetical about gates or preconditions; the gate runs silently as implement's inbound precondition (`/che-planverify-gate`), never surfaced to the user here.
+**Pack fork, port on upstream upgrade**: on PASS, end the report with exactly one next-step line, rendered verbatim — `下一步：/che-implement` — carrying no parenthetical about gates or preconditions; the gate runs silently as implement's inbound precondition (`/che-planverify-gate`), never surfaced to the user here.
 
 ---
 
@@ -380,7 +380,7 @@ or tasks after the run invalidates the report — re-run planverify.
 
 ## Handoff
 
-> Pack fork (ncw), port on upstream upgrade.
+> Pack fork, port on upstream upgrade.
 
 - **目标**：`/che-implement`
 - **条件**：判定 PASS 才放行 implement；实现前另需过 `/che-planverify-gate`——`adr_gate` 默认 block（报告缺失、`adr_status` 非 clean、hash 不匹配均拒绝），`planverify_gate` block 时再拒 BLOCKED_DRIFT / BLOCKED_ADR

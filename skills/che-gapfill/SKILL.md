@@ -105,7 +105,7 @@ Append accepted entries. Preserve the existing formatting. Add a section header 
 
 Show summary: *"Appended {N} tasks to {task_dir}/tasks.md across {N} categories."*
 
-**Pack fork (ncw), port on upstream upgrade** — close with this gate-conditional ending sequence, nothing after it. Resolve the gate config exactly as `che planverify-gate` does: env `SKC_ADR_GATE` / `SKC_PLANVERIFY_GATE` wins over `.che/config.yml` `adr_gate:` / `planverify_gate:` (the machine-local overlay `.che/config.local.yml` only covers language/checker, never gates); defaults `adr_gate: block`, `planverify_gate: off`; either gate resolving to `block` counts as 门禁开启:
+**Pack fork, port on upstream upgrade** — close with this gate-conditional ending sequence, nothing after it. Resolve the gate config exactly as `che planverify-gate` does: env `SKC_ADR_GATE` / `SKC_PLANVERIFY_GATE` wins over `.che/config.yml` `adr_gate:` / `planverify_gate:` (the machine-local overlay `.che/config.local.yml` only covers language/checker, never gates); defaults `adr_gate: block`, `planverify_gate: off`; either gate resolving to `block` counts as 门禁开启:
 
 1. **门禁开启（任一 gate = block）→ 主流程提问**: use the AskUserQuestion tool (never plain-text output that pauses the session for input) with two options, each carrying a one-line description; on selection the agent executes it immediately in this session — 「继续 planverify」（**推荐**）— 独立校验者审 plan+tasks（含确定性 ADR 机械层），PASS 才能进 implement。选中即自动执行 `/che-planverify` /「就此停下」— 结束本次链，planverify 稍后手动跑. On continue, planverify takes over and nothing follows here. On stop, show the manual hints rendered verbatim:
    主流程:
@@ -162,7 +162,7 @@ If `docs/corrections/` exists, scan for past gap-misses that became bugs — pro
 
 ## Handoff
 
-> Pack fork (ncw), port on upstream upgrade.
+> Pack fork, port on upstream upgrade.
 
 - **主链**：plan → analyze → gapfill → planverify（门禁开启时必问）→ implement
 - **目标（门禁开启：`adr_gate`（默认 block）或 `planverify_gate` = block）**：`/che-planverify` —— 独立 checker 审 plan+tasks 是否漂移，PASS 才能进 implement

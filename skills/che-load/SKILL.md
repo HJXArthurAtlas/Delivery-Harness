@@ -122,7 +122,7 @@ If the session's context is compacted by the harness, the compound store summary
 
 ## Handoff
 
-> Pack fork (ncw), port on upstream upgrade.
+> Pack fork, port on upstream upgrade.
 
 - **目标**：`/che-intend` —— 意图访谈 + 生成统一 intent.md（任务自此诞生）
 - **条件**：intend / plan / design 三个技能以 Handoff 前置方式 hook 本技能——执行前会话上下文无 `COMPOUND STORE LOADED` 摘要即先装载再继续；每个特性开始时装载一次，本次会话已装载过则隐式跳过；context 被压缩后可由用户手动重跑 load，绝不 unsolicited 重载

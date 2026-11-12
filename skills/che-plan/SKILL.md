@@ -22,7 +22,7 @@ You **MUST** consider the user input before proceeding (if not empty). User inpu
 
    Record the runs timeline start before any file write: `che state start plan --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available). For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
-2. **Load context**: Read FEATURE_SPEC and `docs/constitution/constitution.md`. Load IMPL_PLAN template (resolved from this skill's `references/`). **Pack fork (ncw, port on upstream upgrade)**: if `$FEATURE_DIR/design-tasks.md` exists, read it too — its interaction rules, page states, and design requirement checklist (UI-xx) are binding UX input for the plan's UX/interaction sections. Align the plan with it; if it conflicts with FEATURE_SPEC, stop and ask the user to reconcile with product/design — never resolve the conflict silently.
+2. **Load context**: Read FEATURE_SPEC and `docs/constitution/constitution.md`. Load IMPL_PLAN template (resolved from this skill's `references/`). **Pack fork, port on upstream upgrade**: if `$FEATURE_DIR/design-tasks.md` exists, read it too — its interaction rules, page states, and design requirement checklist (UI-xx) are binding UX input for the plan's UX/interaction sections. Align the plan with it; if it conflicts with FEATURE_SPEC, stop and ask the user to reconcile with product/design — never resolve the conflict silently.
 
 3. **Execute plan workflow** (Phase 0 research → Phase 1 design, see Phases below): fill Technical Context, Constitution Check, generate research.md / data-model.md / contracts/ / quickstart.md. After Phase 1 output: `che state done plan --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available).
 
@@ -38,7 +38,7 @@ Report branch, IMPL_PLAN path, generated design artifacts (research/data-model/c
 - Independent test criteria for each story
 - Suggested MVP scope (typically just User Story 1)
 - Format validation: Confirm ALL tasks follow the checklist format (checkbox, ID, labels, file paths)
-- **Pack fork (ncw), port on upstream upgrade** — close with this fixed ending sequence, nothing after it:
+- **Pack fork, port on upstream upgrade** — close with this fixed ending sequence, nothing after it:
   1. **Optional task-card backfill (after_tasks 挂点, condition-gated)**: `.che/pingcode-config.yml` 在位且 `mapping.task_artifact` 已设置 → ask via the AskUserQuestion tool 「根据 tasks.md 补建任务卡?」— 同意即在本会话自动执行 `/che-pingcode-specstoissues` 补建任务卡；拒绝或条件不满足 → 静默跳过
   2. **Chain handoff to analyze (main path)**: use the AskUserQuestion tool (never plain-text output that pauses the session for input) with two options, each carrying a one-line description of the action; on selection the agent executes it immediately in this session — 「继续 analyze」（**推荐**）— 实现前体检：intent/plan/tasks 三工件一致性只读分析，尽早暴露矛盾、覆盖缺口与宪法冲突，此时修复成本最低。选中即自动执行 `/che-analyze` /「就此停下」— 结束本次链，analyze / gapfill / planverify 稍后手动跑. On continue, analyze takes over and nothing follows here. On stop, show the manual next-step hints rendered verbatim as follows:
      主流程:
@@ -210,7 +210,7 @@ Every task MUST strictly follow this format:
 
 ## Handoff
 
-> Pack fork (ncw), port on upstream upgrade.
+> Pack fork, port on upstream upgrade.
 
 - **主链**：plan → analyze（三工件体检）→ gapfill（补四类缺口任务）→ planverify（独立判定；门禁开启时必问）→ implement
 - **目标**：`/che-analyze` —— intent/plan/tasks 三工件一致性只读分析，尽早暴露漂移

@@ -55,7 +55,7 @@ The command:
    - Verdict `PASS` / `REPLAN_ALLOWED` with a clean, hash-fresh ADR layer → exits 0 (proceed)
 
 Exit code 2 means a usage error (e.g. duplicate `<slug>`); a missing
-`che` CLI exits 1 with the install hint (`npm install -g @newchiwan/che@latest`).
+`che` CLI exits 1 with the install hint (`npm install -g @hjxarthuratlas/che@latest`).
 
 If the command exits non-zero, **do not continue with `/che-implement`**. Relay
 the message to the user — the recovery path depends on the rejection:

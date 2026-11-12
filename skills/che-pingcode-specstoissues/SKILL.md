@@ -440,7 +440,7 @@ pingcode workitem create \
 
 建卡成功（`artifacts.spec.status == "created"`）后，把任务目录从数字前缀改名为 spec 卡 identifier 前缀，使目录名直接携带 PingCode 追溯标识：
 
-- 新目录名：`{spec 卡 identifier}-{slug}`（如 `001-demo` → `NCW-4921-demo`）；identifier 取 `artifacts.spec.card.identifier`
+- 新目录名：`{spec 卡 identifier}-{slug}`（如 `001-demo` → `PROJ-4921-demo`）；identifier 取 `artifacts.spec.card.identifier`
 - **slug 不变**（目录名剥前缀即得）——session 绑定、门禁、下游 `che paths` 解析均不受影响
 - 执行：目录已被 git 跟踪时用 `git mv specs/<旧名> specs/<新名>`，未跟踪（本轮刚创建未提交）用 `mv` 兜底；目标名已存在 → 跳过改名并记入 `errors[]`
 - 同步更新 `specs/pingcode-mapping.json`：本条目的键从旧目录名改为新目录名（其余条目原样保留）

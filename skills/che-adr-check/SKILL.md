@@ -53,8 +53,8 @@ $ARGUMENTS
 
 ## Notes
 
-- Feature resolution uses the external `che` CLI on `PATH` (`@newchiwan/che`;
-  if unavailable, `npm install -g @newchiwan/che@latest`). `ADRKIT_FEATURE_DIR`
+- Feature resolution uses the external `che` CLI on `PATH` (`@hjxarthuratlas/che`;
+  if unavailable, `npm install -g @hjxarthuratlas/che@latest`). `ADRKIT_FEATURE_DIR`
   overrides feature-dir resolution.
 - Requires `@adrkit/cli` 0.20.0 with `adrkit` on `PATH`. If unavailable,
   install it with `npm install -g @adrkit/cli@0.20.0` and retry.
@@ -70,7 +70,7 @@ $ARGUMENTS
 
 ## Handoff
 
-> Pack fork (ncw), port on upstream upgrade.
+> Pack fork, port on upstream upgrade.
 
 - **目标**：无强制交接目标——本技能是按需排查工具，不参与强制流程
 - **条件**：只读；输出仅终端报告；不产生正式 verdict、不满足 `adr_gate`；正式实现前校验一律走 `/che-planverify`

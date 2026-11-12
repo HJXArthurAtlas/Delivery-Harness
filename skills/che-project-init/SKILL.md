@@ -152,7 +152,7 @@ L3 组件图（某容器内部的模块拆解）不默认产出；用户显式�
 
 本技能是项目接入第一步，必须顺手把 pack 依赖的外部 CLI 备齐（技能运行时只执行 PATH 上的 CLI，任何插件安装路径都不会替你装）：
 
-1. `command -v che` 缺失 → `npm install -g @newchiwan/che@latest` 后复检（技能运行时命令无硬性版本下限；`che pack` 安装通道命令需 ≥ 0.3.0，口径以仓根 `engines.che` 为准，不达标时提示 `che self-update`）。
+1. `command -v che` 缺失 → `npm install -g @hjxarthuratlas/che@latest` 后复检（技能运行时命令无硬性版本下限；`che pack` 安装通道命令需 ≥ 0.3.0，口径以仓根 `engines.che` 为准，不达标时提示 `che self-update`）。
 2. `command -v adrkit` 缺失 → `npm install -g @adrkit/cli@0.20.0` 后复检（pack 按 0.20.0 钉）。
 3. 已在 PATH 的**绝不**擅自升降级；adrkit 与 0.20.0 漂移且技能报错时，建议用户重装并经其确认。
 4. 安装失败或用户拒绝 → **不阻塞**配置写入，在最终回显中标注缺失项与安装命令。
@@ -206,7 +206,7 @@ language 需要问时**最先问**（本项固定中文提问，用户选定后�
 - 文件不存在 → `mkdir -p .che` 后按模板写入（值用用户所选；**不写** `checker:`——它是机器本地键）：
 
 ```yaml
-# .che/config.yml — ncw-delivery-harness 项目配置（/che-project-init 生成）
+# .che/config.yml — delivery-harness 项目配置（/che-project-init 生成）
 # 环境变量优先于本文件：SKC_ADR_GATE、SKC_PLANVERIFY_GATE、SKC_CHECKER；
 # 机器本地覆盖层 .che/config.local.yml 仅 language / checker 两键可覆盖本文件（缺键或空值回落本文件）。
 # checker（intentverify 独立校验者策略）为机器本地键：各成员在 .che/config.local.yml 自配，
@@ -260,7 +260,7 @@ pingcode_integration: off
 2. 存在但无环境检查节（二级标题行含「环境检查」字样即算，允许用户改过近似标题）→ 种子整节追加到文件末尾（前置一个空行）；回显「已新增环境检查段落」，并提示用户可自行挪到合适位置。
 3. 已有该节 → 三块逐项比对补缺（块缺失才补，补在种子原文的相对位置）：
    - **触发说明段**（种子标题下第一段，以「环境检查不随会话自动触发」开头）：节内没有 → 补在节标题之后。
-   - **口径注释**（含「依赖面以 ncw-delivery-harness 为准」的 HTML 注释）：节内没有 → 补在工具表之前。
+   - **口径注释**（含「依赖面以 delivery-harness 为准」的 HTML 注释）：节内没有 → 补在工具表之前。
    - **工具表行**（键 = 表格第一列工具名）：节内表格缺哪行，就把种子对应行原样插入表尾；已有同工具名的行但内容与种子不一致 → **不改**，回显「与团队基线不一致：<工具>」；节内多出的工具行（用户自加）→ 不动，回显列出。
 4. 三块全部一致 → 回显「环境检查段落已是最新，无事可做」。
 
@@ -439,7 +439,7 @@ graph LR
 | 症状 | 处理 |
 |---|---|
 | `npm install -g` 失败 | 检查 npm registry 可达性与全局 bin 目录权限；企业内网确认内部 registry 镜像 |
-| che 安装报 404（@newchiwan 不在公网） | 配置公司 Nexus 消费端：`npm config set @newchiwan:registry https://nexus.newchiwan.cn/repository/registry-npm/` 后重试 |
+| che 安装报 ETARGET / 404 | 确认包名拼写为 `@hjxarthuratlas/che`，检查 npm registry 可达性（公网 npmjs）后重试 |
 | 安装后仍 `command not found: pingcode` | 重开 shell 确认 npm 全局 bin 目录在 PATH 中 |
 | `pingcode --version` 落后于 npm 最新版 | `npm install -g @metaphorli/pingcode-cli@latest` |
 | `auth status` 始终未认证 | 检查登录命令输出；或改设 `PINGCODE_CLIENT_ID`/`PINGCODE_CLIENT_SECRET` |

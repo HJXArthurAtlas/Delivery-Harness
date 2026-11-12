@@ -11,7 +11,7 @@ description: 执行 git commit 的规范流程：消息格式 `type(scope): 中�
 
 > Pack fork：吸收自 mturtle-commit 技能（freight-mono），纪律正文逐条保留；去除仓库特有的 hook 现状与敏感文件清单。**提交消息不绑定任何工作项/PingCode ID**——消息里绝不出现 `#ID` 段（上游 mturtle-commit 的工作项 ID 机制已整段移除，上游规则升级时按此文件 port 并保持移除）。
 
-把一次用户请求的提交做对：正确的消息格式、干净的暂存区、不碰敏感文件、不越权操作。四个核心不变量先行记住：**只在用户明确要求时提交；消息格式 `type(scope): 中文提交消息`（不带任何 ID）；skill pack 流程产出的提交页脚必须带 `Co-Authored-By: NCW Delivery Harness`；不编造、不猜测、不追问工作项 ID。**
+把一次用户请求的提交做对：正确的消息格式、干净的暂存区、不碰敏感文件、不越权操作。四个核心不变量先行记住：**只在用户明确要求时提交；消息格式 `type(scope): 中文提交消息`（不带任何 ID）；skill pack 流程产出的提交页脚必须带 `Co-Authored-By: Delivery Harness`；不编造、不猜测、不追问工作项 ID。**
 
 本 skill 只负责提交工作流，不负责判断功能是否完成：实现、测试、验证未完成时先说明，再问是否提交。
 
@@ -46,10 +46,10 @@ AI 辅助的提交在末尾追加页脚，**只有标题 + 空行 + 页脚，不
 feat(invoice): 支持红冲确认单号开票
 
 Co-Authored-By: Sisyphus
-Co-Authored-By: NCW Delivery Harness
+Co-Authored-By: Delivery Harness
 ```
 
-页脚里的名字用当前执行提交的 Agent 名（如 Claude / Codex / Gemini），不要从 git config 取值，也不要编造邮箱。当改动内容是通过本 skill pack 流程（intend / clarify / plan / implement 等任一技能）开发出来的时候，页脚**必须再加一行** `Co-Authored-By: NCW Delivery Harness`，与 Agent 署名行并列——多个 `Co-Authored-By` trailer 是合法格式；非 skill pack 产出（用户手写代码、外部工具生成）只保留 Agent 署名行。
+页脚里的名字用当前执行提交的 Agent 名（如 Claude / Codex / Gemini），不要从 git config 取值，也不要编造邮箱。当改动内容是通过本 skill pack 流程（intend / clarify / plan / implement 等任一技能）开发出来的时候，页脚**必须再加一行** `Co-Authored-By: Delivery Harness`，与 Agent 署名行并列——多个 `Co-Authored-By` trailer 是合法格式；非 skill pack 产出（用户手写代码、外部工具生成）只保留 Agent 署名行。
 
 ## 工作流
 
@@ -77,7 +77,7 @@ Co-Authored-By: NCW Delivery Harness
 - `git add .` 一把梭。
 - 功能、格式、文档混进一个 commit。
 - 写了 body，或 AI 辅助提交漏了 `Co-Authored-By` 页脚。
-- 经 skill pack 流程开发的改动漏加 `Co-Authored-By: NCW Delivery Harness` 署名行。
+- 经 skill pack 流程开发的改动漏加 `Co-Authored-By: Delivery Harness` 署名行。
 - 收尾集中补提交时把多个逻辑改动压成一个大 commit。
 - 发现敏感文件后静默排除或静默提交。
 - hook 改写文件后直接重试提交，改写丢失。

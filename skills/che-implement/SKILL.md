@@ -17,7 +17,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
-1. Run `che check --json --require-tasks --include-tasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`). All paths must be absolute. Record the runs timeline start before any file write: `che state start implement --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available). For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+1. Run `che check --json --require-tasks --include-tasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list (requires the external `che` CLI on PATH — `@hjxarthuratlas/che`, Node ≥ 22.18; install with `npm install -g @hjxarthuratlas/che@latest`). All paths must be absolute. Record the runs timeline start before any file write: `che state start implement --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available). For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
 
 2. **Check checklists status** (if FEATURE_DIR/checklists/ exists):
    - Treat checklist markers as a read-only gate: scan checkbox state, report status, and ask before proceeding when needed; do NOT modify checklist files or markers
@@ -60,7 +60,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **IF EXISTS**: Read research.md for technical decisions and constraints
    - **IF EXISTS**: Read docs/constitution/constitution.md for governance constraints
    - **IF EXISTS**: Read quickstart.md for integration scenarios
-   - **IF EXISTS**: Read `$FEATURE_DIR/design-tasks.md` (**pack fork (ncw), port on upstream upgrade**): implement UI tasks against its interaction rules and page states, and verify each applicable design requirement (UI-xx) before marking its task complete. An external visual design draft, if any, is the visual source of truth; conflicts with intent/plan go back to the user, never resolved silently.
+   - **IF EXISTS**: Read `$FEATURE_DIR/design-tasks.md` (**pack fork, port on upstream upgrade**): implement UI tasks against its interaction rules and page states, and verify each applicable design requirement (UI-xx) before marking its task complete. An external visual design draft, if any, is the visual source of truth; conflicts with intent/plan go back to the user, never resolved silently.
 
 4. **Project Setup Verification**:
    - **REQUIRED**: Create/verify ignore files based on actual project setup:
@@ -144,7 +144,7 @@ Note: This command assumes a complete task breakdown exists in tasks.md. If task
 
 ## Completion Report
 
-Report final status with summary of completed work. Record the runs timeline completion once here in the final report — not inside the per-task loop: `che state done implement --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available). **Pack fork (ncw), port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
+Report final status with summary of completed work. Record the runs timeline completion once here in the final report — not inside the per-task loop: `che state done implement --session "$CHE_SESSION_ID"` (omit `--session` when no session id is available). **Pack fork, port on upstream upgrade**: end the report with grouped next-step hints, rendered verbatim as follows:
   主流程:
   - /che-intentverify: 独立 checker 审判实现 diff（越界/约束/场景），PASS 才进收尾
   可选:
@@ -162,7 +162,7 @@ Report final status with summary of completed work. Record the runs timeline com
 
 ## Handoff
 
-> Pack fork (ncw), port on upstream upgrade.
+> Pack fork, port on upstream upgrade.
 
 - **目标**：`/che-intentverify` —— 独立 checker 审判实现 diff
 - **条件**：

@@ -146,7 +146,7 @@ completed: {YYYY-MM-DD}
 
 ## Handoff
 
-> Pack fork (ncw), port on upstream upgrade.
+> Pack fork, port on upstream upgrade.
 
 - **目标**：无 —— 链终点；产物落 `docs/adr/`、`docs/corrections/`、`docs/patterns/`，记录落 `{task_dir}/compound.md`
 - **条件**：仅在 intentverify PASS（或 REVIEW NEEDED 经人工确认）后执行；BLOCKED 必须拒绝

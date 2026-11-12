@@ -23,10 +23,10 @@ Note: This clarification workflow is expected to run (and be completed) BEFORE i
 
 Execution steps:
 
-1. Run `che paths --json` from repo root **once** (requires the external `che` CLI on PATH — `@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest`), and `che knowledge paths --json` **once** to resolve the knowledge location. Parse minimal JSON payload fields:
+1. Run `che paths --json` from repo root **once** (requires the external `che` CLI on PATH — `@hjxarthuratlas/che`, Node ≥ 22.18; install with `npm install -g @hjxarthuratlas/che@latest`), and `che knowledge paths --json` **once** to resolve the knowledge location. Parse minimal JSON payload fields:
    - `FEATURE_DIR`
    - `FEATURE_SPEC`
-   - `CONTEXT_FILE` / `GLOSSARY_FILE` (knowledge resolution; if the subcommand is unavailable, stop and recommend upgrading `@newchiwan/che`)
+   - `CONTEXT_FILE` / `GLOSSARY_FILE` (knowledge resolution; if the subcommand is unavailable, stop and recommend upgrading `@hjxarthuratlas/che`)
    - (Optionally capture `IMPL_PLAN`, `TASKS` for future chained flows.)
    - If JSON parsing fails, abort and instruct user to re-run `/che-intend` or verify feature branch environment.
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
@@ -185,7 +185,7 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
 - Coverage summary table listing each taxonomy category with Status: Resolved (was Partial/Missing and addressed), Deferred (exceeds question quota, or remaining item is specifically implementation method, tech-stack comparison, or task breakdown), Clear (already sufficient), Outstanding (still Partial/Missing but low impact).
 - If any Outstanding or Deferred remain, recommend whether to proceed to `/che-plan` or run `/che-clarify` again later post-plan.
 - Suggested next command.
-- **Pack fork (ncw), port on upstream upgrade** — after the report body, close with this fixed ending sequence, nothing after it:
+- **Pack fork, port on upstream upgrade** — after the report body, close with this fixed ending sequence, nothing after it:
   1. **Chain handoff to grill (main path)**: use the AskUserQuestion tool (never plain-text output that pauses the session for input) with two options, each carrying a one-line description of the action; on selection the agent executes it immediately in this session — 「继续 grill」（**推荐**）— 深度追问：多轮交叉检验 intent，暴露自相矛盾与隐含假设，把每个决策点钉到终态；结束后承接「是否现在推送到 PingCode?」与主流程提示。选中即自动执行 `/che-grill`（携带 `TASK_DIR` 与 `SLUG`）/「就此停下」— 结束本次链，grill 与推送稍后手动跑. On continue, grill takes over and nothing follows here. On stop, judge UI presence from the intent (User Stories / In scope / Acceptance Scenarios 中是否出现用户可见界面交互；拿不准按涉 UI 处理) and show exactly ONE manual next-step hint, rendered verbatim:
      UI 存在 →
      主流程:
@@ -205,7 +205,7 @@ Record the runs timeline completion: `che state done clarify --session "$CHE_SES
 
 ## Handoff
 
-> Pack fork (ncw), port on upstream upgrade.
+> Pack fork, port on upstream upgrade.
 
 - **目标**：`/che-grill` —— 追问式深度澄清（主路径下一环）：暴露隐含假设与自相矛盾；PingCode 推送确认与 design/plan 主流程提示由 grill 收尾承接
 - **条件**：

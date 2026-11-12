@@ -35,8 +35,8 @@ If non-empty, treat it as a request to prioritize the specified area for deeper 
 
 ## Prerequisites
 
-1. Confirm that the environment is macOS / Linux and that `bash` and the external `che` CLI are available on PATH (`@newchiwan/che`, Node ≥ 22.18; install with `npm install -g @newchiwan/che@latest` if missing). If not, state that the environment is unsupported and stop. Do not substitute a project-local prerequisite script.
-2. From the repository root, run `che paths --json` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC`, and `che knowledge paths --json` **exactly once** to obtain `CONTEXT_FILE` / `GLOSSARY_FILE` / `ADR_DIR`. If either does not return JSON, stop: for `che paths`, recommend rerunning the agent-specific invocation of `che-intend` or checking the active feature environment; for `che knowledge`, report the command's error and recommend upgrading `@newchiwan/che` when the subcommand is unknown.
+1. Confirm that the environment is macOS / Linux and that `bash` and the external `che` CLI are available on PATH (`@hjxarthuratlas/che`, Node ≥ 22.18; install with `npm install -g @hjxarthuratlas/che@latest` if missing). If not, state that the environment is unsupported and stop. Do not substitute a project-local prerequisite script.
+2. From the repository root, run `che paths --json` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC`, and `che knowledge paths --json` **exactly once** to obtain `CONTEXT_FILE` / `GLOSSARY_FILE` / `ADR_DIR`. If either does not return JSON, stop: for `che paths`, recommend rerunning the agent-specific invocation of `che-intend` or checking the active feature environment; for `che knowledge`, report the command's error and recommend upgrading `@hjxarthuratlas/che` when the subcommand is unknown.
 3. If intent.md does not exist, stop and recommend running the agent-specific invocation of `che-intend` first. Do not create a new intent here.
 4. Read `docs/constitution/constitution.md` (project principles) if it exists. In addition, inspect **only the existing materials relevant to the work at hand** using ordinary file search, file reading, and symbol search:
    - `README*` / `CONTEXT.md` / `CLAUDE.md` / `AGENTS.md` / `documents/**` / `docs/**` — domain terminology, stakeholders, business flows, and design decisions
@@ -60,7 +60,7 @@ che knowledge paths --json
 
 It returns `REPO_ROOT`, `KNOWLEDGE_ROOT`, `CONTEXT_FILE`, `GLOSSARY_FILE`, `GLOSSARY_EXISTS`, `ADR_DIR`, and `SOURCE`. Use those values for the rest of the session; do not reimplement the resolution rules in this skill.
 
-- If the command is unavailable, stop and recommend `npm install -g @newchiwan/che@latest`. Do not fall back to a default path.
+- If the command is unavailable, stop and recommend `npm install -g @hjxarthuratlas/che@latest`. Do not fall back to a default path.
 - If it exits non-zero, stop and report its stderr. Exit 2 means conflicting `knowledge_root` declarations at the same priority; exit 3 means the path is outside the repository or no repository root was found. Do not guess, do not create files, and do not write to more than one location.
 - The command applies this order: explicit `--root` (the user's in-session choice) → `AGENTS.md`/`CLAUDE.md` `knowledge_root:` declaration → `README.md`/repo-root `CONTEXT.md` `knowledge_root:` declaration → `docs/domain_knowledge/`. It is read-only and never creates directories.
 
@@ -438,7 +438,7 @@ Report:
 - The resolved `CONTEXT_FILE`, `KNOWLEDGE_ROOT`, `GLOSSARY_FILE` (legacy, possibly absent), and `ADR_DIR` (the adrkit corpus); the 域节 and terms added or changed in `CONTEXT_FILE`; legacy terms copied or left unmigrated; paths and types of knowledge documents created or updated; and a summary of concepts and decisions recorded, including the ids of the ADR records allocated.
 - Coverage table: show every category's aggregate status as **Resolved** / **Clear** / **Deferred** / **Outstanding**, with a per-point status breakdown for each category. Do not proceed to the completion report if even one Partial / Missing point remains.
 - If Outstanding / Deferred items remain, recommend whether to proceed to `/che-design` / `/che-plan` or rerun this command later.
-- **Pack fork (ncw), port on upstream upgrade** — after the report body, close with this fixed ending sequence, nothing after it:
+- **Pack fork, port on upstream upgrade** — after the report body, close with this fixed ending sequence, nothing after it:
   1. **PingCode push confirmation (before any next-step hint)**: `.che/pingcode-config.yml` exists (PingCode push enabled) → ask via the **AskUserQuestion tool** (never plain-text output that pauses the session for input) with two options, each carrying a one-line description — 「现在推送」（**推荐**）— 把定稿的 spec 推送为 PingCode 需求树卡片 / 「暂不推送」— 不阻塞交接，之后可随时手动补建. The question names the action, never a skill/command. On push, execute the `/che-pingcode-specstoissues` flow in this session immediately (agent runs it itself; never tell the user to run it), then continue to step 2 after it finishes. On skip, or when the config is absent, fall through to step 2 silently.
   2. Judge UI presence from the intent itself — scan User Stories, In scope, and Acceptance Scenarios for any user-visible interface interaction (pages, forms, components, visualization, frontend behavior); when uncertain, treat as UI. Then end with exactly ONE of the following next-step hints, rendered verbatim:
      UI 存在 →
@@ -475,7 +475,7 @@ Report:
 
 ## Handoff
 
-> Pack fork (ncw), port on upstream upgrade.
+> Pack fork, port on upstream upgrade.
 
 - **目标**：按 intent 判定 UI 需求——涉 UI → `/che-design`（先出设计明细再进 plan）；无 UI → `/che-plan`（交接门禁通过后）
 - **推送确认（PingCode，先于主流程提示）**：`.che/pingcode-config.yml` 在位（已开启推送）→ 经 AskUserQuestion 两选项确认（「现在推送」/「暂不推送」，问句只说动作、不出现技能名）；选推送 → 本会话直接执行 `/che-pingcode-specstoissues` 建卡流程并登记 `specs/pingcode-mapping.json`，推送完成后才提示主流程；选不推送或未配置 → 静默跳过，不阻塞交接，后续可随时手动补建登记
