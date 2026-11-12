@@ -10,7 +10,7 @@
 //      ambiguity error listing slug + dir + derived stage
 //
 // Task directories: specs/<prefix>-<slug>/ where prefix is a 3+ digit
-// zero-padded number (pre-PingCode) or a PingCode identifier like NCW-4921
+// zero-padded number (pre-PingCode) or a PingCode identifier like PROJ-4921
 // (post-push rename). Legacy timestamp dirs (YYYYMMDD-HHMMSS-*) are not task
 // dirs. The slug is the stable handle: bindings store the slug, never the
 // path, so the push-time rename is transparent.
@@ -118,7 +118,7 @@ export function isTaskDirName(name: string): boolean {
 
 /**
  * Stable slug of a task dir: basename with the leading PingCode identifier
- * (`NCW-4921-`) or numeric (`001-`) prefix stripped. `NCW-4921-user-auth` →
+ * (`PROJ-4921-`) or numeric (`001-`) prefix stripped. `PROJ-4921-user-auth` →
  * `user-auth`; `001-user-auth` → `user-auth`. The identifier pattern is tried
  * first so its inner hyphen can never be mistaken for the slug separator.
  */
@@ -127,7 +127,7 @@ export function slugFromDirBasename(name: string): string {
 }
 
 export interface TaskDir {
-  /** Directory basename, e.g. `001-user-auth` or `NCW-4921-user-auth`. */
+  /** Directory basename, e.g. `001-user-auth` or `PROJ-4921-user-auth`. */
   name: string;
   slug: string;
   /** Absolute path. */

@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
-# Publish @newchiwan/che to npm registry as plain-JS artifact.
+# Publish @hjxarthuratlas/che to the public npm registry as plain-JS artifact.
 #
 # Why: Node refuses type-stripping for files under node_modules, so the
 # repo flow (bin -> src/index.ts, consumed through the file: symlink whose
 # realpath escapes node_modules) cannot be shipped verbatim. The published
 # tarball therefore carries a single bun-bundled dist/cli.js and nothing else.
 #
-# Publish target: the internal-npm HOSTED repo. Scoped packages resolve their
-# registry via `@newchiwan:registry` (typically set to the registry-npm GROUP
-# for installs), and that config beats `npm publish --registry` — so publish
-# must override the scoped key itself (CHE_PUBLISH_REGISTRY to override).
-# Deploying to a group is a Nexus PRO feature and fails with 403.
+# Publish target: the public npm registry. Set CHE_PUBLISH_REGISTRY to publish
+# through a different registry (e.g. a mirror) via `npm publish --registry`.
 #
 # Usage: bash scripts/publish.sh [extra npm publish flags]
 set -euo pipefail
@@ -34,4 +31,4 @@ node -e '
   copyFileSync("dist/cli.js", stage + "/cli.js");
 ' "$stage"
 
-npm publish "$stage" --@newchiwan:registry="${CHE_PUBLISH_REGISTRY:-https://nexus.newchiwan.cn/repository/internal-npm/}" "$@"
+npm publish "$stage" ${CHE_PUBLISH_REGISTRY:+--registry "$CHE_PUBLISH_REGISTRY"} "$@"

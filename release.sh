@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
-# release.sh — @newchiwan/che CLI 发版入口：版本回写、最新性检查、推送公司 Nexus。
+# release.sh — @hjxarthuratlas/che CLI 发版入口：版本回写、最新性检查、推送 npm。
 #
-# 发布目标是 Nexus internal-npm HOSTED 仓（发布走 group 会 403）；npm 认证读用户级
-# ~/.npmrc（devops 账号，见 README「发布」），本脚本不含凭据。bun 打包与 tarball
-# 暂存在 packages/cli/scripts/publish.sh，本脚本只做它之外的版本事实管理。
+# 发布目标是 npm registry（可用 CHE_PUBLISH_REGISTRY 覆盖）；npm 认证读用户级
+# ~/.npmrc，本脚本不含凭据。bun 打包与 tarball 暂存在 packages/cli/scripts/publish.sh，
+# 本脚本只做它之外的版本事实管理。
 #
 # 用法：
-#   bash release.sh                # 发布 packages/cli/package.json 当前版本（发布前自动查 Nexus 最新版）
+#   bash release.sh                # 发布 packages/cli/package.json 当前版本（发布前自动查 npm 最新版）
 #   bash release.sh 0.5.0          # 先把 0.5.0 写入 packages/cli/package.json + src/version.ts 再发布
-#   bash release.sh --check        # 只检查 package.json 版本是否比 Nexus 已发布最新版新，不发布
+#   bash release.sh --check        # 只检查 package.json 版本是否比 npm 已发布最新版新，不发布
 #   bash release.sh 0.5.0 --check  # 以传入版本做检查，不回写、不发布
 #
-# 退出码：0 成功/可发布；1 版本不比线上新或发布失败；2 用法错误或无法读取 Nexus。
+# 退出码：0 成功/可发布；1 版本不比线上新或发布失败；2 用法错误或无法读取 npm。
 set -euo pipefail
 cd "$(dirname "$0")"
 
-REGISTRY="${CHE_PUBLISH_REGISTRY:-https://nexus.newchiwan.cn/repository/internal-npm/}"
+REGISTRY="${CHE_PUBLISH_REGISTRY:-https://registry.npmjs.org/}"
 PKG_DIR="packages/cli"
 PKG_JSON="$PKG_DIR/package.json"
 VERSION_TS="$PKG_DIR/src/version.ts"
@@ -23,11 +23,11 @@ VERSION_TS="$PKG_DIR/src/version.ts"
 usage() {
   cat <<'EOF'
 用法: bash release.sh [版本号] [--check]
-  bash release.sh                发布 packages/cli/package.json 当前版本（发布前自动查 Nexus 最新版）
+  bash release.sh                发布 packages/cli/package.json 当前版本（发布前自动查 npm 最新版）
   bash release.sh 0.5.0          把 0.5.0 写入 packages/cli/package.json + src/version.ts 再发布
-  bash release.sh --check        只检查版本是否比 Nexus 已发布最新版新，不发布
+  bash release.sh --check        只检查 package.json 版本是否比 npm 已发布最新版新，不发布
   bash release.sh 0.5.0 --check  以传入版本做检查，不回写、不发布
-退出码: 0 成功/可发布; 1 版本不比线上新或发布失败; 2 用法错误或无法读取 Nexus
+退出码: 0 成功/可发布; 1 版本不比线上新或发布失败; 2 用法错误或无法读取 npm
 EOF
 }
 
@@ -100,43 +100,57 @@ local_version="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.arg
 valid_semver "$local_version" || die "$PKG_JSON 版本非法: $local_version" 2
 echo "==> 本地版本 ($PKG_JSON): $local_version"
 
-# Nexus 上已发布的最新版（versions 全列表取 semver 最大，不依赖 dist-tags）
-latest="$(npm view @newchiwan/che versions --json --@newchiwan:registry="$REGISTRY" 2>/dev/null \
-  | node -e "$semver_cmp_js
+# npm 上已发布的最新版（versions 全列表取 semver 最大，不依赖 dist-tags）
+# E404 = 包未发布过（视为首次发布，可发布）；其余失败 = 网络或权限问题
+npm_rc=0
+npm_out="$(npm view @hjxarthuratlas/che versions --json --registry="$REGISTRY" 2>/dev/null)" || npm_rc=$?
+case "$npm_out" in *E404*) npm_rc=0;; esac
+latest="$(printf '%s' "$npm_out" | node -e "$semver_cmp_js
 let raw = '';
 process.stdin.on('data', d => raw += d);
 process.stdin.on('end', () => {
   let out = '';
   try {
     const arr = JSON.parse(raw);
-    const list = Array.isArray(arr) ? arr : [arr];
-    const max = list.reduce((m, x) => m === null || cmp(key(x), key(m)) > 0 ? x : m, null);
+    if (!Array.isArray(arr) || !arr.every(x => typeof x === 'string')) {
+      process.stdout.write('');
+      return;
+    }
+    const max = arr.reduce((m, x) => m === null || cmp(key(x), key(m)) > 0 ? x : m, null);
     if (max) out = max;
   } catch {}
   process.stdout.write(out);
-});" || true)"
+});")"
 
 if [ -z "$latest" ]; then
-  if [ "$check_only" -eq 1 ]; then
-    die "无法读取 Nexus 已发布版本（网络不通或无读权限；registry: $REGISTRY）" 2
+  if [ "$npm_rc" -ne 0 ]; then
+    if [ "$check_only" -eq 1 ]; then
+      die "无法读取 npm 已发布版本（网络不通或无读权限；registry: $REGISTRY）" 2
+    fi
+    echo "==> 警告: 无法读取 npm 已发布版本，跳过最新性检查（重复版本会被 registry 拦下）"
+  else
+    if [ "$check_only" -eq 1 ]; then
+      echo "==> npm 上暂无已发布版本，$local_version 可作为首次发布"
+      exit 0
+    fi
+    echo "==> npm 上暂无已发布版本，首次发布 $local_version"
   fi
-  echo "==> 警告: 无法读取 Nexus 已发布版本，跳过最新性检查（重复版本会被 Nexus 403 拦下）"
 else
-  echo "==> Nexus 最新已发布: $latest"
+  echo "==> npm 最新已发布: $latest"
   if node -e "$semver_cmp_js
 process.exit(cmp(key(process.argv[1]), key(process.argv[2])) > 0 ? 0 : 1)" \
        "$local_version" "$latest"; then
     echo "==> $local_version > $latest，可发布"
   elif [ "$check_only" -eq 1 ]; then
-    die "$local_version 未比 Nexus 最新版 ($latest) 新" 1
+    die "$local_version 未比 npm 最新版 ($latest) 新" 1
   else
-    die "$local_version 已在 Nexus（最新已发布 $latest）——先升版本: bash release.sh X.Y.Z" 1
+    die "$local_version 已在 npm（最新已发布 $latest）——先升版本: bash release.sh X.Y.Z" 1
   fi
 fi
 
 [ "$check_only" -eq 1 ] && exit 0
 
 command -v bun >/dev/null 2>&1 || die "发布需要 bun 打包（见 packages/cli/scripts/publish.sh），本机未找到 bun"
-echo "==> 发布 @newchiwan/che@$local_version → $REGISTRY"
+echo "==> 发布 @hjxarthuratlas/che@$local_version → $REGISTRY"
 CHE_PUBLISH_REGISTRY="$REGISTRY" bash "$PKG_DIR/scripts/publish.sh"
-echo "==> 完成: @newchiwan/che@$local_version 已发布"
+echo "==> 完成: @hjxarthuratlas/che@$local_version 已发布"

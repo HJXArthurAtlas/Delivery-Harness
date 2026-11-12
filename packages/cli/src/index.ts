@@ -15,7 +15,7 @@ import { CLI_VERSION } from './version.ts';
 
 export { CLI_VERSION };
 
-const USAGE = `che — newchiwan delivery harness CLI
+const USAGE = `che — delivery harness CLI
 
 Usage: che <command> [options]
 
@@ -32,7 +32,7 @@ Commands:
   setup-tasks --references-dir <dir> [--json]      Resolve the tasks template + docs
   knowledge paths [--json] [--root <path>]        Resolve KNOWLEDGE_ROOT / CONTEXT_FILE / ADR_DIR
   pack init|status|update [--ref <ref>] [--json]   Install/inspect/update the harness pack (.che/pack.json)
-  self-update [--version <x>] [--check] [--json]   Update the global @newchiwan/che itself
+  self-update [--version <x>] [--check] [--json]   Update the global @hjxarthuratlas/che itself
 
 Resolution: --feature <slug> > CHE_FEATURE_DIRECTORY env > session binding > auto (single task).
 Without a binding and multiple tasks in flight, commands list candidates and fail.

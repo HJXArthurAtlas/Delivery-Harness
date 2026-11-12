@@ -1,6 +1,6 @@
 // che feature — session↔task bindings in .che/feature.json (machine-local,
 // gitignored). Bindings store the task slug, never the path, so the
-// push-time directory rename (001-x → NCW-4921-x) is transparent.
+// push-time directory rename (001-x → PROJ-4921-x) is transparent.
 
 import { parseArgs } from 'node:util';
 import {

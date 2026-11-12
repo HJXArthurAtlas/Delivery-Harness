@@ -1,13 +1,12 @@
-// che self-update — upgrade the globally installed @newchiwan/che via npm.
+// che self-update — upgrade the globally installed @hjxarthuratlas/che via npm.
 //
-// The CLI is published to the company Nexus; self-update shells out to npm
-// (`npm view` for the latest version, `npm install -g` to swap the files).
+// The CLI is published to the public npm registry; self-update shells out to
+// npm (`npm view` for the latest version, `npm install -g` to swap the files).
 // Replacing files of the running process is safe on unix: the current
 // process has the old bundle loaded and picks up the new one next run.
 //
 // Guards, in order: dev checkouts (repo file: link) are refused — upgrading
-// those means git pull, not npm; npm must exist; the @newchiwan scope
-// registry must be configured (public npm serves 404 for this package).
+// those means git pull, not npm; npm must exist.
 
 import { parseArgs } from 'node:util';
 import { execFileSync } from 'node:child_process';
@@ -20,7 +19,7 @@ import { compareVersions } from './pack.ts';
 
 export const SELF_UPDATE_USAGE = `Usage: che self-update [--version <x>] [--check] [--json]
 
-Update the globally installed @newchiwan/che from the company Nexus.
+Update the globally installed @hjxarthuratlas/che from the public npm registry.
 
   --version <x>  Install this exact version instead of the latest
   --check        Only report current vs latest; install nothing
@@ -46,7 +45,7 @@ function npmCapture(args: string[]): string {
 /** True when the running module lives inside an npm-managed install. */
 function isNpmManagedInstall(): boolean {
   const here = realpathSync(fileURLToPath(import.meta.url));
-  return /[\\/]node_modules[\\/]@newchiwan[\\/]che[\\/]/.test(here);
+  return /[\\/]node_modules[\\/]@hjxarthuratlas[\\/]che[\\/]/.test(here);
 }
 
 function requireNpmManagedInstall(): void {
@@ -63,30 +62,15 @@ function requireNpm(): void {
   } catch {
     throw new SelfUpdateError(
       'ERROR: npm is required for self-update but was not found on PATH; ' +
-        'install Node.js >= 22.18 or run: npm install -g @newchiwan/che@latest',
-    );
-  }
-}
-
-function requireScopeRegistry(): void {
-  let registry: string;
-  try {
-    registry = npmCapture(['config', 'get', '@newchiwan:registry']);
-  } catch (err) {
-    throw err instanceof SelfUpdateError ? err : new SelfUpdateError(String(err));
-  }
-  if (registry === '' || registry === 'null' || registry === 'undefined') {
-    throw new SelfUpdateError(
-      'ERROR: the @newchiwan scope registry is not configured; the package only exists on the company Nexus. ' +
-        'Run: npm config set @newchiwan:registry https://nexus.newchiwan.cn/repository/registry-npm/',
+        'install Node.js >= 22.18 or run: npm install -g @hjxarthuratlas/che@latest',
     );
   }
 }
 
 function latestPublishedVersion(): string {
-  const latest = npmCapture(['view', '@newchiwan/che', 'version']);
+  const latest = npmCapture(['view', '@hjxarthuratlas/che', 'version']);
   if (latest === '') {
-    throw new SelfUpdateError('ERROR: npm view returned no version for @newchiwan/che');
+    throw new SelfUpdateError('ERROR: npm view returned no version for @hjxarthuratlas/che');
   }
   return latest;
 }
@@ -117,7 +101,6 @@ export function runSelfUpdate(argv: string[]): number {
   try {
     requireNpmManagedInstall();
     requireNpm();
-    requireScopeRegistry();
 
     const current = CLI_VERSION;
     const target =
@@ -159,12 +142,12 @@ export function runSelfUpdate(argv: string[]): number {
     try {
       // stdio piped (not inherit) so npm's own progress never pollutes the banner;
       // stderr is captured for the failure message below.
-      execFileSync('npm', ['install', '-g', `@newchiwan/che@${target}`], { stdio: ['ignore', 'pipe', 'pipe'] });
+      execFileSync('npm', ['install', '-g', `@hjxarthuratlas/che@${target}`], { stdio: ['ignore', 'pipe', 'pipe'] });
     } catch (err) {
       const detail = isRecord(err) && 'stderr' in err && typeof err.stderr === 'string' ? err.stderr.trim() : '';
       throw new SelfUpdateError(
-        `ERROR: npm install -g @newchiwan/che@${target} failed${detail ? `: ${detail}` : ''}; ` +
-          `install by hand with: npm install -g @newchiwan/che@${target}`,
+        `ERROR: npm install -g @hjxarthuratlas/che@${target} failed${detail ? `: ${detail}` : ''}; ` +
+          `install by hand with: npm install -g @hjxarthuratlas/che@${target}`,
       );
     }
 

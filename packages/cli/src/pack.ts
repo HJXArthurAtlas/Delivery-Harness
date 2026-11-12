@@ -1,4 +1,4 @@
-// che pack — install / inspect / update the ncw-delivery-harness skill pack.
+// che pack — install / inspect / update the delivery-harness skill pack.
 //
 // Channels: the pack repo (git) is the distribution source; a release is a
 // `vX.Y.Z` tag on the repo. `pack init` copies skills/<name>/ into the
@@ -61,7 +61,7 @@ Options:
 /** Thrown with a message that already starts with "ERROR: ". */
 export class PackError extends Error {}
 
-const DEFAULT_PACK_REPO = 'https://git.newchiwan.com/council/ncw-delivery-harness.git';
+const DEFAULT_PACK_REPO = 'https://github.com/HJXArthurAtlas/Delivery-Harness.git';
 const TARGET_RELATIVE = '.agents/skills';
 const MANIFEST_RELATIVE = '.che/pack.json';
 const SHA_PATTERN = /^[0-9a-f]{7,40}$/;
@@ -213,7 +213,7 @@ function checkoutPack(url: string, ref: string): PackSource {
     }
     const engines = isRecord(packageJson.engines) ? packageJson.engines : {};
     return {
-      packName: optionalString(packageJson, 'name') ?? 'ncw-delivery-harness',
+      packName: optionalString(packageJson, 'name') ?? 'delivery-harness',
       packVersion,
       minCliVersion: optionalString(engines, 'che'),
       commit,
@@ -498,7 +498,7 @@ export function runPackInit(argv: string[]): number {
 
     if (values.json !== true) {
       const display = VERSION_TAG_PATTERN.test(ref) ? ref.replace(/^v/, '') : ref;
-      process.stdout.write(paint(ANSI_ORANGE, `正在安装 NCW Delivery Harness ${display} ...\n\n`));
+      process.stdout.write(paint(ANSI_ORANGE, `正在安装 Delivery Harness ${display} ...\n\n`));
     }
        const source = checkoutPack(sourceUrl, ref);
     try {
@@ -582,7 +582,7 @@ export function runPackUpdate(argv: string[]): number {
     const banner = values.json !== true && values['dry-run'] !== true;
     if (banner) {
       const targetDisplay = VERSION_TAG_PATTERN.test(ref) ? ref.replace(/^v/, '') : ref;
-      process.stdout.write(paint(ANSI_GRAY, `NCW Delivery Harness 当前版本： ${manifest.packVersion}\n`));
+      process.stdout.write(paint(ANSI_GRAY, `Delivery Harness 当前版本： ${manifest.packVersion}\n`));
       if (targetDisplay !== manifest.packVersion) {
         process.stdout.write(paint(ANSI_GRAY, `发现新版本： ${targetDisplay}\n`));
       }
