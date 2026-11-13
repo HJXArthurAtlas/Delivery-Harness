@@ -87,7 +87,7 @@ test -f "docs/releases/X.Y.Z.md" \
   && echo OK || echo "FAIL: 发布文档 docs/releases/X.Y.Z.md 缺失"
 gh release view vX.Y.Z >/dev/null \
   && echo OK || echo "FAIL: GitHub Release 未创建"
-npm view @arthuratlas/che version
+npm view @hjxarthuratlas/che version
 ```
 
 最后核对 `/readme-refresh` 触发条件（发布方式变化必触发），需要时执行。

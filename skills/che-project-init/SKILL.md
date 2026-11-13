@@ -152,7 +152,7 @@ L3 组件图（某容器内部的模块拆解）不默认产出；用户显式�
 
 本技能是项目接入第一步，必须顺手把 pack 依赖的外部 CLI 备齐（技能运行时只执行 PATH 上的 CLI，任何插件安装路径都不会替你装）：
 
-1. `command -v che` 缺失 → `npm install -g @arthuratlas/che@latest` 后复检（技能运行时命令无硬性版本下限；`che pack` 安装通道命令需 ≥ 0.3.0，口径以仓根 `engines.che` 为准，不达标时提示 `che self-update`）。
+1. `command -v che` 缺失 → `npm install -g @hjxarthuratlas/che@latest` 后复检（技能运行时命令无硬性版本下限；`che pack` 安装通道命令需 ≥ 0.3.0，口径以仓根 `engines.che` 为准，不达标时提示 `che self-update`）。
 2. `command -v adrkit` 缺失 → `npm install -g @adrkit/cli@0.20.0` 后复检（pack 按 0.20.0 钉）。
 3. 已在 PATH 的**绝不**擅自升降级；adrkit 与 0.20.0 漂移且技能报错时，建议用户重装并经其确认。
 4. 安装失败或用户拒绝 → **不阻塞**配置写入，在最终回显中标注缺失项与安装命令。
@@ -439,7 +439,7 @@ graph LR
 | 症状 | 处理 |
 |---|---|
 | `npm install -g` 失败 | 检查 npm registry 可达性与全局 bin 目录权限；企业内网确认内部 registry 镜像 |
-| che 安装报 ETARGET / 404 | 确认包名拼写为 `@arthuratlas/che`，检查 npm registry 可达性（公网 npmjs）后重试 |
+| che 安装报 ETARGET / 404 | 确认包名拼写为 `@hjxarthuratlas/che`，检查 npm registry 可达性（公网 npmjs）后重试 |
 | 安装后仍 `command not found: pingcode` | 重开 shell 确认 npm 全局 bin 目录在 PATH 中 |
 | `pingcode --version` 落后于 npm 最新版 | `npm install -g @metaphorli/pingcode-cli@latest` |
 | `auth status` 始终未认证 | 检查登录命令输出；或改设 `PINGCODE_CLIENT_ID`/`PINGCODE_CLIENT_SECRET` |

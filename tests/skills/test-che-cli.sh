@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # che CLI contract: task create, session bindings, resolution order, template/setup parity.
-# Drives the repo-local @arthuratlas/che via node_modules/.bin (npm install).
+# Drives the repo-local @hjxarthuratlas/che via node_modules/.bin (npm install).
 set -u
 
 pass=0
@@ -14,7 +14,7 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 if ! node -e 'process.exit(process.features.typescript ? 0 : 1)' 2>/dev/null; then
-  printf 'che-cli: SKIP（本机 Node 无原生 type stripping，无法运行 @arthuratlas/che）\n'
+  printf 'che-cli: SKIP（本机 Node 无原生 type stripping，无法运行 @hjxarthuratlas/che）\n'
   exit 0
 fi
 

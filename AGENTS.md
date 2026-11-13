@@ -4,7 +4,7 @@
 
 本仓是开源的软件交付 Harness（Delivery Harness）——以知识工程、Intent Driven Development、Compound Engineering 为方法底座的跨端 agent skill pack，向 DSH、OpenCode、omp 等端分发意图驱动流程及 adrkit、grill、compound、bug 扩展技能。
 
-本仓同时维护 `@arthuratlas/che` CLI。仓内无 CI，本地 `npm test` 是唯一质量门。
+本仓同时维护 `@hjxarthuratlas/che` CLI。仓内无 CI，本地 `npm test` 是唯一质量门。
 
 ## 路径地图
 
@@ -16,7 +16,7 @@
 | `skills/che-bug-*/` | Bug 评估、修复和验证 |
 | `skills/che-git-master/` | git 提交规范流程（消息格式、拆分、暂存边界） |
 | `skills/che-project-init/` | 项目接入与基础配置、架构画像生成与对账（docs/architecture.md，仅已有代码仓库） |
-| `packages/cli/` | `@arthuratlas/che` 源码与发布脚本 |
+| `packages/cli/` | `@hjxarthuratlas/che` 源码与发布脚本 |
 | `tests/skills/` | 技能结构、CLI 和技能运行时测试 |
 | `.omp-plugin/marketplace.json` | omp 插件 catalog |
 | `dsh-entry.js`、`cordis.patch.yml` | DSH bundle 入口与补丁 |
@@ -40,7 +40,7 @@ npm ci
 npm test
 ```
 
-根包不发布 npm（`private: true`）；omp 与 DSH 插件的分发以仓内容为准（marketplace add / dsh add 直接拉取本仓）。仅 `@arthuratlas/che` 通过根 `release.sh` 发布到公共 npm（内部委托 `packages/cli/scripts/publish.sh` 打包推送）。npm 认证只写用户级 `~/.npmrc`，绝不入库。
+根包不发布 npm（`private: true`）；omp 与 DSH 插件的分发以仓内容为准（marketplace add / dsh add 直接拉取本仓）。仅 `@hjxarthuratlas/che` 通过根 `release.sh` 发布到公共 npm（内部委托 `packages/cli/scripts/publish.sh` 打包推送）。npm 认证只写用户级 `~/.npmrc`，绝不入库。
 
 ## 修改约束
 

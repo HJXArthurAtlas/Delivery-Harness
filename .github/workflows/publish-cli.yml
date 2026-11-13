@@ -1,4 +1,4 @@
-# Publish @arthuratlas/che to the public npm registry when a GitHub
+# Publish @hjxarthuratlas/che to the public npm registry when a GitHub
 # Release is published — only if packages/cli carries a version that is not
 # on the registry yet (i.e. the CLI actually changed).
 #
@@ -6,7 +6,7 @@
 # (--tag latest is passed explicitly), so the registry always exposes both
 # the exact version and the `latest` tag after a successful run.
 #
-# Requires repo secret NPM_TOKEN (automation token for @arthuratlas).
+# Requires repo secret NPM_TOKEN (automation token for @hjxarthuratlas).
 
 name: publish-cli
 
@@ -42,7 +42,7 @@ jobs:
       - name: Check whether version is already on npm
         id: check
         run: |
-          if npm view "@arthuratlas/che@${{ steps.ver.outputs.version }}" version --registry https://registry.npmjs.org/ >/dev/null 2>&1; then
+          if npm view "@hjxarthuratlas/che@${{ steps.ver.outputs.version }}" version --registry https://registry.npmjs.org/ >/dev/null 2>&1; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
             echo "version ${{ steps.ver.outputs.version }} already published — skipping"
           else
@@ -60,7 +60,7 @@ jobs:
         if: steps.check.outputs.skip == 'false'
         run: |
           sleep 10
-          published="$(npm view "@arthuratlas/che@${{ steps.ver.outputs.version }}" version --registry https://registry.npmjs.org/)"
+          published="$(npm view "@hjxarthuratlas/che@${{ steps.ver.outputs.version }}" version --registry https://registry.npmjs.org/)"
           [ "$published" = "${{ steps.ver.outputs.version }}" ] || { echo "::error::published version mismatch: $published"; exit 1; }
-          latest="$(npm view @arthuratlas/che dist-tags.latest --registry https://registry.npmjs.org/)"
+          latest="$(npm view @hjxarthuratlas/che dist-tags.latest --registry https://registry.npmjs.org/)"
           echo "published $published; dist-tags.latest=$latest"

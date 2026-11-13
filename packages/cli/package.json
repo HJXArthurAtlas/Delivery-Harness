@@ -1,5 +1,5 @@
 {
-  "name": "@arthuratlas/che",
+  "name": "@hjxarthuratlas/che",
   "version": "0.5.0",
   "description": "delivery harness CLI: feature pointer, feature paths, template/setup resolution and harness pack lifecycle (init/status/update, self-update).",
   "type": "module",

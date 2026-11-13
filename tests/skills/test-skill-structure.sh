@@ -228,7 +228,7 @@ else
   bad "omp 扩展校验需要 node"
 fi
 
-# 9. @adrkit/cli 运行时依赖：必须钉精确版本，且 omp manifest 存在；分发包 private（不发 npm——发布面只有 omp/DSH 插件与 @arthuratlas/che）
+# 9. @adrkit/cli 运行时依赖：必须钉精确版本，且 omp manifest 存在；分发包 private（不发 npm——发布面只有 omp/DSH 插件与 @hjxarthuratlas/che）
 if command -v node >/dev/null 2>&1; then
   while IFS= read -r line; do
     case "$line" in OK) ok ;; FAIL\ *) bad "${line#FAIL }" ;; esac

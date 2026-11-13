@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@adrkit/cli": "0.20.0",
-    "@arthuratlas/che": "file:packages/cli"
+    "@hjxarthuratlas/che": "file:packages/cli"
   },
   "omp": {
     "extensions": ["./omp-update-check.ts"]

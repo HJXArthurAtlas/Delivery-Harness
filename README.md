@@ -29,7 +29,7 @@ https://github.com/HJXArthurAtlas/Delivery-Harness）。按步骤执行，任何
      目标已存在同名目录时停下来问我，绝不覆盖。
 
 2. 运行时 CLI——全局安装（公网 npm）：
-   npm install -g @arthuratlas/che@latest
+   npm install -g @hjxarthuratlas/che@latest
    npm install -g @adrkit/cli@0.20.0
 
 3. 验证并逐项汇报结果：
@@ -79,7 +79,7 @@ omp 实测同时读项目级与全局级；OpenCode 官方支持同两个路径�
 两个外部 CLI 不随任何插件路径分发，必须装在全局 PATH 上；均发布在公网 npm：
 
 ```bash
-npm install -g @arthuratlas/che@latest   # 特性路径解析（意图驱动 / grill / adrkit 系技能）
+npm install -g @hjxarthuratlas/che@latest   # 特性路径解析（意图驱动 / grill / adrkit 系技能）
 npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 ```
 
@@ -116,12 +116,12 @@ npm install -g @adrkit/cli@0.20.0           # 仅 adrkit 三技能需要
 
 ## 运行时与外部 CLI（排除 init）
 
-`che-adr-*` 依赖外部 `@adrkit/cli`；特性路径解析依赖外部 `che` CLI（`@arthuratlas/che`）：
+`che-adr-*` 依赖外部 `@adrkit/cli`；特性路径解析依赖外部 `che` CLI（`@hjxarthuratlas/che`）：
 
 | 能力 | 实现 / 入口 | 运行时前提 |
 |---|---|---|
 | adrkit `new/check/queue/lint/migrate/evaluate` | 外部 `@adrkit/cli`；`adr.sh` 是跨技能入口 | Node ≥22；`adrkit` 不可用时运行 `npm install -g @adrkit/cli@0.20.0` |
-| grill、adrkit check/draft、speckit 全流程（analyze/clarify/constitution/converge/design/implement/plan/tasks/specify）的特性路径、知识库根（`che knowledge paths`）与模板解析 | 外部 `che` CLI（源与发布单元在 `packages/cli`，npm 包 `@arthuratlas/che`，发布在公网 npm） | Node ≥22.18；`che` 不可用时运行 `npm install -g @arthuratlas/che@latest`；任务目录 `specs/NNN-{slug}/` 由 `che task create` 创建，session 绑定在 `.che/feature.json`（机器本地） |
+| grill、adrkit check/draft、speckit 全流程（analyze/clarify/constitution/converge/design/implement/plan/tasks/specify）的特性路径、知识库根（`che knowledge paths`）与模板解析 | 外部 `che` CLI（源与发布单元在 `packages/cli`，npm 包 `@hjxarthuratlas/che`，发布在公网 npm） | Node ≥22.18；`che` 不可用时运行 `npm install -g @hjxarthuratlas/che@latest`；任务目录 `specs/NNN-{slug}/` 由 `che task create` 创建，session 绑定在 `.che/feature.json`（机器本地） |
 | ADR scaffold / lint / legacy migration | `che-adr-draft/scripts/{scaffold.sh,adr.sh}` | 同 adrkit；全部走 pack-local 跨技能调用 |
 | PingCode 卡操作（che-pingcode-* 五技能） | 无 bundle——依赖外部 `pingcode` CLI（`npm i -g @metaphorli/pingcode-cli`，保持 npm 最新版）；认证走项目级登录包装 `.che/pingcode-login.sh`（由 `/che-project-init` 接入链落盘并随仓库提交，OAuth 凭据封装在脚本内） | `bash .che/pingcode-login.sh status` 退出码 0 + 网络可达 PingCode；未认证时跑同脚本自动开浏览器授权（阻塞等回调属正常，给足 ≥300 秒）；CLI 本体 pack 不内置（API 演进留在上游 CLI） |
 
@@ -134,7 +134,7 @@ CLI 解析（`adrkit-lib.sh`）：只执行 PATH 上的 `adrkit` 与 `che`，不
 ## 开发
 
 ```bash
-npm ci     # 安装钉版本的 @adrkit/cli，并把仓内 @arthuratlas/che（file:packages/cli）链接进 node_modules/.bin，供运行时契约测试使用
+npm ci     # 安装钉版本的 @adrkit/cli，并把仓内 @hjxarthuratlas/che（file:packages/cli）链接进 node_modules/.bin，供运行时契约测试使用
 npm test   # 依次运行技能结构、che CLI 契约和技能运行时契约测试
 ```
 
@@ -148,10 +148,10 @@ npm test   # 依次运行技能结构、che CLI 契约和技能运行时契约�
 
 **发版一律走 `/release`**（流程见 `.agents/commands/release.md`）：定版本号 → 本版含 CLI 变更先发 npm → bump 根版本 + 同步 marketplace → `npm test` 全绿 → 生成 `docs/releases/X.Y.Z.md` 发布文档 → `chore(release)` 单提交（含发布文档）→ `git push origin main vX.Y.Z` 原子推送 → 创建 GitHub Release（发布说明即发布文档）→ postcondition 验证 tag / 发布文档 / Release 生效。没打 tag = che 通道没发版；漏 tag 会被任何项目里的 `che pack status` 探测为 `CHANNEL_DRIFT`。
 
-只有 `@arthuratlas/che` 发布到公共 npm registry。**根包（即整个 pack）不发 npm**（`package.json` 已 `private: true` 防误发）——它的分发就是 omp / DSH 插件与 che 安装通道：
+只有 `@hjxarthuratlas/che` 发布到公共 npm registry。**根包（即整个 pack）不发 npm**（`package.json` 已 `private: true` 防误发）——它的分发就是 omp / DSH 插件与 che 安装通道：
 
 ```bash
-# @arthuratlas/che（bun 打包 dist/cli.js 单文件——Node 不剥 node_modules 内类型，纯 TS tarball 经 npm -g 装出来跑不了；需本机有 bun）
+# @hjxarthuratlas/che（bun 打包 dist/cli.js 单文件——Node 不剥 node_modules 内类型，纯 TS tarball 经 npm -g 装出来跑不了；需本机有 bun）
 bash release.sh              # 发布 packages/cli 当前版本，发布前自动核对 npm 最新版
 bash release.sh 0.5.0        # 先回写版本到 package.json + src/version.ts，再发布
 bash release.sh --check      # 只核对版本是否比线上新，不发布

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pack runtime contract: @adrkit/cli and @arthuratlas/che resolution.
+# Pack runtime contract: @adrkit/cli and @hjxarthuratlas/che resolution.
 # Both CLIs are external PATH deps driven like a user install, against an
 # installed .agents/skills layout with a minimal PATH.
 set -u
@@ -25,7 +25,7 @@ if [ ! -x "$ADRKIT_BIN" ]; then
   exit 1
 fi
 if [ ! -x "$CHE_BIN" ]; then
-  printf '[FAIL] pack-runtime: @arthuratlas/che 未安装；先运行 npm ci\n' >&2
+  printf '[FAIL] pack-runtime: @hjxarthuratlas/che 未安装；先运行 npm ci\n' >&2
   exit 1
 fi
 TMP="$(mktemp -d)"
@@ -108,7 +108,7 @@ command -v che >/dev/null 2>&1 && bad "fixture: 外部 che 意外进入最小 PA
 run "$SKILLS/che-adr-draft/scripts/draft.sh" Probe
 [ "$RC" -eq 1 ] && ok || bad "missing che: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
-  *"npm install -g @arthuratlas/che@latest"*) ok ;;
+  *"npm install -g @hjxarthuratlas/che@latest"*) ok ;;
   *) bad "missing che: 未提示 npm 安装：$(<"$TMP/stderr")" ;;
 esac
 # Missing-che contract: the planverify-gate wrapper delegates to the che CLI
@@ -116,11 +116,11 @@ esac
 run "$PV_GATE_WRAPPER" demo
 [ "$RC" -eq 1 ] && ok || bad "planverify-gate missing che: 退出码 ${RC}，预期 1"
 case "$(<"$TMP/stderr")" in
-  *"npm install -g @arthuratlas/che@latest"*) ok ;;
+  *"npm install -g @hjxarthuratlas/che@latest"*) ok ;;
   *) bad "planverify-gate missing che: 未提示 npm 安装：$(<"$TMP/stderr")" ;;
 esac
 ln -s "$CHE_BIN" "$TMP/bin/che"
-command -v che >/dev/null 2>&1 && ok || bad "fixture: 无法把真实 @arthuratlas/che 加入 PATH"
+command -v che >/dev/null 2>&1 && ok || bad "fixture: 无法把真实 @hjxarthuratlas/che 加入 PATH"
 
 # Task fixture: create via the real CLI (single task → wrappers auto-resolve
 # without a session binding).
