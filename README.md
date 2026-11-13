@@ -146,16 +146,15 @@ npm test   # 依次运行技能结构、che CLI 契约和技能运行时契约�
 
 **版本声明点**：根 `package.json#version` 是 pack 唯一版本源——omp 插件版本（`.omp-plugin/marketplace.json`，`npm test` 强制同步）与 DSH bundle 版本（原生读取）都从它推导；git tag `vX.Y.Z` 是 che 安装通道（`che pack init/status/update`）的发布锚点；根 `engines.che` 声明 pack 所需的 che CLI 最低版本（安装时抄进 `.che/pack.json`）。CLI 版本独立演进（`packages/cli/package.json` + `src/version.ts` 的 `CLI_VERSION`，`test-che-cli.sh` 强制一致）。
 
-**发版一律走 `/release`**（流程见 `.agents/commands/release.md`）：定版本号 → 本版含 CLI 变更先发 npm → bump 根版本 + 同步 marketplace → `npm test` 全绿 → 生成 `docs/releases/X.Y.Z.md` 发布文档 → `chore(release)` 单提交（含发布文档）→ `git push origin main vX.Y.Z` 原子推送 → 创建 GitHub Release（发布说明即发布文档）→ postcondition 验证 tag / 发布文档 / Release 生效。没打 tag = che 通道没发版；漏 tag 会被任何项目里的 `che pack status` 探测为 `CHANNEL_DRIFT`。
+**发版一律走 `/release`**（流程见 `.agents/commands/release.md`）：定版本号 → 回写版本（CLI 变更时含 `packages/cli` 两文件，`release.sh <版本>` 只回写不发布）→ `npm test` 全绿 → 生成 `docs/releases/X.Y.Z.md` 发布文档 → `chore(release)` 单提交（含发布文档）→ `git push origin main vX.Y.Z` 原子推送 → 创建 GitHub Release（发布说明即发布文档）→ CI 自动发布 npm 并校验。没打 tag = che 通道没发版；漏 tag 会被任何项目里的 `che pack status` 探测为 `CHANNEL_DRIFT`。
 
 只有 `@hjxarthuratlas/che` 发布到公共 npm registry。**根包（即整个 pack）不发 npm**（`package.json` 已 `private: true` 防误发）——它的分发就是 omp / DSH 插件与 che 安装通道：
 
 ```bash
-# @hjxarthuratlas/che（bun 打包 dist/cli.js 单文件——Node 不剥 node_modules 内类型，纯 TS tarball 经 npm -g 装出来跑不了；需本机有 bun）
-bash release.sh              # 发布 packages/cli 当前版本，发布前自动核对 npm 最新版
-bash release.sh 0.5.0        # 先回写版本到 package.json + src/version.ts，再发布
-bash release.sh --check      # 只核对版本是否比线上新，不发布
+# release.sh 只做版本事实管理（版本回写 + 与 npm 已发布版本比对）；npm 发布由 CI 完成
+bash release.sh --check      # 检查当前版本是否未上 npm（rc=0 未上 / 1 已在 / 2 读不到 npm）
+bash release.sh 0.6.0        # 回写版本号到 packages/cli/package.json + src/version.ts（不发布）
 ```
 
-- npm 认证写**用户级** `~/.npmrc`（`npm login` 生成，npm 按 registry URI 精确匹配凭据），绝不入仓库。
-- GitHub Release 发布后，CI（[.github/workflows/publish-cli.yml](.github/workflows/publish-cli.yml)）自动检测 `packages/cli` 版本是否已上 npm——未发布则自动发布（dist-tag `latest`），已发布则跳过；与本地 `release.sh` 幂等共存，也可在仓库 Secrets 配 `NPM_TOKEN` 后完全交给 CI。
+- npm 发布凭据只在 GitHub Secret `NPM_TOKEN`；本地无发布动作，不需要发布用 `~/.npmrc` 认证。
+- npm 发布完全由 CI 完成：GitHub Release（pack 的 `vX.Y.Z` 与 CLI 的 `che-v*`）创建即触发 [.github/workflows/publish-cli.yml](.github/workflows/publish-cli.yml)——版本未在 npm 且比线上新才发布（`--access public --tag latest`），否则自动跳过。

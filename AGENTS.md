@@ -40,7 +40,7 @@ npm ci
 npm test
 ```
 
-根包不发布 npm（`private: true`）；omp 与 DSH 插件的分发以仓内容为准（marketplace add / dsh add 直接拉取本仓）。仅 `@hjxarthuratlas/che` 通过根 `release.sh` 发布到公共 npm（内部委托 `packages/cli/scripts/publish.sh` 打包推送）。npm 认证只写用户级 `~/.npmrc`，绝不入库。
+根包不发布 npm（`private: true`）；omp 与 DSH 插件的分发以仓内容为准（marketplace add / dsh add 直接拉取本仓）。仅 `@hjxarthuratlas/che` 的 npm 发布走 CI：GitHub Release 创建触发 `.github/workflows/publish-cli.yml`（打包复用 `packages/cli/scripts/publish.sh`，凭据在仓库 Secret `NPM_TOKEN`）。`release.sh` 只做版本回写与 registry 比对，本地无发布动作。
 
 ## 修改约束
 

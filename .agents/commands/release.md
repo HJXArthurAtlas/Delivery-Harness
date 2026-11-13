@@ -1,10 +1,10 @@
 ---
-description: 发版流程——自动探测 pack / che CLI 各自是否需发、生成建议版本号、经用户确认后直接发布（npm + git tag）；用户说「发布 / 发版 / 升版本 / 打 tag / 出新版本」时执行
+description: 发版流程——自动探测 pack / che CLI 各自是否需发、生成建议版本号、经用户确认后回写版本并创建 GitHub Release，npm 发布由 CI 完成；用户说「发布 / 发版 / 升版本 / 打 tag / 出新版本」时执行
 ---
 
 # release
 
-本仓只有一条发版路径：**根 `package.json#version` 是 pack 唯一版本源（omp 插件与 DSH bundle 共用），git tag `vX.Y.Z` 是 che 安装通道的发布原语**（没打 tag = che 通道没发版）。CLI 版本源是 `packages/cli/package.json`（须与 `src/version.ts` 的 `CLI_VERSION` 一致，测试强制）。绝不手工 bump + push。
+本仓只有一条发版路径：**根 `package.json#version` 是 pack 唯一版本源（omp 插件与 DSH bundle 共用），git tag `vX.Y.Z` 是 che 安装通道的发布原语**（没打 tag = che 通道没发版）；CLI 发版另有 `che-v<版本>` tag（只承载 CLI 通道，不参与 pack 判定）。CLI 版本源是 `packages/cli/package.json`（须与 `src/version.ts` 的 `CLI_VERSION` 一致，测试强制）。npm 发布一律由 Release 触发的 CI 完成，本地不发布。绝不手工 bump + push。
 
 ## 前置
 
@@ -17,13 +17,13 @@ last_tag="$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null || true)"
 git log --oneline "${last_tag:-v0.0.0}..HEAD" -- . ':!packages/cli'   # pack 改动（自最新 tag，已 push 与否一律计入）
 cli_base="$(git log -n1 --format=%H -- packages/cli/package.json packages/cli/src/version.ts)"
 git log --oneline "${cli_base:-v0.0.0}..HEAD" -- packages/cli         # CLI 改动（自上次 CLI 发布回写提交）
-bash release.sh --check; echo "rc=$?"   # 0=本地 CLI 版本未上 npm；1=已在线上；2=读不到 npm，先解决
+bash release.sh --check; echo "rc=$?"   # 0=本地 CLI 版本未上 npm（将由 CI 发布）；1=已在线上；2=读不到 npm，先解决
 node -p 'require("./package.json").version'                            # 根版本（对照最新 tag 查漏 tag）
 ```
 
 判定（锚点纪律：pack 面锚定最新 tag，CLI 面锚定上次 CLI 发布——都绝不是 origin/main 或未 push 提交）：
 - **pack 需发**：最新 tag 后存在非 `packages/cli` 提交（含文档/分发面）；或根版本 > 最新 tag（上次漏 tag 的中间态，并入本次发版）。
-- **CLI 需发**：上次 CLI 发布回写提交之后存在 `packages/cli` 提交；或 `release.sh --check` rc=0（版本已 ahead，必发，以 rc 为准）。上次 CLI 发布回写提交 = `packages/cli/package.json` 或 `src/version.ts` 最近一次提交——CLI 发布不打 tag（tag 只承载 pack 通道），禁止用 pack tag 锚定 CLI 面，否则仅 CLI 发版后其发布提交落在 tag 后会误判。
+- **CLI 需发**：上次 CLI 发布回写提交之后存在 `packages/cli` 提交；或 `release.sh --check` rc=0（版本已 ahead，必发，以 rc 为准）。CLI 面锚定 `che-v*` tag（只承载 CLI 通道，与 pack 的 `vX.Y.Z` 分离），未打过 `che-v` tag 时锚定 `packages/cli/package.json` 或 `src/version.ts` 最近一次提交——禁止用 pack tag 锚定 CLI 面，否则仅 CLI 发版后其发布提交落在 tag 后会误判。
 - 两面都无 → 回报「无可发内容」结束，不 bump、不打 tag。
 
 ## 第 1 步：自动生成建议版本号（pack 与 CLI 各自独立套用 semver）
@@ -42,15 +42,16 @@ CLI 按其提交内容同口径 bump。唯一耦合点：pack 用到 CLI 新能�
 1. **改了什么**：按面归类的 git log（pack 面 / CLI 面）。
 2. **之前版本**：pack = 最新 tag 与根版本；CLI = npm 最新版与本地版本。
 3. **建议版本**：各自新版本号 + bump 理由。
-4. **将执行的动作**：第 3 步将跑的命令清单（release.sh / npm test / 发布文档生成 / commit / tag / push / GitHub Release）。
+4. **将执行的动作**：第 3 步将跑的命令清单（release.sh 版本回写 / npm test / 发布文档生成 / commit / tag / push / GitHub Release → CI 发布 npm）。
 
 用户改口径则按用户版本号执行；确认后第 3 步全自动，不再逐条询问。
 
-## 第 3 步：确认后自动发布（先 CLI，后 pack——`engines.che` 引用已存在的版本）
+## 第 3 步：确认后自动发版（先 CLI 后 pack：`engines.che` 引用的版本必须已上 npm；npm 发布一律由 CI 完成）
 
-- **CLI 需发**：`bash release.sh <CLI新版本>` —— 自动回写 `packages/cli/package.json` 与 `src/version.ts`、核对 npm 最新性、bun 打包并推送公共 npm。失败即停；需用户级 `~/.npmrc` 发布凭据（`npm login`，见 README「发布」），缺认证直接报告，不代填凭据。
-  - pack 同发：CLI 两文件并入 pack bump 提交。
-  - 仅 CLI 发版：单独提交 `chore(release): che CLI <版本>` 推 main，**不打 tag**（tag 只承载 pack 通道）；不生成 pack 发布文档，其改动并入下次 pack 发布文档的「CLI 变化」节。
+- **CLI 需发**：`bash release.sh <CLI新版本>` —— 只回写 `packages/cli/package.json` 与 `src/version.ts` 并核对 npm 最新性（rc=0 未上 npm）；npm 发布由 CI 完成，本地不需要任何发布凭据。
+  - 发版动作：单提交 `chore(release): che CLI <版本>` 推 main → `git tag che-v<版本> && git push origin che-v<版本>` → `gh release create che-v<版本> --title "che CLI <版本>" --notes "<本版 CLI 变化清单>"` → 触发 CI 发布 npm，`gh run watch` 等 publish-cli run success。
+  - pack 同发：CLI 两文件的提交可并入 pack bump 提交，但 `che-v<版本>` Release 仍须**先于** pack 的 `vX.Y.Z` Release 创建——保证 pack `engines.che` 抬升引用的版本已上 npm（否则窗口期内 `che pack init` 安装 404）。
+  - 仅 CLI 发版：只做上面 CLI 发版动作；不生成 pack 发布文档，其改动并入下次 pack 发布文档的「CLI 变化」节。
 - **pack 需发**：
   1. bump 三处：根 `package.json#version`、`.omp-plugin/marketplace.json` 的 plugin `version`（不一致被测试拦下）、`docs/guides/AI Native实践指南.md` 版本对齐行（pack 版 + 本版 CLI 版）。
   2. `npm test` 全绿（三个脚本依次跑；bump 三处一致性在此校验）。失败即停并 `git restore` 还原 bump 改动，不发版、不生成任何文档。
@@ -65,8 +66,8 @@ CLI 按其提交内容同口径 bump。唯一耦合点：pack 用到 CLI 新能�
      ```bash
      gh release create vX.Y.Z --notes-file "docs/releases/X.Y.Z.md"
      ```
-     gh 未安装或未认证时先装 gh 并 `gh auth login`；无 gh 时走 GitHub API（`POST /repos/{owner}/{repo}/releases`，token 认证）。认证缺失直接报告，不代填凭据；失败即停，补建后重跑本步与 postcondition。仅 CLI 发版无 tag，不创建 GitHub Release。
-  7. Release 创建即触发 CI（`.github/workflows/publish-cli.yml`）：检测 `packages/cli` 版本是否已在 npm——第 1 小步已本地发布 → skip（仅做 package.json/version.ts 一致性校验）；漏发 → CI 自动补发（`--tag latest`）。本地 `release.sh` 与 CI 幂等共存，不存在双发；仅 CLI 发版（无 tag、无 Release）不触发 CI，发布只能本地做。
+     gh 未安装或未认证时先装 gh 并 `gh auth login`；无 gh 时走 GitHub API（`POST /repos/{owner}/{repo}/releases`，token 认证）。认证缺失直接报告，不代填凭据；失败即停，补建后重跑本步与 postcondition。
+  7. Release 创建即触发 CI（`.github/workflows/publish-cli.yml`）：pack 的 `vX.Y.Z` Release 中 CLI 版本已由 `che-v` Release 先行发布 → CI skip（仅做 package.json/version.ts 一致性校验）；若漏建 `che-v` Release，CI 会在此自动补发（`--tag latest`）。不存在双发。
 
 ## 发布文档（docs/releases/<版本号>.md）
 
@@ -88,6 +89,9 @@ test -f "docs/releases/X.Y.Z.md" \
   && echo OK || echo "FAIL: 发布文档 docs/releases/X.Y.Z.md 缺失"
 gh release view vX.Y.Z >/dev/null \
   && echo OK || echo "FAIL: GitHub Release 未创建"
+# CLI 需发时：publish-cli run 须 success（CI 发布完成后 npm view 才能查到新版本）
+gh run list --workflow publish-cli.yml --limit 1 \
+  --json status,conclusion -q '.[0] | .status + "/" + .conclusion'
 npm view @hjxarthuratlas/che version
 ```
 
