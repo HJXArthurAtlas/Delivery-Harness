@@ -158,3 +158,4 @@ bash release.sh --check      # 只核对版本是否比线上新，不发布
 ```
 
 - npm 认证写**用户级** `~/.npmrc`（`npm login` 生成，npm 按 registry URI 精确匹配凭据），绝不入仓库。
+- GitHub Release 发布后，CI（[.github/workflows/publish-cli.yml](.github/workflows/publish-cli.yml)）自动检测 `packages/cli` 版本是否已上 npm——未发布则自动发布（dist-tag `latest`），已发布则跳过；与本地 `release.sh` 幂等共存，也可在仓库 Secrets 配 `NPM_TOKEN` 后完全交给 CI。

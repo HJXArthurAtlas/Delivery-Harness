@@ -54,7 +54,7 @@ npm test
 
 ## 发布
 
-用户说「发布 / 发版 / 升版本 / 打 tag / 出新版本」时，一律执行 `.agents/commands/release.md`，绝不手工 bump + push。要点：根 `package.json#version` 是 pack 唯一版本源，git tag `vX.Y.Z` 是 che 安装通道的发布原语（没打 tag = che 通道没发版）。
+用户说「发布 / 发版 / 升版本 / 打 tag / 出新版本」时，一律执行 `.agents/commands/release.md`，绝不手工 bump + push。要点：根 `package.json#version` 是 pack 唯一版本源，git tag `vX.Y.Z` 是 che 安装通道的发布原语（没打 tag = che 通道没发版）。GitHub Release 发布后 CI（`.github/workflows/publish-cli.yml`）自动检测 `packages/cli` 版本并发布 npm。
 
 ## 验证与提交
 
