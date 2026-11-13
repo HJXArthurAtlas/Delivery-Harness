@@ -31,4 +31,4 @@ node -e '
   copyFileSync("dist/cli.js", stage + "/cli.js");
 ' "$stage"
 
-npm publish "$stage" ${CHE_PUBLISH_REGISTRY:+--registry "$CHE_PUBLISH_REGISTRY"} "$@"
+npm publish "$stage" --access public ${CHE_PUBLISH_REGISTRY:+--registry "$CHE_PUBLISH_REGISTRY"} "$@"
