@@ -23,10 +23,10 @@ Note: This clarification workflow is expected to run (and be completed) BEFORE i
 
 Execution steps:
 
-1. Run `che paths --json` from repo root **once** (requires the external `che` CLI on PATH — `@hjxarthuratlas/che`, Node ≥ 22.18; install with `npm install -g @hjxarthuratlas/che@latest`), and `che knowledge paths --json` **once** to resolve the knowledge location. Parse minimal JSON payload fields:
+1. Run `che paths --json` from repo root **once** (requires the external `che` CLI on PATH — `@arthuratlas/che`, Node ≥ 22.18; install with `npm install -g @arthuratlas/che@latest`), and `che knowledge paths --json` **once** to resolve the knowledge location. Parse minimal JSON payload fields:
    - `FEATURE_DIR`
    - `FEATURE_SPEC`
-   - `CONTEXT_FILE` / `GLOSSARY_FILE` (knowledge resolution; if the subcommand is unavailable, stop and recommend upgrading `@hjxarthuratlas/che`)
+   - `CONTEXT_FILE` / `GLOSSARY_FILE` (knowledge resolution; if the subcommand is unavailable, stop and recommend upgrading `@arthuratlas/che`)
    - (Optionally capture `IMPL_PLAN`, `TASKS` for future chained flows.)
    - If JSON parsing fails, abort and instruct user to re-run `/che-intend` or verify feature branch environment.
    - For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").

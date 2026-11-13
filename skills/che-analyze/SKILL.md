@@ -27,7 +27,7 @@ Identify inconsistencies, duplications, ambiguities, and underspecified items ac
 
 ### 1. Initialize Analysis Context
 
-Run `che check --json --require-intent --require-tasks --include-tasks` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS (requires the external `che` CLI on PATH — `@hjxarthuratlas/che`, Node ≥ 22.18; install with `npm install -g @hjxarthuratlas/che@latest`). Derive absolute paths:
+Run `che check --json --require-intent --require-tasks --include-tasks` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS (requires the external `che` CLI on PATH — `@arthuratlas/che`, Node ≥ 22.18; install with `npm install -g @arthuratlas/che@latest`). Derive absolute paths:
 
 - INTENT = FEATURE_DIR/intent.md
 - PLAN = FEATURE_DIR/plan.md

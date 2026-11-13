@@ -30,7 +30,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ### 段二：解析当前特性（硬性前置，与其他 speckit 命令同惯例）
 
-1. 确认环境是 macOS / Linux 且外部 `che` CLI 在 PATH 上可用（`@hjxarthuratlas/che`，要求 Node ≥ 22.18；缺失则 `npm install -g @hjxarthuratlas/che@latest`）。不可用则声明环境不受支持并停止。绝不退回项目内其他脚本——pack 契约是只经由 PATH 上的 `che` 解析。
+1. 确认环境是 macOS / Linux 且外部 `che` CLI 在 PATH 上可用（`@arthuratlas/che`，要求 Node ≥ 22.18；缺失则 `npm install -g @arthuratlas/che@latest`）。不可用则声明环境不受支持并停止。绝不退回项目内其他脚本——pack 契约是只经由 PATH 上的 `che` 解析。
 2. 从仓库根运行 `che paths --json` **恰好一次**，解析 JSON 取 `FEATURE_DIR` / `FEATURE_SPEC`。
 3. 校验 `$FEATURE_DIR/intent.md` 存在：脚本失败或 intent 缺失时停止，提示先运行 `/che-intend`，绝不凭空继续。
 4. 本 skill 依赖一个具体的 intent 才能执行：后续澄清以该 intent 为需求材料，设计明细最终落到 `$FEATURE_DIR/design-tasks.md`（特性目录本身即唯一标识）。

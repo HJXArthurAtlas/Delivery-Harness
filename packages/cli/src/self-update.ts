@@ -1,4 +1,4 @@
-// che self-update — upgrade the globally installed @hjxarthuratlas/che via npm.
+// che self-update — upgrade the globally installed @arthuratlas/che via npm.
 //
 // The CLI is published to the public npm registry; self-update shells out to
 // npm (`npm view` for the latest version, `npm install -g` to swap the files).
@@ -19,7 +19,7 @@ import { compareVersions } from './pack.ts';
 
 export const SELF_UPDATE_USAGE = `Usage: che self-update [--version <x>] [--check] [--json]
 
-Update the globally installed @hjxarthuratlas/che from the public npm registry.
+Update the globally installed @arthuratlas/che from the public npm registry.
 
   --version <x>  Install this exact version instead of the latest
   --check        Only report current vs latest; install nothing
@@ -45,7 +45,7 @@ function npmCapture(args: string[]): string {
 /** True when the running module lives inside an npm-managed install. */
 function isNpmManagedInstall(): boolean {
   const here = realpathSync(fileURLToPath(import.meta.url));
-  return /[\\/]node_modules[\\/]@hjxarthuratlas[\\/]che[\\/]/.test(here);
+  return /[\\/]node_modules[\\/]@arthuratlas[\\/]che[\\/]/.test(here);
 }
 
 function requireNpmManagedInstall(): void {
@@ -62,15 +62,15 @@ function requireNpm(): void {
   } catch {
     throw new SelfUpdateError(
       'ERROR: npm is required for self-update but was not found on PATH; ' +
-        'install Node.js >= 22.18 or run: npm install -g @hjxarthuratlas/che@latest',
+        'install Node.js >= 22.18 or run: npm install -g @arthuratlas/che@latest',
     );
   }
 }
 
 function latestPublishedVersion(): string {
-  const latest = npmCapture(['view', '@hjxarthuratlas/che', 'version']);
+  const latest = npmCapture(['view', '@arthuratlas/che', 'version']);
   if (latest === '') {
-    throw new SelfUpdateError('ERROR: npm view returned no version for @hjxarthuratlas/che');
+    throw new SelfUpdateError('ERROR: npm view returned no version for @arthuratlas/che');
   }
   return latest;
 }
@@ -142,12 +142,12 @@ export function runSelfUpdate(argv: string[]): number {
     try {
       // stdio piped (not inherit) so npm's own progress never pollutes the banner;
       // stderr is captured for the failure message below.
-      execFileSync('npm', ['install', '-g', `@hjxarthuratlas/che@${target}`], { stdio: ['ignore', 'pipe', 'pipe'] });
+      execFileSync('npm', ['install', '-g', `@arthuratlas/che@${target}`], { stdio: ['ignore', 'pipe', 'pipe'] });
     } catch (err) {
       const detail = isRecord(err) && 'stderr' in err && typeof err.stderr === 'string' ? err.stderr.trim() : '';
       throw new SelfUpdateError(
-        `ERROR: npm install -g @hjxarthuratlas/che@${target} failed${detail ? `: ${detail}` : ''}; ` +
-          `install by hand with: npm install -g @hjxarthuratlas/che@${target}`,
+        `ERROR: npm install -g @arthuratlas/che@${target} failed${detail ? `: ${detail}` : ''}; ` +
+          `install by hand with: npm install -g @arthuratlas/che@${target}`,
       );
     }
 

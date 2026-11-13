@@ -64,7 +64,7 @@ adrkit_resolve_readonly_corpus() {
 }
 
 # The current feature directory. Resolve through the external `che` CLI on
-# PATH (published as @hjxarthuratlas/che; same consumption model as `adrkit` above).
+# PATH (published as @arthuratlas/che; same consumption model as `adrkit` above).
 adrkit_feature_dir() {
 	if [ -n "${ADRKIT_FEATURE_DIR:-}" ]; then
 		[ -d "$ADRKIT_FEATURE_DIR" ] ||
@@ -74,7 +74,7 @@ adrkit_feature_dir() {
 	fi
 
 	command -v che >/dev/null 2>&1 ||
-		adrkit_fail "che CLI not found on PATH; install it with 'npm install -g @hjxarthuratlas/che@latest', or set ADRKIT_FEATURE_DIR"
+		adrkit_fail "che CLI not found on PATH; install it with 'npm install -g @arthuratlas/che@latest', or set ADRKIT_FEATURE_DIR"
 
 	_adrkit_paths="$(che paths)" ||
 		adrkit_fail "che feature resolution failed — run /che-intend first, or set ADRKIT_FEATURE_DIR"

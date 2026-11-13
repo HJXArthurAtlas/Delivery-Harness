@@ -9,3 +9,6 @@ packages/cli/*.tgz
 
 # CodeGraph 本地索引（生成物，codegraph init 可随时重建）
 .codegraph/
+
+# 本地散落的仓拷贝（勿提交）
+ncw-delivery-harness/

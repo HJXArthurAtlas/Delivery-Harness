@@ -35,8 +35,8 @@ If non-empty, treat it as a request to prioritize the specified area for deeper 
 
 ## Prerequisites
 
-1. Confirm that the environment is macOS / Linux and that `bash` and the external `che` CLI are available on PATH (`@hjxarthuratlas/che`, Node ≥ 22.18; install with `npm install -g @hjxarthuratlas/che@latest` if missing). If not, state that the environment is unsupported and stop. Do not substitute a project-local prerequisite script.
-2. From the repository root, run `che paths --json` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC`, and `che knowledge paths --json` **exactly once** to obtain `CONTEXT_FILE` / `GLOSSARY_FILE` / `ADR_DIR`. If either does not return JSON, stop: for `che paths`, recommend rerunning the agent-specific invocation of `che-intend` or checking the active feature environment; for `che knowledge`, report the command's error and recommend upgrading `@hjxarthuratlas/che` when the subcommand is unknown.
+1. Confirm that the environment is macOS / Linux and that `bash` and the external `che` CLI are available on PATH (`@arthuratlas/che`, Node ≥ 22.18; install with `npm install -g @arthuratlas/che@latest` if missing). If not, state that the environment is unsupported and stop. Do not substitute a project-local prerequisite script.
+2. From the repository root, run `che paths --json` **exactly once** to obtain `FEATURE_DIR` / `FEATURE_SPEC`, and `che knowledge paths --json` **exactly once** to obtain `CONTEXT_FILE` / `GLOSSARY_FILE` / `ADR_DIR`. If either does not return JSON, stop: for `che paths`, recommend rerunning the agent-specific invocation of `che-intend` or checking the active feature environment; for `che knowledge`, report the command's error and recommend upgrading `@arthuratlas/che` when the subcommand is unknown.
 3. If intent.md does not exist, stop and recommend running the agent-specific invocation of `che-intend` first. Do not create a new intent here.
 4. Read `docs/constitution/constitution.md` (project principles) if it exists. In addition, inspect **only the existing materials relevant to the work at hand** using ordinary file search, file reading, and symbol search:
    - `README*` / `CONTEXT.md` / `CLAUDE.md` / `AGENTS.md` / `documents/**` / `docs/**` — domain terminology, stakeholders, business flows, and design decisions
@@ -60,7 +60,7 @@ che knowledge paths --json
 
 It returns `REPO_ROOT`, `KNOWLEDGE_ROOT`, `CONTEXT_FILE`, `GLOSSARY_FILE`, `GLOSSARY_EXISTS`, `ADR_DIR`, and `SOURCE`. Use those values for the rest of the session; do not reimplement the resolution rules in this skill.
 
-- If the command is unavailable, stop and recommend `npm install -g @hjxarthuratlas/che@latest`. Do not fall back to a default path.
+- If the command is unavailable, stop and recommend `npm install -g @arthuratlas/che@latest`. Do not fall back to a default path.
 - If it exits non-zero, stop and report its stderr. Exit 2 means conflicting `knowledge_root` declarations at the same priority; exit 3 means the path is outside the repository or no repository root was found. Do not guess, do not create files, and do not write to more than one location.
 - The command applies this order: explicit `--root` (the user's in-session choice) → `AGENTS.md`/`CLAUDE.md` `knowledge_root:` declaration → `README.md`/repo-root `CONTEXT.md` `knowledge_root:` declaration → `docs/domain_knowledge/`. It is read-only and never creates directories.
 

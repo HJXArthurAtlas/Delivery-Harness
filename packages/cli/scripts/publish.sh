@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publish @hjxarthuratlas/che to the public npm registry as plain-JS artifact.
+# Publish @arthuratlas/che to the public npm registry as plain-JS artifact.
 #
 # Why: Node refuses type-stripping for files under node_modules, so the
 # repo flow (bin -> src/index.ts, consumed through the file: symlink whose

@@ -103,8 +103,8 @@ skipped even if the user pushes to move fast:
 
 ## Notes
 
-- Feature resolution uses the external `che` CLI on `PATH` (`@hjxarthuratlas/che`;
-  if unavailable, `npm install -g @hjxarthuratlas/che@latest`). `ADRKIT_FEATURE_DIR`
+- Feature resolution uses the external `che` CLI on `PATH` (`@arthuratlas/che`;
+  if unavailable, `npm install -g @arthuratlas/che@latest`). `ADRKIT_FEATURE_DIR`
   overrides feature-dir resolution.
 - Requires `@adrkit/cli` 0.20.0 with `adrkit` on `PATH`; `scripts/adr.sh` is the
   cross-skill lint/migration entry point. If unavailable, install it with

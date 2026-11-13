@@ -2,7 +2,7 @@
 
  面向新项目成员与项目负责人。团队的 AI native 开发底座由 [**delivery-harness**](https://github.com/HJXArthurAtlas/Delivery-Harness/blob/main/README.md)（流程技能包）与一套标准 **monorepo 结构约定**组成：技能包定义 Agent 执行什么，并随包携带治理种子（宪法 / ADR / 环境检查节）；结构约定约束项目内代码的存放位置与交付规范。本文说明项目的标准结构与治理规则，以及从初始化到日常交付的完整路径。
 
-> **版本对齐**：Skill pack `delivery-harness` **v1.7.0**；CLI `@hjxarthuratlas/che` **0.5.0**。
+> **版本对齐**：Skill pack `delivery-harness` **v1.7.0**；CLI `@arthuratlas/che` **0.5.0**。
 
 > **谁读什么**
 > - **项目负责人 / 初始化者**：读全文——初始化、结构约定与规则、技能包接入、维护分工都在这里。
@@ -62,7 +62,7 @@ flowchart LR
 先确认 codegraph MCP 已接入，并用 codegraph 实际执行一次查询验证索引可用；随后通读根目录的 AGENTS.md 并严格遵循，把我的项目信息登记进「布局」章节（没有该章节就新建）；然后运行 /che-project-init 做项目级配置（.che/config.yml 团队基座 + .che/config.local.yml 本地覆盖（仅 language/checker）+ 可选 PingCode 接入），按我的答复执行——它会幂等补全 AGENTS.md 的「环境检查」节，宪法缺失时移交 /che-constitution 逐条确认实例化、基础 ADR 缺失时移交 /che-adr-draft 逐条确认导入；并按 AGENTS.md 的提交规范把本次变更提交。
 ```
 
-> 前提：Agent 所在环境能访问 GitHub（安装技能包）；`@hjxarthuratlas/che` 与 `@adrkit/cli` 直接从公网 npm 安装（初始化提示词与 `/che-project-init` 会自检代装）。
+> 前提：Agent 所在环境能访问 GitHub（安装技能包）；`@arthuratlas/che` 与 `@adrkit/cli` 直接从公网 npm 安装（初始化提示词与 `/che-project-init` 会自检代装）。
 
 ### 1.2 直接开始（存量项目）
 
@@ -162,7 +162,7 @@ your-repo/
 |---|---|
 | Node.js ≥ 22.18 | che 与技能包的硬性要求 |
 | delivery-harness 技能包 | 流程技能本体（按宿主检测：omp / DSH / che pack init / 手动拷贝） |
-| che CLI（`@hjxarthuratlas/che`） | 特性路径解析、知识库根解析（`che knowledge paths`）、任务模型与技能包安装升级（`pack init/status/update`、`self-update`），npm 公开发布 |
+| che CLI（`@arthuratlas/che`） | 特性路径解析、知识库根解析（`che knowledge paths`）、任务模型与技能包安装升级（`pack init/status/update`、`self-update`），npm 公开发布 |
 | adr（adrkit CLI） | adrkit 系技能的运行时 |
 | pingcode CLI（条件） | 仅接入 PingCode 的项目检查，卡操作依赖 |
 | 跨模型 CLI：codex / gemini / claude（条件） | 仅 intentverify checker 策略强制 `cross-model` / `cli:model` 时需要在 PATH，默认不装不查（planverify checker 固定同模型新上下文子代理，无需外部模型） |
@@ -174,7 +174,7 @@ your-repo/
 
 ### 3.1 定位与依赖
 
-29 个 agent skill，承载「意图驱动开发 + PingCode」的流程：**产品出意图建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加治理资产、AGENTS 环境检查段落与项目架构画像的接入初始化（`/che-project-init`：宪法缺失移交 `/che-constitution` 实例化、基础 ADR 缺失移交 `/che-adr-draft` 导入；AGENTS「环境检查」节幂等补缺、只补不删；架构画像先判定仓库属已有代码还是纯新仓库，仅已有代码仓库生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / `che pack init` 项目级安装且版本受管 / 手动拷贝到 `~/.agents/skills/`，四路任一；omp 装法见 harness README——插件自带启动更新通知，要全自动升级可 `omp config set marketplace.autoUpdate auto`）。运行时需要全局 `che`（`@hjxarthuratlas/che`，公网 npm）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
+29 个 agent skill，承载「意图驱动开发 + PingCode」的流程：**产品出意图建卡 → UI 出设计清单 → 开发计划与实现 → 卡片随实现收尾**，外加治理资产、AGENTS 环境检查段落与项目架构画像的接入初始化（`/che-project-init`：宪法缺失移交 `/che-constitution` 实例化、基础 ADR 缺失移交 `/che-adr-draft` 导入；AGENTS「环境检查」节幂等补缺、只补不删；架构画像先判定仓库属已有代码还是纯新仓库，仅已有代码仓库生成并刷新 `docs/architecture.md`）。安装在 Agent 侧（omp 插件 / DSH 插件 / `che pack init` 项目级安装且版本受管 / 手动拷贝到 `~/.agents/skills/`，四路任一；omp 装法见 harness README——插件自带启动更新通知，要全自动升级可 `omp config set marketplace.autoUpdate auto`）。运行时需要全局 `che`（`@arthuratlas/che`，公网 npm）和 `adrkit`（`@adrkit/cli`）；接入 PingCode 时另需 `pingcode` CLI。初始化提示词与 `/che-project-init` 会自检并按需安装。
 
 ### 3.2 主线流程
 

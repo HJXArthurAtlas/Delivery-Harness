@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# release.sh — @hjxarthuratlas/che CLI 发版入口：版本回写、最新性检查、推送 npm。
+# release.sh — @arthuratlas/che CLI 发版入口：版本回写、最新性检查、推送 npm。
 #
 # 发布目标是 npm registry（可用 CHE_PUBLISH_REGISTRY 覆盖）；npm 认证读用户级
 # ~/.npmrc，本脚本不含凭据。bun 打包与 tarball 暂存在 packages/cli/scripts/publish.sh，
@@ -103,7 +103,7 @@ echo "==> 本地版本 ($PKG_JSON): $local_version"
 # npm 上已发布的最新版（versions 全列表取 semver 最大，不依赖 dist-tags）
 # E404 = 包未发布过（视为首次发布，可发布）；其余失败 = 网络或权限问题
 npm_rc=0
-npm_out="$(npm view @hjxarthuratlas/che versions --json --registry="$REGISTRY" 2>/dev/null)" || npm_rc=$?
+npm_out="$(npm view @arthuratlas/che versions --json --registry="$REGISTRY" 2>/dev/null)" || npm_rc=$?
 case "$npm_out" in *E404*) npm_rc=0;; esac
 latest="$(printf '%s' "$npm_out" | node -e "$semver_cmp_js
 let raw = '';
@@ -151,6 +151,6 @@ fi
 [ "$check_only" -eq 1 ] && exit 0
 
 command -v bun >/dev/null 2>&1 || die "发布需要 bun 打包（见 packages/cli/scripts/publish.sh），本机未找到 bun"
-echo "==> 发布 @hjxarthuratlas/che@$local_version → $REGISTRY"
+echo "==> 发布 @arthuratlas/che@$local_version → $REGISTRY"
 CHE_PUBLISH_REGISTRY="$REGISTRY" bash "$PKG_DIR/scripts/publish.sh"
-echo "==> 完成: @hjxarthuratlas/che@$local_version 已发布"
+echo "==> 完成: @arthuratlas/che@$local_version 已发布"
