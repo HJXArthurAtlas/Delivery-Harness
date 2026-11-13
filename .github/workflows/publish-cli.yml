@@ -42,13 +42,32 @@ jobs:
       - name: Check whether version is already on npm
         id: check
         run: |
-          if npm view "@hjxarthuratlas/che@${{ steps.ver.outputs.version }}" version --registry https://registry.npmjs.org/ >/dev/null 2>&1; then
+          version="${{ steps.ver.outputs.version }}"
+          if npm view "@hjxarthuratlas/che@$version" version --registry https://registry.npmjs.org/ >/dev/null 2>&1; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "version ${{ steps.ver.outputs.version }} already published — skipping"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-            echo "version ${{ steps.ver.outputs.version }} not on npm — will publish"
+            echo "version $version already published — skipping"
+            exit 0
           fi
+          latest="$(npm view @hjxarthuratlas/che dist-tags.latest --registry https://registry.npmjs.org/ 2>/dev/null || true)"
+          if [ -n "$latest" ]; then
+            newer="$(node -e '
+              const key = x => x.split(/[.-]/).map(p => (isNaN(+p) ? p : +p));
+              const [a, b] = [process.argv[1], process.argv[2]].map(key);
+              for (let i = 0; i < Math.max(a.length, b.length); i++) {
+                const x = a[i] ?? 0, y = b[i] ?? 0;
+                if (x < y) process.exit(0);
+                if (x > y) process.exit(1);
+              }
+              process.exit(1);
+            ' "$version" "$latest")"
+            if [ "$newer" != "1" ]; then
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              echo "::warning::version $version is not newer than npm latest ($latest) — refusing to publish; dist-tag latest must move forward"
+              exit 0
+            fi
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "version $version not on npm — will publish"
 
       - name: Publish
         if: steps.check.outputs.skip == 'false'
