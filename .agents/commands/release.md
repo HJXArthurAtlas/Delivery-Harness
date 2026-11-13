@@ -46,11 +46,11 @@ CLI 按其提交内容同口径 bump。唯一耦合点：pack 用到 CLI 新能�
 
 用户改口径则按用户版本号执行；确认后第 3 步全自动，不再逐条询问。
 
-## 第 3 步：确认后自动发版（先 CLI 后 pack：`engines.che` 引用的版本必须已上 npm；npm 发布一律由 CI 完成）
+## 第 3 步：确认后自动发版（先建 che-v Release 再建 vX.Y.Z Release；npm 发布由 CI 异步完成，无需等待）
 
 - **CLI 需发**：`bash release.sh <CLI新版本>` —— 只回写 `packages/cli/package.json` 与 `src/version.ts` 并核对 npm 最新性（rc=0 未上 npm）；npm 发布由 CI 完成，本地不需要任何发布凭据。
-  - 发版动作：单提交 `chore(release): che CLI <版本>` 推 main → `git tag che-v<版本> && git push origin che-v<版本>` → `gh release create che-v<版本> --title "che CLI <版本>" --notes "<本版 CLI 变化清单>"` → 触发 CI 发布 npm，`gh run watch` 等 publish-cli run success。
-  - pack 同发：CLI 两文件的提交可并入 pack bump 提交，但 `che-v<版本>` Release 仍须**先于** pack 的 `vX.Y.Z` Release 创建——保证 pack `engines.che` 抬升引用的版本已上 npm（否则窗口期内 `che pack init` 安装 404）。
+  - 发版动作：单提交 `chore(release): che CLI <版本>` 推 main → `git tag che-v<版本> && git push origin che-v<版本>` → `gh release create che-v<版本> --title "che CLI <版本>" --notes "<本版 CLI 变化清单>"` → 触发 CI 异步发布 npm（publish-cli run 内含发布结果自校验，失败经 Actions 通知；进度随时 `gh run list --workflow publish-cli.yml` 查看，无需阻塞等待）。
+  - pack 同发：CLI 两文件的提交可并入 pack bump 提交，`che-v<版本>` Release 建议**先于** pack 的 `vX.Y.Z` Release 创建（workflow 已 concurrency 串行化，两个 Release 连发也安全）；不要求等 CI 完成——`engines.che` 抬升引用的版本约有 1-2 分钟未上 npm 的窗口，期间 `che pack init` 的 CLI 版本检查会报不符，CI 完成后自愈。
   - 仅 CLI 发版：只做上面 CLI 发版动作；不生成 pack 发布文档，其改动并入下次 pack 发布文档的「CLI 变化」节。
 - **pack 需发**：
   1. bump 三处：根 `package.json#version`、`.omp-plugin/marketplace.json` 的 plugin `version`（不一致被测试拦下）、`docs/guides/AI Native实践指南.md` 版本对齐行（pack 版 + 本版 CLI 版）。
@@ -67,7 +67,7 @@ CLI 按其提交内容同口径 bump。唯一耦合点：pack 用到 CLI 新能�
      gh release create vX.Y.Z --notes-file "docs/releases/X.Y.Z.md"
      ```
      gh 未安装或未认证时先装 gh 并 `gh auth login`；无 gh 时走 GitHub API（`POST /repos/{owner}/{repo}/releases`，token 认证）。认证缺失直接报告，不代填凭据；失败即停，补建后重跑本步与 postcondition。
-  7. Release 创建即触发 CI（`.github/workflows/publish-cli.yml`）：pack 的 `vX.Y.Z` Release 中 CLI 版本已由 `che-v` Release 先行发布 → CI skip（仅做 package.json/version.ts 一致性校验）；若漏建 `che-v` Release，CI 会在此自动补发（`--tag latest`）。不存在双发。
+  7. Release 创建即触发 CI（`.github/workflows/publish-cli.yml`，concurrency 串行化）：CLI 版本已在 npm（前一个 run 已完成）→ skip（仅做 package.json/version.ts 一致性校验）；尚未上 npm → 就地发布。两个 Release 各触发一次 run，npm 同版本幂等 + 串行化，不存在双发，也无需人为等待。
 
 ## 发布文档（docs/releases/<版本号>.md）
 
@@ -89,10 +89,8 @@ test -f "docs/releases/X.Y.Z.md" \
   && echo OK || echo "FAIL: 发布文档 docs/releases/X.Y.Z.md 缺失"
 gh release view vX.Y.Z >/dev/null \
   && echo OK || echo "FAIL: GitHub Release 未创建"
-# CLI 需发时：publish-cli run 须 success（CI 发布完成后 npm view 才能查到新版本）
-gh run list --workflow publish-cli.yml --limit 1 \
-  --json status,conclusion -q '.[0] | .status + "/" + .conclusion'
-npm view @hjxarthuratlas/che version
+# CLI 需发时：确认 publish-cli run 已触发即可，不阻塞等 CI（发布结果由 CI 内部自校验并经 Actions 通知）
+gh run list --workflow publish-cli.yml --limit 1 --json status -q '.[0].status'
 ```
 
 最后核对 `/readme-refresh` 触发条件（发布方式变化必触发），需要时执行。

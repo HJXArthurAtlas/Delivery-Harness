@@ -17,6 +17,12 @@ on:
 permissions:
   contents: read
 
+# 串行化发布：连发 che-v 与 vX.Y.Z 两个 Release 时，后一个 run 在前一个完成后才开始，
+# 其 presence check 能看到已发布版本而干净 skip——避免并发对同一版本的 403 竞态。
+concurrency:
+  group: publish-cli
+  cancel-in-progress: false
+
 jobs:
   publish:
     if: github.repository == 'HJXArthurAtlas/Delivery-Harness'
