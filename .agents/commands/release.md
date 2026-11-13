@@ -66,6 +66,7 @@ CLI 按其提交内容同口径 bump。唯一耦合点：pack 用到 CLI 新能�
      gh release create vX.Y.Z --notes-file "docs/releases/X.Y.Z.md"
      ```
      gh 未安装或未认证时先装 gh 并 `gh auth login`；无 gh 时走 GitHub API（`POST /repos/{owner}/{repo}/releases`，token 认证）。认证缺失直接报告，不代填凭据；失败即停，补建后重跑本步与 postcondition。仅 CLI 发版无 tag，不创建 GitHub Release。
+  7. Release 创建即触发 CI（`.github/workflows/publish-cli.yml`）：检测 `packages/cli` 版本是否已在 npm——第 1 小步已本地发布 → skip（仅做 package.json/version.ts 一致性校验）；漏发 → CI 自动补发（`--tag latest`）。本地 `release.sh` 与 CI 幂等共存，不存在双发；仅 CLI 发版（无 tag、无 Release）不触发 CI，发布只能本地做。
 
 ## 发布文档（docs/releases/<版本号>.md）
 
